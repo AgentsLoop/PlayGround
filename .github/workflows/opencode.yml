@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   opencode:
-    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-reusable.yml@main
+    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-reusable.yml@codex/add-android-apk-issue-builds2
     with:
       issue_number: ${{ inputs.issue_number }}
       request: ${{ inputs.request }}
