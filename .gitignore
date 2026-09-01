@@ -1,0 +1,10 @@
+node_modules/
+.opencode/
+.opencode-ssh/
+.opencode-web/
+.omgithub-runtime/
+.agents/
+.agentsweb/
+opencode-agentsweb-id_ed25519
+opencode-agentsweb-id_ed25519.pub
+Agents.md

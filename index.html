@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#080a12">
+<meta name="color-scheme" content="dark">
+<title>Lantern Moth — Dark Garden</title>
+<style>
+  :root{--bg:#080a12;--accent:#ffed7a;--accent2:#7afcff;--danger:#ff5a5a;--panel:rgba(20,22,35,0.92)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1200px 800px at 50% 20%, #1a2540 0%, #080a12 70%) fixed;color:#e8ecf3;font-family: ui-sans-system, -apple-system, Segoe UI, Roboto, Helvetica, Arial;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:16px;padding:18px}
+  h1{font-size:clamp(22px,4vw,34px);letter-spacing:0.08em;text-transform:uppercase;font-weight:900;line-height:1}
+  h1 span{color:var(--accent);text-shadow:0 0 18px rgba(255,237,122,0.7)}
+  .subtitle{opacity:0.7;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;text-align:center}
+  #wrap{position:relative;width:min(920px,95vw);display:flex;flex-direction:column;align-items:center;gap:10px}
+  #hud{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;width:100%;background:var(--panel);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px 14px;backdrop-filter:blur(8px)}
+  #hud .stat{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+  #hud .label{opacity:0.6;font-size:11px;letter-spacing:0.12em;text-transform:uppercase}
+  #hud .value{font-variant-numeric:tabular-nums;min-width:2ch}
+  #lives{letter-spacing:2px;transition:transform 0.15s}
+  #lives.hit{animation:lifeHit 0.4s ease}
+  @keyframes lifeHit{0%{transform:scale(1)}25%{transform:scale(1.25)}50%{transform:scale(0.95)}100%{transform:scale(1)}}
+  canvas{width:100%;height:auto;aspect-ratio: 920 / 560;display:block;background:#0a0e1a;border-radius:16px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;touch-action:none;outline:none}
+  canvas:focus-visible{box-shadow:0 20px 60px rgba(0,0,0,0.6), 0 0 0 2px var(--accent), 0 0 0 1px rgba(255,255,255,0.04) inset}
+  .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;padding:56px 0 12px 0}
+  .card{pointer-events:auto;background:var(--panel);border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:26px 22px;max-width:460px;width:92%;text-align:center;backdrop-filter:blur(12px);box-shadow:0 16px 40px rgba(0,0,0,0.55)}
+  .card h2{font-size:26px;margin-bottom:8px}
+  .card p{opacity:0.85;line-height:1.5;font-size:14px;margin-bottom:12px}
+  .kbd{display:inline-block;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-bottom-width:2px;border-radius:6px;padding:2px 7px;font-size:12px;font-weight:700;margin:0 2px}
+  .btn{appearance:none;border:none;background:linear-gradient(180deg,#ffe97a,#ffb84d);color:#1a1200;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;padding:12px 22px;border-radius:999px;cursor:pointer;box-shadow:0 6px 18px rgba(255,200,60,0.4);transition:transform 0.08s, filter 0.15s, box-shadow 0.15s}
+  .btn:hover{filter:brightness(1.05)}
+  .btn:active{transform:translateY(1px) scale(0.98)}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .btn.secondary{background:rgba(255,255,255,0.12);color:#fff;box-shadow:none;border:1px solid rgba(255,255,255,0.15)}
+  .controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+  #touch{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:none;gap:8px;opacity:0.92;user-select:none;-webkit-user-select:none}
+  #touch button{width:52px;height:52px;border-radius:14px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.1);backdrop-filter:blur(6px);color:#fff;font-size:20px;font-weight:700;cursor:pointer;touch-action:none;transition:background 0.12s, transform 0.08s}
+  #touch button:active{background:rgba(255,237,122,0.22);transform:scale(0.96)}
+  #touch button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  @media(max-width:700px){#touch{display:flex}}
+  @media(max-width:480px){
+    body{padding:12px;gap:12px}
+    #hud{padding:8px 10px}
+    .overlay{padding-top:50px}
+    #touch{bottom:10px;gap:6px}
+    #touch button{width:48px;height:48px;font-size:18px}
+  }
+  .hint{font-size:11px;opacity:0.55;letter-spacing:0.06em;text-align:center;padding:0 12px}
+  .flash{animation:flash 0.32s}
+  @keyframes flash{0%{filter:brightness(1.55)}100%{filter:none}}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  @media (prefers-reduced-motion: reduce){
+    .flash,#lives.hit{animation:none}
+    .btn{transition:none}
+  }
+</style>
+</head>
+<body>
+  <h1><span>LANTERN</span> MOTH</h1>
+  <div class="subtitle">Collect pollen • Avoid spiders • 60 seconds</div>
+  <div id="wrap">
+    <div id="hud" role="status" aria-label="Game status">
+      <div class="stat"><span class="label">Score</span> <span id="score" class="value" aria-live="polite" aria-atomic="true">0</span></div>
+      <div class="stat"><span class="label">Time</span> <span id="time" class="value" aria-live="polite" aria-atomic="true">60</span><span aria-hidden="true">s</span></div>
+      <div class="stat"><span class="label">Lives</span> <span id="lives" class="value" aria-live="polite" aria-atomic="true">♥♥♥</span></div>
+    </div>
+    <canvas id="game" width="920" height="560" role="img" aria-label="Lantern Moth dark garden. Use arrow keys or WASD to move. Collect glowing pollen orbs and avoid spiders." tabindex="0"></canvas>
+    <div id="touch" aria-hidden="true">
+      <button type="button" data-dir="left" aria-label="Move left">◂</button>
+      <div style="display:flex;flex-direction:column;gap:6px"><button type="button" data-dir="up" aria-label="Move up">▴</button><button type="button" data-dir="down" aria-label="Move down">▾</button></div>
+      <button type="button" data-dir="right" aria-label="Move right">▸</button>
+    </div>
+    <div id="overlay" class="overlay" aria-live="polite">
+      <div id="startCard" class="card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+        <h2 id="startTitle">🌙 Dark Garden</h2>
+        <p>You are a tiny lantern moth. Your glow lights only a small circle. Dart between moonflowers to steal pollen while spiders patrol the shadows.</p>
+        <p><span class="kbd">WASD</span> <span class="kbd">↑←↓→</span> to fly &nbsp;•&nbsp; Pollen = +10 &amp; bigger light &nbsp;•&nbsp; Spider = −1 ♥</p>
+        <p class="hint" style="margin-bottom:14px">Drag / swipe on the garden or use on-screen pads on mobile. Press <span class="kbd">P</span> to pause.</p>
+        <button id="startBtn" class="btn" autofocus>Enter the Garden — Press Space</button>
+        <div class="hint" style="margin-top:10px">3 lives • 60 seconds • No external assets — pure canvas magic</div>
+      </div>
+      <div id="pauseCard" class="card" style="display:none" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+        <h2 id="pauseTitle">Paused ⏸</h2>
+        <p>Take a breath — the garden waits.</p>
+        <div class="controls">
+          <button id="resumeBtn" class="btn">Resume — P / Space</button>
+        </div>
+        <p class="hint" style="margin-top:10px">Game auto-pauses when you switch tabs</p>
+      </div>
+      <div id="gameOverCard" class="card" style="display:none" role="dialog" aria-modal="true" aria-labelledby="goTitle">
+        <h2 id="goTitle">Night Ends</h2>
+        <p id="goText">You scored 0</p>
+        <p id="goSub" style="font-size:13px;opacity:0.65"></p>
+        <div class="controls">
+          <button id="restartBtn" class="btn">Play Again — R</button>
+        </div>
+        <p class="hint" style="margin-top:10px">Press <span class="kbd">R</span> or <span class="kbd">Space</span> to restart</p>
+      </div>
+    </div>
+  </div>
+  <div class="hint">Tip: Pollen blooms reappear elsewhere. Hug the light's edge to bait spiders. <span aria-hidden="true">•</span> <span class="kbd">P</span> pause <span class="kbd">R</span> restart</div>
+  <div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const timeEl = document.getElementById('time');
+const livesEl = document.getElementById('lives');
+const overlay = document.getElementById('overlay');
+const startCard = document.getElementById('startCard');
+const pauseCard = document.getElementById('pauseCard');
+const gameOverCard = document.getElementById('gameOverCard');
+const goTitle = document.getElementById('goTitle');
+const goText = document.getElementById('goText');
+const goSub = document.getElementById('goSub');
+const announcer = document.getElementById('announcer');
+
+// Web Audio — no external assets, tiny beeper
+let actx = null;
+function ensureAudio(){
+  if(actx) {
+    if(actx.state==='suspended') actx.resume().catch(()=>{});
+    return actx;
+  }
+  try{
+    actx = new (window.AudioContext||window.webkitAudioContext)();
+  }catch(e){ actx=null; }
+  return actx;
+}
+function blip(freq, dur, type='sine', gain=0.15, freq2=null){
+  const a = ensureAudio();
+  if(!a) return;
+  if(a.state==='suspended') a.resume().catch(()=>{});
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.value = freq;
+  if(freq2!==null) o.frequency.exponentialRampToValueAtTime(freq2, a.currentTime+dur*0.9);
+  g.gain.value = gain;
+  g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime+dur);
+  o.connect(g); g.connect(a.destination);
+  o.start(); o.stop(a.currentTime+dur);
+}
+function playCollect(){ blip(880,0.12,'sine',0.18,1320); setTimeout(()=>blip(1320,0.10,'sine',0.12,1650), 80); }
+function playHit(){ blip(180,0.22,'square',0.24,55); setTimeout(()=>blip(90,0.18,'triangle',0.16), 90); }
+function playTick(){ blip(1100,0.07,'sine',0.10); }
+function playWin(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>blip(f,0.25,'sine',0.14), i*140)); }
+function playLose(){ [220,165,110].forEach((f,i)=>setTimeout(()=>blip(f,0.30,'triangle',0.18), i*200)); }
+
+const W = 920, H = 560;
+
+const state = {
+  mode: 'start', // start, playing, paused, over
+  prevMode: 'start',
+  score: 0,
+  lives: 3,
+  timeLeft: 60,
+  moth: { x: W/2, y: H/2, vx:0, vy:0, r:14, angle:0 },
+  keys: {},
+  lightBase: 115,
+  lightExtra: 0,
+  lightTimer: 0,
+  lightPeak: 0,
+  invuln: 0,
+  pollen: [],
+  spiders: [],
+  particles: [],
+  foliage: [],
+  t: 0,
+  shake: 0
+};
+
+// build foliage
+for(let i=0;i<70;i++){
+  state.foliage.push({
+    x: Math.random()*W,
+    y: Math.random()*H,
+    r: 12 + Math.random()*22,
+    type: Math.random()<0.6 ? 'bush' : (Math.random()<0.5?'flower':'stone'),
+    hue: 95 + Math.random()*60
+  });
+}
+
+function spawnPollen(n=6){
+  state.pollen = [];
+  for(let i=0;i<n;i++) addPollen();
+}
+function addPollen(){
+  let x,y,ok=false;
+  for(let k=0;k<30;k++){
+    x = 40 + Math.random()*(W-80);
+    y = 50 + Math.random()*(H-100);
+    const d = Math.hypot(x-state.moth.x, y-state.moth.y);
+    if(d>110){ ok=true; break; }
+  }
+  if(!ok){ x=40+Math.random()*(W-80); y=50+Math.random()*(H-100); }
+  state.pollen.push({x,y,r:10,phase:Math.random()*Math.PI*2, collected:0});
+}
+function spawnSpiders(){
+  state.spiders = [];
+  const presets = [
+    {x:120,y:120,vx:1.4,vy:1.0},{x:W-120,y:120,vx:-1.3,vy:1.1},
+    {x:120,y:H-80,vx:1.2,vy:-1.3},{x:W-160,y:H-140,vx:-1.5,vy:-0.9}
+  ];
+  presets.forEach(p=> state.spiders.push({...p, r:16, phase:Math.random()*6}));
+}
+
+function resetGame(){
+  state.score=0; state.lives=3; state.timeLeft=60;
+  state.moth.x=W/2; state.moth.y=H/2; state.moth.vx=0; state.moth.vy=0;
+  state.lightExtra=0; state.lightTimer=0; state.lightPeak=0; state.invuln=0; state.particles=[]; state.t=0; state.shake=0;
+  spawnPollen(6);
+  spawnSpiders();
+  updateHUD();
+  accTime=0;
+  last = performance.now();
+}
+
+let last = performance.now();
+let accTime = 0;
+
+function announce(msg){
+  if(!announcer) return;
+  announcer.textContent='';
+  setTimeout(()=>{ announcer.textContent=msg; }, 30);
+}
+
+function updateHUD(){
+  scoreEl.textContent = state.score;
+  timeEl.textContent = Math.ceil(state.timeLeft);
+  livesEl.textContent = '♥'.repeat(state.lives) + '♡'.repeat(3-state.lives);
+  livesEl.style.color = state.lives===1 ? '#ff5a5a' : '#ffed7a';
+  if(state.lives===1) livesEl.classList.add('flash'); else livesEl.classList.remove('flash');
+  // accessible label
+  livesEl.setAttribute('aria-label', state.lives + ' lives remaining out of 3');
+  timeEl.setAttribute('aria-label', Math.ceil(state.timeLeft) + ' seconds remaining');
+  scoreEl.setAttribute('aria-label', 'Score ' + state.score);
+}
+
+function setMode(m){
+  state.mode=m;
+  if(m==='start'){ startCard.style.display='block'; pauseCard.style.display='none'; gameOverCard.style.display='none'; overlay.style.display='flex'; overlay.style.pointerEvents='auto'; canvas.setAttribute('aria-hidden','true'); setTimeout(()=>document.getElementById('startBtn')?.focus(), 50); }
+  else if(m==='paused'){ startCard.style.display='none'; pauseCard.style.display='block'; gameOverCard.style.display='none'; overlay.style.display='flex'; overlay.style.pointerEvents='auto'; setTimeout(()=>document.getElementById('resumeBtn')?.focus(), 50); announce('Game paused'); }
+  else if(m==='over'){ startCard.style.display='none'; pauseCard.style.display='none'; gameOverCard.style.display='block'; overlay.style.display='flex'; overlay.style.pointerEvents='auto'; setTimeout(()=>document.getElementById('restartBtn')?.focus(), 50); }
+  else { overlay.style.display='none'; overlay.style.pointerEvents='none'; canvas.removeAttribute('aria-hidden'); canvas.focus({preventScroll:true}); }
+}
+
+function pauseGame(){
+  if(state.mode!=='playing') return;
+  state.prevMode='playing';
+  setMode('paused');
+}
+function resumeGame(){
+  if(state.mode!=='paused') return;
+  setMode('playing');
+  last = performance.now();
+  accTime = 0;
+  announce('Game resumed');
+}
+
+function handleInput(dt){
+  const s = 280; // speed
+  let ax=0, ay=0;
+  if(state.keys['arrowup']||state.keys['w']) ay -=1;
+  if(state.keys['arrowdown']||state.keys['s']) ay +=1;
+  if(state.keys['arrowleft']||state.keys['a']) ax -=1;
+  if(state.keys['arrowright']||state.keys['d']) ax +=1;
+  if(ax!==0 && ay!==0){ ax*=0.707; ay*=0.707; }
+  // accelerate
+  state.moth.vx += ax * s * dt;
+  state.moth.vy += ay * s * dt;
+  // friction
+  state.moth.vx *= 0.88;
+  state.moth.vy *= 0.88;
+  // clamp speed
+  const sp = Math.hypot(state.moth.vx, state.moth.vy);
+  if(sp>320){ state.moth.vx*=320/sp; state.moth.vy*=320/sp; }
+  state.moth.x += state.moth.vx * dt;
+  state.moth.y += state.moth.vy * dt;
+  // bounds
+  state.moth.x = Math.max(16, Math.min(W-16, state.moth.x));
+  state.moth.y = Math.max(22, Math.min(H-16, state.moth.y));
+  if(sp>5) state.moth.angle = Math.atan2(state.moth.vy, state.moth.vx);
+}
+
+function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
+function easeOutBack(x){
+  const c1=1.70158, c3=c1+1;
+  return 1 + c3*Math.pow(x-1,3) + c1*Math.pow(x-1,2);
+}
+
+function update(dt){
+  if(state.mode!=='playing') return;
+  state.t += dt;
+  accTime += dt;
+  if(accTime>=1){
+    const dec = Math.floor(accTime);
+    state.timeLeft -= dec;
+    accTime %=1;
+    updateHUD();
+    if(state.timeLeft<=10 && state.timeLeft>0){
+      // urgency tick each second
+      playTick();
+    }
+    if(state.timeLeft<=0){
+      state.timeLeft=0;
+      updateHUD();
+      endGame(true);
+      return;
+    }
+  }
+  handleInput(dt);
+
+  // light: punchier expansion — quick peak then eased decay, subtle pulse at end
+  if(state.lightTimer>0){
+    state.lightTimer -= dt;
+    const p = Math.max(0, state.lightTimer / state.lightPeak);
+    // first 15% is overshoot hold, then cubic decay
+    const eased = easeOutCubic(p);
+    // add a tiny back-ease overshoot when p near 1
+    const overshoot = p > 0.85 ? (p-0.85)/0.15 * 8 : 0;
+    state.lightExtra = Math.max(0, 82 * eased + overshoot);
+    if(state.lightTimer<=0){ state.lightExtra=0; state.lightPeak=0; }
+  }
+  if(state.invuln>0) state.invuln -= dt;
+  if(state.shake>0) state.shake -= dt;
+
+  // pollen bob & collect
+  state.pollen.forEach(p=>{
+    p.phase += dt*2.2;
+    const dx = p.x - state.moth.x, dy = p.y - state.moth.y;
+    if(Math.hypot(dx,dy) < p.r + state.moth.r + 6){
+      // collect — award
+      state.score += 10;
+      // light punch: duration 0.95s, peak 82 (handled in decay)
+      state.lightPeak = 0.95;
+      state.lightTimer = 0.95;
+      state.lightExtra = 82;
+      playCollect();
+      // particles burst outward
+      for(let i=0;i<14;i++){
+        const ang = (i/14)*Math.PI*2 + Math.random()*0.25;
+        state.particles.push({x:p.x,y:p.y,vx:Math.cos(ang)* (50+Math.random()*90), vy:Math.sin(ang)*(50+Math.random()*90), life:0.55, max:0.55, color:`hsl(${45+Math.random()*20} 100% 65%)`});
+      }
+      // haptics on mobile if available
+      if(navigator.vibrate) try{ navigator.vibrate(18); }catch(e){}
+      // respawn far from moth
+      p.x = 40 + Math.random()*(W-80);
+      p.y = 50 + Math.random()*(H-100);
+      // avoid stacking on spiders / moth immediately
+      for(let k=0;k<5;k++){
+        const nearSpider = state.spiders.some(s=> Math.hypot(s.x-p.x,s.y-p.y)<50);
+        if(nearSpider){ p.x = 40 + Math.random()*(W-80); p.y=50+Math.random()*(H-100); } else break;
+      }
+      p.phase = Math.random()*6;
+      // score pop
+      state.particles.push({x:p.x,y:p.y-10,vx:0,vy:-32,life:0.75,max:0.75,text:"+10",color:"#ffed7a"});
+      updateHUD();
+      canvas.classList.remove('flash'); void canvas.offsetWidth; canvas.classList.add('flash');
+      announce('Collected pollen, score ' + state.score);
+    }
+  });
+
+  // spiders
+  state.spiders.forEach(s=>{
+    if(Math.random()<0.015){ s.vx += (Math.random()-0.5)*1.2; s.vy += (Math.random()-0.5)*1.2; }
+    const dx = state.moth.x - s.x, dy = state.moth.y - s.y;
+    const dist = Math.hypot(dx,dy);
+    const lightR = state.lightBase + state.lightExtra;
+    if(dist < lightR+80 && dist>40){
+      s.vx += (dx/dist)*0.04;
+      s.vy += (dy/dist)*0.04;
+    }
+    s.vx = Math.max(-2.2, Math.min(2.2, s.vx));
+    s.vy = Math.max(-2.2, Math.min(2.2, s.vy));
+    s.x += s.vx * 60 * dt;
+    s.y += s.vy * 60 * dt;
+    if(s.x < 22 || s.x > W-22) s.vx*=-1;
+    if(s.y < 28 || s.y > H-22) s.vy*=-1;
+    s.x = Math.max(22, Math.min(W-22,s.x));
+    s.y = Math.max(28, Math.min(H-22,s.y));
+    s.phase += dt*4;
+    // collision with moth — respects invuln window
+    if(state.invuln<=0 && Math.hypot(s.x-state.moth.x, s.y-state.moth.y) < s.r + state.moth.r -2){
+      state.lives -=1;
+      state.invuln = 1.35;
+      state.shake = 0.35;
+      // light collapses on hit — lose expansion bonus
+      state.lightTimer = 0; state.lightExtra=0; state.lightPeak=0;
+      playHit();
+      for(let i=0;i<10;i++) state.particles.push({x:state.moth.x,y:state.moth.y,vx:(Math.random()-0.5)*160,vy:(Math.random()-0.5)*160,life:0.5,max:0.5,color:'#ff6b6b'});
+      if(navigator.vibrate) try{ navigator.vibrate([30,40,60]); }catch(e){}
+      livesEl.classList.remove('hit'); void livesEl.offsetWidth; livesEl.classList.add('hit');
+      updateHUD();
+      announce('Hit by spider, ' + state.lives + ' lives remaining');
+      if(state.lives<=0) endGame(false);
+    }
+  });
+
+  // particles
+  state.particles = state.particles.filter(p=>{
+    p.life -= dt;
+    p.x += p.vx*dt;
+    p.y += p.vy*dt;
+    if(p.vy!==undefined) p.vy += 80*dt;
+    p.vx *= 0.98;
+    return p.life>0;
+  });
+}
+
+function endGame(timeUp){
+  state.mode='over';
+  setMode('over');
+  if(timeUp){
+    if(state.score>=80){ goTitle.textContent="Dawn Bringer 🌅"; goSub.textContent="You lit the whole garden — legendary moth!"; playWin(); }
+    else if(state.score>=50){ goTitle.textContent="Garden Guardian ✨"; goSub.textContent="The flowers will remember your light."; playWin(); }
+    else { goTitle.textContent="Night Ends 🌙"; goSub.textContent="The garden slips back into darkness."; setTimeout(()=>blip(330,0.4,'sine',0.13,220),100); }
+  } else {
+    goTitle.textContent="Caught! 🕷️";
+    goSub.textContent="The spiders were too quick — try staying at the edge of your light.";
+    playLose();
+  }
+  goText.textContent = `Score: ${state.score} • Pollen: ${state.score/10} orbs`;
+  if(timeUp && state.lives>0) goText.textContent += ` • Lives left: ${state.lives}`;
+  announce(goTitle.textContent + '. ' + goText.textContent);
+}
+
+function draw(){
+  ctx.save();
+  if(state.shake>0){
+    ctx.translate((Math.random()-0.5)*7, (Math.random()-0.5)*7);
+  }
+  // clear
+  ctx.fillStyle='#0a0e1a';
+  ctx.fillRect(0,0,W,H);
+
+  // subtle garden floor gradient
+  const g = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,800);
+  g.addColorStop(0,'#16223d');
+  g.addColorStop(0.5,'#0f1a2e');
+  g.addColorStop(1,'#070a14');
+  ctx.fillStyle=g;
+  ctx.fillRect(0,0,W,H);
+
+  // foliage behind darkness (dim)
+  state.foliage.forEach(f=>{
+    ctx.globalAlpha=0.9;
+    if(f.type==='bush'){
+      ctx.fillStyle=`hsl(${f.hue} 18% 18%)`;
+      ctx.beginPath(); ctx.ellipse(f.x,f.y,f.r*1.2,f.r*0.9,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle=`hsl(${f.hue} 14% 13%)`;
+      ctx.beginPath(); ctx.ellipse(f.x+f.r*0.3,f.y+5,f.r*0.7,f.r*0.5,0,0,Math.PI*2); ctx.fill();
+    } else if(f.type==='flower'){
+      ctx.fillStyle='rgba(255,255,255,0.06)';
+      ctx.beginPath(); ctx.arc(f.x,f.y, f.r*0.6,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle=`hsl(${Math.random()<0.5? 280: 320} 60% 65% / 0.18)`;
+      ctx.beginPath(); ctx.arc(f.x,f.y,4,0,Math.PI*2); ctx.fill();
+    } else {
+      ctx.fillStyle='rgba(255,255,255,0.05)';
+      ctx.beginPath(); ctx.ellipse(f.x,f.y, f.r*0.5, f.r*0.35,0,0,Math.PI*2); ctx.fill();
+    }
+  });
+  ctx.globalAlpha=1;
+
+  // grid moonlight faint
+  ctx.strokeStyle='rgba(255,255,255,0.025)';
+  ctx.lineWidth=1;
+  for(let x=0;x<W;x+=46){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y=0;y<H;y+=46){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // pollen
+  state.pollen.forEach(p=>{
+    const bob = Math.sin(p.phase)*3;
+    const glow = 18 + Math.sin(p.phase*1.3)*4;
+    const rg = ctx.createRadialGradient(p.x, p.y+bob, 2, p.x, p.y+bob, glow+10);
+    rg.addColorStop(0,'rgba(255,237,122,0.9)');
+    rg.addColorStop(0.4,'rgba(255,180,60,0.45)');
+    rg.addColorStop(1,'rgba(255,237,122,0)');
+    ctx.fillStyle=rg;
+    ctx.beginPath(); ctx.arc(p.x,p.y+bob,glow+10,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ffed7a';
+    ctx.shadowColor='#ffb84d'; ctx.shadowBlur=12;
+    ctx.beginPath(); ctx.arc(p.x,p.y+bob, p.r,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='rgba(255,255,255,0.9)';
+    ctx.beginPath(); ctx.arc(p.x-3,p.y+bob-3,2.5,0,Math.PI*2); ctx.fill();
+  });
+
+  // spiders
+  state.spiders.forEach(s=>{
+    const wob = Math.sin(s.phase)*1.5;
+    ctx.save();
+    ctx.translate(s.x, s.y+wob);
+    ctx.strokeStyle='rgba(30,20,20,0.9)'; ctx.lineWidth=2.2; ctx.lineCap='round';
+    for(let i=-1;i<=1;i++){
+      const legPhase = s.phase*0.6 + i;
+      const ox = Math.sin(legPhase)*4;
+      ctx.beginPath();
+      ctx.moveTo(-6, -2+i*4); ctx.lineTo(-14+ox,-6+i*3); ctx.lineTo(-18+ox, 2+i*2); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(6, -2+i*4); ctx.lineTo(14-ox,-6+i*3); ctx.lineTo(18-ox, 2+i*2); ctx.stroke();
+    }
+    ctx.fillStyle='#1a1212';
+    ctx.beginPath(); ctx.ellipse(0,6, 9,11,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#2a1a1a';
+    ctx.beginPath(); ctx.ellipse(0,-6, 7,7,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ff3b3b';
+    ctx.shadowColor='#ff3b3b'; ctx.shadowBlur=6;
+    ctx.beginPath(); ctx.arc(-3,-8,1.8,0,Math.PI*2); ctx.arc(3,-8,1.8,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.restore();
+  });
+
+  // moth
+  const mx = state.moth.x, my = state.moth.y;
+  const isInv = state.invuln>0 && Math.floor(state.invuln*10)%2===0;
+  // invuln ring (shows remaining i-frames clearly)
+  if(state.invuln>0){
+    const invProg = state.invuln / 1.35;
+    ctx.save();
+    ctx.globalAlpha = 0.55 * invProg;
+    ctx.strokeStyle = invProg > 0.5 ? '#ffed7a' : '#ff5a5a';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6,4]);
+    ctx.lineDashOffset = -state.t*30;
+    ctx.beginPath(); ctx.arc(mx,my, state.moth.r + 12 + Math.sin(state.t*12)*2, 0, Math.PI*2); ctx.stroke();
+    ctx.restore();
+  }
+  if(!isInv){
+    ctx.save();
+    ctx.translate(mx,my);
+    ctx.rotate(state.moth.angle);
+    const flap = Math.sin(state.t*18);
+    ctx.fillStyle='rgba(255,237,180,0.95)';
+    ctx.strokeStyle='rgba(80,50,20,0.25)'; ctx.lineWidth=1;
+    ctx.save();
+    ctx.rotate(flap*0.35);
+    ctx.beginPath();
+    ctx.ellipse(-6, -10, 18, 13, -0.2, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='rgba(180,120,40,0.22)';
+    ctx.beginPath(); ctx.ellipse(-8,-11,6,4, -0.3,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+    ctx.save();
+    ctx.rotate(-flap*0.35);
+    ctx.fillStyle='rgba(255,237,180,0.95)';
+    ctx.beginPath(); ctx.ellipse(-6, 10, 18,13, 0.2,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='rgba(180,120,40,0.22)';
+    ctx.beginPath(); ctx.ellipse(-8,11,6,4,0.3,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle='#2b2010';
+    ctx.beginPath(); ctx.ellipse(4,0, 12,5,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ffeeb0';
+    ctx.beginPath(); ctx.ellipse(9,0, 5,4,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#2b2010'; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(13,-2); ctx.quadraticCurveTo(18,-8,16,-11); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(13,2); ctx.quadraticCurveTo(18,8,16,11); ctx.stroke();
+    ctx.fillStyle='#2b2010'; ctx.beginPath(); ctx.arc(16,-11,1.6,0,Math.PI*2); ctx.arc(16,11,1.6,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ffed7a'; ctx.shadowColor='#ffed7a'; ctx.shadowBlur=10;
+    ctx.beginPath(); ctx.arc(13,0,2.2,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.restore();
+  }
+
+  // particles
+  state.particles.forEach(p=>{
+    const a = p.life / p.max;
+    ctx.globalAlpha = Math.max(0,a);
+    if(p.text){
+      ctx.fillStyle=p.color; ctx.font='bold 14px system-ui, -apple-system, sans-serif'; ctx.textAlign='center';
+      // text shadow for contrast
+      ctx.shadowColor='rgba(0,0,0,0.6)'; ctx.shadowBlur=4;
+      ctx.fillText(p.text, p.x,p.y);
+      ctx.shadowBlur=0;
+    } else {
+      ctx.fillStyle=p.color;
+      ctx.beginPath(); ctx.arc(p.x,p.y, 3*a+1,0,Math.PI*2); ctx.fill();
+    }
+  });
+  ctx.globalAlpha=1;
+
+  // darkness overlay with light cutout
+  ctx.save();
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle=`rgba(5,7,16,0.88)`;
+  ctx.fillRect(0,0,W,H);
+  ctx.globalCompositeOperation='destination-out';
+  const lightR = state.lightBase + state.lightExtra + Math.sin(state.t*3)*3;
+  const steps=10;
+  for(let i=steps;i>=0;i--){
+    const r = (lightR*(i/steps));
+    const alpha = 1 - (i/steps)*0.95;
+    ctx.globalAlpha = alpha*0.19;
+    ctx.beginPath(); ctx.arc(mx,my,r,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  }
+  ctx.globalAlpha=1;
+  ctx.beginPath(); ctx.arc(mx,my, lightR*0.38,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.restore();
+
+  // light rim glow
+  ctx.save();
+  ctx.globalCompositeOperation='screen';
+  const rim = ctx.createRadialGradient(mx,my, lightR*0.55, mx,my, lightR+22);
+  // brighter rim right after pollen, faded otherwise
+  const rimAlpha = 0.18 + (state.lightExtra/82)*0.16;
+  rim.addColorStop(0,'rgba(255,237,122,'+rimAlpha+')');
+  rim.addColorStop(0.55,'rgba(255,180,60,'+(rimAlpha*0.55)+')');
+  rim.addColorStop(1,'rgba(255,237,122,0)');
+  ctx.fillStyle=rim;
+  ctx.beginPath(); ctx.arc(mx,my, lightR+22,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  // vignette
+  const vig = ctx.createRadialGradient(W/2,H/2, W*0.5, W/2,H/2, W*0.95);
+  vig.addColorStop(0,'rgba(0,0,0,0)');
+  vig.addColorStop(1,'rgba(0,0,0,0.55)');
+  ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
+
+  ctx.restore();
+
+  if(state.mode==='playing' && state.timeLeft<=10){
+    timeEl.style.color = (Math.floor(state.t*4)%2===0)?'#ff5a5a':'#ffed7a';
+  } else if(state.mode==='playing') {
+    timeEl.style.color='';
+  }
+}
+
+function loop(now){
+  const dt = Math.min(0.033, (now-last)/1000);
+  last=now;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// input
+window.addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  if(k===' ' || k==='enter' || k==='p' || k==='r' || k.startsWith('arrow')) ensureAudio();
+  state.keys[k]=true;
+  if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
+  if(k==='p' || k==='escape'){
+    if(state.mode==='playing') pauseGame();
+    else if(state.mode==='paused') resumeGame();
+    if(k==='escape' && (state.mode==='playing'||state.mode==='paused')) e.preventDefault();
+  }
+  if(k===' ' && state.mode==='start'){ resetGame(); state.mode='playing'; setMode('playing'); }
+  if(k===' ' && state.mode==='paused'){ resumeGame(); }
+  if((k==='r' || k===' ') && state.mode==='over'){ resetGame(); state.mode='playing'; setMode('playing'); }
+  // allow R to restart from paused as well? no
+});
+window.addEventListener('keyup',e=>{ state.keys[e.key.toLowerCase()]=false; });
+
+// pause on blur / tab hidden — prevents timer cheat and lost-input bugs
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden && state.mode==='playing') pauseGame();
+});
+window.addEventListener('blur', ()=>{
+  if(state.mode==='playing') pauseGame();
+});
+// resume is manual only — do not auto-resume on focus, player decides
+
+// touch
+document.querySelectorAll('#touch button').forEach(b=>{
+  const dir=b.dataset.dir;
+  const down=()=>{ if(dir==='up')state.keys['w']=true; if(dir==='down')state.keys['s']=true; if(dir==='left')state.keys['a']=true; if(dir==='right')state.keys['d']=true; };
+  const up=()=>{ if(dir==='up')state.keys['w']=false; if(dir==='down')state.keys['s']=false; if(dir==='left')state.keys['a']=false; if(dir==='right')state.keys['d']=false; };
+  b.addEventListener('touchstart',e=>{e.preventDefault(); down();},{passive:false});
+  b.addEventListener('touchend',e=>{e.preventDefault(); up();},{passive:false});
+  b.addEventListener('touchcancel',e=>{e.preventDefault(); up();},{passive:false});
+  b.addEventListener('mousedown',down); b.addEventListener('mouseup',up); b.addEventListener('mouseleave',up);
+});
+
+// buttons — unlock audio on first interaction
+document.getElementById('startBtn').addEventListener('click',()=>{ ensureAudio(); resetGame(); state.mode='playing'; setMode('playing'); blip(440,0.08,'sine',0.10,660); });
+document.getElementById('restartBtn').addEventListener('click',()=>{ ensureAudio(); resetGame(); state.mode='playing'; setMode('playing'); });
+document.getElementById('resumeBtn').addEventListener('click',()=>{ ensureAudio(); resumeGame(); });
+
+// allow Space/Enter on focused buttons already handled by keydown; also handle overlay click to resume when paused
+overlay.addEventListener('click', (e)=>{
+  if(state.mode==='paused' && e.target===overlay) resumeGame();
+});
+
+// pointer drag control
+let dragging=false;
+canvas.addEventListener('pointerdown',e=>{ ensureAudio(); dragging=true; canvas.setPointerCapture(e.pointerId); if(state.mode==='playing') e.preventDefault(); });
+canvas.addEventListener('pointerup',()=> dragging=false);
+canvas.addEventListener('pointercancel',()=> dragging=false);
+canvas.addEventListener('pointermove',e=>{
+  if(!dragging || state.mode!=='playing') return;
+  const rect=canvas.getBoundingClientRect();
+  const x=(e.clientX-rect.left)/rect.width * W;
+  const y=(e.clientY-rect.top)/rect.height * H;
+  const dx=x-state.moth.x, dy=y-state.moth.y;
+  const d=Math.hypot(dx,dy);
+  if(d>4){ state.moth.vx += (dx/d)*14; state.moth.vy += (dy/d)*14; }
+});
+canvas.addEventListener('click',()=>{
+  if(state.mode==='start'){ resetGame(); state.mode='playing'; setMode('playing'); }
+});
+
+// prevent context menu / long-press on canvas (mobile polish)
+canvas.addEventListener('contextmenu', e=> e.preventDefault());
+
+// init
+resetGame();
+setMode('start');
+draw();
+</script>
+</body>
+</html>
