@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lantern Moth — Dark Garden</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="wrap">
+    <header>
+      <h1>Lantern Moth</h1>
+      <p class="sub">Guide the moth • Collect pollen • Avoid spiders • 60 seconds</p>
+    </header>
+
+    <div id="game-container">
+      <canvas id="game" width="960" height="600" aria-label="Lantern Moth game canvas"></canvas>
+
+      <!-- HUD -->
+      <div id="hud">
+        <div class="hud-item"><span class="label">SCORE</span> <span id="score">0</span></div>
+        <div class="hud-item"><span class="label">TIME</span> <span id="timer">60.0</span></div>
+        <div class="hud-item"><span class="label">LIVES</span> <span id="lives">♥♥♥</span></div>
+        <div class="hud-item light-ind"><span class="label">LIGHT</span><div id="lightBar"><div id="lightFill"></div></div></div>
+      </div>
+
+      <!-- Start Screen -->
+      <div id="startScreen" class="overlay">
+        <div class="overlay-card">
+          <div class="moth-icon">🦋</div>
+          <h2>Lantern Moth</h2>
+          <p>A tiny moth awakens in a moonless garden.<br>Its lantern glow is the only light.</p>
+          <ul class="howto">
+            <li><b>Move</b> — Arrow Keys / WASD — or drag finger / swipe on mobile</li>
+            <li><b>Collect</b> — glowing pollen orbs (+10, light blooms)</li>
+            <li><b>Avoid</b> — spiders patrolling the dark (-1 life)</li>
+            <li><b>Goal</b> — score as much as you can before the night ends (60s)</li>
+          </ul>
+          <button id="startBtn" class="btn primary">Enter the Garden — Press Space</button>
+          <p class="hint">Tip: pollen makes your light expand for 2 seconds — use it to spot spiders.</p>
+        </div>
+      </div>
+
+      <!-- Game Over -->
+      <div id="gameOverScreen" class="overlay hidden">
+        <div class="overlay-card">
+          <h2 id="endTitle">Night Falls</h2>
+          <p id="endDesc" class="end-desc"></p>
+          <div class="stats">
+            <div><span id="finalScore">0</span><small>SCORE</small></div>
+            <div><span id="finalPollen">0</span><small>POLLEN</small></div>
+            <div><span id="finalTime">0.0s</span><small>TIME</small></div>
+          </div>
+          <button id="restartBtn" class="btn primary">Play Again — Press R</button>
+          <p class="hint">Or press SPACE to restart</p>
+        </div>
+      </div>
+
+      <div id="pauseHint" class="pause-hint hidden">PAUSED — Press P to resume</div>
+    </div>
+
+    <div class="controls-bar">
+      <span class="kbd">↑↓←→</span> or <span class="kbd">WASD</span> to move &nbsp;•&nbsp; <span class="kbd">P</span> pause &nbsp;•&nbsp; <span class="kbd">R</span> restart
+      <span class="mobile-only"> • Touch & drag to move</span>
+    </div>
+    <footer>
+      No external assets — all visuals drawn with Canvas API. Runs locally by opening <code>index.html</code> or <code>npx serve .</code>
+    </footer>
+  </div>
+<script src="game.js"></script>
+</body>
+</html>
