@@ -1,0 +1,458 @@
+[0m
+> build · muse-spark-1.2-contributor-free
+[0m
+Neon Orchard locked — building your playable basket catcher with lives, scoring, and ramped difficulty.
+[0m→ [0mRead .
+[0m→ [0mRead .opencode
+[0m→ [0mRead README.md
+[0m
+[0m# [0mTodos
+[ ] Launch builder/critic/verifier subagents via task tool
+[ ] Implement Neon Orchard game (self-contained HTML/JS/CSS)
+[ ] Apply critic findings and re-verify
+[0m
+[0m# [0mTodos
+[•] Launch builder/critic/verifier subagents via task tool
+[ ] Implement Neon Orchard game (self-contained HTML/JS/CSS)
+[ ] Apply critic findings and re-verify
+[0m
+[0m• [0mbuilder implement game[90m General Agent[0m
+[0m✓ [0mbuilder implement game[90m General Agent[0m
+[0m→ [0mRead neon-orchard
+[0m→ [0mRead neon-orchard/index.html
+[0m
+[0m# [0mTodos
+[✓] Launch builder/critic/verifier subagents via task tool
+[✓] Implement Neon Orchard game (self-contained HTML/JS/CSS)
+[•] Apply critic findings and re-verify
+[0m
+[0m• [0mcritic inspect game[90m General Agent[0m
+[0m✓ [0mcritic inspect game[90m General Agent[0m
+[0m• [0mverifier browser checks[90m General Agent[0m
+[0m✓ [0mverifier browser checks[90m General Agent[0m
+Core loop verified — now addressing the polish gap before final checks.
+[0m→ [0mRead neon-orchard/index.html[90m [offset=306, limit=50][0m
+[0m
+[0m← [0mEdit neon-orchard/index.html
+Index: /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
++++ /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+@@ -308,13 +308,15 @@
+   running:false, paused:false, gameOver:false,
+   score:0, lives:3, caught:0,
+   startTime:0, elapsed:0,
+   best: parseInt(localStorage.getItem('neonOrchardBest')||'0',10),
+-  basket:{ x:0, y:0, w:120, h:26, targetX:0 },
++  basket:{ x:0, y:0, w:120, h:26, targetX:0, punch:0, hitFlash:0 },
+   fruits:[], rocks:[], particles:[],
+   spawnTimer:0, spawnInterval:820,
+   keys:{left:false,right:false},
+   pointerActive:false, pointerX:0,
++  combo:0, comboTimer:0,
++  basketPile:[], // last caught fruit types for visual pile
+ };
+ 
+ function resetGame(){
+   state.score=0; state.lives=3; state.caught=0;
+
+[0m
+[0m← [0mEdit neon-orchard/index.html
+Index: /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
++++ /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+@@ -319,9 +319,12 @@
+ };
+ 
+ function resetGame(){
+   state.score=0; state.lives=3; state.caught=0;
++  state.combo=0; state.comboTimer=0;
+   state.fruits=[]; state.rocks=[]; state.particles=[];
++  state.basketPile=[];
++  state.basket.punch=0; state.basket.hitFlash=0;
+   state.spawnTimer=0; state.spawnInterval=820;
+   state.elapsed=0; state.startTime=performance.now();
+   state.gameOver=false; state.paused=false;
+   state.basket.w = Math.min(140, Math.max(90, W*0.16));
+
+[0m
+[0m→ [0mRead neon-orchard/index.html[90m [offset=340, limit=30][0m
+[0m→ [0mRead neon-orchard/index.html[90m [offset=370, limit=60][0m
+[0m→ [0mRead neon-orchard/index.html[90m [offset=560, limit=120][0m
+[0m
+[0m← [0mEdit neon-orchard/index.html
+Index: /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
++++ /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+@@ -580,34 +580,53 @@
+   arr.splice(i,1);
+   continue;
+ }
+ // collision with basket (basket catch zone is top edge)
+-// basket shape: outer rect + inner lip
+ const catchY = by - 6;
+-// expand basket detect a bit
+ if(collides(o.x, o.y, o.size, o.size, bx-6, catchY, bw+12, bh+10)){
+-  // only if falling and near top
+   if(o.vy>0 && o.y + o.size*0.6 > catchY && o.y < by+bh){
+     if(o.type==='rock'){
+       state.lives -=1;
++      state.combo=0; state.comboTimer=0;
++      // basket hit punch (downward squash)
++      state.basket.punch = -0.22;
++      state.basket.hitFlash = 0.65;
+       updateHUD();
+       sfxRock();
+       triggerShake();
+-      spawnParticles(o.x+o.size/2, o.y+o.size/2, '#ff3a6b', 16);
+-      // flash
++      spawnParticles(o.x+o.size/2, o.y+o.size/2, '#ff3a6b', 18);
++      // ring flash
++      state.particles.push({ x:o.x+o.size/2, y:o.y+o.size/2, vx:0, vy:0, life:0.35, t:0, size:0, color:'#ff3a6b', ring:true, ringSize:o.size });
+       shell.style.boxShadow = '0 0 0 2px rgba(255,46,151,0.6) inset, 0 0 40px rgba(255,46,151,0.5)';
+       setTimeout(()=> shell.style.boxShadow='',180);
+     } else {
+-      state.score +=10;
++      // combo logic
++      if(state.comboTimer>0) state.combo +=1; else state.combo=1;
++      state.comboTimer = 1.6; // seconds to keep combo
++      const tier = state.combo>=5 ? 3 : state.combo>=3 ? 2 : 1;
++      const points = tier===3 ? 20 : tier===2 ? 15 : 10;
++      state.score += points;
+       state.caught+=1;
++      // persistent pile - keep last 20
++      state.basketPile.push(o.fruit);
++      if(state.basketPile.length>20) state.basketPile.shift();
++      // basket punch up
++      state.basket.punch = 0.28;
++      state.basket.hitFlash = 0;
+       updateHUD();
++      // higher pitch for combo
+       sfxCatch();
+-      spawnParticles(o.x+o.size/2, o.y+o.size/2, o.fruit.glow, 14);
+-      // score pop handled in particles? also create text particle
++      if(tier>1) setTimeout(()=> tone(1500 + tier*200, 0.1,'sine',0.14), 60);
++      // enhanced particles + ring
++      spawnParticles(o.x+o.size/2, o.y+o.size/2, o.fruit.glow, 10 + tier*4);
++      state.particles.push({ x:o.x+o.size/2, y:o.y+o.size/2, vx:0, vy:0, life:0.3, t:0, size:0, color:o.fruit.glow, ring:true, ringSize:o.size*0.9 });
++      // fruit pop scale particle
++      state.particles.push({ x:o.x+o.size/2, y:o.y+o.size/2, vx:0, vy:-10, life:0.22, t:0, size:o.size, color:o.fruit.color, pop:true, glow:o.fruit.glow });
++      const label = tier>1 ? `+${points} x${state.combo}!` : `+${points}`;
+       state.particles.push({
+-        x: o.x+o.size/2, y: o.y,
+-        vx: 0, vy:-80, life:0.7, t:0, size:0,
+-        color:'#fff', text:'+10'
++        x: o.x+o.size/2, y: o.y - 6,
++        vx: (Math.random()-0.5)*30, vy:-110 - tier*12, life:0.75, t:0, size:0,
++        color: tier===3 ? '#fff700' : tier===2 ? '#b6ff2e' : '#fff', text: label, tier
+       });
+     }
+     arr.splice(i,1);
+     if(state.lives<=0){
+
+[0m
+[0m→ [0mRead neon-orchard/index.html[90m [offset=535, limit=50][0m
+[0m→ [0mRead neon-orchard/index.html[90m [offset=520, limit=40][0m
+[0m
+[0m← [0mEdit neon-orchard/index.html
+Index: /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
++++ /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+@@ -531,8 +531,18 @@
+ const diff = 1 + state.score/220 + state.elapsed/40;
+ const speedMul = Math.min(2.6, diff);
+ state.spawnInterval = Math.max(260, 820 - state.score*1.2 - state.elapsed*4);
+ 
++// combo decay & basket punch decay
++if(state.comboTimer>0){
++  state.comboTimer -= dt;
++  if(state.comboTimer<=0){ state.combo=0; state.comboTimer=0; updateHUD(); }
++}
++// punch springs back: lerp to 0
++state.basket.punch *= Math.pow(0.08, dt*10); // fast decay
++if(Math.abs(state.basket.punch)<0.01) state.basket.punch=0;
++state.basket.hitFlash = Math.max(0, state.basket.hitFlash - dt*3);
++
+ // basket move
+ let move = 0;
+ if(state.keys.left) move -= 1;
+ if(state.keys.right) move += 1;
+
+[0m
+[0m→ [0mRead neon-orchard/index.html[90m [offset=161, limit=25][0m
+[0m
+[0m← [0mEdit neon-orchard/index.html
+Index: /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
++++ /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+@@ -170,8 +170,9 @@
+ <div class="hud">
+   <div class="hud-card">
+     <div class="hud-label">Score</div>
+     <div id="scoreEl" class="hud-value">0</div>
++    <div id="comboEl" style="font-size:10px;font-weight:800;letter-spacing:0.08em;color:var(--neon-lime);min-height:12px;margin-top:2px;text-shadow:0 0 8px rgba(182,255,46,0.8)"></div>
+   </div>
+   <div class="hud-card">
+     <div class="hud-label">Lives</div>
+     <div id="heartsEl" class="hearts"></div>
+
+[0m
+[0m→ [0mRead neon-orchard/index.html[90m [offset=333, limit=20][0m
+[0m
+[0m← [0mEdit neon-orchard/index.html
+Index: /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
++++ /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+@@ -337,8 +337,13 @@
+ }
+ 
+ function updateHUD(){
+   scoreEl.textContent = state.score;
++  const comboEl=document.getElementById('comboEl');
++  if(state.combo>1){
++    comboEl.textContent = `🔥 x${state.combo}  ${state.comboTimer.toFixed(1)}s`;
++    comboEl.style.opacity = String(0.6 + Math.min(0.4, state.combo*0.08));
++  } else { comboEl.textContent=''; }
+   heartsEl.innerHTML = '';
+   for(let i=0;i<3;i++){
+     const s=document.createElement('span');
+     s.className='heart'+(i>=state.lives?' lost':'');
+
+[0m
+[0m→ [0mRead neon-orchard/index.html[90m [offset=780, limit=160][0m
+Remediation patching — adding depth to catch feedback and rewarding streaks.
+[0m
+[0m← [0mEdit neon-orchard/index.html
+Index: /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
++++ /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+@@ -821,28 +821,34 @@
+   ctx.beginPath(); ctx.arc(-s*0.12,-s*0.12, s*0.12,0,Math.PI*2); ctx.fill();
+   ctx.restore();
+ }
+ 
+-// basket
++// basket with punch
+ const b=state.basket;
+-// shadow
++const punch = b.punch || 0;
++const scaleX = 1 - punch*0.25;
++const scaleY = 1 + punch*0.9;
++const bxCenter = b.x + b.w/2;
++const byCenter = b.y + b.h/2;
++// shadow (scales with punch)
+ ctx.fillStyle='rgba(0,0,0,0.35)';
+-ctx.beginPath(); ctx.ellipse(b.x+b.w/2, b.y+b.h+8, b.w*0.42, 8, 0,0,Math.PI*2); ctx.fill();
+-// basket body
++ctx.beginPath(); ctx.ellipse(bxCenter, b.y+b.h+8, b.w*0.42*scaleX, 8, 0,0,Math.PI*2); ctx.fill();
+ ctx.save();
+-// glow under basket
+-ctx.shadowColor='#00f0ff';
+-ctx.shadowBlur=18;
+-ctx.fillStyle='rgba(0,240,255,0.12)';
++ctx.translate(bxCenter, byCenter);
++ctx.scale(scaleX, scaleY);
++ctx.translate(-bxCenter, -byCenter);
++// glow under basket (intensify on hitFlash)
++ctx.shadowColor = b.hitFlash>0 ? '#ff2e97' : '#00f0ff';
++ctx.shadowBlur = b.hitFlash>0 ? 22 + b.hitFlash*18 : 18;
++ctx.fillStyle = b.hitFlash>0 ? `rgba(255,46,151,${0.18 + b.hitFlash*0.18})` : 'rgba(0,240,255,0.12)';
+ ctx.fillRect(b.x-4, b.y-2, b.w+8, b.h+6);
+ ctx.shadowBlur=0;
+ // wood gradient
+ const bg = ctx.createLinearGradient(b.x, b.y, b.x, b.y+b.h);
+ bg.addColorStop(0,'#3a2a1a');
+ bg.addColorStop(0.5,'#5a3a1a');
+ bg.addColorStop(1,'#2a1a08');
+ ctx.fillStyle=bg;
+-// basket shape with woven look
+ ctx.beginPath();
+ const r=12;
+ ctx.moveTo(b.x+r, b.y);
+ ctx.lineTo(b.x+b.w-r, b.y);
+@@ -854,8 +860,13 @@
+ ctx.lineTo(b.x, b.y+r);
+ ctx.quadraticCurveTo(b.x, b.y, b.x+r, b.y);
+ ctx.closePath();
+ ctx.fill();
++// hit flash overlay
++if(b.hitFlash>0){
++  ctx.fillStyle=`rgba(255,58,107,${b.hitFlash*0.22})`;
++  ctx.fill();
++}
+ // weave lines
+ ctx.strokeStyle='rgba(255,200,120,0.22)';
+ ctx.lineWidth=1;
+ for(let i=1;i<3;i++){
+@@ -865,18 +876,47 @@
+ for(let x=b.x+14; x<b.x+b.w; x+=18){
+   ctx.beginPath(); ctx.moveTo(x, b.y+3); ctx.lineTo(x-6, b.y+b.h-3); ctx.stroke();
+ }
+ // rim neon
+-ctx.strokeStyle='#00f0ff';
++ctx.strokeStyle= b.hitFlash>0 ? '#ff2e97' : '#00f0ff';
+ ctx.lineWidth=2.5;
+-ctx.shadowColor='#00f0ff'; ctx.shadowBlur=12;
++ctx.shadowColor= b.hitFlash>0 ? '#ff2e97' : '#00f0ff'; ctx.shadowBlur=12;
+ ctx.strokeRect(b.x-1, b.y-1, b.w+2, 6);
+ ctx.shadowBlur=0;
+-ctx.fillStyle='rgba(182,255,46,0.9)';
++ctx.fillStyle= b.hitFlash>0 ? 'rgba(255,46,151,0.95)' : 'rgba(182,255,46,0.9)';
+ ctx.fillRect(b.x-1, b.y-1, b.w+2, 2);
+-// inner fruit pile hint
+-ctx.fillStyle='rgba(255,255,255,0.06)';
+-ctx.fillRect(b.x+6, b.y+8, b.w-12, b.h-12);
++// persistent pile: draw stacked fruits inside basket
++if(state.basketPile.length>0){
++  const pile = state.basketPile.slice(-12);
++  const cols = Math.max(3, Math.floor(b.w/20));
++  pile.forEach((f, i)=>{
++    const col = i % cols;
++    const row = Math.floor(i / cols);
++    const px = b.x + 10 + col*18 + (row%2)*8 + Math.sin(i*1.2)*2;
++    const py = b.y + b.h - 8 - row*8 - Math.cos(i*0.9)*1.5;
++    const s = 10 + (i%3)*2;
++    ctx.save();
++    ctx.translate(px, py);
++    ctx.rotate(Math.sin(i*1.1)*0.2);
++    ctx.shadowColor=f.glow; ctx.shadowBlur=8;
++    const grd = ctx.createRadialGradient(-s*0.15,-s*0.2, s*0.18, 0,0, s*0.55);
++    grd.addColorStop(0,'#fff'); grd.addColorStop(0.25,f.color); grd.addColorStop(1,'#1a1a2e');
++    ctx.fillStyle=grd;
++    ctx.beginPath(); ctx.ellipse(0,0, s*0.45, s*0.48, 0,0,Math.PI*2); ctx.fill();
++    ctx.shadowBlur=0;
++    ctx.fillStyle='rgba(255,255,255,0.7)';
++    ctx.beginPath(); ctx.ellipse(-s*0.15,-s*0.16, s*0.10, s*0.07, -0.6,0,Math.PI*2); ctx.fill();
++    ctx.restore();
++    // wobble on recent catch
++    if(i===pile.length-1 && Math.abs(punch)>0.08){
++      ctx.fillStyle='rgba(255,255,255,0.12)';
++      ctx.beginPath(); ctx.ellipse(px, py, s*0.5, s*0.55,0,0,Math.PI*2); ctx.fill();
++    }
++  });
++} else {
++  ctx.fillStyle='rgba(255,255,255,0.06)';
++  ctx.fillRect(b.x+6, b.y+8, b.w-12, b.h-12);
++}
+ ctx.restore();
+ 
+ // particles
+ for(const p of state.particles){
+
+[0m
+[0m← [0mEdit neon-orchard/index.html
+Index: /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
++++ /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+@@ -917,17 +917,45 @@
+   ctx.fillRect(b.x+6, b.y+8, b.w-12, b.h-12);
+ }
+ ctx.restore();
+ 
+-// particles
++// particles - pop/ring/text/dots
+ for(const p of state.particles){
+-  if(p.text){
++  if(p.ring){
+     const a = 1 - p.t/p.life;
++    ctx.globalAlpha = a*0.75;
++    ctx.strokeStyle = p.color;
++    ctx.lineWidth = 2.5 * a + 0.5;
++    ctx.shadowColor=p.color; ctx.shadowBlur=12 * a;
++    ctx.beginPath(); ctx.arc(p.x,p.y, p.ringSize*0.45 + p.t*70, 0, Math.PI*2); ctx.stroke();
++    ctx.shadowBlur=0; ctx.globalAlpha=1;
++  } else if(p.pop){
++    const a = 1 - p.t/p.life;
++    const scale = 1 + p.t*2.2;
++    ctx.globalAlpha = a;
++    ctx.save();
++    ctx.translate(p.x,p.y);
++    ctx.scale(scale, scale);
++    ctx.shadowColor=p.glow; ctx.shadowBlur=18*a;
++    const s=p.size*0.5;
++    const grd = ctx.createRadialGradient(-s*0.2,-s*0.25, s*0.2, 0,0, s*0.65);
++    grd.addColorStop(0,'#fff'); grd.addColorStop(0.2,p.color); grd.addColorStop(1,'#1a1a2e');
++    ctx.fillStyle=grd;
++    ctx.beginPath(); ctx.ellipse(0,0, s*0.95, s*1.02, 0,0,Math.PI*2); ctx.fill();
++    ctx.shadowBlur=0; ctx.restore();
++    ctx.globalAlpha=1;
++  } else if(p.text){
++    const a = 1 - p.t/p.life;
++    const tier = p.tier||1;
++    const scale = tier===3 ? 1.2 : tier===2 ? 1.08 : 1;
+     ctx.globalAlpha=a;
+-    ctx.fillStyle='#fff';
+-    ctx.font=`800 ${14 + a*4}px system-ui`;
++    ctx.fillStyle = tier===3 ? '#fff700' : tier===2 ? '#b6ff2e' : '#fff';
++    ctx.font=`800 ${Math.round((15 + a*5)*scale)}px system-ui`;
+     ctx.textAlign='center';
+-    ctx.shadowColor='#b6ff2e'; ctx.shadowBlur=10;
++    ctx.shadowColor = tier>1 ? '#ff8a00' : '#b6ff2e'; ctx.shadowBlur= tier>1 ? 14 : 10;
++    // outline for readability
++    ctx.strokeStyle='rgba(0,0,0,0.55)'; ctx.lineWidth=3;
++    ctx.strokeText(p.text, p.x, p.y);
+     ctx.fillText(p.text, p.x, p.y);
+     ctx.shadowBlur=0;
+     ctx.globalAlpha=1;
+   } else {
+
+[0m
+[0m$ [0mnode --check /tmp/neon_check.js 2>&1 || python3 -c "
+import re, pathlib
+p=pathlib.Path('/home/runner/work/PlayGround/PlayGround/neon-orchard/index.html').read_text()
+m=re.search(r'<script>(.*?)</script>', p, re.S)
+open('/tmp/neon_check.js','w').write(m.group(1))
+print('extracted', len(m.group(1)))
+"
+node --check /tmp/neon_check.js && echo "syntax OK"
+ls -lh /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+node:internal/modules/cjs/loader:1433
+  throw err;
+  ^
+
+Error: Cannot find module '/tmp/neon_check.js'
+    at node:internal/modules/cjs/loader:1430:15
+    at node:internal/main/check_syntax:33:20 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.23.2
+extracted 27331
+syntax OK
+-rw-r--r-- 1 runner runner 38K Sep  1 02:45 /home/runner/work/PlayGround/PlayGround/neon-orchard/index.html
+[0m
+[0m$ [0mnode --check /tmp/neon_check.js && echo "syntax OK 2"
+python3 -c "
+import pathlib, re
+p=pathlib.Path('/home/runner/work/PlayGround/PlayGround/neon-orchard/index.html').read_text()
+assert 'combo' in p and 'basketPile' in p and 'punch' in p
+print('features present')
+# check self-contained
+assert 'http' not in p.lower().split('<script')[0] or 'https://' not in p
+print('self-contained OK')
+# count size
+print(len(p))
+"
+syntax OK 2
+features present
+self-contained OK
+38782
+[0m
+[0m• [0mverifier re-check after fix[90m General Agent[0m
+[0m✓ [0mverifier re-check after fix[90m General Agent[0m
+[0m
+[0m# [0mTodos
+[✓] Launch builder/critic/verifier subagents via task tool
+[✓] Implement Neon Orchard game (self-contained HTML/JS/CSS)
+[✓] Apply critic findings and re-verify
+[0m
+[goal:evidence] File neon-orchard/index.html (38KB, 993 lines, single self-contained HTML) implements basket catcher with Arrows/A/D + drag + mobile buttons, falling fruit +10 (tiered 10/15/20 via combo) vs rocks -1 life (3 hearts), score/lives HUD with combo xN timer, increasing difficulty (spawn 820→260ms, speedMul 1→2.6, rock rate 22%→40%, double-spawn), start/pause (P/Space)/gameOver/restart flow with best localStorage, neon responsive style, Web Audio, shake/vibrate/particles. Builder ses_fa5267ac3ffe7IWW4jNWsifBv1 created initial game, critic ses_fa5259321ffeBQo6PdYo1vdw5F reported weightless catch (no basket punch/pop/combo/pile), verifier ses_fa5254d76ffe1RLiEI77eMm6IS passed loop checks, remediation added punch (scaleX/Y spring, hitFlash), ring flash + pop scale, combo timer 1.6s tiered scoring + scaled +points xCombo! text, persistent basketPile (12-20 stacked fruits wobbling), re-verifier ses_fa5246c96ffe2Qey4bhyUo8i1g passed 13/13. Mandatory workflow skills: (none) listed — no Sketchfab/asset skill applies to 2D canvas arcade, so no external asset workflow needed. Runnable via file:// or `python -m http.server` at neon-orchard/index.html; node --check syntax PASS, no external deps.
+[goal:complete]
