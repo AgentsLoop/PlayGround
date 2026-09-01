@@ -1,0 +1,11 @@
+Build a small playable browser game called Neon Orchard. The player moves a basket horizontally with the arrow keys or A/D to catch falling glowing fruit and avoid falling rocks. Include a score, three lives, increasing difficulty, a start/restart flow, and a polished responsive visual style. Keep it self-contained and runnable in the repository.
+
+Mandatory workflow skills: (none). Before implementing, read every listed skill's `SKILL.md` and follow its instructions for this request. If a listed skill applies to the requested feature or assets, you must use it; do not substitute a generic or procedural workaround when the skill provides the required workflow. For example, when `load-sketchfab-threejs` is listed, use it to obtain and integrate at least one suitable Sketchfab/GLB asset, preserve attribution, and verify that asset renders in the browser. If a listed skill genuinely does not apply, state why in the completion report.
+
+Mandatory orchestration: before declaring the game complete, use OpenCode's `task` tool to launch separate child sessions for:
+
+- builder: implement or improve the game feature;
+- critic: independently inspect the current browser result against a concrete named reference and report the single biggest remaining gap;
+- verifier: run browser checks and verify the gameplay loop.
+
+Launch independent builder/critic work as parallel background subagents when supported. Wait for all child sessions, apply the critic's concrete finding through an implementation or remediation step, and run verification again afterward. Do not claim a critique loop ran unless the task tool returns distinct child session IDs and the critic produces a concrete finding. If the task tool is unavailable, stop and report the blocker instead of silently doing the work in one agent.
