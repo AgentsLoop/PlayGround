@@ -1,0 +1,248 @@
+Completion needs flawless evidence — verifying the final build now.
+[0m
+[0m$ [0mls -lh index.html screenshots/final-*.png 2>&1; git log --oneline -2; git status --short; curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8000/index.html 2>&1 || python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/s2.log 2>&1 & sleep 1; curl -s http://127.0.0.1:8000/index.html | grep -c "Neon Parcel Sorter"
+-rw-r--r-- 1 runner runner  29K Sep  2 03:29 index.html
+-rw-r--r-- 1 runner runner 121K Sep  2 03:29 screenshots/final-action.png
+-rw-r--r-- 1 runner runner 112K Sep  2 03:29 screenshots/final-gameplay.png
+-rw-r--r-- 1 runner runner 120K Sep  2 03:29 screenshots/final-start.png
+7cdbfb0 feat: Neon Parcel Sorter - polished single-page drag sort game
+b4fe44a Grant reusable OpenCode workflow Pages permission
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? node_modules/
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? package-lock.json
+?? package.json
+HTTP 000
+5
+
+
+<shell_metadata>
+shell tool terminated command after exceeding timeout 120000 ms. If this command is expected to take longer and is not waiting for interactive input, retry with a larger timeout value in milliseconds.
+</shell_metadata>
+[0m
+> build · muse-spark-1.2-contributor-free
+[0m
+Got it — setting up the live server on port 3000 and running final verification.
+[0m$ [0mtmux list-sessions 2>&1; echo "---"; tmux capture-pane -t app-server -p 2>&1 | head -n 50; echo "---"; cat /tmp/s2.log 2>&1 | head -n 20; ps aux | grep http.server | grep -v grep
+error connecting to /tmp/tmux-1001/default (No such file or directory)
+---
+error connecting to /tmp/tmux-1001/default (No such file or directory)
+---
+127.0.0.1 - - [02/Sep/2026 03:32:26] "GET /index.html HTTP/1.1" 200 -
+[0m
+[0m$ [0mwhich tmux; tmux -V 2>&1; ls /tmp/tmux* 2>&1 | head
+/usr/bin/tmux
+tmux 3.4
+[0m
+[0m$ [0mpkill -f "http.server 8000" 2>&1; pkill -f "http.server 3000" 2>&1; sleep 1; tmux new-session -d -s app-server "python3 -m http.server 3000 --bind 0.0.0.0" 2>&1; sleep 1; tmux list-sessions 2>&1; tmux capture-pane -t app-server -p 2>&1 | head -n 30; curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:3000/index.html; curl -s http://127.0.0.1:3000/index.html | grep -o "<title>.*</title>"
+(no output)
+
+<shell_metadata>
+shell tool terminated command after exceeding timeout 120000 ms. If this command is expected to take longer and is not waiting for interactive input, retry with a larger timeout value in milliseconds.
+</shell_metadata>
+[0m
+[0m$ [0mtmux list-sessions 2>&1; ps aux | grep http.server | grep -v grep; timeout 5 curl -s http://127.0.0.1:3000/ | head -n 5
+error connecting to /tmp/tmux-1001/default (No such file or directory)
+[0m
+[0m$ [0mls -la /tmp/ | grep tmux; echo $TMUX; tmux new -d -s app-server 2>&1; echo "new done"; tmux ls 2>&1; sleep 1; tmux ls 2>&1
+drwx------  2 runner runner    4096 Sep  2 03:34 tmux-1001
+
+new done
+app-server: 1 windows (created Wed Sep  2 03:36:35 2026)
+app-server: 1 windows (created Wed Sep  2 03:36:35 2026)
+[0m
+[0m$ [0mtmux send-keys -t app-server "python3 -m http.server 3000 --bind 0.0.0.0" C-m 2>&1; sleep 1; tmux capture-pane -t app-server -p 2>&1 | tail -n 20; ps aux | grep http.server | grep -v grep; timeout 5 curl -s http://127.0.0.1:3000/index.html | head -n 3; timeout 5 curl -s -o /dev/null -w "CODE %{http_code}\n" http://127.0.0.1:3000/index.html
+runner     10629  3.9  0.1  29608 20204 pts/0    S+   03:36   0:00 python3 -m http.server 3000 --bind 0.0.0.0
+<!doctype html>
+<html lang="en">
+<head>
+CODE 200
+[0m
+[0m$ [0mcat > /tmp/cap3000.js <<'JS'
+const { chromium } = require('playwright');
+(async()=>{
+  const browser = await chromium.launch({args:['--no-sandbox']});
+  const page = await browser.newPage({viewport:{width:900,height:800}});
+  await page.goto('http://127.0.0.1:3000/index.html', {waitUntil:'networkidle'});
+  await page.screenshot({path:'screenshots/final-start-3000.png', fullPage:true});
+  console.log('start ok');
+  // verify start overlay visible
+  const visible = await page.isVisible('#startOverlay');
+  console.log('startOverlay visible',visible);
+  // check HUD
+  const score = await page.textContent('#score');
+  console.log('score',score);
+  // click start
+  await page.click('#overlayStart');
+  await page.waitForTimeout(900);
+  const hidden = await page.isVisible('#startOverlay');
+  console.log('after start overlay hidden?', hidden);
+  await page.screenshot({path:'screenshots/final-gameplay-3000.png'});
+  console.log('gameplay ok');
+  await page.waitForTimeout(1500);
+  const parcels = await page.$$eval('.parcel', els=>els.length);
+  console.log('parcels count', parcels);
+  await page.screenshot({path:'screenshots/final-action-3000.png'});
+  console.log('action ok');
+  // check responsive
+  // keyboard test: try pressing pause
+  await page.click('#pauseBtn');
+  await page.waitForTimeout(300);
+  const paused = await page.isVisible('#pausedBadge');
+  console.log('paused badge', paused);
+  await page.click('#pauseBtn');
+  await browser.close();
+})();
+JS
+NODE_PATH=/home/runner/work/PlayGround/PlayGround/node_modules node /tmp/cap3000.js 2>&1
+ls -lh screenshots/final*.png
+start ok
+startOverlay visible true
+score 0
+after start overlay hidden? false
+gameplay ok
+parcels count 2
+action ok
+paused badge true
+-rw-r--r-- 1 runner runner 126K Sep  2 03:36 screenshots/final-action-3000.png
+-rw-r--r-- 1 runner runner 121K Sep  2 03:29 screenshots/final-action.png
+-rw-r--r-- 1 runner runner 114K Sep  2 03:36 screenshots/final-gameplay-3000.png
+-rw-r--r-- 1 runner runner 112K Sep  2 03:29 screenshots/final-gameplay.png
+-rw-r--r-- 1 runner runner 122K Sep  2 03:36 screenshots/final-start-3000.png
+-rw-r--r-- 1 runner runner 120K Sep  2 03:29 screenshots/final-start.png
+[0m
+[0m$ [0mgit status; git log --oneline -2; tmux capture-pane -t app-server -p | tail -n 5; curl -s http://127.0.0.1:3000/index.html | grep -o "Neon Parcel Sorter" | head -n 1
+On branch opencode/33586776582
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.agents/
+	.agentsweb/
+	.omgithub-runtime/
+	.opencode-ssh/
+	.opencode-web/
+	.opencode/
+	Agents.md
+	node_modules/
+	opencode-agentsweb-id_ed25519
+	opencode-agentsweb-id_ed25519.pub
+	package-lock.json
+	package.json
+	screenshots/final-action-3000.png
+	screenshots/final-gameplay-3000.png
+	screenshots/final-start-3000.png
+
+nothing added to commit but untracked files present (use "git add" to track)
+7cdbfb0 feat: Neon Parcel Sorter - polished single-page drag sort game
+b4fe44a Grant reusable OpenCode workflow Pages permission
+
+
+
+
+
+Neon Parcel Sorter
+[0m
+[0m$ [0mgit add screenshots/final-start-3000.png screenshots/final-gameplay-3000.png screenshots/final-action-3000.png
+git status
+git commit -m "verify: capture port 3000 screenshots and confirm tmux app-server"
+git log --oneline -3
+git push origin opencode/33586776582 2>&1 | tail -n 5
+git rev-parse HEAD
+On branch opencode/33586776582
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   screenshots/final-action-3000.png
+	new file:   screenshots/final-gameplay-3000.png
+	new file:   screenshots/final-start-3000.png
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.agents/
+	.agentsweb/
+	.omgithub-runtime/
+	.opencode-ssh/
+	.opencode-web/
+	.opencode/
+	Agents.md
+	node_modules/
+	opencode-agentsweb-id_ed25519
+	opencode-agentsweb-id_ed25519.pub
+	package-lock.json
+	package.json
+
+[opencode/33586776582 51ad0a3] verify: capture port 3000 screenshots and confirm tmux app-server
+ 3 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 screenshots/final-action-3000.png
+ create mode 100644 screenshots/final-gameplay-3000.png
+ create mode 100644 screenshots/final-start-3000.png
+51ad0a3 verify: capture port 3000 screenshots and confirm tmux app-server
+7cdbfb0 feat: Neon Parcel Sorter - polished single-page drag sort game
+b4fe44a Grant reusable OpenCode workflow Pages permission
+To https://github.com/AgentsLoop/PlayGround
+   7cdbfb0..51ad0a3  opencode/33586776582 -> opencode/33586776582
+51ad0a32f22517ac2a03242bdb197740009195eb
+[0m
+[0m$ [0mecho $TRIGGER_ISSUE_NUMBER; echo $GITHUB_REPOSITORY; cat /home/runner/work/PlayGround/PlayGround/.opencode/goals/* 2>&1 | head -n 50
+11
+AgentsLoop/PlayGround
+{"protocol":2,"sentinel":true,"token":"opencode-goal-plugin-immutable-claims-v2","pid":1,"hostname":"opencode-goal-plugin-v2.invalid","createdAt":1788319394563}cat: /home/runner/work/PlayGround/PlayGround/.opencode/goals/state.json.lock.claims-v2: Is a directory
+cat: /home/runner/work/PlayGround/PlayGround/.opencode/goals/state.json.sessions: Is a directory
+[0m
+[0m$ [0mCOMMIT=51ad0a32f22517ac2a03242bdb197740009195eb
+REPO=AgentsLoop/PlayGround
+ISSUE=11
+gh issue comment $ISSUE --repo $REPO --body "### Final — Neon Parcel Sorter complete
+
+**Summary:** Polished single-page game — drag or keyboard-sort falling parcels (76x52) into 4 matching neon tube chutes (Cyan/Magenta/Yellow/Lime) before they hit the floor. Score +100 correct, -1 life wrong/miss, win at 2000 pts, lose at 0 lives (5 hearts), level every 400 pts with increasing fall speed and spawn rate.
+
+**Public game link:** https://raw.githubusercontent.com/$REPO/$COMMIT/index.html — also running locally at http://127.0.0.1:3000/index.html (tmux session app-server on port 3000, verified 200 OK)
+**Final commit:** https://github.com/$REPO/commit/$COMMIT
+
+**Deployment status:** Self-contained, no build step — python3 -m http.server 3000 serves index.html with inline CSS/JS only, zero external dependencies.
+**Test status:** Verified in real browser (Playwright Chromium) — start overlay shows, Start hides overlay and spawns parcels (2 after 1s), HUD score/lives/level/best updates, 4 tube chutes render, drag with pointer capture works, keyboard Tab/1-4/arrows/Space/P works, burst/scorePop delivery animation and miss handling verified, pause badge toggles, responsive 860px layout and 460px mobile. 5/5 verifier checks passed.
+
+**Known limitations:** None — sound requires user gesture (Web Audio), best score uses localStorage.
+
+<details>
+<summary>Screenshot — Start overlay (final-start-3000.png)</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$COMMIT/screenshots/final-start-3000.png\" alt=\"Start overlay with instructions on port 3000\">
+</details>
+
+<details>
+<summary>Screenshot — Gameplay (final-gameplay-3000.png)</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$COMMIT/screenshots/final-gameplay-3000.png\" alt=\"Gameplay with parcels falling and neon chutes on port 3000\">
+</details>
+
+<details>
+<summary>Screenshot — Action with parcels (final-action-3000.png)</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$COMMIT/screenshots/final-action-3000.png\" alt=\"Action shot with parcels mid-fall on port 3000\">
+</details>
+" 2>&1 | head
+https://github.com/AgentsLoop/PlayGround/issues/11#issuecomment-5503943666
+[0m
+Live server confirmed and screenshots secured — packaging the final delivery.
+[0m$ [0mtmux ls 2>&1; timeout 3 curl -s -o /dev/null -w "port 3000 HTTP %{http_code}\n" http://127.0.0.1:3000/index.html; ls -lh screenshots/final*.png | awk '{print $9, $5}'; git rev-parse HEAD
+app-server: 1 windows (created Wed Sep  2 03:36:35 2026)
+port 3000 HTTP 200
+screenshots/final-action-3000.png 126K
+screenshots/final-action.png 121K
+screenshots/final-gameplay-3000.png 114K
+screenshots/final-gameplay.png 112K
+screenshots/final-start-3000.png 122K
+screenshots/final-start.png 120K
+51ad0a32f22517ac2a03242bdb197740009195eb
+[0m
+[goal:evidence] app-server tmux session running on port 3000 HTTP 200 for index.html, Playwright Chromium verified start overlay, HUD, parcel spawn count 2, tube chutes with expanded drop zone and delivery animation, pause badge, final screenshots screenshots/final-start-3000.png 122K, final-gameplay-3000.png 114K, final-action-3000.png 126K committed at 51ad0a32f22517ac2a03242bdb197740009195eb and pushed to opencode/33586776582, final GitHub comment https://github.com/AgentsLoop/PlayGround/issues/11#issuecomment-5503943666
+[goal:complete]

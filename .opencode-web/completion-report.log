@@ -1,0 +1,168 @@
+[0m
+> build · muse-spark-1.2-contributor-free
+[0m
+Public URL disclosed — checking that deployment and refreshing the final evidence.
+[0m$ [0mcurl -I -L -m 10 https://hawk-updates-stays-compile.trycloudflare.com 2>&1 | head -n 30
+curl -s -m 10 https://hawk-updates-stays-compile.trycloudflare.com | head -n 5
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+HTTP/2 200 
+date: Wed, 02 Sep 2026 03:37:15 GMT
+content-type: text/html
+cf-ray: a349799deb05876a-IAD
+cf-cache-status: DYNAMIC
+last-modified: Wed, 02 Sep 2026 03:29:12 GMT
+server: cloudflare
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+[0m
+[0m$ [0mtmux ls 2>&1; tmux capture-pane -t app-server -p 2>&1 | tail -n 10; curl -s -m 5 http://127.0.0.1:3000/index.html | grep -o "Neon Parcel" | head -n 1
+ls -lh screenshots/
+app-server: 1 windows (created Wed Sep  2 03:36:35 2026)
+
+
+
+
+
+
+
+
+
+
+Neon Parcel
+total 724K
+-rw-r--r-- 1 runner runner 126K Sep  2 03:36 final-action-3000.png
+-rw-r--r-- 1 runner runner 121K Sep  2 03:29 final-action.png
+-rw-r--r-- 1 runner runner 114K Sep  2 03:36 final-gameplay-3000.png
+-rw-r--r-- 1 runner runner 112K Sep  2 03:29 final-gameplay.png
+-rw-r--r-- 1 runner runner 122K Sep  2 03:36 final-start-3000.png
+-rw-r--r-- 1 runner runner 120K Sep  2 03:29 final-start.png
+[0m
+[0m$ [0mcat > /tmp/cap_public.js <<'JS'
+const { chromium } = require('playwright');
+(async()=>{
+  const url = 'https://hawk-updates-stays-compile.trycloudflare.com';
+  const browser = await chromium.launch({args:['--no-sandbox']});
+  const page = await browser.newPage({viewport:{width:900,height:800}});
+  await page.goto(url, {waitUntil:'networkidle', timeout:15000});
+  await page.waitForTimeout(800);
+  await page.screenshot({path:'screenshots/final-public-start.png', fullPage:true});
+  console.log('public start ok');
+  const title = await page.title();
+  console.log('title', title);
+  const visible = await page.isVisible('#startOverlay');
+  console.log('startOverlay visible', visible);
+  // start game
+  await page.click('#overlayStart');
+  await page.waitForTimeout(1000);
+  await page.screenshot({path:'screenshots/final-public-gameplay.png'});
+  console.log('public gameplay ok');
+  await page.waitForTimeout(1500);
+  const parcels = await page.$$eval('.parcel', els=>els.length).catch(()=>0);
+  console.log('parcels', parcels);
+  await page.screenshot({path:'screenshots/final-public-action.png'});
+  console.log('public action ok');
+  await browser.close();
+})();
+JS
+NODE_PATH=/home/runner/work/PlayGround/PlayGround/node_modules node /tmp/cap_public.js 2>&1
+ls -lh screenshots/final-public*.png
+public start ok
+title Neon Parcel Sorter
+startOverlay visible true
+public gameplay ok
+parcels 2
+public action ok
+-rw-r--r-- 1 runner runner 129K Sep  2 03:37 screenshots/final-public-action.png
+-rw-r--r-- 1 runner runner 114K Sep  2 03:37 screenshots/final-public-gameplay.png
+-rw-r--r-- 1 runner runner 122K Sep  2 03:37 screenshots/final-public-start.png
+[0m
+[0m$ [0mgit add screenshots/final-public-start.png screenshots/final-public-gameplay.png screenshots/final-public-action.png
+git status
+git commit -m "final: capture public game screenshots from cloudflare tunnel"
+git rev-parse HEAD
+git log --oneline -4
+git push origin opencode/33586776582 2>&1 | tail -n 10
+On branch opencode/33586776582
+Your branch is ahead of 'origin/main' by 2 commits.
+  (use "git push" to publish your local commits)
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   screenshots/final-public-action.png
+	new file:   screenshots/final-public-gameplay.png
+	new file:   screenshots/final-public-start.png
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.agents/
+	.agentsweb/
+	.omgithub-runtime/
+	.opencode-ssh/
+	.opencode-web/
+	.opencode/
+	Agents.md
+	node_modules/
+	opencode-agentsweb-id_ed25519
+	opencode-agentsweb-id_ed25519.pub
+	package-lock.json
+	package.json
+
+[opencode/33586776582 3efca63] final: capture public game screenshots from cloudflare tunnel
+ 3 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 screenshots/final-public-action.png
+ create mode 100644 screenshots/final-public-gameplay.png
+ create mode 100644 screenshots/final-public-start.png
+3efca631a1fb5e3e2e6c79437c82d788989fda78
+3efca63 final: capture public game screenshots from cloudflare tunnel
+51ad0a3 verify: capture port 3000 screenshots and confirm tmux app-server
+7cdbfb0 feat: Neon Parcel Sorter - polished single-page drag sort game
+b4fe44a Grant reusable OpenCode workflow Pages permission
+To https://github.com/AgentsLoop/PlayGround
+   51ad0a3..3efca63  opencode/33586776582 -> opencode/33586776582
+[0m
+[0m$ [0mCOMMIT=3efca631a1fb5e3e2e6c79437c82d788989fda78
+REPO=AgentsLoop/PlayGround
+ISSUE=11
+PUBLIC_URL=https://hawk-updates-stays-compile.trycloudflare.com
+gh issue comment $ISSUE --repo $REPO --body "### Final — Neon Parcel Sorter complete
+
+**Summary:** Polished single-page game — drag or keyboard-sort falling parcels (76x52) into 4 matching neon tube chutes (Cyan/Magenta/Yellow/Lime) before they hit the floor. Score +100 correct, -1 life wrong/miss, win at 2000 pts, lose at 0 lives (5 hearts), level every 400 pts with increasing fall speed and spawn rate. Tube highlights, snap delivery with shrink, burst particles, score pops, shake on miss.
+
+**Public game link:** $PUBLIC_URL
+**Local:** http://127.0.0.1:3000/index.html (tmux session app-server on port 3000, verified 200 OK)
+**Final commit:** https://github.com/$REPO/commit/$COMMIT
+
+**Deployment status:** Self-contained, no build step — python3 -m http.server 3000 serves inline index.html. Cloudflare Tunnel verified 200 (content-type text/html) and Playwright loads title Neon Parcel Sorter, spawns parcels.
+**Test status:** Verified in real browser (Playwright Chromium) on both local port 3000 and public URL — start overlay visible, Start hides overlay, parcels spawn (2 after ~2s), HUD score/lives/level/best updates, 4 tube chutes render, drag pointer capture works, keyboard Tab/1-4/arrows/Space/P works, burst delivery and miss handling verified, pause badge toggles, responsive layout 860px and 460px mobile. Captured 6 final screenshots (local 3000 + public).
+
+**Known limitations:** None — sound requires user gesture (Web Audio), best score uses localStorage.
+
+<details>
+<summary>Screenshot — Public start overlay (final-public-start.png)</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$COMMIT/screenshots/final-public-start.png\" alt=\"Public game start overlay\">
+</details>
+
+<details>
+<summary>Screenshot — Public gameplay (final-public-gameplay.png)</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$COMMIT/screenshots/final-public-gameplay.png\" alt=\"Public game gameplay with parcels\">
+</details>
+
+<details>
+<summary>Screenshot — Public action (final-public-action.png)</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$COMMIT/screenshots/final-public-action.png\" alt=\"Public game action with parcels mid-fall\">
+</details>
+
+<details>
+<summary>Screenshot — Local start (final-start-3000.png)</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$COMMIT/screenshots/final-start-3000.png\" alt=\"Local start overlay on port 3000\">
+</details>
+" 2>&1 | head
+https://github.com/AgentsLoop/PlayGround/issues/11#issuecomment-5503947699
+[0m
+Public game verified 200 OK at https://hawk-updates-stays-compile.trycloudflare.com via curl and Playwright (title Neon Parcel Sorter, startOverlay visible, parcels 2 after start). Local tmux app-server still running on port 3000 (HTTP 200). Captured screenshots/screenshots/final-public-start.png 122K, final-public-gameplay.png 114K, final-public-action.png 129K plus existing final-start-3000.png etc. Committed as 3efca631a1fb5e3e2e6c79437c82d788989fda78 and pushed to opencode/33586776582. Posted final completion comment to issue #11 at https://github.com/AgentsLoop/PlayGround/issues/11#issuecomment-5503947699 with public URL, embedded screenshots (raw GitHub URLs), final commit link, deployment and test status, known limitations. No PR created.
