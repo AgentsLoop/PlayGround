@@ -4,16 +4,28 @@ run-name: "OpenCode #${{ inputs.issue_number }} — ${{ inputs.issue_title }}"
 on:
   workflow_dispatch:
     inputs:
-      issue_number: { required: true }
-      request: { required: true }
-      issue_title: { required: true }
-      labels_json: { required: false, default: '[]' }
-      sender: { required: true }
-
+      issue_number:
+        description: Issue containing the OpenCode label
+        required: true
+      request:
+        description: Exact issue request text
+        required: true
+      issue_title:
+        description: Issue title for the Actions run name
+        required: true
+      labels_json:
+        description: JSON array of issue label names
+        required: false
+        default: '[]'
+      sender:
+        description: GitHub username that submitted the request
+        required: true
 permissions:
   contents: write
   issues: write
-$'  pull-requests: write\n  pages: write\n'  id-token: write
+  pull-requests: write
+  pages: write
+  id-token: write
 
 jobs:
   opencode:
@@ -24,7 +36,4 @@ jobs:
       issue_title: ${{ inputs.issue_title }}
       labels_json: ${{ inputs.labels_json }}
       sender: ${{ inputs.sender }}
-    secrets:
-      OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
-      OPENCODE_AUTH_JSON: ${{ secrets.OPENCODE_AUTH_JSON }}
-      AGENTSWEB_SSH_PUBLIC_KEY: ${{ secrets.AGENTSWEB_SSH_PUBLIC_KEY }}
+    secrets: inherit
