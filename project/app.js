@@ -137,15 +137,17 @@ function render(){
       inp.setAttribute('aria-label','Edit todo');
       // focus and select end
       setTimeout(()=>{ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); },0);
+      let cancelled = false;
       const saveEdit = ()=>{
+        if(cancelled) return;
         const v = inp.value;
         editingId=null;
         updateText(td.id, v);
       };
-      const cancelEdit = ()=>{ editingId=null; render(); };
+      const cancelEdit = ()=>{ cancelled=true; editingId=null; render(); };
       inp.addEventListener('keydown', e=>{
         if(e.key==='Enter') saveEdit();
-        else if(e.key==='Escape') cancelEdit();
+        else if(e.key==='Escape'){ e.preventDefault(); cancelEdit(); }
       });
       inp.addEventListener('blur', saveEdit);
       textWrap = inp;

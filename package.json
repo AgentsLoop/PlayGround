@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/AgentsLoop/PlayGround#readme",
   "devDependencies": {
+    "jsdom": "^30.0.1",
     "playwright": "^1.62.1"
   }
 }
