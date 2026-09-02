@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Neon Raindrop Catcher</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg:#070a14;
+    --neon-cyan:#00f0ff;
+    --neon-blue:#2a6bff;
+    --neon-pink:#ff2a6d;
+    --neon-red:#ff3b30;
+    --glass:rgba(255,255,255,0.06);
+  }
+  body {
+    background: radial-gradient(1200px 800px at 50% -10%, #1a2a5a 0%, transparent 60%),
+                radial-gradient(900px 600px at 80% 90%, #3a1040 0%, transparent 60%),
+                linear-gradient(180deg, #070a14 0%, #0a1228 50%, #0b0f1e 100%);
+    color:#e6f0ff;
+    font-family:'Space Grotesk', system-ui, sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    overflow-x:hidden;
+  }
+  /* header */
+  .topbar {
+    width:100%;
+    max-width:1100px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 20px 8px;
+  }
+  .logo {
+    font-family:'Orbitron', monospace;
+    font-weight:900;
+    letter-spacing:0.08em;
+    font-size:18px;
+    text-transform:uppercase;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .logo-mark {
+    width:26px; height:26px;
+    border:2px solid var(--neon-cyan);
+    border-radius:50%;
+    box-shadow:0 0 12px var(--neon-cyan), inset 0 0 8px rgba(0,240,255,0.4);
+    position:relative;
+    background: radial-gradient(circle at 30% 30%, rgba(0,240,255,0.6), transparent 60%);
+  }
+  .logo-mark::after {
+    content:'';
+    position:absolute;
+    inset:6px;
+    border-radius:50%;
+    background: var(--neon-cyan);
+    box-shadow:0 0 8px var(--neon-cyan);
+    opacity:0.9;
+  }
+  .tagline { opacity:0.6; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; }
+
+  .wrap {
+    width:100%;
+    max-width:1100px;
+    display:grid;
+    grid-template-columns: 1fr 420px 1fr;
+    gap:18px;
+    padding:0 20px 20px;
+    align-items:start;
+  }
+  @media (max-width: 900px){
+    .wrap{ grid-template-columns:1fr; justify-items:center; }
+    .side { display:none; }
+    .side.mobile-show{display:flex; width:100%; max-width:420px; order:3;}
+  }
+  .side {
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:18px;
+    padding:16px;
+    backdrop-filter: blur(12px);
+    box-shadow:0 10px 40px rgba(0,0,0,0.4);
+  }
+  .side h3 {
+    font-family:'Orbitron', monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    opacity:0.9;
+    margin-bottom:10px;
+    color: var(--neon-cyan);
+  }
+  .side p, .side li {
+    font-size:13px;
+    line-height:1.5;
+    opacity:0.85;
+  }
+  .side ul { padding-left:16px; margin:6px 0; }
+  .side .badge {
+    display:inline-block;
+    font-size:10px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid rgba(0,240,255,0.4);
+    color: var(--neon-cyan);
+    margin-bottom:10px;
+    background: rgba(0,240,255,0.08);
+  }
+  .kbd {
+    display:inline-block;
+    border:1px solid rgba(255,255,255,0.2);
+    border-bottom-width:2px;
+    background: rgba(255,255,255,0.08);
+    padding:1px 6px;
+    border-radius:6px;
+    font-family:monospace;
+    font-size:12px;
+    margin:0 1px;
+  }
+
+  .game-shell {
+    width:420px;
+    max-width:100%;
+    position:relative;
+    border-radius:22px;
+    padding:10px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,240,255,0.08) inset;
+  }
+  .hud {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 12px;
+    background: rgba(7,10,20,0.7);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px;
+    margin-bottom:10px;
+    font-family:'Orbitron', monospace;
+  }
+  .hud-item { text-align:center; min-width:70px; }
+  .hud-label { font-size:9px; letter-spacing:0.18em; opacity:0.6; text-transform:uppercase; }
+  .hud-value { font-size:18px; font-weight:700; letter-spacing:0.04em; }
+  .hud-value.score { color: var(--neon-cyan); text-shadow:0 0 10px rgba(0,240,255,0.6); }
+  .hud-value.level { color:#ffd93d; text-shadow:0 0 10px rgba(255,217,61,0.5); }
+  .lives { display:flex; gap:6px; justify-content:center; margin-top:4px; }
+  .heart {
+    width:14px; height:14px;
+    background: var(--neon-pink);
+    transform: rotate(-45deg);
+    position:relative;
+    box-shadow:0 0 8px rgba(255,42,109,0.6);
+    transition: all 0.2s;
+  }
+  .heart::before, .heart::after {
+    content:'';
+    position:absolute;
+    width:14px; height:14px;
+    background: var(--neon-pink);
+    border-radius:50%;
+  }
+  .heart::before { top:-7px; left:0; }
+  .heart::after { left:7px; top:0; }
+  .heart.empty {
+    background: rgba(255,255,255,0.12);
+    box-shadow:none;
+  }
+  .heart.empty::before, .heart.empty::after { background: rgba(255,255,255,0.12); }
+  .heart.lost { animation: heartPop 0.4s ease; }
+  @keyframes heartPop { 0%{transform:rotate(-45deg) scale(1)} 50%{transform:rotate(-45deg) scale(1.4)} 100%{transform:rotate(-45deg) scale(1)} }
+
+  .canvas-wrap {
+    position:relative;
+    width:100%;
+    height:600px;
+    border-radius:16px;
+    overflow:hidden;
+    background:
+      radial-gradient(600px 400px at 50% 0%, rgba(42,107,255,0.25), transparent 70%),
+      radial-gradient(500px 300px at 20% 80%, rgba(255,42,109,0.12), transparent 70%),
+      linear-gradient(180deg, #0a1430 0%, #0d1b3a 35%, #0f1e3f 100%);
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  canvas { display:block; width:100%; height:100%; }
+  /* grid overlay - boosted for cabinet readability per critic */
+  .canvas-wrap::after {
+    content:'';
+    position:absolute;
+    inset:0;
+    background:
+      linear-gradient(rgba(0,240,255,0.16) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,255,0.16) 1px, transparent 1px);
+    background-size: 28px 28px;
+    opacity:0.45;
+    pointer-events:none;
+  }
+  .canvas-wrap::before {
+    content:'';
+    position:absolute;
+    inset:0;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,240,255,0.04) 3px);
+    opacity:0.3;
+    pointer-events:none;
+    z-index:1;
+  }
+  .hit-flash {
+    position:absolute;
+    inset:0;
+    background: radial-gradient(ellipse at 50% 60%, rgba(255,42,109,0.45), transparent 70%);
+    opacity:0;
+    pointer-events:none;
+    z-index:3;
+    transition: opacity 0.12s;
+  }
+  .hit-flash.show { opacity:1; }
+  .hit-flash.miss { background: radial-gradient(ellipse at 50% 85%, rgba(0,240,255,0.22), transparent 65%); }
+  .overlay {
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background: radial-gradient(600px 400px at 50% 20%, rgba(10,20,48,0.85), rgba(7,10,20,0.92));
+    backdrop-filter: blur(6px);
+    z-index:5;
+    text-align:center;
+    padding:24px;
+  }
+  .overlay.hidden { display:none; }
+  .title {
+    font-family:'Orbitron', monospace;
+    font-weight:900;
+    font-size:28px;
+    line-height:1.1;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    text-shadow:0 0 20px rgba(0,240,255,0.6), 0 0 40px rgba(42,107,255,0.4);
+  }
+  .title span { color: var(--neon-cyan); }
+  .subtitle {
+    margin-top:8px;
+    font-size:13px;
+    opacity:0.75;
+    max-width:300px;
+    line-height:1.5;
+  }
+  .btn-primary {
+    margin-top:18px;
+    font-family:'Orbitron', monospace;
+    font-weight:700;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    font-size:13px;
+    padding:12px 28px;
+    border-radius:999px;
+    border:1px solid var(--neon-cyan);
+    background: linear-gradient(180deg, rgba(0,240,255,0.9), rgba(42,107,255,0.9));
+    color:#031018;
+    cursor:pointer;
+    box-shadow:0 0 18px rgba(0,240,255,0.5), 0 8px 20px rgba(0,0,0,0.3);
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .btn-primary:hover { transform: translateY(-1px) scale(1.02); box-shadow:0 0 24px rgba(0,240,255,0.7); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-secondary {
+    margin-top:10px;
+    background: transparent;
+    border:1px solid rgba(255,255,255,0.18);
+    color:#cfe6ff;
+    font-size:12px;
+    padding:8px 16px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .stats-row {
+    display:flex;
+    gap:12px;
+    margin-top:14px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .stat-pill {
+    padding:8px 12px;
+    border-radius:999px;
+    background: rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.08);
+    font-family:'Orbitron', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+  }
+  .controls-hint {
+    margin-top:14px;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:center;
+    font-size:11px;
+    opacity:0.7;
+  }
+  .touch-controls {
+    display:none;
+    gap:10px;
+    margin-top:10px;
+    width:100%;
+  }
+  .touch-btn {
+    flex:1;
+    padding:14px;
+    border-radius:14px;
+    background: rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.12);
+    color:#e6f0ff;
+    font-family:'Orbitron', monospace;
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    touch-action: manipulation;
+    user-select:none;
+  }
+  .touch-btn:active { background: rgba(0,240,255,0.15); border-color: var(--neon-cyan); }
+  @media (max-width: 900px){
+    .touch-controls{ display:flex; }
+  }
+  .pause-badge {
+    position:absolute;
+    top:54px;
+    left:50%;
+    transform:translateX(-50%);
+    background: rgba(0,0,0,0.6);
+    border:1px solid rgba(255,255,255,0.12);
+    padding:6px 12px;
+    border-radius:999px;
+    font-family:'Orbitron', monospace;
+    font-size:10px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    z-index:4;
+    opacity:0;
+    transition: opacity 0.2s;
+    pointer-events:none;
+  }
+  .pause-badge.show { opacity:1; }
+  .level-toast {
+    position:absolute;
+    top:40%;
+    left:50%;
+    transform:translate(-50%, -50%) scale(0.9);
+    font-family:'Orbitron', monospace;
+    font-weight:900;
+    font-size:28px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:#ffd93d;
+    text-shadow:0 0 18px rgba(255,217,61,0.8), 0 0 30px rgba(255,42,109,0.4);
+    opacity:0;
+    pointer-events:none;
+    z-index:4;
+  }
+  .level-toast.show { animation: toastPop 1.2s ease forwards; }
+  @keyframes toastPop {
+    0%{ opacity:0; transform:translate(-50%,-50%) scale(0.8); }
+    20%{ opacity:1; transform:translate(-50%,-50%) scale(1.05); }
+    80%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+    100%{ opacity:0; transform:translate(-50%,-50%) scale(1); }
+  }
+  footer {
+    margin-top:auto;
+    padding:12px 20px 18px;
+    font-size:11px;
+    opacity:0.5;
+    text-align:center;
+    letter-spacing:0.06em;
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="logo"><div class="logo-mark"></div> Neon Raindrop <span style="opacity:0.5; font-weight:500">Catcher</span></div>
+    <div class="tagline">Catch blue • Dodge red • Survive</div>
+  </div>
+
+  <div class="wrap">
+    <div class="side">
+      <div class="badge">How to Play</div>
+      <h3>Objective</h3>
+      <p>Move the glowing cup to <strong style="color:var(--neon-cyan)">catch blue raindrops</strong> and avoid <strong style="color:var(--neon-red)">red sparks</strong>.</p>
+      <ul>
+        <li><span style="color:var(--neon-cyan)">Blue drop</span> = +10 points</li>
+        <li><span style="color:var(--neon-red)">Red spark</span> caught = −1 life</li>
+        <li>Missed blue drop = −1 life</li>
+      </ul>
+      <h3 style="margin-top:12px">Controls</h3>
+      <p><span class="kbd">◀</span> <span class="kbd">▶</span> or <span class="kbd">A</span> <span class="kbd">D</span> to move<br>
+         Hold for smooth glide • <span class="kbd">P</span> pause • Touch & drag on mobile</p>
+      <h3 style="margin-top:12px">Difficulty</h3>
+      <p>Every <strong>100 points</strong> you level up: rain falls faster and spawns more sparks. How long can you glow?</p>
+    </div>
+
+    <div class="game-shell" id="gameShell">
+      <div class="hud">
+        <div class="hud-item">
+          <div class="hud-label">Score</div>
+          <div class="hud-value score" id="scoreEl">0</div>
+        </div>
+        <div class="hud-item">
+          <div class="hud-label">Lives</div>
+          <div class="lives" id="livesEl"></div>
+        </div>
+        <div class="hud-item">
+          <div class="hud-label">Level</div>
+          <div class="hud-value level" id="levelEl">1</div>
+        </div>
+      </div>
+
+        <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="gameCanvas" width="400" height="600" tabindex="0" aria-label="Game canvas - use arrow keys or A/D to move"></canvas>
+        <div class="hit-flash" id="hitFlash"></div>
+        <div class="pause-badge" id="pauseBadge">Paused • Press P to resume</div>
+        <div class="level-toast" id="levelToast">Level 2</div>
+
+        <div class="overlay" id="startOverlay">
+          <div class="title">Neon<br><span>Raindrop</span><br>Catcher</div>
+          <div class="subtitle">Slide the neon cup through the storm. Catch the cool blue drops, dodge the angry red sparks.</div>
+          <button class="btn-primary" id="startBtn">▶ Start Catching</button>
+          <div class="controls-hint">
+            <span><span class="kbd">←</span> <span class="kbd">→</span> Move</span>
+            <span>•</span>
+            <span><span class="kbd">A</span> <span class="kbd">D</span> Move</span>
+            <span>•</span>
+            <span><span class="kbd">SPACE</span> Start</span>
+          </div>
+          <div class="stats-row">
+            <div class="stat-pill">3 LIVES</div>
+            <div class="stat-pill">ENDLESS LEVELS</div>
+            <div class="stat-pill">NEON STORM</div>
+          </div>
+        </div>
+
+        <div class="overlay hidden" id="gameOverOverlay">
+          <div class="title" style="font-size:24px; color: var(--neon-pink); text-shadow:0 0 16px rgba(255,42,109,0.6)">Signal Lost</div>
+          <div class="subtitle" id="finalStats">You caught the storm for a while.</div>
+          <div class="stats-row" id="finalPills"></div>
+          <button class="btn-primary" id="restartBtn">↻ Play Again</button>
+          <button class="btn-secondary" id="shareBtn">Press Enter to restart</button>
+        </div>
+      </div>
+
+      <div class="touch-controls">
+        <button class="touch-btn" id="touchLeft">◀ Left</button>
+        <button class="touch-btn" id="touchRight">Right ▶</button>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="badge" style="border-color: var(--neon-pink); color:var(--neon-pink);">Neon Field Notes</div>
+      <h3>Visual Language</h3>
+      <p>Dark city rain, cyan rim-light, pink hazards. Blue drops leave a cool comet tail, red sparks crackle and fizz.</p>
+      <h3 style="margin-top:12px">Pro Tips</h3>
+      <ul>
+        <li>Stay centered — you can reach both edges faster.</li>
+        <li>Red sparks fall slightly faster. Watch their orange core.</li>
+        <li>Don't chase every blue at low lives; survival >贪心.</li>
+      </ul>
+      <h3 style="margin-top:12px">Accessibility</h3>
+      <p>All actions work with keyboard. No mouse required. Pause anytime with <span class="kbd">P</span> or <span class="kbd">Esc</span>.</p>
+      <div class="side mobile-show" style="flex-direction:column; margin-top:12px; display:none;"></div>
+    </div>
+  </div>
+
+  <footer>Built for the browser • 60fps • No installs • Works offline after load • © Neon Field</footer>
+
+<script>
+(() => {
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const wrap = document.getElementById('canvasWrap');
+  const scoreEl = document.getElementById('scoreEl');
+  const livesEl = document.getElementById('livesEl');
+  const levelEl = document.getElementById('levelEl');
+  const startOverlay = document.getElementById('startOverlay');
+  const gameOverOverlay = document.getElementById('gameOverOverlay');
+  const startBtn = document.getElementById('startBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const pauseBadge = document.getElementById('pauseBadge');
+  const levelToast = document.getElementById('levelToast');
+  const finalStats = document.getElementById('finalStats');
+  const finalPills = document.getElementById('finalPills');
+
+  // Canvas logical size
+  const W = 400, H = 600;
+
+  // Game state
+  let score = 0;
+  let lives = 3;
+  let level = 1;
+  let running = false;
+  let paused = false;
+  let gameOver = false;
+  let drops = [];
+  let particles = [];
+  let spawnTimer = 0;
+  let spawnInterval = 700;
+  let lastTime = 0;
+  let shake = 0;
+  let bestScore = 0;
+  try{ bestScore = Number(localStorage.getItem('neon-best')||0); }catch(e){}
+
+  // Cup
+  const cup = {
+    x: W/2 - 45,
+    y: H - 58,
+    w: 90,
+    h: 46,
+    vx: 0,
+    targetX: W/2 -45
+  };
+
+  const keys = { left:false, right:false };
+
+  // keep logical 400x600; CSS handles scaling (retina would need DPR scaling, not needed here)
+
+  function renderLives() {
+    livesEl.innerHTML = '';
+    for(let i=0;i<3;i++){
+      const h = document.createElement('div');
+      h.className = 'heart' + (i < lives ? '' : ' empty');
+      livesEl.appendChild(h);
+    }
+  }
+
+  function setScore(v){
+    score=v;
+    scoreEl.textContent = v;
+    const newLevel = Math.floor(score/100)+1;
+    if(newLevel !== level){
+      level = newLevel;
+      levelEl.textContent = level;
+      showLevelToast();
+      // increase difficulty
+      spawnInterval = Math.max(260, 700 - (level-1)*55);
+    }
+  }
+
+  function showLevelToast(){
+    levelToast.textContent = `Level ${level}`;
+    levelToast.classList.remove('show');
+    void levelToast.offsetWidth;
+    levelToast.classList.add('show');
+    spawnSparksBurst();
+    playTone(880, 0.12, 0.12);
+    setTimeout(()=> playTone(1320,0.12,0.12), 110);
+  }
+
+  function spawnSparksBurst(){
+    for(let i=0;i<10;i++){
+      particles.push({
+        x: W/2 + (Math.random()-0.5)*120,
+        y: 80,
+        vx: (Math.random()-0.5)*4,
+        vy: Math.random()*2+1,
+        life: 30,
+        maxLife:30,
+        size: Math.random()*2+1.5,
+        color: i%2? '38,107,255' : '255,42,109'
+      });
+    }
+  }
+
+  // Audio
+  let audioCtx=null;
+  function ensureAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); }
+  function playTone(freq, dur, vol=0.2, type='sine'){
+    try{
+      ensureAudio();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type=type; o.frequency.value=freq;
+      g.gain.value=vol;
+      o.connect(g); g.connect(audioCtx.destination);
+      const t=audioCtx.currentTime;
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t+dur);
+      o.start(t); o.stop(t+dur);
+    }catch(e){}
+  }
+  function playCatch(){ playTone(1200,0.12,0.15,'sine'); setTimeout(()=>playTone(1600,0.1,0.12,'sine'),70); }
+  function playHit(){ playTone(180,0.25,0.35,'square'); setTimeout(()=>playTone(120,0.25,0.25,'square'),90); }
+  function playMiss(){ playTone(90,0.4,0.2,'sawtooth'); }
+
+  function createDrop(){
+    const isRed = Math.random() < (0.22 + (level-1)*0.04); // 22% -> ~42% at high level
+    const x = 16 + Math.random()*(W-32);
+    const baseSpeed = 2.2 + (level-1)*0.45 + Math.random()*0.9;
+    const speed = isRed ? baseSpeed * (1.5 + (level-1)*0.04) : baseSpeed;
+    drops.push({
+      x, y: -22,
+      vx: (Math.random()-0.5)*0.6,
+      vy: speed,
+      r: isRed ? 13 : 9,
+      type: isRed ? 'spark' : 'drop',
+      rotation: Math.random()*Math.PI*2,
+      rotSpeed: (Math.random()-0.5)*0.12,
+      wobble: Math.random()*Math.PI*2
+    });
+  }
+
+  function resetGame(){
+    score=0; lives=3; level=1;
+    setScore(0);
+    levelEl.textContent='1';
+    spawnInterval=700;
+    drops=[];
+    particles=[];
+    cup.x = W/2 - cup.w/2;
+    cup.targetX = cup.x;
+    renderLives();
+    shake=0;
+    gameOver=false;
+    paused=false;
+    pauseBadge.classList.remove('show');
+  }
+
+  function startGame(){
+    resetGame();
+    running=true;
+    gameOver=false;
+    paused=false;
+    pauseBadge.classList.remove('show');
+    startOverlay.classList.add('hidden');
+    gameOverOverlay.classList.add('hidden');
+    lastTime = performance.now();
+    // persistent loop already running
+    ensureAudio();
+    playTone(440,0.08,0.12);
+    canvas.focus();
+  }
+
+  function endGame(){
+    running=false;
+    gameOver=true;
+    paused=false;
+    pauseBadge.classList.remove('show');
+    try{ if(score > bestScore){ bestScore=score; localStorage.setItem('neon-best', bestScore); } }catch(e){}
+    finalStats.innerHTML = `Score <strong style="color:var(--neon-cyan)">${score}</strong> • Level ${level} • Best ${bestScore}`;
+    finalPills.innerHTML = `
+      <div class="stat-pill">SCORE ${score}</div>
+      <div class="stat-pill">LEVEL ${level}</div>
+      <div class="stat-pill">BEST ${bestScore}</div>`;
+    gameOverOverlay.classList.remove('hidden');
+    shake=14;
+    playMiss();
+  }
+
+  // flash handling for distinct hit vs miss feedback
+  let flashTimer=0;
+  function triggerFlash(isHit){
+    const el = document.getElementById('hitFlash');
+    if(!el) return;
+    el.classList.remove('miss');
+    if(!isHit) el.classList.add('miss');
+    el.classList.add('show');
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(()=> el.classList.remove('show'), isHit? 140 : 180);
+    // brief hit-stop for red
+    if(isHit){ hitStop = 6; }
+  }
+  let hitStop=0;
+
+  function loseLife(isHit){
+    lives--;
+    renderLives();
+    shake= isHit ? 22 : 6;
+    triggerFlash(isHit);
+    // flash hearts
+    const hearts = livesEl.children;
+    if(hearts[lives]) hearts[lives].classList.add('lost');
+    playHit();
+    // burst particles
+    const cx = cup.x + cup.w/2;
+    const cy = cup.y + 6;
+    const col = isHit ? '255,59,48' : '0,240,255';
+    for(let i=0;i<14;i++){
+      particles.push({
+        x:cx, y:cy,
+        vx: (Math.random()-0.5)*7,
+        vy: Math.random()*-5 -1,
+        life: 22+Math.random()*12,
+        maxLife: 30,
+        size: Math.random()*3+2,
+        color: col
+      });
+    }
+    if(lives <=0){
+      endGame();
+    }
+  }
+
+  function catchDrop(d, idx){
+    drops.splice(idx,1);
+    if(d.type==='drop'){
+      setScore(score+10);
+      playCatch();
+      // particles
+      for(let i=0;i<9;i++){
+        particles.push({
+          x: d.x, y: d.y,
+          vx: (Math.random()-0.5)*5,
+          vy: (Math.random()-0.5)*5 -1,
+          life: 18+Math.random()*10,
+          maxLife: 28,
+          size: Math.random()*2.5+1.5,
+          color: '0,240,255'
+        });
+      }
+      // subtle cup glow pulse
+      cupPulse = 14;
+    } else {
+      // red spark caught = lose life
+      loseLife(true);
+      for(let i=0;i<12;i++){
+        particles.push({
+          x: d.x, y: d.y,
+          vx: (Math.random()-0.5)*6,
+          vy: (Math.random()-0.5)*5,
+          life: 20,
+          maxLife:20,
+          size: Math.random()*2+1,
+          color: '255,42,109'
+        });
+      }
+    }
+    scoreEl.animate([{transform:'scale(1)'},{transform:'scale(1.18)'},{transform:'scale(1)'}], {duration:180, easing:'ease-out'});
+  }
+
+  let cupPulse=0;
+
+  function update(dt){
+    if(!running) return;
+    if(paused) return;
+    if(hitStop>0){ hitStop--; return; }
+
+    // cup movement - snappier lerp per critic (0.45 vs 0.32)
+    const speed = 6.8; // pixels per frame at 60fps, scaled by dt
+    const moveStep = speed * (dt/16.67);
+    if(keys.left) cup.targetX -= moveStep*1.25;
+    if(keys.right) cup.targetX += moveStep*1.25;
+    // clamp target
+    cup.targetX = Math.max(0, Math.min(W - cup.w, cup.targetX));
+    // smooth lerp - boosted for arcade responsiveness
+    cup.x += (cup.targetX - cup.x) * 0.45;
+    // hard clamp to prevent lerp overshoot on resize/drag
+    cup.x = Math.max(0, Math.min(W - cup.w, cup.x));
+
+    // spawn
+    spawnTimer += dt;
+    const curInterval = spawnInterval + (Math.random()*80-40);
+    if(spawnTimer > curInterval){
+      spawnTimer=0;
+      createDrop();
+      if(level>3 && Math.random()<0.35) createDrop();
+    }
+
+    // update drops
+    for(let i=drops.length-1;i>=0;i--){
+      const d = drops[i];
+      d.y += d.vy * (dt/16.67);
+      d.x += d.vx * (dt/16.67);
+      d.rotation += d.rotSpeed * (dt/16.67);
+      d.wobble += 0.12 * (dt/16.67);
+
+      // wall bounce little
+      if(d.x < 10) d.vx = Math.abs(d.vx);
+      if(d.x > W-10) d.vx = -Math.abs(d.vx);
+
+      // collision with cup: cup is at y = H-58, w=90 h=46, opening at top
+      const cupLeft = cup.x + 6;
+      const cupRight = cup.x + cup.w -6;
+      const cupTop = cup.y;
+      const catchZoneTop = cup.y + 6;
+      const catchZoneBottom = cup.y + cup.h - 6;
+
+      const withinX = d.x > cupLeft + 4 && d.x < cupRight -4;
+      const withinY = d.y + d.r > catchZoneTop && d.y - d.r < catchZoneBottom;
+
+      if(withinX && withinY){
+        // catch only if near top opening - treat as catch
+        catchDrop(d, i);
+        continue;
+      }
+
+      // missed: off bottom
+      if(d.y - d.r > H+10){
+        drops.splice(i,1);
+        if(d.type==='drop'){
+          // missing blue costs life
+          loseLife(false);
+        } else {
+          // red missed: small bonus? no, just fade
+          // tiny fizz
+          for(let k=0;k<5;k++) particles.push({x:d.x,y:H-12,vx:(Math.random()-0.5)*2,vy:Math.random()*-2, life:12,maxLife:12,size:1.5,color:'255,42,109'});
+        }
+      }
+    }
+
+    // particles
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.18;
+      p.vx *= 0.99;
+      p.life--;
+      if(p.life<=0) particles.splice(i,1);
+    }
+
+    if(cupPulse>0) cupPulse--;
+    if(shake>0) shake -= 0.9;
+  }
+
+  function draw(){
+    // clear with shake
+    ctx.save();
+    if(shake>0){
+      ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake);
+    }
+
+    // bg gradient already via CSS, but draw vertical fading bars
+    ctx.clearRect(0,0,W,H);
+    // subtle vertical glow columns - boosted
+    ctx.globalAlpha = 0.09;
+    for(let i=0;i<3;i++){
+      const x = 60 + i*120 + Math.sin(Date.now()*0.0006 + i)*20;
+      const grad = ctx.createLinearGradient(x,0,x, H);
+      grad.addColorStop(0,'rgba(0,240,255,0)');
+      grad.addColorStop(0.5,'rgba(0,240,255,0.9)');
+      grad.addColorStop(1,'rgba(0,240,255,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x-1.5,0,3,H);
+    }
+    ctx.globalAlpha =1;
+
+    // horizon line
+    ctx.strokeStyle='rgba(0,240,255,0.18)';
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(0, H-14);
+    ctx.lineTo(W, H-14);
+    ctx.stroke();
+    ctx.shadowColor='rgba(0,240,255,0.6)';
+    ctx.shadowBlur=8;
+    ctx.stroke();
+    ctx.shadowBlur=0;
+
+    // drops - with additive bloom for cabinet punch
+    ctx.globalCompositeOperation = 'lighter';
+    for(const d of drops){
+      ctx.save();
+      ctx.translate(d.x, d.y);
+      ctx.rotate(d.rotation *0.15);
+      if(d.type==='drop'){
+        // blue raindrop - smaller, cool, crisp
+        // tail - more subtle
+        ctx.globalAlpha=0.28;
+        ctx.fillStyle='#00f0ff';
+        ctx.beginPath();
+        ctx.ellipse(0, -14, 2.2, 11, 0,0,Math.PI*2);
+        ctx.fill();
+        // main drop
+        ctx.globalAlpha=1;
+        ctx.shadowColor='#00f0ff';
+        ctx.shadowBlur=18;
+        ctx.fillStyle='#2ec5ff';
+        ctx.beginPath();
+        ctx.moveTo(0, -d.r);
+        ctx.bezierCurveTo(d.r*0.9, -d.r*0.2, d.r*0.7, d.r, 0, d.r*1.05);
+        ctx.bezierCurveTo(-d.r*0.7, d.r, -d.r*0.9, -d.r*0.2, 0, -d.r);
+        ctx.fill();
+        // black keyline for separation (cabinet style)
+        ctx.shadowBlur=0;
+        ctx.strokeStyle='rgba(0,0,0,0.55)';
+        ctx.lineWidth=1.4;
+        ctx.stroke();
+        // highlight
+        ctx.fillStyle='rgba(255,255,255,0.92)';
+        ctx.beginPath();
+        ctx.ellipse(-2.5, -2.5, 2.2, 3.8, -0.3,0,Math.PI*2);
+        ctx.fill();
+        // inner glow
+        ctx.globalAlpha=0.4;
+        ctx.fillStyle='#ffffff';
+        ctx.beginPath();
+        ctx.arc(0.8,1.5, d.r*0.35,0,Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha=1;
+      } else {
+        // red spark - LARGER, Jagged, high contrast with black stroke
+        const flick = 0.85 + Math.sin(d.wobble*2.2)*0.15;
+        ctx.shadowColor='#ff2a6d';
+        ctx.shadowBlur=16*flick;
+        ctx.fillStyle='#ff3b30';
+        // star - bigger outer radius 14 vs inner 6
+        ctx.beginPath();
+        const spikes=5;
+        for(let a=0;a<spikes*2;a++){
+          const rad = (a%2===0)? 14 : 6.5;
+          const ang = (Math.PI*2/spikes/2)*a - Math.PI/2;
+          const px = Math.cos(ang)*rad;
+          const py = Math.sin(ang)*rad;
+          if(a===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+        }
+        ctx.closePath();
+        ctx.fill();
+        // black edge for readability
+        ctx.shadowBlur=0;
+        ctx.strokeStyle='rgba(0,0,0,0.85)';
+        ctx.lineWidth=1.8;
+        ctx.stroke();
+        // core - brighter orange
+        ctx.fillStyle='#ff9a3d';
+        ctx.globalAlpha=0.95*flick;
+        ctx.shadowColor='#ff7a00';
+        ctx.shadowBlur=8;
+        ctx.beginPath();
+        ctx.arc(0,0,4,0,Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur=0;
+        ctx.globalAlpha=1;
+        // spark trail - longer, more visible
+        ctx.strokeStyle='rgba(255,42,109,0.55)';
+        ctx.lineWidth=2;
+        ctx.beginPath();
+        ctx.moveTo(0, -16);
+        ctx.lineTo(0, -28);
+        ctx.stroke();
+        // outer flicker dots
+        ctx.fillStyle='rgba(255,107,80,0.9)';
+        ctx.beginPath();
+        ctx.arc(5*Math.sin(d.wobble), -8, 1.2,0,Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+
+    // cup - polished neon
+    ctx.save();
+    ctx.translate(cup.x, cup.y);
+    const pulse = cupPulse>0 ? Math.sin(cupPulse*0.8)*2 : 0;
+    // shadow
+    ctx.fillStyle='rgba(0,0,0,0.35)';
+    ctx.beginPath();
+    ctx.ellipse(cup.w/2, cup.h+6, cup.w*0.45, 6, 0,0,Math.PI*2);
+    ctx.fill();
+    // outer glow
+    ctx.shadowColor='#00f0ff';
+    ctx.shadowBlur=18 + pulse*4;
+    ctx.strokeStyle='rgba(0,240,255,0.95)';
+    ctx.lineWidth=2.2;
+    // cup shape: trapezoid with rounded bottom
+    ctx.fillStyle='rgba(8,18,42,0.92)';
+    ctx.beginPath();
+    const r=10;
+    ctx.moveTo(6, 0);
+    ctx.lineTo(cup.w-6, 0);
+    ctx.lineTo(cup.w-10, cup.h - r);
+    ctx.quadraticCurveTo(cup.w-10, cup.h, cup.w-10 - r, cup.h);
+    ctx.lineTo(10 + r, cup.h);
+    ctx.quadraticCurveTo(10, cup.h, 10, cup.h - r);
+    ctx.lineTo(6,0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.shadowBlur=0;
+    // inner liquid glow
+    const liqGrad = ctx.createLinearGradient(0,12,0,cup.h);
+    liqGrad.addColorStop(0,'rgba(0,240,255,0.55)');
+    liqGrad.addColorStop(1,'rgba(42,107,255,0.25)');
+    ctx.fillStyle=liqGrad;
+    ctx.beginPath();
+    ctx.moveTo(12, 14);
+    ctx.lineTo(cup.w-12,14);
+    ctx.lineTo(cup.w-16, cup.h-8);
+    ctx.lineTo(16, cup.h-8);
+    ctx.closePath();
+    ctx.fill();
+    // rim highlight
+    ctx.strokeStyle='rgba(255,255,255,0.9)';
+    ctx.lineWidth=1.2;
+    ctx.beginPath();
+    ctx.moveTo(6,0);
+    ctx.lineTo(cup.w-6,0);
+    ctx.stroke();
+    // inner highlight line
+    ctx.strokeStyle='rgba(255,255,255,0.18)';
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(18, cup.h-8);
+    ctx.lineTo(cup.w-18, cup.h-8);
+    ctx.stroke();
+    // side glints
+    ctx.fillStyle='rgba(255,255,255,0.12)';
+    ctx.fillRect(10, 8, 1.5, cup.h-20);
+    ctx.fillRect(cup.w-11.5, 8, 1.5, cup.h-20);
+
+    // handle? no, minimal
+    ctx.restore();
+
+    // particles - additive bloom
+    ctx.globalCompositeOperation = 'lighter';
+    for(const p of particles){
+      const alpha = p.life / p.maxLife;
+      ctx.globalAlpha = alpha*0.9;
+      ctx.fillStyle = `rgba(${p.color},${alpha})`;
+      ctx.shadowColor = `rgba(${p.color},0.9)`;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size*alpha,0,Math.PI*2);
+      ctx.fill();
+    }
+    ctx.shadowBlur=0;
+    ctx.globalAlpha=1;
+    ctx.globalCompositeOperation = 'source-over';
+
+    // vignette
+    const vg = ctx.createRadialGradient(W/2, H/2, H*0.6, W/2, H/2, H);
+    vg.addColorStop(0,'transparent');
+    vg.addColorStop(1,'rgba(0,0,0,0.35)');
+    ctx.fillStyle=vg;
+    ctx.fillRect(0,0,W,H);
+
+    ctx.restore();
+  }
+
+  function loop(now){
+    const dt = Math.min(33, now - lastTime);
+    lastTime = now;
+    if(running){
+      update(dt);
+    } else {
+      // still animate shake/particles after game over
+      for(let i=particles.length-1;i>=0;i--){
+        const p=particles[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.18; p.vx *= 0.99; p.life--;
+        if(p.life<=0) particles.splice(i,1);
+      }
+      if(shake>0) shake -= 0.9;
+      if(shake<0) shake=0;
+    }
+    draw();
+    requestAnimationFrame(loop);
+  }
+  // kick off single persistent loop
+  lastTime = performance.now();
+  requestAnimationFrame(loop);
+
+  // Initial state
+  renderLives();
+
+  // Input - prevent scroll on arrow/space
+  window.addEventListener('keydown', (e)=>{
+    const k = e.key.toLowerCase();
+    const isArrow = k==='arrowleft' || k==='arrowright';
+    if(isArrow || k===' '){
+      e.preventDefault();
+    }
+    if(k==='arrowleft' || k==='a') { keys.left=true; cup.targetX = cup.x; }
+    if(k==='arrowright' || k==='d') { keys.right=true; cup.targetX = cup.x; }
+    if(k===' ' || k==='enter'){
+      if(!running){
+        startGame();
+        e.preventDefault();
+      }
+    }
+    if(k==='p' || k==='escape'){
+      if(running && !gameOver){
+        paused=!paused;
+        pauseBadge.classList.toggle('show', paused);
+        if(!paused) lastTime=performance.now();
+        e.preventDefault();
+      }
+    }
+  }, {passive:false});
+  window.addEventListener('keyup', (e)=>{
+    const k=e.key.toLowerCase();
+    if(k==='arrowleft' || k==='a') keys.left=false;
+    if(k==='arrowright' || k==='d') keys.right=false;
+  });
+
+  // Mouse / touch drag
+  let dragging=false;
+  function getXFromEvent(e){
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const scale = W / rect.width;
+    return (clientX - rect.left)*scale;
+  }
+  function onPointerMove(e){
+    if(!running||paused) return;
+    const x = getXFromEvent(e);
+    cup.targetX = x - cup.w/2;
+    cup.targetX = Math.max(0, Math.min(W-cup.w, cup.targetX));
+    if(dragging) e.preventDefault();
+  }
+  canvas.addEventListener('pointerdown', (e)=>{
+    dragging=true;
+    onPointerMove(e);
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', onPointerMove);
+  canvas.addEventListener('pointerup', ()=> dragging=false);
+  wrap.addEventListener('touchmove', (e)=>{ if(dragging) e.preventDefault(); }, {passive:false});
+
+  // touch buttons
+  const leftBtn=document.getElementById('touchLeft');
+  const rightBtn=document.getElementById('touchRight');
+  function bindHold(btn, dir){
+    const start=(e)=>{
+      e.preventDefault();
+      keys[dir]=true;
+      cup.targetX = cup.x;
+    };
+    const end=(e)=>{
+      if(e) e.preventDefault();
+      keys[dir]=false;
+    };
+    btn.addEventListener('touchstart', start, {passive:false});
+    btn.addEventListener('touchend', end, {passive:false});
+    btn.addEventListener('touchcancel', end, {passive:false});
+    btn.addEventListener('mousedown', start);
+    window.addEventListener('mouseup', end);
+    btn.addEventListener('mouseleave', end);
+  }
+  bindHold(leftBtn,'left');
+  bindHold(rightBtn,'right');
+
+  startBtn.addEventListener('click', startGame);
+  restartBtn.addEventListener('click', startGame);
+  document.getElementById('shareBtn').addEventListener('click', startGame);
+
+  // ensure canvas focusable; click canvas to focus for keyboard
+  canvas.addEventListener('click', ()=> canvas.focus());
+  window.addEventListener('load', ()=> { renderLives(); draw(); });
+
+  // Expose for verifier
+  window.__neonGame = { startGame, getState: ()=>({score,lives,level,running,paused,gameOver,drops: drops.length}) };
+})();
+</script>
+</body>
+</html>
