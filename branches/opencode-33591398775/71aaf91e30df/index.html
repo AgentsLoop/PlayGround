@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Neon Parcel Sorter — Sort the Glow</title>
+<meta name="description" content="Drag falling neon parcels into matching chutes. Keyboard accessible, responsive, increasing speed.">
+<style>
+  :root{
+    --bg:#070a14;
+    --panel:#0f1326cc;
+    --line:#1a2348;
+    --cyan:#00f5ff;
+    --mag:#ff006e;
+    --yel:#ffea00;
+    --lime:#39ff14;
+    --text:#eaf0ff;
+    --muted:#9aa3c7;
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family: ui-sans-system, -apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial;
+    background: radial-gradient(1200px 800px at 70% -10%, #1a2a6a 0%, transparent 60%),
+                radial-gradient(1000px 600px at 0% 100%, #3a0a5a 0%, transparent 60%),
+                linear-gradient(180deg,#070a14 0%, #0a0e22 100%);
+    color:var(--text); display:flex; flex-direction:column; min-height:100dvh;
+  }
+  a{color:var(--cyan)}
+  header{
+    max-width:1100px; width:100%; margin:0 auto; padding:18px 20px 8px;
+    display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  }
+  .brand{display:flex; gap:14px; align-items:center}
+  .logo{
+    width:44px; height:44px; border-radius:12px; display:grid; place-items:center;
+    background: linear-gradient(135deg, #00f5ff, #ff006e);
+    box-shadow: 0 0 18px #00f5ff88, 0 0 28px #ff006e55; font-weight:900; letter-spacing:.04em;
+  }
+  .brand h1{margin:0; font-size:22px; line-height:1; letter-spacing:.04em; text-transform:uppercase}
+  .brand p{margin:2px 0 0; color:var(--muted); font-size:12px; letter-spacing:.08em; text-transform:uppercase}
+  .top-actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .btn{
+    appearance:none; border:0; border-radius:999px; padding:10px 18px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; font-size:12px; cursor:pointer; transition:.15s; color:#051018;
+    background: linear-gradient(180deg,#fff 0%, #e6f0ff 100%); box-shadow:0 6px 20px #0006;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn:active{transform:translateY(1px)}
+  .btn.ghost{background: #ffffff14; color:var(--text); border:1px solid #ffffff24; backdrop-filter: blur(8px)}
+  .btn.neon{background: linear-gradient(90deg,var(--cyan), #7af0ff); box-shadow:0 0 18px #00f5ff88}
+  .btn.mag{background: linear-gradient(90deg,var(--mag), #ff7ab6); color:#fff; box-shadow:0 0 18px #ff006e88}
+  .hud{
+    max-width:1100px; width:100%; margin:4px auto 0; padding:0 20px;
+    display:grid; grid-template-columns: 1.2fr .9fr .9fr auto; gap:12px;
+  }
+  @media(max-width:760px){.hud{grid-template-columns:1fr 1fr;}}
+  .stat{
+    background:var(--panel); border:1px solid #ffffff14; border-radius:14px; padding:12px 14px;
+    backdrop-filter: blur(10px); display:flex; align-items:center; justify-content:space-between; gap:12px;
+    box-shadow: inset 0 1px 0 #ffffff14;
+  }
+  .stat label{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+  .stat strong{font-size:22px; letter-spacing:.02em}
+  .hearts{letter-spacing:.12em; font-size:18px; filter: drop-shadow(0 0 8px #ff4d6d)}
+  .level-bar{height:8px; border-radius:99px; background:#ffffff14; overflow:hidden; flex:1; min-width:80px}
+  .level-fill{height:100%; width:0%; background: linear-gradient(90deg,var(--cyan),var(--lime)); box-shadow:0 0 10px #00f5ffaa; transition: width .4s ease}
+  .wrap{max-width:1100px; width:100%; margin:16px auto; padding:0 20px 24px; flex:1; display:flex; flex-direction:column; gap:14px}
+  .arena-shell{
+    position:relative; border-radius:22px; padding:10px;
+    background: linear-gradient(180deg,#ffffff14,#ffffff06); border:1px solid #ffffff18;
+    box-shadow: 0 20px 60px #0008, inset 0 1px 0 #ffffff1a;
+  }
+  .arena{
+    position:relative; height:560px; border-radius:16px; overflow:hidden;
+    background:
+      linear-gradient( transparent 96%, #ffffff08 97%),
+      linear-gradient(90deg, transparent 96%, #ffffff06 97%),
+      radial-gradient(900px 500px at 50% 0%, #ffffff14 0%, transparent 60%),
+      linear-gradient(180deg,#0b1028 0%, #0a0f2b 100%);
+    background-size: 28px 28px, 28px 28px, auto, auto;
+    border:1px solid #26306a;
+    touch-action:none;
+    isolation:isolate;
+  }
+  @media(max-width:760px){.arena{height:520px}}
+  @media(max-width:520px){.arena{height:460px}}
+  .arena:focus{outline:2px solid var(--cyan); outline-offset:2px}
+  .scan{
+    position:absolute; inset:0; pointer-events:none; opacity:.35;
+    background: repeating-linear-gradient(180deg, transparent 0 3px, #00f5ff08 4px);
+    animation: scan 6s linear infinite;
+  }
+  @keyframes scan{from{transform:translateY(-40px)} to{transform:translateY(40px)}}
+  .parcel{
+    position:absolute; width:78px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-weight:900; letter-spacing:.06em; font-size:12px; text-transform:uppercase; cursor:grab; user-select:none;
+    border:1.5px solid #ffffff; box-shadow: 0 8px 24px #0008, 0 0 16px currentColor;
+    transform: translate3d(0,0,0); transition: box-shadow .15s, filter .15s;
+    will-change: transform, left, top;
+  }
+  .parcel{touch-action:none}
+  .parcel:active{cursor:grabbing}
+  .parcel:focus{outline:2px solid #fff; outline-offset:2px}
+  .parcel:focus-visible{outline:2px solid #fff; outline-offset:2px}
+  .parcel.selected{filter:brightness(1.15); box-shadow:0 10px 28px #0009, 0 0 22px currentColor, 0 0 0 3px #fff}
+  .parcel.dragging{z-index:30; cursor:grabbing; filter:brightness(1.2); transform: scale(1.08); box-shadow:0 16px 32px #000a, 0 0 28px currentColor, 0 0 0 2px #fff}
+  .parcel .icon{font-size:18px; margin-right:6px}
+  .parcel.cyan{ background: linear-gradient(180deg,#0ff,#00c8d6); color:#002026; border-color:#b6ffff}
+  .parcel.mag{ background: linear-gradient(180deg,#ff2e7e,#c8004a); color:#fff; border-color:#ffb3d1}
+  .parcel.yel{ background: linear-gradient(180deg,#ffe566,#ffb800); color:#2b1d00; border-color:#fff7b3}
+  .parcel.lime{ background: linear-gradient(180deg,#7aff6a,#1fbf00); color:#0a1f00; border-color:#d2ffb3}
+  .chutes{
+    position:absolute; left:0; right:0; bottom:0; height:92px; display:grid; grid-template-columns: repeat(4,1fr); gap:10px;
+    padding:10px; z-index:5; pointer-events:none;
+  }
+  .chute{
+    border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    border:1.5px dashed #ffffff66; backdrop-filter: blur(8px); position:relative; overflow:hidden;
+    transition:.15s; pointer-events:auto;
+  }
+  .chute.active{transform: translateY(-4px) scale(1.04); border-style:solid; box-shadow:0 0 24px currentColor, 0 8px 24px #0006; background: color-mix(in srgb, currentColor 22%, transparent); animation: chutePulse .9s ease infinite alternate}
+  .chute.valid{filter:brightness(1.25); box-shadow:0 0 28px currentColor, 0 10px 28px #0007}
+  .chute.invalid{border-color:#ff3b30 !important; background:#ff3b3020 !important; color:#ff3b30; box-shadow:0 0 20px #ff3b3088; animation: shake .28s ease}
+  .chute.cyan{ background:#00f5ff14; color:var(--cyan); border-color:var(--cyan)}
+  .chute.mag{ background:#ff006e14; color:var(--mag); border-color:var(--mag)}
+  .chute.yel{ background:#ffea0014; color:var(--yel); border-color:var(--yel)}
+  .chute.lime{ background:#39ff1414; color:var(--lime); border-color:var(--lime)}
+  @keyframes chutePulse{from{filter:brightness(1)} to{filter:brightness(1.15)}}
+  @keyframes shake{0%,100%{transform:translateX(0) translateY(-4px) scale(1.04)} 25%{transform:translateX(-4px) translateY(-4px) scale(1.04)} 75%{transform:translateX(4px) translateY(-4px) scale(1.04)}}
+  .chute kbd{
+    font-size:10px; letter-spacing:.08em; background:#ffffff14; border:1px solid #ffffff24; padding:3px 7px; border-radius:999px;
+  }
+  .chute .label{font-weight:800; letter-spacing:.1em; text-transform:uppercase; font-size:12px}
+  .chute .hint{font-size:10px; opacity:.8; letter-spacing:.06em; text-transform:uppercase}
+  .particles{position:absolute; inset:0; pointer-events:none; z-index:4}
+  .overlay{
+    position:absolute; inset:0; display:grid; place-items:center; padding:20px; z-index:20;
+    background: linear-gradient(180deg,#070a14cc,#0b1028e6); backdrop-filter: blur(10px);
+  }
+  .card{
+    width:min(560px, 100%); background: linear-gradient(180deg,#121638 0%, #0e1230 100%);
+    border:1px solid #ffffff18; border-radius:22px; padding:22px; box-shadow:0 20px 60px #000a;
+    text-align:center;
+  }
+  .card h2{margin:4px 0 8px; font-size:28px; letter-spacing:.04em; text-transform:uppercase}
+  .card p{margin:0 0 14px; color:#cbd3ff; line-height:1.5}
+  .badges{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:10px 0 14px}
+  .badge{font-size:11px; letter-spacing:.08em; text-transform:uppercase; background:#ffffff10; border:1px solid #ffffff14; padding:6px 10px; border-radius:999px}
+  .controls-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left; margin:12px 0}
+  @media(max-width:560px){.controls-grid{grid-template-columns:1fr}}
+  .ctrl{background:#ffffff08; border:1px solid #ffffff12; border-radius:12px; padding:10px 12px}
+  .ctrl strong{display:block; font-size:12px; letter-spacing:.08em; text-transform:uppercase; margin-bottom:4px}
+  .ctrl span{font-size:12px; color:#cbd3ff}
+  .actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px}
+  .toast{
+    position:absolute; left:50%; top:14px; transform:translateX(-50%);
+    background:#0b1028f0; border:1px solid #ffffff18; padding:8px 12px; border-radius:999px; font-size:12px; letter-spacing:.06em;
+    text-transform:uppercase; display:none; z-index:15; box-shadow:0 8px 24px #0006;
+  }
+  .toast.show{display:block; animation: pop .3s ease}
+  @keyframes pop{from{transform:translateX(-50%) scale(.9); opacity:0} to{transform:translateX(-50%) scale(1); opacity:1}}
+  footer{max-width:1100px; width:100%; margin:0 auto; padding:0 20px 18px; color:var(--muted); font-size:12px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap}
+  .kbd{font-family:ui-monospace,Menlo,monospace; background:#ffffff12; border:1px solid #ffffff1a; border-bottom-width:2px; padding:2px 6px; border-radius:6px; font-size:11px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">⬢</div>
+    <div>
+      <h1>Neon Parcel Sorter</h1>
+      <p>Drag • Drop • Match the glow</p>
+    </div>
+  </div>
+  <div class="top-actions">
+    <button class="btn ghost" id="howBtn" aria-label="How to play">How to play</button>
+    <button class="btn ghost" id="pauseBtn" aria-label="Pause game">⏸ Pause</button>
+    <button class="btn neon" id="startBtn" aria-label="Start game">▶ Start</button>
+  </div>
+</header>
+
+<div class="hud" role="status" aria-live="polite">
+  <div class="stat"><label>Score</label><strong id="score">0</strong></div>
+  <div class="stat"><label>Lives</label><strong class="hearts" id="lives">♥♥♥♥♥</strong></div>
+  <div class="stat"><label>Level <span id="level">1</span></label><div class="level-bar" aria-hidden="true"><div class="level-fill" id="levelFill"></div></div></div>
+  <div class="stat"><label>Next parcel</label><strong id="nextColor" style="font-size:12px; letter-spacing:.1em">—</strong></div>
+</div>
+
+<div class="wrap">
+  <div class="arena-shell">
+    <div id="arena" class="arena" tabindex="0" aria-label="Game arena. Drag parcels to matching chutes. Use arrow keys and number keys 1 to 4 for keyboard control.">
+      <div class="scan"></div>
+      <canvas id="fx" class="particles" width="900" height="560" aria-hidden="true"></canvas>
+      <div id="toast" class="toast" role="status"></div>
+      <div class="chutes" id="chutes">
+        <div class="chute cyan" data-color="cyan" data-key="1"><span class="label">Cyan</span><kbd>1</kbd><span class="hint">Q • drag here</span></div>
+        <div class="chute mag" data-color="mag" data-key="2"><span class="label">Magenta</span><kbd>2</kbd><span class="hint">W • drag here</span></div>
+        <div class="chute yel" data-color="yel" data-key="3"><span class="label">YELLOW</span><kbd>3</kbd><span class="hint">E • drag here</span></div>
+        <div class="chute lime" data-color="lime" data-key="4"><span class="label">LIME</span><kbd>4</kbd><span class="hint">R • drag here</span></div>
+      </div>
+      <!-- parcels injected here -->
+      <div id="overlay" class="overlay">
+        <div class="card" role="dialog" aria-modal="true" aria-labelledby="overlayTitle">
+          <div style="font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--cyan)">● Neon Logistics Co.</div>
+          <h2 id="overlayTitle">Sort the Neon</h2>
+          <p id="overlayDesc">Parcels fall from the sky. Drag each one into its matching colored chute before it hits the floor. Wrong chute or missed parcel costs a life. Reach <strong>400</strong> points to win. Speed increases every level.</p>
+          <div class="badges"><span class="badge">⚡ Increasing speed</span><span class="badge">🎯 4 colors</span><span class="badge">♿ Keyboard ready</span><span class="badge">📱 Responsive</span></div>
+          <div class="controls-grid">
+            <div class="ctrl"><strong>🖱 Mouse / Touch</strong><span>Drag parcel → hover chute → release. Glow = match.</span></div>
+            <div class="ctrl"><strong>⌨ Keyboard</strong><span><span class="kbd">Tab</span> focus parcel • <span class="kbd">← →</span> move • <span class="kbd">1</span><span class="kbd">2</span><span class="kbd">3</span><span class="kbd">4</span> sort selected</span></div>
+            <div class="ctrl"><strong>⏸ Pause</strong><span><span class="kbd">P</span> or <span class="kbd">Esc</span> pauses. Game auto-pauses when tab hidden.</span></div>
+            <div class="ctrl"><strong>🏆 Win / Lose</strong><span>5 lives. Lose life on miss or wrong chute. +10 / +15 streak bonus on correct.</span></div>
+          </div>
+          <div class="actions">
+            <button class="btn neon" id="playBtn">▶ Play Now</button>
+            <button class="btn ghost" id="demoBtn">How keyboard works</button>
+          </div>
+          <p style="margin-top:12px; font-size:11px; color:var(--muted)">Tip: On mobile, drag with finger. On desktop, try keyboard-only for accessibility.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <span>Built single-page, no dependencies. Sounds via Web Audio. Progress saved? No — pure session.</span>
+    <span><span class="kbd">Space</span> selects nearest parcel • <span class="kbd">Enter</span> restarts</span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const arena = document.getElementById('arena');
+  const overlay = document.getElementById('overlay');
+  const overlayTitle = document.getElementById('overlayTitle');
+  const overlayDesc = document.getElementById('overlayDesc');
+  const playBtn = document.getElementById('playBtn');
+  const startBtn = document.getElementById('startBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const howBtn = document.getElementById('howBtn');
+  const demoBtn = document.getElementById('demoBtn');
+  const scoreEl = document.getElementById('score');
+  const livesEl = document.getElementById('lives');
+  const levelEl = document.getElementById('level');
+  const levelFill = document.getElementById('levelFill');
+  const nextColorEl = document.getElementById('nextColor');
+  const toast = document.getElementById('toast');
+  const fx = document.getElementById('fx');
+  const chutes = [...document.querySelectorAll('.chute')];
+  const COLORS = [
+    {id:'cyan', label:'CYAN', icon:'⬢'},
+    {id:'mag', label:'MAG', icon:'⬣'},
+    {id:'yel', label:'YEL', icon:'⬔'},
+    {id:'lime', label:'LIME', icon:'⬥'},
+  ];
+  const COLOR_MAP = Object.fromEntries(COLORS.map(c=>[c.id,c]));
+  let score=0, lives=5, level=1, speed=90, spawnEvery=1400, running=false, paused=false, lastSpawn=0, raf=0, selected=null, streak=0;
+  let parcels=[]; // {el,x,y,w,h,color,vx,vy,id}
+  let nextColor = COLORS[Math.floor(Math.random()*4)];
+  let particles=[]; let audioCtx=null;
+  let toastTimer=null;
+  let arenaRect=null;
+
+  function ensureAudio(){
+    if(audioCtx) return;
+    try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+  }
+  function beep(freq, dur, type='sine', gain=0.12){
+    if(!audioCtx) return;
+    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+    o.type=type; o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination);
+    g.gain.value=gain; o.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+dur); o.stop(audioCtx.currentTime+dur);
+  }
+  function sfxGood(){ ensureAudio(); beep(880,.12,'sine',.15); setTimeout(()=>beep(1320,.15,'sine',.12),80); }
+  function sfxBad(){ ensureAudio(); beep(180,.25,'square',.12); setTimeout(()=>beep(120,.3,'square',.08),120);}
+  function sfxTick(){ ensureAudio(); beep(600,.06,'triangle',.06); }
+
+  function showToast(msg, ms=1200){
+    toast.textContent=msg; toast.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.classList.remove('show'), ms);
+  }
+  function updateHUD(){
+    scoreEl.textContent=score;
+    livesEl.textContent='♥'.repeat(lives) + '♡'.repeat(Math.max(0,5-lives));
+    livesEl.style.opacity = lives<=2 ? '1' : '1';
+    if(lives<=2) livesEl.style.color='#ff4d6d'; else livesEl.style.color='';
+    levelEl.textContent=level;
+    levelFill.style.width = ((score%50)/50*100)+'%';
+    nextColorEl.textContent = nextColor.label;
+    nextColorEl.style.color = nextColor.id==='cyan'?'var(--cyan)': nextColor.id==='mag'?'var(--mag)': nextColor.id==='yel'?'var(--yel)':'var(--lime)';
+    nextColorEl.style.textShadow = `0 0 12px currentColor`;
+  }
+  function setOverlay(mode, title, desc){
+    overlay.style.display = mode==='hidden' ? 'none' : 'grid';
+    if(title) overlayTitle.textContent=title;
+    if(desc) overlayDesc.innerHTML=desc;
+  }
+  function resetGame(){
+    parcels.forEach(p=>p.el.remove()); parcels=[]; selected=null;
+    score=0; lives=5; level=1; speed=90; spawnEvery=1400; lastSpawn=0; streak=0;
+    nextColor = COLORS[Math.floor(Math.random()*4)];
+    updateHUD(); updateArenaMetrics();
+  }
+
+  function updateArenaMetrics(){
+    arenaRect = arena.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio||1, 2);
+    fx.width = arena.clientWidth*dpr; fx.height=arena.clientHeight*dpr;
+    fx.style.width=arena.clientWidth+'px'; fx.style.height=arena.clientHeight+'px';
+    const ctx=fx.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  window.addEventListener('resize', updateArenaMetrics);
+
+  function createParcel(){
+    const color = nextColor;
+    nextColor = COLORS[Math.floor(Math.random()*4)];
+    updateHUD();
+    const w=78, h=52;
+    const x = Math.random()*(arena.clientWidth - w - 16)+8;
+    const y = -h - 6;
+    const el = document.createElement('div');
+    el.className=`parcel ${color.id}`;
+    el.tabIndex=0;
+    el.setAttribute('role','button');
+    el.setAttribute('aria-label', `${color.label} parcel. Drag to ${color.label} chute, or press ${COLORS.findIndex(c=>c.id===color.id)+1} to sort.`);
+    el.innerHTML=`<span class="icon">${color.icon}</span>${color.label}`;
+    el.style.left=x+'px'; el.style.top=y+'px';
+    el.dataset.color=color.id;
+    const id = Math.random().toString(36).slice(2);
+    el.dataset.id=id;
+    arena.appendChild(el);
+    const p = {el, x, y, w, h, color:color.id, vy: speed, id, dragging:false, ptrId:null};
+    parcels.push(p);
+    // focus handling
+    el.addEventListener('focus', ()=>{ selected=p; parcels.forEach(q=>q.el.classList.toggle('selected', q===p)); });
+    el.addEventListener('pointerdown', onParcelPointerDown);
+    return p;
+  }
+
+  function onParcelPointerDown(e){
+    const id=e.currentTarget.dataset.id;
+    const p = parcels.find(x=>x.id===id);
+    if(!p || !running || paused) return;
+    ensureAudio();
+    selected=p; parcels.forEach(q=>q.el.classList.toggle('selected', q===p));
+    p.dragging=true; p.ptrId=e.pointerId;
+    p.el.classList.add('dragging'); p.el.setPointerCapture(e.pointerId);
+    p.offsetX = e.clientX - p.x - arenaRect.left;
+    p.offsetY = e.clientY - p.y - arenaRect.top;
+    e.preventDefault();
+    const move = (ev)=>{
+      if(ev.pointerId!==p.ptrId) return;
+      const nx = ev.clientX - arenaRect.left - p.offsetX;
+      const ny = ev.clientY - arenaRect.top - p.offsetY;
+      p.x = Math.max(0, Math.min(arena.clientWidth - p.w, nx));
+      p.y = Math.max(-10, Math.min(arena.clientHeight - p.h - 6, ny));
+      p.el.style.left=p.x+'px'; p.el.style.top=p.y+'px';
+      highlightChutes(p);
+    };
+    const up = (ev)=>{
+      if(ev.pointerId!==p.ptrId) return;
+      p.el.releasePointerCapture(ev.pointerId);
+      p.el.classList.remove('dragging'); p.dragging=false;
+      p.el.removeEventListener('pointermove', move);
+      p.el.removeEventListener('pointerup', up);
+      p.el.removeEventListener('pointercancel', up);
+      clearHighlights();
+      // check drop target
+      const chute = chuteUnderParcel(p);
+      if(chute){ handleSort(p, chute); }
+      else {
+        // if dropped near bottom without chute, keep falling
+        sfxTick();
+      }
+    };
+    p.el.addEventListener('pointermove', move);
+    p.el.addEventListener('pointerup', up);
+    p.el.addEventListener('pointercancel', up);
+  }
+
+  function chuteUnderParcel(p){
+    const px = p.x + p.w/2, py = p.y + p.h/2;
+    // chutes are bottom 92px
+    if(py < arena.clientHeight - 96) return null;
+    const chW = arena.clientWidth / 4;
+    const idx = Math.floor(px / chW);
+    if(idx<0||idx>3) return null;
+    const map=['cyan','mag','yel','lime'];
+    return map[idx];
+  }
+  function highlightChutes(p){
+    const cx = p.x + p.w/2, cy = p.y + p.h/2;
+    if(cy < arena.clientHeight - 96){ clearHighlights(); return; }
+    const chW = arena.clientWidth/4;
+    const idx = Math.floor(cx / chW);
+    chutes.forEach((c,i)=>{
+      const isActive = i===idx;
+      c.classList.toggle('active', isActive);
+      if(isActive){
+        const chuteColor = c.dataset.color;
+        const valid = chuteColor===p.color;
+        c.classList.toggle('valid', valid);
+        c.classList.toggle('invalid', !valid);
+      } else {
+        c.classList.remove('valid','invalid');
+      }
+    });
+  }
+  function clearHighlights(){ chutes.forEach(c=>c.classList.remove('active','valid','invalid')); }
+
+  function handleSort(p, chuteColor){
+    const correct = p.color===chuteColor;
+    spawnBurst(p.x+p.w/2, p.y+p.h/2, correct? p.color : 'bad');
+    p.el.remove(); parcels = parcels.filter(x=>x!==p); if(selected===p) selected=null;
+    if(correct){
+      streak++; const bonus = streak>=3 ? 5 : 0;
+      const pts = 10 + bonus;
+      score += pts;
+      if(score>=400){ win(); return; }
+      level = 1 + Math.floor(score/50);
+      speed = 90 + level*18;
+      spawnEvery = Math.max(380, 1400 - level*90);
+      sfxGood(); showToast(streak>=3? `+${pts} STREAK x${streak} 🔥` : `+${pts} SORTED`, 900);
+      arena.animate([{transform:'scale(1)'},{transform:'scale(1.005)'},{transform:'scale(1)'}],{duration:140,easing:'ease-out'});
+    } else {
+      streak=0; lives--; sfxBad(); showToast(`WRONG CHUTE -1 ♥`, 1100);
+      arena.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:220});
+      if(lives<=0){ lose(); return; }
+    }
+    updateHUD();
+  }
+
+  function handleMiss(p){
+    spawnBurst(p.x+p.w/2, arena.clientHeight-40, 'miss');
+    p.el.remove(); parcels = parcels.filter(x=>x!==p); if(selected===p) selected=null;
+    streak=0; lives--; sfxBad(); showToast(`MISSED -1 ♥`, 1100);
+    arena.animate([{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:220});
+    if(lives<=0) lose();
+    updateHUD();
+  }
+
+  function spawnBurst(x,y, kind){
+    const col = kind==='cyan'?'#00f5ff': kind==='mag'?'#ff006e': kind==='yel'?'#ffea00': kind==='lime'?'#39ff14': kind==='bad'?'#ff3b30':'#9aa3c7';
+    for(let i=0;i<14;i++){
+      particles.push({x,y, vx:(Math.random()-0.5)*260, vy:(Math.random()-0.7)*260 - 40, life:0.6, max:0.6, r: 2+Math.random()*4, col, alpha:1});
+    }
+  }
+
+  function renderFX(dt){
+    const ctx=fx.getContext('2d');
+    ctx.clearRect(0,0,arena.clientWidth, arena.clientHeight);
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.life-=dt; if(p.life<=0){ particles.splice(i,1); continue; }
+      p.x += p.vx*dt; p.y += p.vy*dt; p.vy += 520*dt;
+      p.alpha = p.life/p.max;
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle=p.col; ctx.shadowColor=p.col; ctx.shadowBlur=12;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha=1; ctx.shadowBlur=0;
+  }
+  // independent particle loop so bursts animate even when paused
+  let fxLast=performance.now();
+  (function fxLoop(ts){
+    requestAnimationFrame(fxLoop);
+    const dt = Math.min(0.033, (ts - fxLast)/1000); fxLast=ts;
+    if(particles.length) renderFX(dt);
+  })(performance.now());
+
+  function win(){
+    running=false; cancelAnimationFrame(raf);
+    setOverlay('show','YOU WIN — NEON MASTER!', `Score <strong>${score}</strong> • Level ${level} • All parcels sorted. Speed was ${(speed).toFixed(0)} px/s. <br>Press <strong>Enter</strong> or Play Again.`);
+    playBtn.textContent='↻ Play Again'; startBtn.textContent='↻ Restart';
+  }
+  function lose(){
+    running=false; cancelAnimationFrame(raf);
+    setOverlay('show','SIGNAL LOST', `Out of lives. Score <strong>${score}</strong> • Level ${level}<br>Tip: Use <strong>1-4</strong> keys to sort the selected parcel instantly.`);
+    playBtn.textContent='↻ Try Again'; startBtn.textContent='↻ Restart';
+  }
+
+  function loop(ts){
+    if(!running || paused) return;
+    raf = requestAnimationFrame(loop);
+    const dt = Math.min(0.033, (ts - (loop._last||ts))/1000); loop._last=ts;
+    // spawn
+    if(ts - lastSpawn > spawnEvery){ createParcel(); lastSpawn=ts; }
+    // move parcels
+    const bottom = arena.clientHeight - 92;
+    for(let i=parcels.length-1;i>=0;i--){
+      const p=parcels[i];
+      if(p.dragging) continue;
+      p.y += p.vy * dt;
+      // slight horizontal drift for natural feel?
+      p.el.style.top = p.y+'px';
+      p.el.style.left = p.x+'px';
+      if(p.y + p.h >= bottom + 12){
+        // if not dragged, it's a miss unless it's already over correct chute at landing? We count as miss if hits floor outside correct handling.
+        // Allow auto-sort if exactly over correct chute at bottom edge? For drag gameplay, require drag; falling to chute does NOT auto sort — must be dragged. So treat as miss.
+        handleMiss(p);
+      }
+    }
+  }
+
+  function startGame(){
+    ensureAudio(); if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+    resetGame();
+    running=true; paused=false; pauseBtn.textContent='⏸ Pause';
+    setOverlay('hidden');
+    startBtn.textContent='↻ Restart';
+    lastSpawn=performance.now();
+    loop._last=performance.now();
+    createParcel();
+    cancelAnimationFrame(raf); raf=requestAnimationFrame(loop);
+    showToast('GO! Drag to match', 1000);
+    arena.focus();
+  }
+
+  // Controls
+  playBtn.addEventListener('click', ()=>{
+    // card button: resume if paused overlay, else restart
+    if(overlay.style.display!=='none' && running && paused){
+      paused=false; pauseBtn.textContent='⏸ Pause'; setOverlay('hidden');
+      loop._last=performance.now(); raf=requestAnimationFrame(loop); arena.focus(); return;
+    }
+    if(overlay.style.display!=='none' && running && !paused){
+      setOverlay('hidden'); arena.focus(); return;
+    }
+    startGame();
+  });
+  startBtn.addEventListener('click', ()=>{
+    startGame();
+  });
+  pauseBtn.addEventListener('click', ()=>{
+    if(!running) { showToast('Press Start to play', 900); return; }
+    if(overlay.style.display!=='none'){ setOverlay('hidden'); return; }
+    paused=!paused; pauseBtn.textContent= paused ? '▶ Resume' : '⏸ Pause';
+    if(paused){ cancelAnimationFrame(raf); setOverlay('show','PAUSED', `Game paused. Press <strong>Resume</strong>, <span class="kbd">P</span> or <span class="kbd">Esc</span> to continue.<br>Score ${score} • Level ${level}`); playBtn.textContent='▶ Resume'; }
+    else { setOverlay('hidden'); loop._last=performance.now(); raf=requestAnimationFrame(loop); showToast('RESUMED', 700); arena.focus(); }
+  });
+  howBtn.addEventListener('click', ()=>{
+    const wasRunning = running && !paused;
+    if(running && !paused && overlay.style.display==='none'){ paused=true; cancelAnimationFrame(raf); pauseBtn.textContent='▶ Resume'; }
+    setOverlay('show','HOW TO PLAY',
+      `Drag parcels to matching chutes. <br><br><strong>Mouse / Touch:</strong> drag & drop onto glowing chute • <strong>Keyboard:</strong> <span class="kbd">Tab</span> to parcel, <span class="kbd">←/→</span> / <span class="kbd">↑/↓</span> move, <span class="kbd">1-4</span> sort, <span class="kbd">Space</span> selects nearest.<br><br><strong>Goal:</strong> 400 points to win, 5 lives. Speed + spawn rate increase each level.`);
+    playBtn.textContent = wasRunning ? '▶ Resume' : '▶ Play Now';
+  });
+  demoBtn.addEventListener('click', ()=>{
+    showToast('Tab → parcel, 1-4 to sort', 1500);
+    if(!running) startGame();
+    setTimeout(()=>{
+      const p = parcels[0]; if(p){ selected=p; parcels.forEach(q=>q.el.classList.toggle('selected', q===p)); p.el.focus(); }
+    }, 300);
+  });
+
+  // Keyboard
+  function selectNearest(){
+    if(!parcels.length) return null;
+    let nearest = parcels.reduce((a,b)=> a.y > b.y ? a : b);
+    selected=nearest; parcels.forEach(p=>p.el.classList.toggle('selected', p===nearest)); nearest.el.focus();
+    return nearest;
+  }
+  window.addEventListener('keydown', (e)=>{
+    if(e.key==='p' || e.key==='P' || e.key==='Escape'){
+      if(running && overlay.style.display==='none'){ pauseBtn.click(); e.preventDefault(); }
+      else if(overlay.style.display!=='none'){
+        // Esc or P resumes if paused, otherwise just closes how-to-play
+        if(running && paused){ paused=false; pauseBtn.textContent='⏸ Pause'; setOverlay('hidden'); loop._last=performance.now(); cancelAnimationFrame(raf); raf=requestAnimationFrame(loop); arena.focus(); }
+        else if(e.key==='Escape'){ setOverlay('hidden'); if(running && !paused){ loop._last=performance.now(); cancelAnimationFrame(raf); raf=requestAnimationFrame(loop); arena.focus(); } }
+        e.preventDefault();
+      }
+      return;
+    }
+    if(e.key==='Enter'){
+      if(overlay.style.display!=='none'){ startGame(); e.preventDefault(); }
+      return;
+    }
+    if(e.key==='Tab'){
+      // let native focus move, but ensure next focus selects parcel
+      if(!running || paused) return;
+      // browser will move focus; focusin handler will update selected
+      return;
+    }
+    if(!running || paused) return;
+    // number keys sort
+    const map={ '1':'cyan','2':'mag','3':'yel','4':'lime', 'q':'cyan','w':'mag','e':'yel','r':'lime', 'Q':'cyan','W':'mag','E':'yel','R':'lime'};
+    if(map[e.key]){
+      let target = selected;
+      if(!target) target = selectNearest();
+      if(target){ handleSort(target, map[e.key]); e.preventDefault(); return; }
+    }
+    if(e.key===' ' || e.code==='Space'){
+      selectNearest();
+      e.preventDefault(); return;
+    }
+    if(e.key==='ArrowLeft' || e.key==='ArrowRight'){
+      let t = selected || selectNearest();
+      if(t && !t.dragging){
+        const delta = e.key==='ArrowLeft'? -36 : 36;
+        t.x = Math.max(0, Math.min(arena.clientWidth - t.w, t.x + delta));
+        t.el.style.left=t.x+'px';
+        sfxTick();
+      }
+      e.preventDefault();
+    }
+    if(e.key==='ArrowUp' || e.key==='ArrowDown'){
+      let t = selected || selectNearest();
+      if(t && !t.dragging){
+        const delta = e.key==='ArrowUp'? -32 : 32;
+        t.y = Math.max(-10, Math.min(arena.clientHeight - t.h -6, t.y + delta));
+        t.el.style.top=t.y+'px';
+      }
+      e.preventDefault();
+    }
+  });
+
+  // chutes hover via pointer (for desktop drag feedback)
+  chutes.forEach(c=>{
+    c.addEventListener('pointerenter', ()=> c.classList.add('active'));
+    c.addEventListener('pointerleave', ()=> c.classList.remove('active'));
+  });
+
+  // visibility pause
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.hidden && running && !paused){ pauseBtn.click(); }
+  });
+
+  // init
+  updateArenaMetrics();
+  updateHUD();
+  // ensure focusable parcels get selected style on focus via delegation already
+  arena.addEventListener('focusin', (e)=>{
+    if(e.target.classList.contains('parcel')){
+      const p = parcels.find(x=>x.id===e.target.dataset.id); if(p){ selected=p; parcels.forEach(q=>q.el.classList.toggle('selected', q===p));}
+    }
+  });
+
+  // expose for verifier
+  window.__game = { startGame, get state(){return {score,lives,level,running,paused, parcels: parcels.length}} };
+})();
+</script>
+</body>
+</html>

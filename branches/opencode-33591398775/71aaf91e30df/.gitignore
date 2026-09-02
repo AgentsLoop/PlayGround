@@ -1,0 +1,5 @@
+node_modules/
+.opencode/
+.opencode-ssh/
+.opencode-web/
+.agentsweb/
