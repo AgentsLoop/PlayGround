@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Neon Harbor Catch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--neon-cyan:#00f0ff;--neon-pink:#ff2a6d;--neon-yellow:#ffe600;--neon-purple:#b537f2;--bg:#050a1a}
+html,body{min-height:100%;background:var(--bg);font-family:'Space Grotesk',system-ui,sans-serif;color:#fff}
+html{overflow-x:hidden}
+body{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:12px 12px 16px;min-height:100dvh;background:radial-gradient(ellipse at 50% 0%, #10204a 0%, #050a1a 65%);overflow-x:hidden}
+@media(min-height:700px){body{justify-content:center}}
+.header{text-align:center;margin-bottom:10px;z-index:2;padding-top:4px}
+.header h1{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(20px,4vw,38px);letter-spacing:0.12em;text-transform:uppercase;line-height:1}
+.header h1 span{color:var(--neon-cyan);text-shadow:0 0 12px var(--neon-cyan),0 0 30px rgba(0,240,255,.5)}
+.header h1 em{color:var(--neon-pink);font-style:normal;text-shadow:0 0 12px var(--neon-pink)}
+.header p{font-size:12px;letter-spacing:.22em;text-transform:uppercase;opacity:.6;margin-top:4px}
+.wrap{width:min(920px,98vw);display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0}
+.hud{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));border:1px solid rgba(0,240,255,.25);border-radius:14px;padding:10px 14px;backdrop-filter:blur(8px);transition:box-shadow .2s,border-color .2s}
+.hud.flash{box-shadow:0 0 18px rgba(255,42,109,.7);border-color:rgba(255,42,109,.5)}
+.hud-left,.hud-right{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.6}
+.stat strong{font-family:'Orbitron',monospace;font-size:18px;line-height:1;text-shadow:0 0 8px currentColor;transition:transform .15s}
+.stat strong.pulse{transform:scale(1.14)}
+.stat.score strong{color:var(--neon-cyan)}
+.stat.level strong{color:var(--neon-yellow);font-size:15px}
+.lives{display:flex;gap:6px;align-items:center}
+.heart{width:22px;height:22px;display:grid;place-items:center;background:rgba(255,42,109,.15);border:1px solid rgba(255,42,109,.5);border-radius:50%;font-size:12px;box-shadow:0 0 10px rgba(255,42,109,.4);transition:all .3s}
+.heart.off{opacity:.25;filter:grayscale(1);box-shadow:none;transform:scale(.85)}
+.heart.hit{animation:heartHit .4s ease}
+@keyframes heartHit{0%{transform:scale(1)}30%{transform:scale(1.4)}100%{transform:scale(.85)}}
+.game-shell{position:relative;width:100%;aspect-ratio:16/9;max-height:min(62vh,560px);background:#0a1430;border-radius:18px;overflow:hidden;border:1px solid rgba(0,240,255,.28);box-shadow:0 0 0 1px rgba(255,255,255,.06) inset, 0 16px 50px rgba(0,0,0,.55),0 0 40px rgba(0,240,255,.15)}
+.game-shell.shake{animation:shellShake .35s ease}
+@keyframes shellShake{0%,100%{transform:translate(0,0)}15%{transform:translate(-6px,2px)}30%{transform:translate(5px,-2px)}45%{transform:translate(-4px,1px)}60%{transform:translate(4px,-1px)}75%{transform:translate(-2px,0)}}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:linear-gradient(180deg,rgba(5,10,26,.72) 0%,rgba(5,10,26,.88) 100%);backdrop-filter:blur(4px);transition:opacity .16s,visibility .16s}
+.overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.badge{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--neon-cyan);border:1px solid rgba(0,240,255,.4);padding:6px 12px;border-radius:999px;background:rgba(0,240,255,.08);margin-bottom:14px}
+.overlay h2{font-family:'Orbitron',monospace;font-size:clamp(22px,4.5vw,42px);font-weight:900;line-height:1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.overlay h2 .c{color:var(--neon-cyan);text-shadow:0 0 16px var(--neon-cyan)}
+.overlay h2 .p{color:var(--neon-pink);text-shadow:0 0 16px var(--neon-pink)}
+.overlay p{max-width:440px;font-size:14px;line-height:1.5;opacity:.78;margin:0 auto 16px}
+.btn{appearance:none;border:0;cursor:pointer;font-family:'Orbitron',monospace;font-weight:800;font-size:14px;letter-spacing:.14em;text-transform:uppercase;padding:14px 28px;border-radius:999px;color:#050a1a;background:linear-gradient(90deg,var(--neon-cyan),#7afcff);box-shadow:0 0 18px rgba(0,240,255,.6),0 8px 20px rgba(0,0,0,.3);transition:transform .15s,box-shadow .15s,filter .15s}
+.btn:hover{transform:translateY(-1px) scale(1.02);box-shadow:0 0 24px rgba(0,240,255,.8),0 10px 24px rgba(0,0,0,.35)}
+.btn:active{transform:scale(.98)}
+.btn:focus-visible{outline:2px solid var(--neon-cyan);outline-offset:3px}
+.btn.secondary{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2);box-shadow:none}
+.kbd-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.kbd{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:.1em;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-bottom-width:3px;padding:6px 8px;border-radius:6px}
+.controls-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:3;pointer-events:none}
+.touch-btn{pointer-events:auto;width:64px;height:64px;border-radius:50%;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.10);backdrop-filter:blur(8px);display:none;place-items:center;font-size:20px;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none;transition:transform .1s,background .15s,border-color .15s}
+.touch-btn:active,.touch-btn.held{transform:scale(.92);background:rgba(0,240,255,.22);border-color:rgba(0,240,255,.5)}
+#hitFlash{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%, rgba(255,42,109,.28) 0%, transparent 70%);opacity:0;pointer-events:none;transition:opacity .2s}
+#hitFlash.on{opacity:1}
+@media(max-width:640px){.touch-btn{display:grid}.hud{padding:8px 10px;border-radius:12px}.hud-left,.hud-right{gap:10px}.hud-right{gap:8px}.stat strong{font-size:16px}.game-shell{aspect-ratio:4/3;max-height:none;max-height:min(68vh,520px);border-radius:14px}.header p{font-size:10px;letter-spacing:.16em}.controls-hint{bottom:8px}.wrap{gap:8px}body{padding:8px}}
+@media(max-width:380px){.hud{flex-wrap:wrap}.game-shell{aspect-ratio:1/1.05}}
+.footer{font-size:11px;opacity:.5;letter-spacing:.08em;text-align:center;padding:6px 8px}
+.footer span{color:var(--neon-cyan)}
+@media(prefers-reduced-motion:reduce){.game-shell.shake{animation:none} *{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1><span>NEON</span> <em>HARBOR</em> CATCH</h1>
+  <p>Catch buoys • Avoid mines • Neon tide is rising</p>
+</div>
+<div class="wrap">
+  <div class="hud" role="status" aria-live="polite">
+    <div class="hud-left">
+      <div class="stat score"><label>Score</label><strong id="scoreEl">0</strong></div>
+      <div class="stat level"><label>Level</label><strong id="levelEl">1</strong></div>
+      <div class="stat"><label>Speed</label><strong id="speedEl" style="color:#fff;font-size:13px">1.0×</strong></div>
+    </div>
+    <div class="hud-right">
+      <div class="stat" style="align-items:flex-end"><label>Lives</label><div class="lives" id="livesEl"><div class="heart">♥</div><div class="heart">♥</div><div class="heart">♥</div></div></div>
+      <button class="btn secondary" id="pauseBtn" style="padding:8px 14px;font-size:11px">⏸ Pause (P)</button>
+    </div>
+  </div>
+  <div class="game-shell" id="shell">
+    <canvas id="game" width="920" height="518" aria-label="Neon Harbor Catch game canvas"></canvas>
+    <div id="hitFlash" aria-hidden="true"></div>
+    <div class="controls-hint" id="touchControls">
+      <button class="touch-btn" id="leftBtn" aria-label="Move left">◀</button>
+      <button class="touch-btn" id="rightBtn" aria-label="Move right">▶</button>
+    </div>
+    <!-- Start overlay -->
+    <div class="overlay" id="startOverlay">
+      <div class="badge">✦ Single-screen arcade • Responsive</div>
+      <h2><span class="c">Catch</span> the <span class="p">Glow</span></h2>
+      <p>Move your harbor boat with <b>← →</b> or <b>A D</b>. Catch falling <span style="color:var(--neon-cyan)">neon buoys</span> for points. Hit <span style="color:var(--neon-pink)">mines</span> and you lose a life. Survive the rising tide!</p>
+      <button class="btn" id="startBtn">▶ Start Game</button>
+      <div class="kbd-row"><span class="kbd">← / A</span><span class="kbd">→ / D</span><span class="kbd">P Pause</span><span class="kbd">R Restart</span></div>
+      <p style="font-size:11px;opacity:.5;margin-top:10px">Tip: Hold direction for smooth glide. Speed increases every 250 pts.</p>
+    </div>
+    <!-- Pause overlay -->
+    <div class="overlay hidden" id="pauseOverlay">
+      <div class="badge">Paused</div>
+      <h2>Paused</h2>
+      <p>Take a breath. The harbor waits.</p>
+      <button class="btn" id="resumeBtn">Resume</button>
+    </div>
+    <!-- Game over overlay -->
+    <div class="overlay hidden" id="gameOverOverlay">
+      <div class="badge" style="color:var(--neon-pink);border-color:rgba(255,42,109,.4)">Game Over</div>
+      <h2 id="finalTitle">Harbor Lost</h2>
+      <p id="finalScore" style="font-family:'Orbitron',monospace;font-size:18px;color:var(--neon-cyan)"></p>
+      <p id="finalMsg" style="font-size:13px;opacity:.7"></p>
+      <button class="btn" id="restartBtn">↻ Play Again</button>
+      <p style="font-size:11px;opacity:.45;margin-top:10px">Press <b>R</b> or <b>Enter</b> to restart instantly</p>
+    </div>
+  </div>
+  <div class="footer">Built for <span>PlayGround</span> • Self-contained • No dependencies • 60fps canvas • Harbor lights guide you</div>
+</div>
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const shell = document.getElementById('shell');
+  const hitFlash = document.getElementById('hitFlash');
+  const scoreEl = document.getElementById('scoreEl');
+  const levelEl = document.getElementById('levelEl');
+  const speedEl = document.getElementById('speedEl');
+  const livesEl = document.getElementById('livesEl');
+  const hud = document.querySelector('.hud');
+  const startOverlay = document.getElementById('startOverlay');
+  const pauseOverlay = document.getElementById('pauseOverlay');
+  const gameOverOverlay = document.getElementById('gameOverOverlay');
+  const finalScore = document.getElementById('finalScore');
+  const finalMsg = document.getElementById('finalMsg');
+  const pauseBtn = document.getElementById('pauseBtn');
+
+  // Fixed internal resolution for game logic; CSS scales responsively
+  canvas.width = 920; canvas.height = 518;
+  const W = 920, H = 518;
+  const WATER_Y = H - 56;
+
+  let score = 0, lives = 3, level = 1, speedMul = 1;
+  let gameState = 'start'; // start, playing, paused, over
+  let keys = {};
+  let boat = { x: W/2 - 50, y: WATER_Y - 18, w: 100, h: 30, vx: 0 };
+  let objects = [];
+  let particles = [];
+  let floatingTexts = [];
+  let spawnTimer = 0, spawnInterval = 0.85;
+  let time = 0, shake = 0;
+  let highScore = parseInt(localStorage.getItem('neonHarborHigh')||'0');
+  let dragging = false;
+  let dragTargetX = boat.x;
+
+  // -- Audio: self-contained WebAudio bleeps --
+  let audioCtx = null;
+  function ensureAudio(){
+    if(audioCtx) return;
+    try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ audioCtx=null; }
+  }
+  function tone(freq, dur, type, vol, glideTo){
+    if(!audioCtx) return;
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type||'sine';
+    o.frequency.value = freq;
+    if(glideTo!=null){
+      o.frequency.linearRampToValueAtTime(glideTo, audioCtx.currentTime+dur*0.8);
+    }
+    g.gain.value = vol!=null?vol:0.18;
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime+dur);
+  }
+  function sfxCatch(pts){
+    ensureAudio();
+    if(pts>=50) { tone(900,0.12,'square',0.14); setTimeout(()=>tone(1200,0.18,'sine',0.12),70); }
+    else if(pts>=20) tone(700,0.14,'sine',0.15, 950);
+    else tone(620,0.11,'sine',0.14, 820);
+  }
+  function sfxHit(){
+    ensureAudio();
+    tone(180,0.22,'square',0.22, 70);
+    setTimeout(()=>tone(90,0.18,'triangle',0.18),60);
+  }
+  function sfxLevel(){
+    ensureAudio();
+    [523,659,784,1046].forEach((f,i)=> setTimeout(()=>tone(f,0.18,'sine',0.12), i*90));
+  }
+  function sfxGameOver(){
+    ensureAudio();
+    tone(400,0.3,'sawtooth',0.15, 120);
+    setTimeout(()=>tone(220,0.4,'square',0.13,80),180);
+  }
+  function sfxStart(){
+    ensureAudio();
+    tone(400,0.12,'sine',0.13,600);
+    setTimeout(()=>tone(800,0.15,'sine',0.12),110);
+  }
+  // unlock audio on first interaction
+  ['click','keydown','touchstart'].forEach(ev=>{
+    window.addEventListener(ev, ensureAudio, {once:true, passive:true});
+  });
+
+  function resetGame(){
+    score=0; lives=3; level=1; speedMul=1; spawnInterval=0.85; objects=[]; particles=[]; floatingTexts=[]; spawnTimer=0; time=0; shake=0;
+    boat.x=W/2-50; boat.y=WATER_Y-18; boat.vx=0; dragTargetX=boat.x; dragging=false;
+    updateHUD();
+  }
+
+  function updateHUD(){
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+    speedEl.textContent = speedMul.toFixed(1)+'×';
+    [...livesEl.children].forEach((el,i)=>{
+      el.classList.toggle('off', i >= lives);
+    });
+    pauseBtn.textContent = gameState==='paused' ? '▶ Resume' : '⏸ Pause (P)';
+    pauseBtn.setAttribute('aria-label', gameState==='paused'?'Resume game':'Pause game');
+  }
+  function pulseScore(){
+    scoreEl.classList.remove('pulse');
+    void scoreEl.offsetWidth;
+    scoreEl.classList.add('pulse');
+    setTimeout(()=> scoreEl.classList.remove('pulse'),180);
+  }
+  function triggerShake(intensity){
+    shake = Math.max(shake, intensity);
+    shell.classList.remove('shake');
+    void shell.offsetWidth;
+    shell.classList.add('shake');
+    setTimeout(()=> shell.classList.remove('shake'),400);
+  }
+  function flashHit(){
+    hitFlash.classList.add('on');
+    hud.classList.add('flash');
+    setTimeout(()=>{ hitFlash.classList.remove('on'); hud.classList.remove('flash'); },220);
+  }
+
+  // Input - keyboard with smoothing & robust handling
+  const KEY_MAP = { 'arrowleft':'left','a':'left','arrowright':'right','d':'right' };
+  window.addEventListener('keydown', e=>{
+    const k = e.key.toLowerCase();
+    // prevent scrolling with space/arrows
+    if([' ','arrowleft','arrowright','arrowup','arrowdown'].includes(k)) {
+      // only prevent if game is active or overlay open to avoid scroll jump
+      e.preventDefault();
+    }
+    keys[k]=true;
+    // pause toggle - works from playing/paused
+    if(k==='p' || k==='escape'){
+      if(gameState==='playing'){ setPaused(true); }
+      else if(gameState==='paused'){ setPaused(false); }
+    }
+    // start / restart flow via keyboard: Enter, Space, R
+    if((k==='r' || k==='enter' || k===' ') ){
+      if(gameState==='over'){ e.preventDefault(); startGame(); return; }
+      if(gameState==='start'){ e.preventDefault(); startGame(); return; }
+      if(gameState==='paused' && (k==='enter' || k===' ')){ e.preventDefault(); setPaused(false); }
+    }
+    // also allow Enter to resume from pause overlay gracefully
+  });
+  window.addEventListener('keyup', e=>{ keys[e.key.toLowerCase()]=false; });
+  window.addEventListener('blur', ()=>{ keys={}; dragging=false; document.querySelectorAll('.touch-btn').forEach(b=>b.classList.remove('held')); });
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.hidden && gameState==='playing') setPaused(true);
+  });
+
+  // Touch / buttons - improved with pointer events & held state
+  const leftBtn=document.getElementById('leftBtn'), rightBtn=document.getElementById('rightBtn');
+  function bindHold(btn, dirKey){
+    const activate=(e)=>{
+      e.preventDefault();
+      keys[dirKey]=true;
+      btn.classList.add('held');
+      ensureAudio();
+    };
+    const deactivate=(e)=>{
+      e.preventDefault();
+      keys[dirKey]=false;
+      btn.classList.remove('held');
+    };
+    // pointer events cover touch+mouse+pen
+    btn.addEventListener('pointerdown', activate);
+    btn.addEventListener('pointerup', deactivate);
+    btn.addEventListener('pointercancel', deactivate);
+    btn.addEventListener('pointerleave', deactivate);
+    // fallback touch for older
+    btn.addEventListener('touchstart', activate, {passive:false});
+    btn.addEventListener('touchend', deactivate, {passive:false});
+    // prevent context menu / double-tap zoom
+    btn.addEventListener('contextmenu', e=>e.preventDefault());
+  }
+  bindHold(leftBtn,'arrowleft'); bindHold(rightBtn,'arrowright');
+
+  // Drag boat on canvas for mobile - smoothed lerp
+  function canvasToWorld(clientX){
+    const rect=canvas.getBoundingClientRect();
+    const sx=(clientX - rect.left) / rect.width * W;
+    return Math.max(0, Math.min(W - boat.w, sx - boat.w/2));
+  }
+  function handlePointerDown(e){
+    if(gameState!=='playing') return;
+    dragging=true;
+    const cx = e.touches?e.touches[0].clientX : e.clientX;
+    dragTargetX = canvasToWorld(cx);
+    // capture pointer if possible
+    try{ canvas.setPointerCapture && e.pointerId!=null && canvas.setPointerCapture(e.pointerId); }catch(_){}
+  }
+  function handlePointerMove(e){
+    if(!dragging || gameState!=='playing') return;
+    if(e.cancelable) e.preventDefault();
+    const cx = e.touches?e.touches[0].clientX : e.clientX;
+    dragTargetX = canvasToWorld(cx);
+  }
+  function handlePointerUp(e){
+    dragging=false;
+    try{ canvas.releasePointerCapture && e.pointerId!=null && canvas.releasePointerCapture(e.pointerId); }catch(_){}
+  }
+  // pointer events
+  canvas.addEventListener('pointerdown', handlePointerDown);
+  canvas.addEventListener('pointermove', handlePointerMove);
+  canvas.addEventListener('pointerup', handlePointerUp);
+  canvas.addEventListener('pointercancel', handlePointerUp);
+  // legacy touch/mouse fallbacks (passive false where needed)
+  canvas.addEventListener('touchstart', handlePointerDown, {passive:false});
+  canvas.addEventListener('touchmove', handlePointerMove, {passive:false});
+  canvas.addEventListener('touchend', handlePointerUp, {passive:false});
+  canvas.addEventListener('mousedown', handlePointerDown);
+  window.addEventListener('mousemove', (e)=>{ if(dragging) handlePointerMove(e); });
+  window.addEventListener('mouseup', handlePointerUp);
+
+  function setPaused(p){
+    if(gameState==='over' || gameState==='start') return;
+    gameState = p?'paused':'playing';
+    pauseOverlay.classList.toggle('hidden', !p);
+    updateHUD();
+    if(p) keys={};
+  }
+  pauseBtn.addEventListener('click', ()=> setPaused(gameState!=='paused'));
+  document.getElementById('resumeBtn').addEventListener('click', ()=> setPaused(false));
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('restartBtn').addEventListener('click', startGame);
+  // ensure overlays buttons reachable by keyboard - already handled globally
+
+  function startGame(){
+    sfxStart();
+    resetGame();
+    gameState='playing';
+    startOverlay.classList.add('hidden');
+    pauseOverlay.classList.add('hidden');
+    gameOverOverlay.classList.add('hidden');
+    updateHUD();
+    // focus canvas for keyboard immediately
+    canvas.focus?.();
+  }
+  function gameOver(){
+    gameState='over';
+    if(score>highScore){ highScore=score; localStorage.setItem('neonHarborHigh', highScore); }
+    finalScore.textContent = `Score ${score} • Level ${level} • High ${highScore}`;
+    let msg='';
+    if(score<100) msg="The harbor lights flicker out. Try again, captain.";
+    else if(score<400) msg="Solid run! The neon tide respects your helm.";
+    else if(score<800) msg="Harbor legend! You rode the neon surge.";
+    else msg="MYTHIC! The harbor will sing your name.";
+    finalMsg.textContent=msg;
+    gameOverOverlay.classList.remove('hidden');
+    for(let i=0;i<24;i++) spawnParticle(boat.x+boat.w/2, boat.y+4, '#ff2a6d', 1.2);
+    triggerShake(16);
+    sfxGameOver();
+    // allow immediate restart via focus
+    setTimeout(()=> document.getElementById('restartBtn').focus(), 120);
+  }
+
+  function spawnParticle(x,y,color,boost){
+    particles.push({x,y,vx:(Math.random()-.5)*6*(boost||1), vy:(Math.random()*-5-1)*(boost||1), life:1, decay:0.02+Math.random()*0.03, r:2+Math.random()*4, color});
+  }
+
+  function spawnObject(dt){
+    spawnTimer+=dt;
+    if(spawnTimer < spawnInterval) return;
+    spawnTimer=0;
+    const isMine = Math.random() < (0.28 + level*0.02);
+    if(isMine){
+      const w=34,h=34;
+      objects.push({x: Math.random()*(W-w-20)+10, y:-40, w,h, type:'mine', vy: (140+Math.random()*80)*speedMul, rot:0, rotV:(Math.random()-.5)*2, glow:'#ff2a6d'});
+    } else {
+      const kinds=[
+        {c:'#00f0ff', pts:10, r:16},{c:'#ffe600', pts:20, r:14},{c:'#b537f2', pts:30, r:13},{c:'#00ff9d', pts:15, r:15}
+      ];
+      const k = Math.random()<0.6?kinds[0]: kinds[Math.floor(Math.random()*kinds.length)];
+      if(Math.random()<0.08){
+        objects.push({x: Math.random()*(W-44)+22, y:-30, w:42,h:42, type:'buoy', pts:50, color:'#fff', vy:(130+Math.random()*70)*speedMul, rot:0, rotV:(Math.random()-.5)*1.5, glow:'#fff'});
+      } else {
+        objects.push({x: Math.random()*(W-k.r*2-20)+10, y:-30, w:k.r*2, h:k.r*2, type:'buoy', pts:k.pts, color:k.c, vy:(130+Math.random()*70)*speedMul, rot:0, rotV:(Math.random()-.5)*1.2, glow:k.c});
+      }
+    }
+  }
+
+  function update(dt){
+    if(gameState!=='playing') return;
+    time+=dt;
+    // boat movement with smoothing - higher accel for snappy harbor feel
+    if(dragging){
+      // smooth spring towards dragTargetX for buttery drag without teleport jitter
+      const diff = dragTargetX - boat.x;
+      // lerp factor 18 gives ~0.055s follow delay; snap if very close
+      if(Math.abs(diff) < 0.5) boat.x = dragTargetX;
+      else boat.x += diff * Math.min(1, 18*dt);
+      boat.vx = diff * 6; // for lean feedback if desired
+    } else {
+      let dir=0;
+      if(keys['arrowleft']||keys['a']) dir-=1;
+      if(keys['arrowright']||keys['d']) dir+=1;
+      const accel= 2000, maxSpeed= 560, friction= 1500;
+      if(dir!==0){
+        boat.vx += dir*accel*dt;
+        // cap overshoot quickly
+        if(Math.sign(boat.vx) !== dir && Math.abs(boat.vx) > 120) boat.vx *= 0.85;
+      } else {
+        if(Math.abs(boat.vx)>0){
+          const f=Math.sign(boat.vx)*friction*dt;
+          if(Math.abs(f) >= Math.abs(boat.vx)) boat.vx=0; else boat.vx-=f;
+        }
+        // snap tiny velocities to zero to avoid drift
+        if(Math.abs(boat.vx) < 8) boat.vx=0;
+      }
+      boat.vx = Math.max(-maxSpeed, Math.min(maxSpeed, boat.vx));
+      boat.x += boat.vx*dt;
+    }
+    boat.x = Math.max(0, Math.min(W - boat.w, boat.x));
+    boat.y = WATER_Y - 18 + Math.sin(time*2.2)*3;
+
+    spawnObject(dt);
+    for(let i=objects.length-1;i>=0;i--){
+      const o=objects[i];
+      o.y += o.vy*dt;
+      o.rot += o.rotV*dt;
+      const bx=boat.x, by=boat.y, bw=boat.w, bh=boat.h;
+      const catchY = by + 6;
+      const hit = o.x + o.w > bx+8 && o.x < bx+bw-8 && o.y+o.h > catchY && o.y < by+bh;
+      if(hit){
+        if(o.type==='buoy'){
+          score+=o.pts;
+          sfxCatch(o.pts);
+          pulseScore();
+          const newLevel = Math.floor(score/250)+1;
+          if(newLevel!==level){
+            level=newLevel;
+            // correct speed scaling: multiplicative with caps
+            speedMul = Math.min(2.6, 1 + (level-1)*0.18);
+            spawnInterval = Math.max(0.38, 0.85 - (level-1)*0.07);
+            sfxLevel();
+            // level burst
+            for(let k=0;k<14;k++) spawnParticle(W/2, 24, '#ffe600', 0.9);
+          }
+          updateHUD();
+          for(let k=0;k<8;k++) spawnParticle(o.x+o.w/2, o.y+o.h/2, o.glow);
+          // World-space floating score visible at 2m - stroked, large, upward drift
+          floatingTexts.push({x:o.x+o.w/2, y:o.y, text:'+'+o.pts, color:o.color||o.glow, vy:-90 - Math.random()*40, vx:(Math.random()-0.5)*20, life:1, decay:0.022, scale: o.pts>=50?1.25: o.pts>=30?1.1:1});
+          if(o.pts>=50){ for(let k=0;k<6;k++) spawnParticle(o.x+o.w/2, o.y+o.h/2, '#fff'); }
+        } else {
+          lives -=1;
+          updateHUD();
+          triggerShake(10);
+          flashHit();
+          sfxHit();
+          const heartEl = [...livesEl.children][lives];
+          if(heartEl){ heartEl.classList.remove('hit'); void heartEl.offsetWidth; heartEl.classList.add('hit'); }
+          for(let k=0;k<12;k++) spawnParticle(o.x+o.w/2, o.y+o.h/2, '#ff2a6d');
+          floatingTexts.push({x:o.x+o.w/2, y:o.y, text:'HIT!', color:'#ff2a6d', vy:-80, vx:0, life:1, decay:0.028, scale:1.2});
+          if(lives<=0){ gameOver(); }
+        }
+        objects.splice(i,1);
+        continue;
+      }
+      if(o.y > H+40){
+        objects.splice(i,1);
+      }
+    }
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.x+=p.vx*dt*60; p.y+=p.vy*dt*60; p.vy+= 9.8*dt*3; p.life-=p.decay; p.vx*=0.99;
+      if(p.life<=0) particles.splice(i,1);
+    }
+    for(let i=floatingTexts.length-1;i>=0;i--){
+      const f=floatingTexts[i];
+      f.x+=f.vx*dt; f.y+=f.vy*dt; f.vy+= 28*dt; f.life-=f.decay;
+      if(f.life<=0) floatingTexts.splice(i,1);
+    }
+    if(shake>0) {
+      shake = Math.max(0, shake - dt*28);
+      // exponential decay feels more natural than linear
+      if(shake < 0.3) shake=0;
+    }
+  }
+
+  function draw(){
+    ctx.save();
+    if(shake>0){
+      // subtle canvas shake + shell CSS shake combine for juice
+      const sx=(Math.random()-.5)*shake*0.7;
+      const sy=(Math.random()-.5)*shake*0.5;
+      ctx.translate(sx,sy);
+    }
+    const g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#0b1b3f'); g.addColorStop(0.45,'#0a1430'); g.addColorStop(1,'#070f2a');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(255,255,255,.7)';
+    for(let i=0;i<60;i++){
+      const x=(Math.sin(i*1.37)*0.5+0.5)*W;
+      const y=(Math.cos(i*2.9)*0.5+0.5)*H*0.45;
+      const a=0.3+Math.sin(time*1.1+i)*0.3;
+      ctx.globalAlpha=Math.max(0,a*0.5);
+      ctx.fillRect(x,y,1.2,1.2);
+    }
+    ctx.globalAlpha=1;
+    ctx.fillStyle='rgba(0,0,0,.45)';
+    const buildings=[80,120,60,150,90,110,70,130,100,60,140,85];
+    let bx=0;
+    buildings.forEach((h,i)=>{
+      const w= W/buildings.length;
+      const bh= h*0.35;
+      const y= WATER_Y-90 - bh;
+      ctx.fillRect(bx+2, y, w-4, bh+90);
+      ctx.fillStyle='rgba(0,240,255,.55)';
+      for(let wy=y+10; wy<y+bh; wy+=12){
+        // deterministic flicker instead of random per frame
+        if(((i*7+wy)%5)!==0) ctx.fillRect(bx+w/2-4, wy, 8,5);
+      }
+      ctx.fillStyle='rgba(0,0,0,.45)';
+      bx+=w;
+    });
+    ctx.strokeStyle='rgba(0,240,255,.5)'; ctx.lineWidth=2; ctx.shadowColor='#00f0ff'; ctx.shadowBlur=12;
+    ctx.beginPath(); ctx.moveTo(0,WATER_Y-90); ctx.lineTo(W,WATER_Y-90); ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.strokeStyle='rgba(0,240,255,.08)'; ctx.lineWidth=1;
+    for(let y=WATER_Y-90; y<WATER_Y; y+=14){
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    }
+    for(let x=0;x<W;x+=46){
+      ctx.beginPath(); ctx.moveTo(x, WATER_Y-90); ctx.lineTo(x + (Math.sin(time*0.5)*4), WATER_Y); ctx.stroke();
+    }
+    const waterGrad=ctx.createLinearGradient(0,WATER_Y,0,H);
+    waterGrad.addColorStop(0,'#0e2a5a'); waterGrad.addColorStop(0.5,'#0a1f45'); waterGrad.addColorStop(1,'#06122e');
+    ctx.fillStyle=waterGrad; ctx.fillRect(0,WATER_Y,W,H-WATER_Y);
+    ctx.strokeStyle='rgba(0,240,255,.18)'; ctx.lineWidth=1.2;
+    for(let i=0;i<3;i++){
+      ctx.beginPath();
+      const wy=WATER_Y+10 + i*12 + Math.sin(time*1.2+i)*2;
+      ctx.moveTo(0,wy);
+      for(let x=0;x<=W;x+=10){
+        const y= wy + Math.sin(x*0.02 + time*2 + i)*3;
+        ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+    ctx.fillStyle='rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(boat.x+boat.w/2, WATER_Y+6, boat.w/2+6, 7,0,0,Math.PI*2); ctx.fill();
+
+    objects.forEach(o=>{
+      ctx.save();
+      ctx.translate(o.x+o.w/2, o.y+o.h/2);
+      ctx.rotate(o.rot*0.15);
+      if(o.type==='buoy'){
+        ctx.shadowColor=o.glow; ctx.shadowBlur=18;
+        ctx.fillStyle=o.color;
+        ctx.beginPath(); ctx.arc(0,0,o.w/2-2,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur=0;
+        ctx.fillStyle='rgba(255,255,255,.85)';
+        ctx.beginPath(); ctx.ellipse(-o.w*0.18,-o.w*0.18,o.w*0.16,o.w*0.12, -0.4,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='rgba(0,0,0,.28)'; ctx.fillRect(-o.w/2+2, -2, o.w-4, 4);
+        ctx.fillStyle='rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(0, o.h*0.22, 3,0,Math.PI*2); ctx.fill();
+        if(o.pts>=30){
+          ctx.fillStyle='#fff'; ctx.font='700 10px Orbitron, monospace'; ctx.textAlign='center'; ctx.fillText('+'+o.pts,0, 4);
+        }
+      } else {
+        ctx.shadowColor='#ff2a6d'; ctx.shadowBlur=20;
+        ctx.fillStyle='#1a1a22';
+        ctx.beginPath(); ctx.arc(0,0,o.w/2-1,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur=0;
+        ctx.fillStyle='#ff2a6d';
+        for(let a=0;a<Math.PI*2;a+= Math.PI/4){
+          const sx=Math.cos(a)*(o.w/2-4), sy=Math.sin(a)*(o.w/2-4);
+          ctx.beginPath(); ctx.arc(sx,sy,4.5,0,Math.PI*2); ctx.fill();
+          ctx.fillStyle='rgba(255,255,255,.5)'; ctx.beginPath(); ctx.arc(sx-1,sy-1,1.5,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#ff2a6d';
+        }
+        ctx.fillStyle='#ff2a6d'; ctx.beginPath(); ctx.arc(0,0,7,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#fff'; ctx.font='900 9px Orbitron'; ctx.textAlign='center'; ctx.fillText('!',0,3);
+      }
+      ctx.restore();
+    });
+
+    ctx.save();
+    ctx.translate(boat.x, boat.y);
+    // tilt based on velocity for juice
+    const tilt = Math.max(-0.08, Math.min(0.08, boat.vx/700));
+    ctx.translate(boat.w/2, 14);
+    ctx.rotate(tilt);
+    ctx.translate(-boat.w/2, -14);
+    ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.roundRect(2,12, boat.w-4, 18, [0,0,8,8]); ctx.fill();
+    const hullGrad=ctx.createLinearGradient(0,10,0,30);
+    hullGrad.addColorStop(0,'#e6f7ff'); hullGrad.addColorStop(1,'#8ab4d6');
+    ctx.fillStyle=hullGrad;
+    ctx.beginPath(); ctx.roundRect(0,10, boat.w, 18, [4,4,10,10]); ctx.fill();
+    ctx.fillStyle='#00f0ff'; ctx.shadowColor='#00f0ff'; ctx.shadowBlur=8; ctx.fillRect(6,16, boat.w-12,3); ctx.shadowBlur=0;
+    ctx.fillStyle='#0f1f3a'; ctx.strokeStyle='rgba(0,240,255,.4)'; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.roundRect(boat.w*0.18, -6, boat.w*0.52, 20, 4); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='rgba(0,240,255,.9)'; ctx.shadowColor='#00f0ff'; ctx.shadowBlur=6;
+    ctx.fillRect(boat.w*0.24, 0, 14,8); ctx.fillRect(boat.w*0.44, 0, 14,8); ctx.shadowBlur=0;
+    ctx.fillStyle='#ffe600'; ctx.shadowColor='#ffe600'; ctx.shadowBlur=10;
+    ctx.beginPath(); ctx.arc(boat.w*0.78, -8, 4,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
+    ctx.fillStyle='#cfe8ff'; ctx.beginPath(); ctx.moveTo(boat.w-2,12); ctx.lineTo(boat.w+10,18); ctx.lineTo(boat.w-2,24); ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+    particles.forEach(p=>{
+      ctx.globalAlpha=Math.max(0,p.life);
+      ctx.fillStyle=p.color; ctx.shadowColor=p.color; ctx.shadowBlur=8;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha=1; ctx.shadowBlur=0;
+    // floating score pops - large stroked for 2m readability
+    floatingTexts.forEach(f=>{
+      const a = Math.max(0, f.life);
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.translate(f.x, f.y);
+      ctx.scale(f.scale, f.scale);
+      ctx.font = '900 26px Orbitron, monospace';
+      ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      ctx.lineWidth=5;
+      ctx.strokeStyle='rgba(0,0,0,.85)';
+      ctx.lineJoin='round';
+      ctx.strokeText(f.text, 0, 0);
+      ctx.shadowColor = f.color;
+      ctx.shadowBlur=12;
+      ctx.fillStyle='#fff';
+      ctx.fillText(f.text, 0, 0);
+      ctx.restore();
+    });
+    ctx.globalAlpha=1; ctx.shadowBlur=0;
+
+    const vig=ctx.createRadialGradient(W/2,H/2, W*0.3, W/2,H/2, W*0.9);
+    vig.addColorStop(0,'rgba(0,0,0,0)'); vig.addColorStop(1,'rgba(0,0,0,.35)');
+    ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
+
+    ctx.restore();
+  }
+
+  let last=performance.now();
+  function loop(now){
+    const dt=Math.min(0.033, (now-last)/1000);
+    last=now;
+    update(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  window.__game={ get state(){return gameState}, get score(){return score}, get lives(){return lives}, get objects(){return objects}, get particles(){return particles}, get floatingTexts(){return floatingTexts}, get boat(){return boat}, startGame, setPaused };
+
+  updateHUD();
+  // focus start button for keyboard accessibility
+  document.getElementById('startBtn').focus();
+})();
+</script>
+</body>
+</html>
