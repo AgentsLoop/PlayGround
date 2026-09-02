@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lantern Lanes — Glow Through the Dark</title>
+<style>
+  :root{
+    --bg:#0a0f14;
+    --panel:#121d26;
+    --line:#234658;
+    --lantern:#ffd86b;
+    --lantern-glow:#ff9a3c;
+    --firefly:#ffe94d;
+    --fog:#7a8c98;
+    --fog2:#4a5a68;
+    --text:#e8f0f5;
+    --muted:#8da0b3;
+    --accent:#ffcf4d;
+    --win:#4ade80;
+    --lose:#fb7185;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:ui-sans-system,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    background: radial-gradient(1200px 600px at 50% -10%, #1a2e3d 0%, var(--bg) 55%);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:18px 12px 28px;
+  }
+  header{
+    width:min(720px,100%);
+    display:flex;justify-content:space-between;align-items:center;
+    background:linear-gradient(180deg, #13202c, #0f1a23);
+    border:1px solid #1e3442;
+    border-radius:16px;
+    padding:12px 16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{width:40px;height:40px;border-radius:10px;background:radial-gradient(circle at 35% 30%, #fff7c2 0%, var(--lantern) 35%, #ff8c2a 68%, #7a2e0a 100%);box-shadow:0 0 18px rgba(255,180,60,.9),0 0 36px rgba(255,140,30,.35);display:grid;place-items:center;font-size:20px}
+  .brand h1{font-size:18px;letter-spacing:.04em;line-height:1}
+  .brand p{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+  .hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .pill{
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:999px;
+    padding:7px 12px;
+    font-size:13px;
+    display:flex;gap:8px;align-items:center;
+    min-width:96px;justify-content:space-between;
+  }
+  .pill span{color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  .pill b{font-variant-numeric:tabular-nums}
+  .pill.timer-pill{border-color:rgba(255,207,77,.25);background:rgba(255,207,77,.08);min-width:110px}
+  .pill.timer-pill b{font-size:22px;font-weight:900;color:var(--accent);letter-spacing:.02em}
+  .pill.timer-pill.warning b{color:#ffb4b4}
+  .pill.score-pill.pop{animation:scorePop .22s ease}
+  @keyframes scorePop{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+  .pill.flash{animation:flash .3s ease}
+  @keyframes flash{0%{box-shadow:0 0 0 rgba(255,207,77,0)}50%{box-shadow:0 0 18px rgba(255,207,77,.6)}100%{box-shadow:0 0 0 rgba(255,207,77,0)}}
+  #timer{transition:color .25s ease}
+  #timer.warning{color:#ffb4b4 !important}
+  #timer.pulse{animation:pulse .4s ease}
+  @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+  .grid-shell.shake{animation:shake 160ms ease}
+  .cell.flash::after{background:rgba(255,233,77,.35) !important}
+  .progress{height:4px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-top:4px}
+  .progress-fill{height:100%;background:linear-gradient(90deg, #ffe94d, #ff9a2e);width:0%;transition:width .3s ease;box-shadow:0 0 8px rgba(255,220,100,.6)}
+
+  .wrap{
+    width:min(720px,100%);
+    margin-top:14px;
+    background:linear-gradient(180deg, #0d1923, #0a131b);
+    border:1px solid #1c3443;
+    border-radius:18px;
+    padding:14px;
+    box-shadow:0 16px 40px rgba(0,0,0,.5);
+  }
+  .grid-shell{
+    position:relative;
+    aspect-ratio:1;
+    width:100%;
+    background:#060a0e;
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid #1a3141;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.04), inset 0 30px 60px rgba(0,0,0,.6);
+  }
+  #grid{
+    width:100%;height:100%;
+    display:grid;
+    grid-template-columns:repeat(10,1fr);
+    grid-template-rows:repeat(10,1fr);
+    gap:2px;
+    background:var(--line);
+    padding:2px;
+    position:relative;
+  }
+  .cell{
+    background:radial-gradient(400px 400px at var(--mx,50%) var(--my,50%), rgba(255,210,100,.08) 0%, rgba(255,210,100,0) 55%), #0e1a24;
+    position:relative;
+    overflow:hidden;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+  }
+  .cell.lane::after{
+    content:"";
+    position:absolute;inset:0;
+    border:1px dashed rgba(255,255,255,.03);
+  }
+  /* lantern */
+  .lantern{
+    position:absolute;
+    width:68%;height:68%;
+    left:16%;top:16%;
+    background:radial-gradient(circle at 35% 30%, #fffbe6 0%, #ffdd6b 40%, #ff8c21 72%, #b84a0a 100%);
+    border-radius:40% 40% 35% 35% / 45% 45% 35% 35%;
+    box-shadow:0 0 12px rgba(255,180,60,.95), 0 0 28px rgba(255,140,30,.55), 0 4px 10px rgba(0,0,0,.6);
+    z-index:7;
+    transition: transform .08s ease;
+    display:grid;place-items:center;
+  }
+  .lantern::before{
+    content:"";
+    position:absolute;top:-6%;left:28%;width:44%;height:18%;
+    background:#2b1a0a;border:1px solid #5a3412;border-radius:4px 4px 6px 6px;
+  }
+  .lantern::after{content:"✦";font-size:10px;color:#fff;opacity:.9}
+  .lantern.hit{animation:hit .35s ease}
+  @keyframes hit{0%{transform:scale(1)}30%{transform:scale(1.2)}60%{transform:scale(.9)}100%{transform:scale(1)}}
+  .glow{
+    position:absolute;inset:-55%;
+    background:radial-gradient(circle, rgba(255,200,70,.55) 0%, rgba(255,160,30,.25) 28%, rgba(255,120,20,0) 70%);
+    border-radius:50%;
+    pointer-events:none;
+    z-index:4;
+    mix-blend-mode:screen;
+  }
+  /* firefly */
+  .firefly{
+    position:absolute;
+    width:54%;height:54%;left:23%;top:23%;
+    background:radial-gradient(circle at 30% 30%, #ffffa8 0%, #ffe94d 45%, #ffb700 75%, #ff8a00 100%);
+    border-radius:50%;
+    box-shadow:0 0 10px rgba(255,233,77,.95), 0 0 22px rgba(255,200,40,.6);
+    animation: flutter 1.1s ease-in-out infinite alternate, twinkle 1.6s ease-in-out infinite;
+    z-index:6;
+  }
+  .firefly::after{
+    content:"";
+    position:absolute;inset:-35%;
+    background:radial-gradient(circle, rgba(255,233,77,.45) 0%, transparent 70%);
+    border-radius:50%;
+    animation: twinkle 1.6s ease-in-out infinite reverse;
+  }
+  @keyframes flutter{0%{transform:translateY(0) scale(1)}100%{transform:translateY(-4px) scale(1.06)}}
+  @keyframes twinkle{0%,100%{opacity:1}50%{opacity:.7}}
+  .firefly.collected{animation:pop .35s ease forwards}
+  @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.5);opacity:1}100%{transform:scale(0);opacity:0}}
+  /* fog */
+  .fog{
+    position:absolute;
+    width:78%;height:58%;left:11%;top:21%;
+    background: radial-gradient(ellipse at 30% 40%, rgba(180,200,215,.90) 0%, rgba(140,165,180,.75) 30%, rgba(110,135,150,.55) 58%, rgba(80,100,118,.0) 78%),
+                radial-gradient(ellipse at 70% 60%, rgba(200,215,225,.82) 0%, rgba(150,175,190,.60) 35%, transparent 75%);
+    border-radius:40% 55% 45% 50% / 50% 40% 55% 45%;
+    box-shadow:0 4px 18px rgba(0,0,0,.35), inset 0 1px 6px rgba(255,255,255,.5);
+    opacity:.68;
+    z-index:2;
+    animation: drift 3.5s ease-in-out infinite alternate;
+    filter:blur(.2px);
+  }
+  .fog::before{
+    content:"";
+    position:absolute;inset:12% 18% 18% 12%;
+    background:radial-gradient(ellipse, rgba(255,255,255,.35), transparent 70%);
+    border-radius:50%;
+  }
+  @keyframes drift{0%{transform:translateX(-3px) translateY(0)}100%{transform:translateX(3px) translateY(-2px)}}
+  .fog.slow{animation-duration:4.8s}
+  .fog.fast{animation-duration:2.6s}
+
+  /* particles */
+  #particles{
+    position:absolute;inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:6;
+  }
+  .particle{
+    position:absolute;
+    width:8px;height:8px;
+    border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, #ffffc2, #ffd86b 60%, #ff9a2e);
+    box-shadow:0 0 8px rgba(255,220,100,.9);
+    pointer-events:none;
+    animation: particlePop 480ms ease-out forwards;
+  }
+  @keyframes particlePop{
+    0%{transform:translate(0,0) scale(1); opacity:1}
+    100%{transform:translate(var(--tx),var(--ty)) scale(0); opacity:0}
+  }
+
+  /* overlay screens */
+  .overlay{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg, rgba(6,12,18,.78), rgba(6,12,18,.92));
+    backdrop-filter: blur(6px);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;
+    padding:20px;
+    z-index:10;
+  }
+  .overlay.hidden{display:none}
+  .badge{
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+    background:rgba(255,207,77,.12);border:1px solid rgba(255,207,77,.3);
+    padding:6px 10px;border-radius:999px;margin-bottom:12px;
+  }
+  .overlay h2{font-size:28px;line-height:1.1;margin-bottom:8px;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+  .overlay p{color:#c8d7e5;font-size:13.5px;line-height:1.5;max-width:420px;margin:0 auto}
+  .stats-row{display:flex;gap:10px;margin:14px 0;flex-wrap:wrap;justify-content:center}
+  .stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;min-width:90px}
+  .stat b{font-size:20px;display:block}
+  .stat span{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+  .btn{
+    margin-top:12px;
+    background:linear-gradient(180deg, #ffd86b, #ff9a2e);
+    color:#2b1a03;
+    border:0;
+    padding:12px 22px;
+    border-radius:999px;
+    font-weight:800;
+    font-size:15px;
+    letter-spacing:.02em;
+    cursor:pointer;
+    box-shadow:0 6px 18px rgba(255,154,46,.45), inset 0 1px 0 rgba(255,255,255,.7);
+    transition:transform .08s ease, filter .15s ease;
+  }
+  .btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
+  .btn:focus-visible{outline:2px solid #ffd86b; outline-offset:2px}
+  .btn.secondary{
+    background:rgba(255,255,255,.08);
+    color:var(--text);
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:none;
+  }
+  .controls{
+    margin-top:12px;
+    display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+    color:var(--muted);font-size:12px;align-items:center;
+  }
+  .kbd{
+    background:#1b2a37;border:1px solid #2a4054;border-bottom-width:3px;
+    padding:3px 7px;border-radius:6px;color:#d8e6f2;font-weight:700;font-size:11px;
+  }
+  .footer{
+    width:min(720px,100%);
+    margin-top:10px;
+    display:flex;justify-content:space-between;align-items:center;
+    color:var(--muted);font-size:11px;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .footer a{color:var(--muted)}
+  .dpad{
+    display:none;
+    gap:6px;
+    margin-top:10px;
+    user-select:none;
+  }
+  .dpad button{
+    width:44px;height:44px;border-radius:10px;
+    background:#13202c;border:1px solid #234052;color:#d8e6f2;font-size:18px;
+    touch-action:manipulation;
+  }
+  .dpad button:focus-visible{outline:2px solid #ffd86b; outline-offset:2px}
+  .dpad button:active{background:#1d2f42}
+  .dpad .mid{visibility:hidden}
+  #muteBtn{
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+    color:var(--muted);
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:12px;
+    cursor:pointer;
+  }
+  #muteBtn:focus-visible{outline:2px solid #ffd86b; outline-offset:2px}
+  @media (max-width:620px){
+    .dpad{display:grid;grid-template-columns:44px 44px 44px;justify-content:center}
+    header{flex-wrap:wrap;gap:10px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .firefly, .fog, .lantern.hit, #timer.pulse, .particle{animation:none !important}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo" aria-hidden="true">🏮</div>
+    <div>
+      <h1>LANTERN LANES</h1>
+      <p>Collect fireflies • Avoid the fog</p>
+    </div>
+  </div>
+  <div class="hud" aria-label="Game status">
+    <div class="pill score-pill" id="scorePill" aria-live="polite"><span>Score</span><b id="score">0</b></div>
+    <div class="pill timer-pill" id="timerPill" aria-live="polite"><span>Time</span><b id="timer">60</b></div>
+    <div class="pill" aria-live="polite" style="flex-direction:column;align-items:stretch;min-width:110px;padding:7px 10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>Goal</span><b id="goal">15</b></div>
+      <div class="progress" aria-hidden="true"><div class="progress-fill" id="goalFill"></div></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid-shell" id="gridShell">
+    <div id="grid" role="grid" aria-label="10 by 10 dark grid, move lantern to collect fireflies"></div>
+    <div id="particles" aria-hidden="true"></div>
+
+    <!-- Start Screen -->
+    <div id="startScreen" class="overlay" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+      <div class="badge">✦ Dark Grid • Moving Fog • Glowing Lantern</div>
+      <h2 id="startTitle">Light the Lanes</h2>
+      <p>Move your lantern with <b>arrow keys</b> or <b>WASD</b> through the dark. Collect the fluttering fireflies for points. Touch a fog patch and your light fades. Gather <b id="goalText">15</b> fireflies before the time runs out to win.</p>
+      <div class="stats-row">
+        <div class="stat"><b>🔥 15</b><span>to win</span></div>
+        <div class="stat"><b>⏱ 60s</b><span>on the clock</span></div>
+        <div class="stat"><b>🌫 4 fogs</b><span>drifting</span></div>
+      </div>
+      <button id="startBtn" class="btn" autofocus>▶ Start Game</button>
+      <div class="controls" aria-label="Keyboard controls">
+        <span class="kbd" aria-hidden="true">↑</span><span class="kbd" aria-hidden="true">←</span><span class="kbd" aria-hidden="true">↓</span><span class="kbd" aria-hidden="true">→</span>
+        <span>or</span>
+        <span class="kbd" aria-hidden="true">W</span><span class="kbd" aria-hidden="true">A</span><span class="kbd" aria-hidden="true">S</span><span class="kbd" aria-hidden="true">D</span>
+        <span>• Space to pause • Esc to pause</span>
+      </div>
+    </div>
+
+    <!-- Pause -->
+    <div id="pauseScreen" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+      <h2 id="pauseTitle">Paused</h2>
+      <p>Take a breath. The fog keeps drifting… Press Space or Esc to resume.</p>
+      <button id="resumeBtn" class="btn">Resume</button>
+      <button id="restartFromPause" class="btn secondary">Restart</button>
+    </div>
+
+    <!-- End Screen -->
+    <div id="endScreen" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="endTitle">
+      <div id="endBadge" class="badge">Result</div>
+      <h2 id="endTitle">Game Over</h2>
+      <p id="endDesc">—</p>
+      <div class="stats-row">
+        <div class="stat"><b id="endScore">0</b><span>score</span></div>
+        <div class="stat"><b id="endBest">0</b><span>best</span></div>
+        <div class="stat"><b id="endTime">0s</b><span>time left</span></div>
+      </div>
+      <button id="replayBtn" class="btn">↻ Play Again</button>
+      <button id="shareBtn" class="btn secondary" style="margin-top:8px">Copy Score</button>
+    </div>
+  </div>
+
+  <div class="dpad" id="dpad" aria-label="Mobile direction pad">
+    <span class="mid" aria-hidden="true"></span><button data-dir="up" aria-label="Move up">↑</button><span class="mid" aria-hidden="true"></span>
+    <button data-dir="left" aria-label="Move left">←</button><button data-dir="down" aria-label="Move down">↓</button><button data-dir="right" aria-label="Move right">→</button>
+  </div>
+</div>
+
+<div class="footer">
+  <span>Tip: Fireflies respawn — keep moving. Fog bounces off walls.</span>
+  <span style="display:flex;gap:8px;align-items:center">
+    <button id="muteBtn" aria-pressed="false" aria-label="Mute sound">🔊 Sound on</button>
+    <span id="bestLine" aria-live="polite">Best: 0</span>
+  </span>
+</div>
+
+<script>
+(() => {
+  const GRID_SIZE = 10;
+  const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
+  const GOAL = 15;
+  const DURATION = 60;
+  const FOG_COUNT = 4;
+  const FIREFLY_COUNT = 4;
+
+  const gridEl = document.getElementById('grid');
+  const gridShell = document.getElementById('gridShell');
+  const scoreEl = document.getElementById('score');
+  const scorePill = document.getElementById('scorePill');
+  const timerEl = document.getElementById('timer');
+  const timerPill = document.getElementById('timerPill');
+  const goalEl = document.getElementById('goal');
+  const goalText = document.getElementById('goalText');
+  const goalFill = document.getElementById('goalFill');
+  const startScreen = document.getElementById('startScreen');
+  const pauseScreen = document.getElementById('pauseScreen');
+  const endScreen = document.getElementById('endScreen');
+  const endBadge = document.getElementById('endBadge');
+  const endTitle = document.getElementById('endTitle');
+  const endDesc = document.getElementById('endDesc');
+  const endScore = document.getElementById('endScore');
+  const endBest = document.getElementById('endBest');
+  const endTime = document.getElementById('endTime');
+  const bestLine = document.getElementById('bestLine');
+  const particlesEl = document.getElementById('particles');
+  const muteBtn = document.getElementById('muteBtn');
+
+  goalEl.textContent = GOAL;
+  goalText.textContent = GOAL;
+
+  // build grid DOM
+  const cells = [];
+  for(let i=0;i<TOTAL_CELLS;i++){
+    const c = document.createElement('div');
+    c.className = 'cell';
+    c.dataset.index = i;
+    c.setAttribute('role','gridcell');
+    c.setAttribute('aria-label', 'row ' + (Math.floor(i/GRID_SIZE)+1) + ' col ' + (i%GRID_SIZE+1));
+    gridEl.appendChild(c);
+    cells.push(c);
+  }
+
+  // state
+  let player = {x:4,y:4};
+  let fireflies = []; // {x,y,el}
+  let fogs = []; // {x,y,dx,dy,el}
+  let score = 0;
+  let timeLeft = DURATION;
+  let best = parseInt(localStorage.getItem('lantern-best')||'0',10);
+  let running = false;
+  let paused = false;
+  let timerId = null;
+  let fogInterval = null;
+  let muted = localStorage.getItem('lantern-muted') === '1';
+
+  bestLine.textContent = 'Best: ' + best;
+  function syncMuteBtn(){
+    muteBtn.textContent = muted ? '🔇 Muted' : '🔊 Sound on';
+    muteBtn.setAttribute('aria-pressed', muted ? 'true':'false');
+  }
+  syncMuteBtn();
+  muteBtn.addEventListener('click', ()=>{
+    muted = !muted;
+    localStorage.setItem('lantern-muted', muted ? '1':'0');
+    syncMuteBtn();
+    if(!muted) { try{ getCtx(); }catch{} }
+  });
+
+  // ---- WebAudio bleeps ----
+  let audioCtx = null;
+  function getCtx(){
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function beep(freq, dur, type, vol, when=0){
+    if(muted) return;
+    try{
+      const ctx = getCtx();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      g.gain.value = vol;
+      o.connect(g); g.connect(ctx.destination);
+      const t = ctx.currentTime + when;
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.start(t);
+      o.stop(t + dur + 0.03);
+    }catch(e){}
+  }
+  function sfxCollect(){ beep(880,0.14,'sine',0.32); beep(1320,0.12,'sine',0.22,0.07); }
+  function sfxBump(){ beep(120,0.12,'square',0.18); }
+  function sfxFog(){ beep(140,0.38,'sawtooth',0.28); beep(95,0.42,'square',0.14,0.12); }
+  function sfxWin(){ [523,659,784,1046].forEach((f,i)=> beep(f,0.28,'sine',0.28,i*0.13)); }
+  function sfxLose(){ [220,185,150].forEach((f,i)=> beep(f,0.32,'triangle',0.26,i*0.16)); }
+  function sfxTick(){ if(timeLeft<=10 && timeLeft>0) beep(720,0.08,'sine',0.12); }
+
+  // ---- particles ----
+  function spawnParticles(cx, cy){
+    // cx,cy are grid cell coordinates 0-9; convert to % in shell
+    const shellRect = particlesEl.getBoundingClientRect();
+    // if shell not visible yet, skip
+    if(shellRect.width===0) return;
+    const cellW = shellRect.width / GRID_SIZE;
+    const cellH = shellRect.height / GRID_SIZE;
+    const baseX = cx * cellW + cellW/2;
+    const baseY = cy * cellH + cellH/2;
+    for(let i=0;i<7;i++){
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const ang = (i/7)*Math.PI*2 + Math.random()*0.5;
+      const dist = 18 + Math.random()*22;
+      const tx = Math.cos(ang)*dist;
+      const ty = Math.sin(ang)*dist;
+      p.style.left = baseX + 'px';
+      p.style.top = baseY + 'px';
+      p.style.setProperty('--tx', tx+'px');
+      p.style.setProperty('--ty', ty+'px');
+      particlesEl.appendChild(p);
+      setTimeout(()=> p.remove(), 600);
+    }
+  }
+  function clearParticles(){ particlesEl.innerHTML=''; }
+
+  function posToIndex(x,y){ return y*GRID_SIZE + x; }
+  function inBounds(x,y){ return x>=0 && x<GRID_SIZE && y>=0 && y<GRID_SIZE; }
+  function randomEmpty(exclude){
+    let tries=0;
+    while(tries<100){
+      const x=Math.floor(Math.random()*GRID_SIZE);
+      const y=Math.floor(Math.random()*GRID_SIZE);
+      const key=x+','+y;
+      if(exclude.has(key)) {tries++; continue;}
+      // avoid spawning too close to player when board is not crowded
+      if(Math.abs(x-player.x)+Math.abs(y-player.y) < 3 && exclude.size < 8){tries++; continue;}
+      return {x,y};
+    }
+    // fallback: scan for first free
+    for(let y=0;y<GRID_SIZE;y++) for(let x=0;x<GRID_SIZE;x++) if(!exclude.has(x+','+y)) return {x,y};
+    return {x:0,y:0};
+  }
+
+  // create lantern element (single)
+  const lanternEl = document.createElement('div');
+  lanternEl.className = 'lantern';
+  lanternEl.setAttribute('role','img');
+  lanternEl.setAttribute('aria-label','lantern');
+  const glowEl = document.createElement('div');
+  glowEl.className = 'glow';
+  glowEl.setAttribute('aria-hidden','true');
+  lanternEl.appendChild(glowEl);
+
+  function render(){
+    cells.forEach(c=>{ c.innerHTML=''; c.style.removeProperty('--mx'); c.style.removeProperty('--my'); });
+
+    // light falloff based on lantern position
+    cells.forEach(c=>{
+      const idx=parseInt(c.dataset.index,10);
+      const cx=idx%GRID_SIZE, cy=Math.floor(idx/GRID_SIZE);
+      const dx=cx-player.x, dy=cy-player.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      const intensity=Math.max(0, 1 - dist/4.5);
+      if(intensity>0){
+        c.style.setProperty('--mx', ((player.x/GRID_SIZE)*100)+'%');
+        c.style.setProperty('--my', ((player.y/GRID_SIZE)*100)+'%');
+      }
+    });
+
+    // place fireflies
+    fireflies.forEach(f=>{
+      const cell=cells[posToIndex(f.x,f.y)];
+      const el=f.el;
+      el.classList.remove('collected');
+      cell.appendChild(el);
+    });
+    // place fogs
+    fogs.forEach(f=>{
+      const cell=cells[posToIndex(f.x,f.y)];
+      cell.appendChild(f.el);
+    });
+    // place lantern last so on top
+    const pCell=cells[posToIndex(player.x, player.y)];
+    pCell.appendChild(lanternEl);
+  }
+
+  function spawnFireflies(){
+    fireflies=[];
+    const occupied=new Set();
+    occupied.add(player.x+','+player.y);
+    fogs.forEach(f=> occupied.add(f.x+','+f.y));
+    for(let i=0;i<FIREFLY_COUNT;i++){
+      const pos=randomEmpty(occupied);
+      occupied.add(pos.x+','+pos.y);
+      const el=document.createElement('div');
+      el.className='firefly';
+      el.setAttribute('aria-label','firefly');
+      el.setAttribute('role','img');
+      fireflies.push({x:pos.x,y:pos.y,el});
+    }
+  }
+  function spawnFogs(){
+    fogs=[];
+    const occupied=new Set([player.x+','+player.y]);
+    const dirs=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]];
+    for(let i=0;i<FOG_COUNT;i++){
+      const pos=randomEmpty(occupied);
+      occupied.add(pos.x+','+pos.y);
+      const d=dirs[Math.floor(Math.random()*dirs.length)];
+      let dx=d[0], dy=d[1];
+      if(dx===0 && dy===0) dx=1;
+      dx=Math.sign(dx); dy=Math.sign(dy);
+      if(dx===0 && dy===0) dx=1;
+      const el=document.createElement('div');
+      el.className='fog ' + (i%2===0?'slow':'fast');
+      el.setAttribute('aria-label','fog');
+      el.setAttribute('role','img');
+      fogs.push({x:pos.x,y:pos.y,dx,dy,el});
+    }
+  }
+
+  function updateProgress(){
+    const pct = Math.min(100, Math.round(score/GOAL*100));
+    goalFill.style.width = pct + '%';
+  }
+  function triggerShake(intensity){
+    gridShell.classList.remove('shake');
+    void gridShell.offsetWidth;
+    gridShell.classList.add('shake');
+    setTimeout(()=> gridShell.classList.remove('shake'), 200);
+    if(navigator.vibrate) navigator.vibrate(intensity || 40);
+  }
+  function flashCell(x,y){
+    const idx=posToIndex(x,y);
+    const c=cells[idx];
+    if(!c) return;
+    c.classList.add('flash');
+    setTimeout(()=> c.classList.remove('flash'), 300);
+  }
+  function addScore(n){
+    score+=n;
+    scoreEl.textContent=score;
+    updateProgress();
+    // score pop + flash
+    scorePill.classList.remove('pop','flash');
+    void scorePill.offsetWidth;
+    scorePill.classList.add('pop','flash');
+    setTimeout(()=> scorePill.classList.remove('pop','flash'), 300);
+    if(score>best){ best=score; localStorage.setItem('lantern-best', best); bestLine.textContent='Best: '+best; }
+    if(score>=GOAL){
+      win();
+    }
+  }
+
+  function respawnFirefly(ff){
+    ff.el.classList.add('collected');
+    setTimeout(()=>{
+      const occupied=new Set();
+      occupied.add(player.x+','+player.y);
+      fireflies.forEach(f=>{ if(f!==ff) occupied.add(f.x+','+f.y); });
+      fogs.forEach(f=> occupied.add(f.x+','+f.y));
+      const pos=randomEmpty(occupied);
+      ff.x=pos.x; ff.y=pos.y;
+      ff.el.classList.remove('collected');
+      render();
+    }, 340);
+  }
+
+  function checkCollisions(){
+    // firefly collect first
+    for(const ff of fireflies){
+      if(ff.x===player.x && ff.y===player.y){
+        const cx=ff.x, cy=ff.y;
+        sfxCollect();
+        spawnParticles(cx, cy);
+        flashCell(cx,cy);
+        triggerShake(30);
+        addScore(1);
+        timerEl.classList.remove('pulse'); void timerEl.offsetWidth; timerEl.classList.add('pulse');
+        respawnFirefly(ff);
+        if(score>=GOAL) return;
+      }
+    }
+    // fog
+    for(const f of fogs){
+      if(f.x===player.x && f.y===player.y){
+        sfxFog();
+        triggerShake(120);
+        gameOver('fog');
+        return;
+      }
+    }
+  }
+
+  function movePlayer(dx,dy){
+    if(!running || paused) return;
+    const nx=player.x+dx, ny=player.y+dy;
+    if(!inBounds(nx,ny)) {
+      sfxBump();
+      lanternEl.classList.remove('hit'); void lanternEl.offsetWidth; lanternEl.classList.add('hit');
+      return;
+    }
+    player.x=nx; player.y=ny;
+    render();
+    checkCollisions();
+  }
+
+  function tickFog(){
+    if(!running || paused) return;
+    fogs.forEach(f=>{
+      let nx=f.x+f.dx, ny=f.y+f.dy;
+      if(!inBounds(nx,f.y)){
+        f.dx*=-1; nx=f.x+f.dx;
+      }
+      if(!inBounds(f.x,ny)){
+        f.dy*=-1; ny=f.y+f.dy;
+      }
+      if(Math.random()<0.12){
+        const opts=[[1,0],[-1,0],[0,1],[0,-1]];
+        const o=opts[Math.floor(Math.random()*opts.length)];
+        f.dx=o[0]; f.dy=o[1];
+        if(f.dx===0 && f.dy===0) f.dx=1;
+        nx=f.x+f.dx; ny=f.y+f.dy;
+        if(!inBounds(nx,ny)){ nx=f.x; ny=f.y; }
+      } else {
+        if(!inBounds(nx,ny)){
+          f.dx*=-1; f.dy*=-1;
+          nx=f.x+f.dx; ny=f.y+f.dy;
+          if(!inBounds(nx,ny)){ nx=f.x; ny=f.y; }
+        }
+      }
+      const occupied = fogs.some(other=> other!==f && other.x===nx && other.y===ny);
+      if(occupied){
+        f.dx*=-1; f.dy*=-1;
+      } else {
+        f.x=nx; f.y=ny;
+      }
+    });
+    render();
+    checkCollisions();
+  }
+
+  function startTimer(){
+    clearInterval(timerId);
+    timerId=setInterval(()=>{
+      if(paused || !running) return;
+      timeLeft--;
+      timerEl.textContent=timeLeft;
+      if(timeLeft<=10) { timerPill.classList.add('warning'); timerEl.classList.add('warning'); timerPill.classList.remove('pulse'); void timerPill.offsetWidth; timerPill.classList.add('pulse'); } else { timerPill.classList.remove('warning','pulse'); timerEl.classList.remove('warning'); }
+      sfxTick();
+      if(timeLeft<=0){
+        timeLeft=0;
+        timerEl.textContent='0';
+        if(score>=GOAL) win();
+        else gameOver('time');
+      }
+    },1000);
+  }
+
+  function startGame(){
+    score=0; timeLeft=DURATION;
+    player={x:Math.floor(GRID_SIZE/2)-1, y:Math.floor(GRID_SIZE/2)-1};
+    scoreEl.textContent='0';
+    timerEl.textContent=String(timeLeft);
+    timerEl.classList.remove('warning','pulse');
+    timerPill.classList.remove('warning','pulse');
+    updateProgress();
+    clearParticles();
+    startScreen.classList.add('hidden');
+    pauseScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    spawnFogs();
+    spawnFireflies();
+    render();
+    running=true; paused=false;
+    startTimer();
+    clearInterval(fogInterval);
+    fogInterval=setInterval(tickFog, 520);
+    // prime audio context on user gesture
+    try{ getCtx(); }catch{}
+    // ensure focus for keyboard
+    if(document.activeElement) document.activeElement.blur();
+    gridEl.setAttribute('tabindex','-1');
+    gridEl.focus({preventScroll:true});
+  }
+
+  function pauseGame(){
+    if(!running) return;
+    paused=true;
+    pauseScreen.classList.remove('hidden');
+    document.getElementById('resumeBtn').focus();
+  }
+  function resumeGame(){
+    paused=false;
+    pauseScreen.classList.add('hidden');
+    gridEl.focus({preventScroll:true});
+  }
+
+  function win(){
+    if(!running) return;
+    running=false;
+    clearInterval(timerId); clearInterval(fogInterval);
+    sfxWin();
+    endBadge.textContent='✦ Victory';
+    endBadge.style.background='rgba(74,222,128,.15)';
+    endBadge.style.borderColor='rgba(74,222,128,.4)';
+    endBadge.style.color='#4ade80';
+    endTitle.textContent='Lanes Cleared!';
+    endTitle.style.color='var(--win)';
+    endDesc.textContent=`You gathered ${score} fireflies with ${timeLeft}s to spare. The fog retreats before your light.`;
+    endScore.textContent=score;
+    endBest.textContent=best;
+    endTime.textContent=timeLeft+'s';
+    endScreen.classList.remove('hidden');
+    document.getElementById('replayBtn').focus();
+  }
+  function gameOver(reason){
+    if(!running) return;
+    running=false;
+    clearInterval(timerId); clearInterval(fogInterval);
+    if(reason!=='fog') sfxLose();
+    lanternEl.classList.remove('hit'); void lanternEl.offsetWidth; lanternEl.classList.add('hit');
+    endBadge.textContent= reason==='fog' ? '☁ Fog claimed the light' : '⏱ Time faded';
+    endBadge.style.background='rgba(251,113,133,.12)';
+    endBadge.style.borderColor='rgba(251,113,133,.35)';
+    endBadge.style.color='var(--lose)';
+    endTitle.textContent= reason==='fog' ? 'Lost in Fog' : 'Light Faded';
+    endTitle.style.color='var(--lose)';
+    endDesc.textContent= reason==='fog' ? `A fog patch swallowed your lantern at ${player.x+1},${player.y+1}. You had ${score}/${GOAL} fireflies.` : `Time ran out with ${score}/${GOAL} fireflies. The lantern dims…`;
+    endScore.textContent=score;
+    endBest.textContent=best;
+    endTime.textContent=timeLeft+'s';
+    endScreen.classList.remove('hidden');
+    document.getElementById('replayBtn').focus();
+  }
+
+  // input: key repeat is handled natively via repeated keydown events — prevent default and move instantly
+  const keyMap={
+    'ArrowUp':[0,-1], 'ArrowDown':[0,1], 'ArrowLeft':[-1,0], 'ArrowRight':[1,0],
+    'w':[0,-1], 'W':[0,-1], 'a':[-1,0], 'A':[-1,0], 's':[0,1], 'S':[0,1], 'd':[1,0], 'D':[1,0]
+  };
+  window.addEventListener('keydown', e=>{
+    if(e.key===' '){
+      e.preventDefault();
+      if(!running) return;
+      if(paused) resumeGame(); else pauseGame();
+      return;
+    }
+    if(e.key==='Escape' && running && !paused){ pauseGame(); return; }
+    if(e.key==='Escape' && paused){ resumeGame(); return; }
+    const dir=keyMap[e.key];
+    if(dir){
+      e.preventDefault();
+      movePlayer(dir[0],dir[1]);
+    }
+  });
+
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('replayBtn').addEventListener('click', startGame);
+  document.getElementById('resumeBtn').addEventListener('click', resumeGame);
+  document.getElementById('restartFromPause').addEventListener('click', startGame);
+  document.getElementById('shareBtn').addEventListener('click', async ()=>{
+    const txt=`Lantern Lanes — ${score}/${GOAL} fireflies, ${timeLeft}s left. Can you beat it?`;
+    try{ await navigator.clipboard.writeText(txt); const b=document.getElementById('shareBtn'); b.textContent='✓ Copied!'; setTimeout(()=>b.textContent='Copy Score',1500);}catch{ alert(txt); }
+  });
+
+  // dpad
+  document.querySelectorAll('[data-dir]').forEach(btn=>{
+    const dir=btn.dataset.dir;
+    const map={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
+    const handler=(e)=>{ e.preventDefault(); movePlayer(map[dir][0],map[dir][1]); };
+    btn.addEventListener('touchstart', handler, {passive:false});
+    btn.addEventListener('click', handler);
+  });
+
+  // initial render shows grid empty but start overlay covers
+  spawnFogs(); spawnFireflies(); render();
+  // expose for testing — include tickFog and goal/time for determinism
+  window.__lantern={ startGame, movePlayer, tickFog, getState:()=>({score,timeLeft,player:{...player}, running, paused, fogs:fogs.map(f=>({...f,el:undefined})), fireflies:fireflies.map(f=>({...f,el:undefined})), GOAL, DURATION, GRID_SIZE }) };
+
+})();
+</script>
+</body>
+</html>
