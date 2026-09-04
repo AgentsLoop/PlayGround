@@ -4,10 +4,12 @@
   "description": "Signal Sprites: Neon Relay \u2014 pilot a glowing cursor, collect 3 signal shards, dodge firewall bars, reach the relay gate before time runs out.",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0 --strictPort",
     "build": "vite build",
-    "preview": "vite preview --port 4173",
-    "test": "node --test test/game.test.js"
+    "preview": "vite preview --host 0.0.0.0 --port 4173 --strictPort",
+    "test": "node --test test/game.test.js",
+    "dev:public": "vite --host 0.0.0.0 --strictPort",
+    "preview:public": "vite preview --host 0.0.0.0 --port 4173 --strictPort"
   },
   "devDependencies": {
     "vite": "^6.0.0"
