@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signal Sprites: Neon Relay</title>
+    <link rel="icon" href="data:," />
+    <script type="module" crossorigin src="./assets/index-DE7b8t_3.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Boax9NIA.css">
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <h1>Signal Sprites: <span>Neon Relay</span></h1>
+        <div id="hud" aria-live="polite">
+          <div class="hud-item" id="hud-shards">◆ Shards 0/3</div>
+          <div class="hud-item" id="hud-time">⏱ 60.0s</div>
+          <div class="hud-item" id="hud-status">Standby</div>
+        </div>
+      </header>
+      <main class="stage-wrap">
+        <canvas id="game" width="960" height="600" aria-label="Neon Relay game canvas"></canvas>
+        <div id="overlay" class="overlay">
+          <div class="card">
+            <h2 id="overlay-title">Signal Sprites: Neon Relay</h2>
+            <div id="overlay-text"><p>Pilot the glowing cursor. Collect <b>3 signal shards ◆</b>, dodge the red <b>firewall bars</b>, then reach the green <b>relay gate</b> before the timer hits zero.</p>
+            <p class="controls-hint">Move: <b>WASD / Arrows</b> · or <b>hold mouse / touch</b> to steer toward pointer · <b>Enter/Space</b> to start</p></div>
+            <button id="overlay-btn">Start Run</button>
+          </div>
+        </div>
+        <div id="toast" class="toast" role="status"></div>
+      </main>
+      <footer class="foot">
+        <span>npm run dev → play · npm run build → dist/</span>
+        <button id="restart-btn" type="button">Restart (R)</button>
+      </footer>
+    </div>
+  </body>
+</html>
