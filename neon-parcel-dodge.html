@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Neon Parcel Dodge</title>
+<link rel="icon" href="data:,">
+<style>
+  :root{
+    --bg:#070714; --neon-cyan:#00f0ff; --neon-pink:#ff2fd6;
+    --neon-green:#39ff14; --neon-red:#ff2b4e; --neon-yellow:#ffe14d;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; min-height:100vh; background:radial-gradient(1200px 600px at 50% -10%, #1a1446 0%, var(--bg) 60%) fixed, var(--bg);
+    color:#eaf6ff; font-family:'Segoe UI',system-ui,Roboto,Arial,sans-serif;
+    display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .wrap{width:min(480px,100%); }
+  header{text-align:center; margin-bottom:10px;}
+  h1{
+    margin:0; font-size:clamp(22px,5vw,32px); letter-spacing:2px; font-weight:800;
+    color:#fff; text-shadow:0 0 8px var(--neon-cyan),0 0 20px var(--neon-cyan),0 0 30px var(--neon-pink);
+  }
+  h1 span{color:var(--neon-yellow); text-shadow:0 0 8px var(--neon-yellow),0 0 20px #ff9d00;}
+  .sub{opacity:.75; font-size:13px; margin-top:4px; letter-spacing:.5px;}
+  .hud{
+    display:flex; gap:8px; margin:12px 0;
+  }
+  .pill{
+    flex:1; background:rgba(255,255,255,.06); border:1px solid rgba(0,240,255,.35);
+    border-radius:12px; padding:8px 10px; text-align:center; box-shadow:0 0 12px rgba(0,240,255,.15) inset;
+  }
+  .pill small{display:block; font-size:10px; letter-spacing:1.5px; opacity:.7;}
+  .pill b{font-size:20px; font-variant-numeric:tabular-nums;}
+  #lives b{color:#ff7a90; text-shadow:0 0 10px var(--neon-red);}
+  #scoreBox b{color:var(--neon-green); text-shadow:0 0 10px rgba(57,255,20,.8);}
+  #levelBox b{color:var(--neon-cyan);}
+  .stage{
+    position:relative; border-radius:16px; overflow:hidden;
+    border:1px solid rgba(0,240,255,.5);
+    box-shadow:0 0 20px rgba(0,240,255,.25),0 0 60px rgba(255,47,214,.12);
+    background:#0a0a1f;
+  }
+  canvas{display:block; width:100%; height:auto; touch-action:none; background:transparent;}
+  .overlay{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center; padding:24px;
+    background:rgba(5,5,20,.82); backdrop-filter:blur(4px); z-index:2;
+  }
+  .overlay[hidden]{display:none;}
+  .overlay h2{margin:0 0 8px; font-size:28px; text-shadow:0 0 12px var(--neon-pink);}
+  .overlay p{margin:6px 0 14px; font-size:14px; line-height:1.5; opacity:.9; max-width:32ch;}
+  .btn{
+    cursor:pointer; border:0; border-radius:999px; padding:12px 28px; font-size:16px; font-weight:800;
+    letter-spacing:1px; color:#05131a; background:linear-gradient(90deg,var(--neon-cyan),var(--neon-green));
+    box-shadow:0 0 18px rgba(0,240,255,.7); transition:transform .12s;
+  }
+  .btn:hover{transform:scale(1.04);}
+  .btn:active{transform:scale(.97);}
+  .btn.secondary{background:transparent; color:#fff; border:1px solid rgba(255,255,255,.4); box-shadow:none; margin-top:8px; font-size:13px; padding:8px 18px;}
+  .legend{display:flex; gap:10px; justify-content:center; margin-top:10px; font-size:12px; opacity:.9;}
+  .dot{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:4px; vertical-align:baseline;}
+  .controls{display:flex; gap:8px; margin-top:10px;}
+  .controls button{
+    flex:1; padding:12px; font-size:20px; border-radius:12px; border:1px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.07); color:#fff; cursor:pointer; user-select:none;
+  }
+  .controls button:active{background:rgba(0,240,255,.25);}
+  @media (pointer:fine){ .controls{display:none;} }
+  footer{margin-top:10px; text-align:center; font-size:11px; opacity:.55;}
+  kbd{background:#1e1e35; border:1px solid #444; border-radius:6px; padding:1px 6px; font-size:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>NEON <span>PARCEL</span> DODGE</h1>
+    <div class="sub">Catch <b style="color:var(--neon-green)">parcels</b> • Dodge <b style="color:var(--neon-red)">hazards</b></div>
+  </header>
+  <div class="hud">
+    <div class="pill" id="scoreBox"><small>SCORE</small><b id="score">0</b></div>
+    <div class="pill" id="lives"><small>LIVES</small><b id="livesVal">♥♥♥</b></div>
+    <div class="pill" id="levelBox"><small>LEVEL</small><b id="level">1</b></div>
+  </div>
+  <div class="stage">
+    <canvas id="game" width="480" height="640"></canvas>
+    <div class="overlay" id="startScreen">
+      <h2>📦 NEON COURIER</h2>
+      <p>Move the courier with <kbd>◀</kbd><kbd>▶</kbd> / <kbd>A</kbd><kbd>D</kbd> or drag / touch.<br>
+      Catch <b style="color:#39ff14">green parcels (+10)</b>, avoid <b style="color:#ff2b4e">red hazards</b>.<br>
+      Missing a parcel costs a life. 3 lives. Good luck!</p>
+      <button class="btn" id="startBtn">▶ START GAME</button>
+    </div>
+    <div class="overlay" id="overScreen" hidden>
+      <h2>GAME OVER</h2>
+      <p id="finalStats">Score 0 • Level 1</p>
+      <button class="btn" id="restartBtn">↻ RESTART</button>
+    </div>
+  </div>
+  <div class="legend"><span><i class="dot" style="background:#39ff14;box-shadow:0 0 8px #39ff14"></i>parcel +10</span><span><i class="dot" style="background:#ff2b4e;box-shadow:0 0 8px #ff2b4e"></i>hazard −1♥</span><span><i class="dot" style="background:#ffe14d;box-shadow:0 0 8px #ffe14d"></i>gold +30</span></div>
+  <div class="controls"><button id="leftBtn">◀</button><button id="rightBtn">▶</button></div>
+  <footer>Self-contained • no assets • canvas 60fps • responsive</footer>
+</div>
+<script>
+(() => {
+"use strict";
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const livesEl = document.getElementById('livesVal');
+const levelEl = document.getElementById('level');
+const startScreen = document.getElementById('startScreen');
+const overScreen = document.getElementById('overScreen');
+const finalStats = document.getElementById('finalStats');
+
+const W = canvas.width, H = canvas.height;
+
+// Game state — exposed for automated verification
+const S = window.__game = {
+  state: 'menu', // menu | playing | over
+  score: 0, lives: 3, level: 1,
+  player: { x: W/2, w: 84, h: 22, speed: 380, vx: 0 },
+  items: [], particles: [],
+  spawnT: 0, elapsed: 0, caught: 0, missed: 0, hits: 0,
+  keys: {}
+};
+
+function difficulty(){
+  // level rises every 150 pts; speed + spawn rate scale
+  const lvl = 1 + Math.floor(S.score / 150);
+  S.level = lvl;
+  return {
+    level: lvl,
+    fallMin: 140 + lvl*28,
+    fallMax: 230 + lvl*42,
+    spawnInterval: Math.max(0.28, 0.95 - lvl*0.09),
+    hazardChance: Math.min(0.45, 0.18 + lvl*0.035)
+  };
+}
+
+function reset(){
+  S.score=0; S.lives=3; S.level=1;
+  S.items=[]; S.particles=[]; S.spawnT=0; S.elapsed=0;
+  S.caught=0; S.missed=0; S.hits=0;
+  S.player.x = W/2;
+  updateHUD();
+}
+
+function start(){
+  reset();
+  S.state='playing';
+  startScreen.hidden=true; overScreen.hidden=true;
+}
+function gameOver(){
+  S.state='over';
+  finalStats.textContent = `Score ${S.score} • Level ${S.level} • Caught ${S.caught}`;
+  overScreen.hidden=false;
+}
+function loseLife(kind){
+  S.lives--;
+  burst(S.player.x, H-60, '#ff2b4e', 22);
+  updateHUD();
+  if(S.lives<=0) gameOver();
+}
+function updateHUD(){
+  scoreEl.textContent = S.score;
+  levelEl.textContent = S.level;
+  livesEl.textContent = '♥'.repeat(Math.max(0,S.lives)) + '♡'.repeat(Math.max(0,3-S.lives));
+}
+
+function spawn(){
+  const d = difficulty();
+  const r = Math.random();
+  let type='parcel';
+  if(r < d.hazardChance) type='hazard';
+  else if(r > 0.93) type='gold';
+  const size = type==='gold' ? 22 : 26;
+  S.items.push({
+    type,
+    x: 20 + Math.random()*(W-40),
+    y: -30,
+    w: size+8, h: size,
+    vy: d.fallMin + Math.random()*(d.fallMax-d.fallMin),
+    rot: Math.random()*Math.PI,
+    vr: (Math.random()-.5)*3,
+    sway: Math.random()*40,
+    swayF: 1+Math.random()*2,
+    t: 0
+  });
+}
+
+function burst(x,y,color,n){
+  for(let i=0;i<n;i++){
+    S.particles.push({x,y,vx:(Math.random()-.5)*320,vy:(Math.random()-.8)*320,life:.5+Math.random()*.4,t:0,color,r:1+Math.random()*3});
+  }
+}
+
+let last=0;
+function loop(ts){
+  requestAnimationFrame(loop);
+  const dt = Math.min(0.05, (ts-last)/1000 || 0.016);
+  last = ts;
+  update(dt);
+  render(ts/1000);
+}
+
+function update(dt){
+  if(S.state!=='playing') return;
+  S.elapsed += dt;
+  const d = difficulty();
+
+  // movement
+  const p = S.player;
+  let dir=0;
+  if(S.keys['ArrowLeft']||S.keys['a']||S.keys['A']) dir-=1;
+  if(S.keys['ArrowRight']||S.keys['d']||S.keys['D']) dir+=1;
+  p.x += dir * p.speed * dt;
+  // touch buttons
+  if(S.keys['__left']) p.x -= p.speed*dt;
+  if(S.keys['__right']) p.x += p.speed*dt;
+  p.x = Math.max(p.w/2+4, Math.min(W-p.w/2-4, p.x));
+
+  // spawn
+  S.spawnT -= dt;
+  if(S.spawnT<=0){ spawn(); S.spawnT = d.spawnInterval * (0.7+Math.random()*0.6); }
+
+  // items fall
+  const catchY = H - 56;
+  for(let i=S.items.length-1;i>=0;i--){
+    const it = S.items[i];
+    it.t += dt; it.y += it.vy*dt; it.rot += it.vr*dt;
+    it.x += Math.sin(it.t*it.swayF)*it.sway*dt;
+    const inX = Math.abs(it.x - p.x) < (p.w/2 + it.w/2 - 8);
+    const inY = it.y + it.h/2 >= catchY && it.y - it.h/2 <= catchY + 30;
+    if(inX && inY){
+      // caught / hit
+      if(it.type==='parcel'){ S.score+=10; S.caught++; burst(it.x,catchY,'#39ff14',10); }
+      else if(it.type==='gold'){ S.score+=30; S.caught++; burst(it.x,catchY,'#ffe14d',16); }
+      else { S.hits++; loseLife('hazard'); }
+      S.items.splice(i,1);
+      difficulty(); updateHUD();
+      continue;
+    }
+    if(it.y > H+30){
+      S.items.splice(i,1);
+      if(it.type==='parcel'||it.type==='gold'){ S.missed++; loseLife('miss'); }
+    }
+  }
+
+  // particles
+  for(let i=S.particles.length-1;i>=0;i--){
+    const q=S.particles[i]; q.t+=dt;
+    q.x+=q.vx*dt; q.y+=q.vy*dt; q.vy+=500*dt;
+    if(q.t>q.life) S.particles.splice(i,1);
+  }
+  updateHUD();
+}
+
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+function render(t){
+  ctx.clearRect(0,0,W,H);
+  // bg grid
+  ctx.save();
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#0b0b26'); g.addColorStop(1,'#070714');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(0,240,255,.10)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y=0;y<H;y+=40){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  // moving horizon glow
+  ctx.fillStyle='rgba(255,47,214,.08)';
+  ctx.fillRect(0, ((t*60)%H)-H, W, H);
+  ctx.restore();
+
+  // catch line
+  ctx.save();
+  ctx.strokeStyle='rgba(0,240,255,.4)'; ctx.setLineDash([8,8]);
+  ctx.beginPath(); ctx.moveTo(8,H-56+30); ctx.lineTo(W-8,H-56+30); ctx.stroke();
+  ctx.restore();
+
+  // items
+  for(const it of S.items){
+    ctx.save(); ctx.translate(it.x,it.y); ctx.rotate(it.rot*0.3);
+    if(it.type==='hazard'){
+      ctx.shadowColor='#ff2b4e'; ctx.shadowBlur=16;
+      ctx.fillStyle='#2a0710'; ctx.strokeStyle='#ff2b4e'; ctx.lineWidth=2.5;
+      roundRect(-it.w/2,-it.h/2,it.w,it.h,5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle='#ff2b4e'; ctx.font='bold 16px sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.shadowBlur=8; ctx.fillText('✖',0,1);
+      ctx.shadowBlur=0;
+    } else {
+      const col = it.type==='gold' ? '#ffe14d' : '#39ff14';
+      ctx.shadowColor=col; ctx.shadowBlur=16;
+      ctx.fillStyle= it.type==='gold' ? '#3a2f00' : '#0a2a08';
+      ctx.strokeStyle=col; ctx.lineWidth=2.5;
+      roundRect(-it.w/2,-it.h/2,it.w,it.h,5); ctx.fill(); ctx.stroke();
+      // tape
+      ctx.strokeStyle=col; ctx.globalAlpha=.7; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(0,-it.h/2); ctx.lineTo(0,it.h/2); ctx.stroke();
+      ctx.globalAlpha=1;
+      ctx.fillStyle=col; ctx.font='bold 13px sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(it.type==='gold'?'★':'📦',0,1);
+      ctx.shadowBlur=0;
+    }
+    ctx.restore();
+  }
+
+  // player courier
+  const p=S.player, py=H-56;
+  ctx.save();
+  ctx.translate(p.x,py);
+  ctx.shadowColor='#00f0ff'; ctx.shadowBlur=20;
+  // hover board / courier
+  const grd=ctx.createLinearGradient(0,-14,0,16);
+  grd.addColorStop(0,'#123'); grd.addColorStop(1,'#03141c');
+  ctx.fillStyle=grd; ctx.strokeStyle='#00f0ff'; ctx.lineWidth=2.5;
+  roundRect(-p.w/2,-12,p.w,26,10); ctx.fill(); ctx.stroke();
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#00f0ff'; ctx.font='bold 15px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('🛵 ◂ ▸',0,2);
+  // thruster glow
+  ctx.fillStyle=`rgba(255,47,214,${.4+.3*Math.sin(t*10)})`;
+  ctx.beginPath(); ctx.ellipse(0,18,22,5,0,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  // particles
+  for(const q of S.particles){
+    ctx.globalAlpha = 1 - q.t/q.life;
+    ctx.fillStyle=q.color;
+    ctx.fillRect(q.x-q.r/2,q.y-q.r/2,q.r,q.r);
+  }
+  ctx.globalAlpha=1;
+}
+
+// input
+addEventListener('keydown',e=>{
+  if(['ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+  S.keys[e.key]=true;
+  if(e.key==='Enter'&&S.state!=='playing') start();
+});
+addEventListener('keyup',e=>{ S.keys[e.key]=false; });
+function bindHold(el,name){
+  const on=e=>{e.preventDefault(); S.keys[name]=true;};
+  const off=e=>{e.preventDefault(); S.keys[name]=false;};
+  el.addEventListener('pointerdown',on);
+  el.addEventListener('pointerup',off);
+  el.addEventListener('pointerleave',off);
+  el.addEventListener('pointercancel',off);
+}
+bindHold(document.getElementById('leftBtn'),'__left');
+bindHold(document.getElementById('rightBtn'),'__right');
+
+// drag on canvas
+let dragging=false;
+function pointerX(e){ const r=canvas.getBoundingClientRect(); const cx=(e.touches?e.touches[0].clientX:e.clientX); return (cx-r.left)/r.width*W; }
+canvas.addEventListener('pointerdown',e=>{dragging=true; S.player.x=pointerX(e); canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{ if(dragging) S.player.x=Math.max(46,Math.min(W-46,pointerX(e)));});
+canvas.addEventListener('pointerup',()=>dragging=false);
+canvas.addEventListener('pointercancel',()=>dragging=false);
+
+document.getElementById('startBtn').addEventListener('click',start);
+document.getElementById('restartBtn').addEventListener('click',start);
+
+updateHUD();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
