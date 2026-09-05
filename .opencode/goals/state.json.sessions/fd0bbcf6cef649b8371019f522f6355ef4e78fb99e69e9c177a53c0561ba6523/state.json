@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "goals": [
+    {
+      "goalId": "38fad880-26a6-4543-a01a-04eb762bf2a0",
+      "runId": "9bc40e1f-365f-4cef-9fd1-5da5eb5d513e",
+      "condition": "Build a first-person shooter at the level of the most recent Call of Duty games in ThreeJS with AAA quality textures, physics, visuals",
+      "successCriteria": "Playable ThreeJS FPS with AAA-comparable visuals, physics, textures verified blind side-by-side vs COD by harsh critic sub-agents iterating until perfect",
+      "constraints": "Limits: 10 auto-continues, 900s, 200000 context tokens. Stack: ThreeJS.",
+      "mode": "normal",
+      "sessionID": "ses_f8fd7a57cffec3vBkrK6qi1n1l",
+      "turnCount": 0,
+      "startedAt": 1788588100929,
+      "pausedAt": 0,
+      "totalTokens": 42663,
+      "usage": {
+        "input": 33416,
+        "output": 9612,
+        "reasoning": 2609,
+        "cacheRead": 785628,
+        "cacheWrite": 0,
+        "cost": 0,
+        "costKnown": true
+      },
+      "options": {
+        "maxTurns": 10,
+        "maxDurationMs": 900000,
+        "maxTokens": 200000,
+        "minDelayMs": 1500,
+        "maxRecentMessages": 50,
+        "noProgressTokenThreshold": 50,
+        "noProgressTurnsBeforePause": 2,
+        "noToolCallTurnsBeforePause": 2,
+        "noInterruptOnUserMessage": true,
+        "noContinueWhileChildrenActive": false,
+        "budgetWrapupRatio": 0.8,
+        "warnTurnsRemaining": 3,
+        "warnDurationMsRemaining": 60000,
+        "warnTokensRemaining": 25000,
+        "maxPromptFailures": 3,
+        "resultRetentionMs": 604800000,
+        "maxStoredResults": 200
+      },
+      "lastStatus": "Assistant reported blocked.",
+      "lastAssistantText": "",
+      "lastAssistantMessageID": "",
+      "lastContinueAt": 0,
+      "lastProgressAt": 1788588437407,
+      "noProgressTurns": 0,
+      "noToolCallTurns": 0,
+      "blockedReason": "AAA COD parity requires ~3000-person team, $300M+ budget, photogrammetry/PBR 4K assets, mocap, GI/volumetrics, Atmos audio, server netcode — none available in 900s zero-asset browser session. Built best-effort playable prototype instead (index.html). Need user decision: licensed assets + team + months, or accept stylized indie scope.",
+      "budgetWrapupSent": false,
+      "stopped": true,
+      "stopReason": "blocked",
+      "promptFailures": 0,
+      "formatFailures": 0,
+      "compactionEpoch": 0,
+      "stalledCompactions": 0,
+      "lastCompactionEventID": "",
+      "messageSeenSinceCompaction": true,
+      "compactionSourceAssistantMessageID": "",
+      "executionContext": {
+        "agent": "build",
+        "model": {
+          "providerID": "opencode",
+          "modelID": "muse-spark-1.3-contributor-free"
+        }
+      },
+      "continuationClaim": null,
+      "messageIDs": [
+        "msg_070288867001pWFu2NKtUP9XVR",
+        "msg_070288dca001w6eUixvGcf0Kwq",
+        "msg_070289473001fRHHTwTeLqcQkT",
+        "msg_07029483300122hUEDCwzw2xxf",
+        "msg_07029576a001LDmNi45eHGZmI2",
+        "msg_07029ae7b001uK5q7y6dt2pc47",
+        "msg_07029b948001QORGoHvsDKOc0s",
+        "msg_07029c3950013zC4ANUE99f3Vr",
+        "msg_07029caa50019HuNnxb90u5eQr",
+        "msg_07029e292001h1jcOukPUsg3pd",
+        "msg_07029efce001Az2YvdsV1372nB",
+        "msg_07029fd3c001uKEBWVZJSm8lah",
+        "msg_0702a1462001HYFVysDzmgkdt5",
+        "msg_0702ab1cc001wtjJj7gOX6vlAT",
+        "msg_0702ae98c001EgE9ruo0MsDfA3",
+        "msg_0702af554001DDVPP2PVomDhx0",
+        "msg_0702b0d3d001P3S6UVwuTRU0wx",
+        "msg_0702b191d001t8lvQBR0klwV0j",
+        "msg_0702bcb32001jTGIvJTfTQtB1o",
+        "msg_0702bd7b6001aL0AObPcbtzgHg",
+        "msg_0702c07f10018FilOR9KeEK6u9",
+        "msg_0702c2e9c001ZaTdemqy0RlXYw",
+        "msg_0702c74b1001YDPIfb46ddNyIa",
+        "msg_0702c8a4c001vxmQyh5SCJSJAX",
+        "msg_0702d6a16001DfRyXeTiZxoeJ2",
+        "msg_0702d73b3001si3goImOlzVbj6",
+        "msg_0702d8996001v3BBkLReArfsQ5",
+        "msg_0702da3b30015IHbCQwv7Y1GCk"
+      ],
+      "history": [
+        {
+          "type": "set",
+          "detail": "Goal created via agent tool with limits: 10 auto-continues, 900s, 200,000 context tokens.",
+          "timestamp": 1788588100930
+        },
+        {
+          "type": "blocked",
+          "detail": "AAA COD parity requires ~3000-person team, $300M+ budget, photogrammetry/PBR 4K assets, mocap, GI/volumetrics, Atmos audio, server netcode — none available in 900s zero-asset browser session. Built best-effort playable prototype instead (index.html). Need user decision: licensed assets + team + months, or accept stylized indie scope.",
+          "timestamp": 1788588182056
+        }
+      ],
+      "checkpoints": [],
+      "lastCheckpoint": null,
+      "skipNextTerminalCheck": false,
+      "focused": true
+    }
+  ],
+  "results": [],
+  "archives": [],
+  "orderedSessions": []
+}
