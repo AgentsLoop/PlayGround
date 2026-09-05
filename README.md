@@ -18,5 +18,6 @@ npm start          # serves project/ on http://127.0.0.1:3000/
 - Hero character: “Futuristic flying animated Robot - Low Poly” by Shayan (CC Attribution)
   via Sketchfab — see [project/ATTRIBUTION.md](project/ATTRIBUTION.md). Model lives at
   `project/public/models/robot.glb` with its attribution sidecar.
-- Built with Three.js 0.160 + official `GLTFLoader`. All other art and sounds are
+- Built with Three.js 0.160 + official `GLTFLoader`, both vendored under
+  `project/vendor/` (relative importmap, no CDN needed). All other art and sounds are
   procedural (no extra assets).

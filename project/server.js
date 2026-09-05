@@ -7,8 +7,16 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = __dirname;
-const PORT = Number(process.env.PORT || 3000);
-const HOST = process.env.HOST || '127.0.0.1';
+const argv = process.argv.slice(2);
+const argVal = (name) => {
+  const i = argv.findIndex((a) => a === name || a.startsWith(name + '='));
+  if (i === -1) return undefined;
+  const a = argv[i];
+  if (a.includes('=')) return a.split('=').slice(1).join('=');
+  return argv[i + 1];
+};
+const PORT = Number(process.env.PORT || argVal('--port') || 3000);
+const HOST = process.env.HOST || argVal('--host') || '127.0.0.1';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
