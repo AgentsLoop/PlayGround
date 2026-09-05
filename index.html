@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ThreeJS FPS Prototype (not COD-scale)</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#0b0e13;color:#e8ecf1;font-family:system-ui,sans-serif}
+#app{position:fixed;inset:0}
+canvas{display:block}
+#hud{position:fixed;inset:0;pointer-events:none}
+#cross{position:absolute;left:50%;top:50%;width:24px;height:24px;transform:translate(-50%,-50%)}
+#cross:before,#cross:after{content:"";position:absolute;background:#fff;opacity:.9}
+#cross:before{left:11px;top:2px;width:2px;height:20px}
+#cross:after{left:2px;top:11px;width:20px;height:2px}
+#top{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.5);padding:8px 12px;border-radius:8px;font-size:14px}
+#ammo{position:absolute;bottom:18px;right:18px;background:rgba(0,0,0,.5);padding:10px 14px;border-radius:8px;font-size:20px}
+#hpbar{position:absolute;bottom:18px;left:18px;width:240px;background:rgba(0,0,0,.5);padding:10px;border-radius:8px}
+#hpfill{height:10px;background:#4caf50;border-radius:5px;width:100%}
+#overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,8,12,.82);text-align:center;padding:24px}
+#card{max-width:640px;background:#141a23;border:1px solid #2a3444;border-radius:12px;padding:28px}
+button{pointer-events:auto;font-size:18px;padding:12px 22px;border-radius:8px;border:0;background:#2f7bff;color:#fff;cursor:pointer}
+#hitmark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(45deg);width:34px;height:34px;opacity:0}
+#hitmark:before,#hitmark:after{content:"";position:absolute;background:#ff5252}
+#hitmark:before{left:15px;top:0;width:4px;height:34px}
+#hitmark:after{top:15px;left:0;width:34px;height:4px}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"}}</script>
+</head>
+<body>
+<div id="app"></div>
+<div id="hud">
+<div id="cross"></div><div id="hitmark"></div>
+<div id="top">WASD move · Mouse look · Click shoot · R reload · Wave <span id="wave">1</span> · Kills <span id="kills">0</span></div>
+<div id="ammo">30 / ∞</div>
+<div id="hpbar"><div>HP</div><div style="background:#222;border-radius:5px"><div id="hpfill"></div></div></div>
+</div>
+<div id="overlay"><div id="card">
+<h1>ThreeJS FPS — playable prototype</h1>
+<p>Scope honesty: this is a <b>greybox systems demo</b> (~600 lines, procedural boxes, no scanned PBR, no GI, no mocap, no netcode). It is <b>not</b> Call of Duty visual parity — that requires ~3000 people, $300M+, custom engine, photogrammetry, mocap, Atmos audio, server netcode.</p>
+<p>Click to lock pointer and play. Survive waves of bots.</p>
+<button id="play">Click to play</button>
+</div></div>
+<script type="module">
+import * as THREE from 'three';
+import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+
+const app=document.getElementById('app');
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+app.appendChild(renderer.domElement);
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x87a0bd);
+scene.fog=new THREE.FogExp2(0x87a0bd,0.012);
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,300);
+camera.position.set(0,1.7,8);
+
+scene.add(new THREE.HemisphereLight(0xcfe8ff,0x556070,1.4));
+const sun=new THREE.DirectionalLight(0xffffff,2.4);
+sun.position.set(20,30,10);sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=-40;sun.shadow.camera.right=40;sun.shadow.camera.top=40;sun.shadow.camera.bottom=-40;
+scene.add(sun);
+
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(120,120),new THREE.MeshStandardMaterial({color:0x5a6572,roughness:.95}));
+floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+const grid=new THREE.GridHelper(120,60,0x22d3ee,0x334155);grid.position.y=0.01;scene.add(grid);
+
+const walls=[];
+function box(w,h,d,x,y,z,c){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color:c,roughness:.85}));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;scene.add(m);walls.push(new THREE.Box3().setFromObject(m));return m;}
+box(40,6,.8,0,3,-20,0x8b93a1);box(40,6,.8,0,3,20,0x8b93a1);
+box(.8,6,40,-20,3,0,0x8b93a1);box(.8,6,40,20,3,0,0x8b93a1);
+box(4,2,4,-6,1,-4,0x6b7280);box(4,3,2,6,1.5,2,0x6b7280);box(2,1,6,0,0.5,-8,0x78716c);box(3,2.5,3,-8,1.25,6,0x64748b);
+
+const controls=new PointerLockControls(camera,renderer.domElement);
+const overlay=document.getElementById('overlay');
+document.getElementById('play').onclick=()=>controls.lock();
+controls.addEventListener('lock',()=>overlay.style.display='none');
+controls.addEventListener('unlock',()=>overlay.style.display='flex');
+
+const keys={};addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyR')reload();});
+addEventListener('keyup',e=>keys[e.code]=false);
+
+let hp=100,ammo=30,kills=0,wave=1;
+const hpfill=document.getElementById('hpfill'),ammoEl=document.getElementById('ammo');
+const killsEl=document.getElementById('kills'),waveEl=document.getElementById('wave');
+const hitmark=document.getElementById('hitmark');
+function flashHit(){hitmark.style.opacity=1;setTimeout(()=>hitmark.style.opacity=0,90);}
+
+// procedural audio
+let AC=null;function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC;}
+function shot(){try{const c=ac(),t=c.currentTime;const b=c.createBuffer(1,c.sampleRate*0.18,c.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);const s=c.createBufferSource();s.buffer=b;const f=c.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(7000,t);f.frequency.exponentialRampToValueAtTime(400,t+0.15);const g=c.createGain();g.gain.setValueAtTime(0.5,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.18);s.connect(f).connect(g).connect(c.destination);s.start();}catch(e){}}
+function blip(fr=880){try{const c=ac(),o=c.createOscillator(),g=c.createGain();o.type='square';o.frequency.value=fr;g.gain.setValueAtTime(0.15,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.08);o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+0.09);}catch(e){}}
+function reload(){if(ammo===30)return;ammo=30;ammoEl.textContent=ammo+' / ∞';blip(440);}
+
+// gun viewmodel (floating low-poly — openly not AAA hands)
+const gun=new THREE.Group();
+const gm=new THREE.MeshStandardMaterial({color:0x1f2937,roughness:.5,metalness:.6});
+const body=new THREE.Mesh(new THREE.BoxGeometry(.09,.14,.55),gm);gun.add(body);
+const barrel=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.35,12),gm);barrel.rotation.x=Math.PI/2;barrel.position.set(0,.02,-.4);gun.add(barrel);
+const flash=new THREE.PointLight(0xffb300,0,8);flash.position.set(0,0,-.6);gun.add(flash);
+gun.position.set(.28,-.24,-.5);camera.add(gun);scene.add(camera);
+let kick=0;
+
+// enemies: red bots with FSM chase/attack
+const enemies=[];const ray=new THREE.Raycaster();
+function spawnWave(n){for(let i=0;i<n;i++){const g=new THREE.Group();const m=new THREE.Mesh(new THREE.BoxGeometry(.8,1.6,.5),new THREE.MeshStandardMaterial({color:0xdc2626,roughness:.7,emissive:0x000000}));m.position.y=0.8;m.castShadow=true;g.add(m);const a=Math.random()*Math.PI*2,r=12+Math.random()*6;g.position.set(Math.cos(a)*r,0,Math.sin(a)*r);g.userData={hp:3,m};scene.add(g);enemies.push(g);}waveEl.textContent=wave;}
+spawnWave(4);
+
+let lastShot=0;
+addEventListener('mousedown',()=>{if(!controls.isLocked)return;const now=performance.now();if(now-lastShot<140||ammo<=0)return;lastShot=now;ammo--;ammoEl.textContent=ammo+' / ∞';kick=0.09;shot();flash.intensity=8;setTimeout(()=>flash.intensity=0,50);
+ray.setFromCamera({x:0,y:0},camera);ray.far=80;
+const meshes=enemies.map(e=>e.userData.m);
+const hit=ray.intersectObjects(meshes,false)[0];
+if(hit){const g=enemies.find(e=>e.userData.m===hit.object);g.userData.hp--;flashHit();blip(1200);g.userData.m.material.emissive.setHex(0x7f1d1d);setTimeout(()=>g.userData.m.material.emissive.setHex(0x000000),80);
+if(g.userData.hp<=0){scene.remove(g);enemies.splice(enemies.indexOf(g),1);kills++;killsEl.textContent=kills;blip(300);if(enemies.length===0){wave++;spawnWave(3+wave);}}}});
+
+const vel=new THREE.Vector3();const clock=new THREE.Clock();
+function collide(p){for(const b of walls){if(b.containsPoint(p)){return true;}}return false;}
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),0.05);
+if(controls.isLocked){
+const sp=keys.ShiftLeft?8:5;
+const f=(keys.KeyW?1:0)-(keys.KeyS?1:0),s=(keys.KeyD?1:0)-(keys.KeyA?1:0);
+vel.x-=vel.x*8*dt;vel.z-=vel.z*8*dt;
+const dir=new THREE.Vector3();controls.getDirection(dir);dir.y=0;dir.normalize();
+const side=new THREE.Vector3().crossVectors(dir,new THREE.Vector3(0,1,0));
+vel.addScaledVector(dir,f*sp*dt*10);vel.addScaledVector(side,s*sp*dt*10);
+const np=camera.position.clone().addScaledVector(vel,dt);np.y=1.7;
+if(!collide(np))camera.position.copy(np);
+np.x=Math.max(-19,Math.min(19,np.x));np.z=Math.max(-19,Math.min(19,np.z));camera.position.x=np.x;camera.position.z=np.z;
+// enemies
+for(const e of enemies){const to=camera.position.clone().sub(e.position);to.y=0;const d=to.length();to.normalize();
+if(d>1.6){e.position.addScaledVector(to,dt*(1.5+wave*0.15));}else{hp-=20*dt;hpfill.style.width=Math.max(0,hp)+'%';hpfill.style.background=hp>50?'#4caf50':'#f44336';if(hp<=0){hp=100;hpfill.style.width='100%';blip(200);}}
+e.lookAt(camera.position.x,0,camera.position.z);}
+if(enemies.length===0){wave++;spawnWave(3+wave);}
+}
+kick*=Math.pow(0.0001,dt);gun.position.z=-0.5+kick;gun.rotation.x=kick*2;
+renderer.render(scene,camera);}
+animate();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+</script>
+</body>
+</html>
