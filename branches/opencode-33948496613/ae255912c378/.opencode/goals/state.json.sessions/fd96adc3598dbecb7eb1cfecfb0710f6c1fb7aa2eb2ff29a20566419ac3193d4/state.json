@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "goals": [],
+  "results": [
+    {
+      "condition": "Build a small playable browser game called Neon Parcel Dodge. The player moves a courier left and right to catch falling parcels while avoiding red hazards. Include a clear score, lives, start/restart flow, increasing difficulty, and polished responsive HTML/CSS/JavaScript presentation. Keep it self-contained and verify the core gameplay loop in the browser.",
+      "state": "achieved",
+      "reason": "",
+      "evidence": "file=neon-parcel-dodge.html; headless Chrome (puppeteer-core) verified: start->playing with spawn, ArrowRight 240->434 and ArrowLeft ->206 movement, injected parcel catch score 0->10 caught=1, hazard hit lives 3->2, score 300 -> level 3 difficulty scaling, last-life hazard -> over screen visible, restart resets to playing/score 0/lives 3; zero console/page errors; desktop + 390px mobile screenshots confirmed polished responsive rendering.",
+      "blockedReason": "",
+      "turnCount": 0,
+      "totalTokens": 20125,
+      "usage": {
+        "input": 19245,
+        "output": 7149,
+        "reasoning": 531,
+        "cacheRead": 160460,
+        "cacheWrite": 0,
+        "cost": 0,
+        "costKnown": true
+      },
+      "startedAt": 1788587901707,
+      "finishedAt": 1788587990495,
+      "lastStatus": "Goal completed.",
+      "lastCheckpoint": {
+        "summary": "Neon Parcel Dodge is complete at `neon-parcel-dodge.html` — single self-contained file (no assets), canvas 60fps, neon responsive UI with score/lives/level HUD, start/game-over/restart overlays, keyboard + drag + touch controls, gold bonus parcels, particle effects, and level sc…",
+        "timestamp": 1788587990494
+      },
+      "checkpoints": [
+        {
+          "summary": "Neon Parcel Dodge is complete at `neon-parcel-dodge.html` — single self-contained file (no assets), canvas 60fps, neon responsive UI with score/lives/level HUD, start/game-over/restart overlays, keyboard + drag + touch controls, gold bonus parcels, particle effects, and level sc…",
+          "timestamp": 1788587990494
+        }
+      ],
+      "history": [
+        {
+          "type": "set",
+          "detail": "Goal created with limits: 10 auto-continues, 900s, 200,000 context tokens.",
+          "timestamp": 1788587901708
+        },
+        {
+          "type": "completed",
+          "detail": "Assistant marked the goal complete with evidence: file=neon-parcel-dodge.html; headless Chrome (puppeteer-core) verified: start->playing with spawn, ArrowRight 240->434 and ArrowLeft ->206 movement, injected parcel catch score 0->10 caught=1, hazard hit lives 3->2, score 300 -> level 3 difficulty scaling, last-life hazard -> over screen visible, restart resets to playing/score 0/lives 3; zero con…",
+          "timestamp": 1788587990495
+        }
+      ],
+      "sessionID": "ses_f8fda7ec4ffe205NJzbGfquL1D"
+    }
+  ],
+  "archives": [
+    {
+      "sessionID": "ses_f8fda7ec4ffe205NJzbGfquL1D",
+      "results": [
+        {
+          "condition": "Build a small playable browser game called Neon Parcel Dodge. The player moves a courier left and right to catch falling parcels while avoiding red hazards. Include a clear score, lives, start/restart flow, increasing difficulty, and polished responsive HTML/CSS/JavaScript presentation. Keep it self-contained and verify the core gameplay loop in the browser.",
+          "state": "achieved",
+          "reason": "",
+          "evidence": "file=neon-parcel-dodge.html; headless Chrome (puppeteer-core) verified: start->playing with spawn, ArrowRight 240->434 and ArrowLeft ->206 movement, injected parcel catch score 0->10 caught=1, hazard hit lives 3->2, score 300 -> level 3 difficulty scaling, last-life hazard -> over screen visible, restart resets to playing/score 0/lives 3; zero console/page errors; desktop + 390px mobile screenshots confirmed polished responsive rendering.",
+          "blockedReason": "",
+          "turnCount": 0,
+          "totalTokens": 20125,
+          "usage": {
+            "input": 19245,
+            "output": 7149,
+            "reasoning": 531,
+            "cacheRead": 160460,
+            "cacheWrite": 0,
+            "cost": 0,
+            "costKnown": true
+          },
+          "startedAt": 1788587901707,
+          "finishedAt": 1788587990495,
+          "lastStatus": "Goal completed.",
+          "lastCheckpoint": {
+            "summary": "Neon Parcel Dodge is complete at `neon-parcel-dodge.html` — single self-contained file (no assets), canvas 60fps, neon responsive UI with score/lives/level HUD, start/game-over/restart overlays, keyboard + drag + touch controls, gold bonus parcels, particle effects, and level sc…",
+            "timestamp": 1788587990494
+          },
+          "checkpoints": [
+            {
+              "summary": "Neon Parcel Dodge is complete at `neon-parcel-dodge.html` — single self-contained file (no assets), canvas 60fps, neon responsive UI with score/lives/level HUD, start/game-over/restart overlays, keyboard + drag + touch controls, gold bonus parcels, particle effects, and level sc…",
+              "timestamp": 1788587990494
+            }
+          ],
+          "history": [
+            {
+              "type": "set",
+              "detail": "Goal created with limits: 10 auto-continues, 900s, 200,000 context tokens.",
+              "timestamp": 1788587901708
+            },
+            {
+              "type": "completed",
+              "detail": "Assistant marked the goal complete with evidence: file=neon-parcel-dodge.html; headless Chrome (puppeteer-core) verified: start->playing with spawn, ArrowRight 240->434 and ArrowLeft ->206 movement, injected parcel catch score 0->10 caught=1, hazard hit lives 3->2, score 300 -> level 3 difficulty scaling, last-life hazard -> over screen visible, restart resets to playing/score 0/lives 3; zero con…",
+              "timestamp": 1788587990495
+            }
+          ],
+          "sessionID": "ses_f8fda7ec4ffe205NJzbGfquL1D"
+        }
+      ]
+    }
+  ],
+  "orderedSessions": []
+}
