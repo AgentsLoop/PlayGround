@@ -158,8 +158,8 @@ for (let i = 0; i < 12; i++) {
     color: 0xffd34d, emissive: 0xffaa00, emissiveIntensity: 2.2, roughness: 0.25
   }));
   m.castShadow = true; spawnOrb(m); scene.add(m); orbs.push(m);
-  const halo = new THREE.Mesh(new THREE.SphereGeometry(0.6, 12, 12),
-    new THREE.MeshBasicMaterial({ color: 0xffcc33, transparent: true, opacity: 0.25 }));
+  const halo = new THREE.Mesh(new THREE.SphereGeometry(0.62, 12, 12),
+    new THREE.MeshBasicMaterial({ color: 0xffb833, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false }));
   m.add(halo);
 }
 
@@ -239,7 +239,7 @@ function say(msg) {
 }
 playBtn.onclick = () => { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); startGame(); };
 function startGame() {
-  S.running = true; S.score = 0; S.lives = 3; S.time = TIME_LIMIT; S.invuln = 0;
+  S.running = true; S.presented = true; S.score = 0; S.lives = 3; S.time = TIME_LIMIT; S.invuln = 0;
   player.position.set(0, 0, 0);
   orbs.forEach(spawnOrb);
   overlay.classList.add('hidden');
@@ -293,7 +293,18 @@ function update(dt, t) {
     // idle camera orbit
     camera.position.set(Math.cos(t * 0.25) * 14, 7, Math.sin(t * 0.25) * 14);
     camera.lookAt(0, 1.2, 0);
-    player.rotation.y += dt * 0.6;
+    if (!S.presented) {
+      // before the first run, park the hero beside the title card, facing the camera
+      const toC = new THREE.Vector3(-camera.position.x, 0, -camera.position.z).normalize();
+      const right = new THREE.Vector3(-toC.z, 0, toC.x); // screen-right for a camera looking along toC
+      player.position.copy(camera.position).addScaledVector(toC, 7).addScaledVector(right, -4.2);
+      player.position.y = 0;
+    }
+    const faceYaw = Math.atan2(camera.position.x - player.position.x, camera.position.z - player.position.z);
+    let d = faceYaw - S.yaw;
+    while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2;
+    S.yaw += d * Math.min(1, dt * 5);
+    player.rotation.y = S.yaw;
     player.position.y = Math.sin(t * 2) * 0.12;
     return;
   }
