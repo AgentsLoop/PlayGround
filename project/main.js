@@ -66,7 +66,11 @@ scene.add(playerRig);
 let shipModel = null;
 async function loadShip() {
   const loader = new GLTFLoader();
-  const urls = ['./public/models/spaceship.glb', './models/spaceship.glb'];
+  // Prefer the correct relative path for the current entrypoint so no 404 is logged.
+  const fromProject = window.location.pathname.includes('/project/');
+  const urls = fromProject
+    ? ['./public/models/spaceship.glb', './models/spaceship.glb']
+    : ['./project/public/models/spaceship.glb'];
   for (const u of urls) {
     try {
       const gltf = await loader.loadAsync(u);
