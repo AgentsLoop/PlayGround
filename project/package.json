@@ -1,0 +1,10 @@
+{
+  "name": "robo-orb-run",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Robo Orb Run — 3D browser collector game (Three.js + Sketchfab robot hero)",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "ISC"
+}
