@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tidepool Tangle</title>
+<style>
+  :root{
+    --sand:#f6e7c8; --sea:#0e7c86; --deep:#075e66; --ink:#17323a;
+    --coral:#ff6b6b; --sun:#ffc93c; --kelp:#2ec4b6; --violet:#9b5de5;
+    --card:#fffdf6; --muted:#5b7a82;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;
+    color:var(--ink); min-height:100vh; display:flex; flex-direction:column;
+    background:linear-gradient(180deg,#b8e6e8 0%,#8fd0d4 30%,var(--sand) 78%,#eed9a8 100%);
+  }
+  header{
+    text-align:center; padding:14px 12px 6px;
+  }
+  header h1{margin:0; font-size:clamp(1.6rem,4vw,2.4rem); letter-spacing:.5px; color:var(--deep);
+    text-shadow:0 2px 0 rgba(255,255,255,.6)}
+  header p{margin:4px 0 0; color:var(--muted); font-size:.95rem}
+  #hud{
+    display:flex; gap:10px; justify-content:center; align-items:stretch;
+    flex-wrap:wrap; padding:10px 12px;
+  }
+  .pill{
+    background:var(--card); border:2px solid #ffffff; border-radius:14px;
+    box-shadow:0 4px 12px rgba(7,94,102,.15);
+    padding:8px 16px; min-width:130px; text-align:center;
+  }
+  .pill .label{font-size:.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--muted)}
+  .pill .value{font-size:1.5rem; font-weight:800; color:var(--deep)}
+  #timerWrap{flex:1 1 220px; max-width:420px; display:flex; flex-direction:column; justify-content:center;
+    background:var(--card); border-radius:14px; padding:8px 14px; border:2px solid #fff;
+    box-shadow:0 4px 12px rgba(7,94,102,.15)}
+  #timerBarOuter{height:14px; background:#e3efef; border-radius:99px; overflow:hidden; margin-top:6px}
+  #timerBar{height:100%; width:100%; border-radius:99px;
+    background:linear-gradient(90deg,#2ec4b6,#09a5a5); transition:width .25s linear, background .5s}
+  #timerBar.low{background:linear-gradient(90deg,#ff9f1c,#ff6b6b)}
+  #controls{display:flex; gap:10px; justify-content:center; padding:2px 12px 8px; flex-wrap:wrap}
+  button{font-family:inherit}
+  #restartBtn,#startBtn,#startBtn2{
+    border:none; border-radius:99px; padding:10px 22px; font-size:1rem; font-weight:800;
+    cursor:pointer; color:#fff; background:linear-gradient(180deg,#12a3ad,#075e66);
+    box-shadow:0 4px 0 #04444a, 0 8px 16px rgba(7,94,102,.3); transition:transform .08s;
+  }
+  #restartBtn:active,#startBtn:active,#startBtn2:active{transform:translateY(3px); box-shadow:0 1px 0 #04444a}
+  #restartBtn:focus-visible,#startBtn:focus-visible,#startBtn2:focus-visible,.shell:focus-visible,.basket:focus-visible{outline:3px solid #ff9f1c; outline-offset:2px}
+  main{flex:1; width:min(1024px,100%); margin:0 auto; padding:0 12px 18px; display:flex; flex-direction:column; gap:12px}
+  #baskets{display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
+  @media (max-width:640px){ #baskets{grid-template-columns:repeat(2,1fr)} }
+  .basket{
+    border-radius:16px; padding:10px 8px 12px; text-align:center; cursor:pointer;
+    background:rgba(255,253,246,.92); border:3px dashed transparent;
+    box-shadow:0 4px 12px rgba(7,94,102,.15); transition:transform .12s, border-color .12s;
+    position:relative; min-height:104px;
+  }
+  .basket .emoji{font-size:2.4rem; line-height:1.1}
+  .basket .name{font-weight:800; margin-top:2px}
+  .basket .count{font-size:.85rem; color:var(--muted)}
+  .basket .key{position:absolute; top:6px; right:8px; font-size:.7rem; background:#17323a; color:#fff;
+    border-radius:6px; padding:1px 6px; opacity:.75}
+  /* Color+icon redundancy: each basket carries the same creature emoji as its
+     shells on a solid tint, so matching never depends on color alone. */
+  .basket[data-color="coral"]{border-color:var(--coral); background:linear-gradient(180deg,#ffe0e0,#ffc2c2)}
+  .basket[data-color="sun"]{border-color:var(--sun); background:linear-gradient(180deg,#fff3c4,#ffe58a)}
+  .basket[data-color="kelp"]{border-color:var(--kelp); background:linear-gradient(180deg,#c9fff9,#9df0e4)}
+  .basket[data-color="violet"]{border-color:var(--violet); background:linear-gradient(180deg,#e6d4ff,#cdb0f7)}
+  .basket.drop-hint{transform:scale(1.05); background:#fff}
+  .basket.bump{animation:bump .35s}
+  .basket.deny{animation:shake .3s}
+  @keyframes bump{40%{transform:scale(1.12) rotate(-1.5deg)}}
+  @keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+  #poolWrap{
+    position:relative; border-radius:20px; overflow:hidden;
+    background:radial-gradient(ellipse 90% 70% at 50% 30%, #2fb9c4 0%, #14909b 45%, #0b6b74 100%);
+    box-shadow:inset 0 0 60px rgba(0,40,45,.45), 0 6px 18px rgba(7,94,102,.25);
+    min-height:340px; border:4px solid #fffdf6;
+  }
+  #poolLabel{position:absolute; top:8px; left:12px; color:#eafffb; font-weight:700; opacity:.9;
+    text-shadow:0 1px 3px rgba(0,0,0,.4); pointer-events:none; z-index:5}
+  #pool{position:absolute; inset:0; touch-action:none}
+  .shell{
+    position:absolute; width:64px; height:64px; border-radius:50%;
+    border:3px solid rgba(255,255,255,.9); cursor:grab;
+    display:flex; align-items:center; justify-content:center; font-size:1.9rem;
+    box-shadow:0 6px 12px rgba(0,30,35,.35); user-select:none; -webkit-user-select:none;
+    animation:bob 2.4s ease-in-out infinite; transition:transform .1s;
+    background:#fff; touch-action:none; padding:0; margin:0;
+  }
+  .shell:active{cursor:grabbing}
+  .shell.selected{transform:scale(1.15); box-shadow:0 0 0 4px #ff9f1c, 0 6px 12px rgba(0,30,35,.35); z-index:10}
+  .shell.dragging{animation:none; z-index:20; transform:scale(1.15); opacity:.95}
+  .shell[data-color="coral"]{background:radial-gradient(circle at 35% 30%,#ffd3d3,var(--coral))}
+  .shell[data-color="sun"]{background:radial-gradient(circle at 35% 30%,#fff3c4,var(--sun))}
+  .shell[data-color="kelp"]{background:radial-gradient(circle at 35% 30%,#c9fff9,var(--kelp))}
+  .shell[data-color="violet"]{background:radial-gradient(circle at 35% 30%,#e6d4ff,var(--violet))}
+  @keyframes bob{0%,100%{margin-top:0}50%{margin-top:-8px}}
+  .shell.pop{animation:pop .3s forwards}
+  @keyframes pop{to{transform:scale(1.6); opacity:0}}
+  .float-score{
+    position:absolute; font-weight:900; font-size:1.3rem; color:#fff; pointer-events:none;
+    text-shadow:0 2px 4px rgba(0,0,0,.5); animation:floatUp .8s forwards; z-index:30;
+  }
+  @keyframes floatUp{to{transform:translateY(-46px); opacity:0}}
+  #overlay{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(7,40,45,.72); z-index:40; padding:16px;
+  }
+  #overlay[hidden]{display:none}
+  #overlayCard{background:var(--card); border-radius:18px; padding:24px 28px; text-align:center; max-width:420px;
+    box-shadow:0 12px 40px rgba(0,0,0,.35)}
+  #overlayCard h2{margin:0 0 6px; color:var(--deep)}
+  #overlayCard p{color:var(--muted)}
+  #help{font-size:.88rem; color:var(--muted); text-align:center; line-height:1.5; max-width:640px; margin:0 auto}
+  kbd{background:#17323a; color:#fff; border-radius:5px; padding:0 6px; font-size:.78rem}
+  #live{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+  .confetti{position:absolute; top:-12px; font-size:1.2rem; animation:fall linear forwards; pointer-events:none; z-index:50}
+  @keyframes fall{to{transform:translateY(420px) rotate(540deg); opacity:.9}}
+  @media (prefers-reduced-motion:reduce){ .shell{animation:none} .confetti{display:none} }
+</style>
+</head>
+<body>
+<header>
+  <h1>🐚 Tidepool Tangle</h1>
+  <p>Click or drag each shell into the basket of the <strong>same color</strong> before the tide comes in!</p>
+</header>
+
+<div id="hud" role="status" aria-label="Game status">
+  <div class="pill"><div class="label">Score</div><div class="value" id="score">0</div></div>
+  <div id="timerWrap">
+    <div><span class="label" style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">Time left</span>
+    <strong id="timeText">60s</strong> · <span id="best">Best: 0</span></div>
+    <div id="timerBarOuter"><div id="timerBar"></div></div>
+  </div>
+  <div class="pill"><div class="label">Sorted</div><div class="value" id="sorted">0</div></div>
+</div>
+
+<div id="controls">
+  <button id="startBtn">▶ Start (Enter)</button>
+  <button id="restartBtn">↻ Restart (R)</button>
+</div>
+
+<main>
+  <div id="baskets" role="group" aria-label="Tidepool baskets">
+    <div class="basket" data-color="coral" tabindex="0" role="button" aria-label="Coral shell basket, press 1">
+      <span class="key">1</span><div class="emoji">🐚</div><div class="name" style="color:#d63d3d">Coral shell</div><div class="count" id="count-coral">0 sorted</div>
+    </div>
+    <div class="basket" data-color="sun" tabindex="0" role="button" aria-label="Sunny fish basket, press 2">
+      <span class="key">2</span><div class="emoji">🐠</div><div class="name" style="color:#b78a00">Sunny fish</div><div class="count" id="count-sun">0 sorted</div>
+    </div>
+    <div class="basket" data-color="kelp" tabindex="0" role="button" aria-label="Kelp turtle basket, press 3">
+      <span class="key">3</span><div class="emoji">🐢</div><div class="name" style="color:#0a8a7d">Kelp turtle</div><div class="count" id="count-kelp">0 sorted</div>
+    </div>
+    <div class="basket" data-color="violet" tabindex="0" role="button" aria-label="Violet squid basket, press 4">
+      <span class="key">4</span><div class="emoji">🦑</div><div class="name" style="color:#7a3fd1">Violet squid</div><div class="count" id="count-violet">0 sorted</div>
+    </div>
+  </div>
+
+  <div id="poolWrap">
+    <span id="poolLabel">🌊 Tidepool — shells wash up here</span>
+    <div id="pool" aria-label="Tidepool play area"></div>
+    <div id="overlay">
+      <div id="overlayCard">
+        <h2 id="overlayTitle">Ready to untangle?</h2>
+        <p id="overlayText">You have <strong>60 seconds</strong>. Match each shell to its basket.<br>Correct: <strong>+10</strong> · Wrong: <strong>−5</strong> · Combo streaks earn bonus!</p>
+        <button id="startBtn2">▶ Start game</button>
+      </div>
+    </div>
+  </div>
+
+  <p id="help">🖱️ <strong>Drag</strong> a shell onto a basket, or <strong>click</strong> a shell then click a basket. ⌨️ <kbd>Tab</kbd> finds shells, <kbd>1</kbd>–<kbd>4</kbd> sorts the selected shell, <kbd>R</kbd> restarts. Wrong basket = −5 &amp; a wobble!</p>
+</main>
+
+<div id="live" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+  var COLORS = ["coral","sun","kelp","violet"];
+  var EMOJI = {coral:"🐚", sun:"🐠", kelp:"🐢", violet:"🦑"};
+  var NAMES = {coral:"Coral", sun:"Sunny", kelp:"Kelp", violet:"Violet"};
+  var GAME_LEN = 60, MAX_SHELLS = 7;
+  var score=0, sorted=0, streak=0, best=0, timeLeft=GAME_LEN, running=false, timerId=null, selected=null, counts={coral:0,sun:0,kelp:0,violet:0};
+  try{ best = parseInt(localStorage.getItem("tidepoolBest")||"0",10)||0; }catch(e){}
+
+  var pool=document.getElementById("pool"), scoreEl=document.getElementById("score"),
+      sortedEl=document.getElementById("sorted"), timeText=document.getElementById("timeText"),
+      timerBar=document.getElementById("timerBar"), bestEl=document.getElementById("best"),
+      overlay=document.getElementById("overlay"), overlayTitle=document.getElementById("overlayTitle"),
+      overlayText=document.getElementById("overlayText"), live=document.getElementById("live");
+
+  bestEl.textContent="Best: "+best;
+
+  function randColor(){ return COLORS[Math.floor(Math.random()*COLORS.length)]; }
+  function freeSpot(){
+    var w=pool.clientWidth||300, h=pool.clientHeight||300;
+    return { x: 8+Math.random()*Math.max(40,(w-80)), y: 24+Math.random()*Math.max(40,(h-100)) };
+  }
+  function announce(m){ live.textContent=m; }
+
+  function spawnShell(){
+    if(!running) return;
+    if(pool.querySelectorAll(".shell").length>=MAX_SHELLS) return;
+    var c=randColor(), s=freeSpot();
+    var b=document.createElement("button");
+    b.className="shell"; b.dataset.color=c;
+    b.style.left=s.x+"px"; b.style.top=s.y+"px";
+    b.style.animationDelay=(Math.random()*2)+"s";
+    b.textContent=EMOJI[c];
+    b.setAttribute("aria-label", NAMES[c]+" shell. Press 1 to 4 to sort, or drag to a basket.");
+    b.addEventListener("pointerdown", onDragStart);
+    b.addEventListener("click", function(e){
+      if(b.dataset.moved==="1"){ b.dataset.moved="0"; return; }
+      selectShell(b);
+    });
+    b.addEventListener("keydown", function(e){
+      if(e.key==="1"||e.key==="2"||e.key==="3"||e.key==="4"){
+        e.preventDefault(); selectShell(b); deposit(b, COLORS[+e.key-1]);
+      } else if(e.key==="Enter"||e.key===" "){ e.preventDefault(); selectShell(b); }
+    });
+    pool.appendChild(b);
+  }
+  function selectShell(b){
+    if(!running) return;
+    if(selected) selected.classList.remove("selected");
+    selected=b; b.classList.add("selected");
+    announce(NAMES[b.dataset.color]+" shell selected. Press 1 to 4 to sort.");
+  }
+  function onDragStart(e){
+    var el=e.currentTarget;
+    if(!running) return;
+    if(e.pointerType==="mouse" && e.button!==undefined && e.button!==0) return;
+    if(el.dataset.dragId!==undefined && el.dataset.dragId!=="") return;
+    e.preventDefault();
+    try{ el.setPointerCapture && el.setPointerCapture(e.pointerId); }catch(err){}
+    el.dataset.dragId=String(e.pointerId);
+    el.classList.add("dragging"); selectShell(el);
+    // Freeze bob animation offset so the shell doesn't jump when dragging starts
+    el.style.marginTop="0";
+    function clamp(v,lo,hi){ return Math.min(hi,Math.max(lo,v)); }
+    function moveShell(clientX,clientY){
+      var poolRect=pool.getBoundingClientRect();
+      var w=el.offsetWidth||64, h=el.offsetHeight||64;
+      var x=clamp(clientX-poolRect.left-w/2, -w/4, Math.max(0,poolRect.width-w*0.75));
+      var y=clamp(clientY-poolRect.top-h/2, -h/4, Math.max(0,poolRect.height-h*0.75));
+      el.dataset.moved="1";
+      el.style.left=x+"px";
+      el.style.top=y+"px";
+      document.querySelectorAll(".basket").forEach(function(bk){
+        var r=bk.getBoundingClientRect();
+        var over = clientX>r.left && clientX<r.right && clientY>r.top && clientY<r.bottom;
+        bk.classList.toggle("drop-hint", over);
+      });
+    }
+    function cleanup(){
+      el.dataset.dragId="";
+      el.classList.remove("dragging");
+      document.querySelectorAll(".basket").forEach(function(bk){bk.classList.remove("drop-hint");});
+      el.removeEventListener("pointermove",move); el.removeEventListener("pointerup",up); el.removeEventListener("pointercancel",cancel);
+    }
+    function move(ev){
+      if(String(ev.pointerId)!==el.dataset.dragId) return;
+      ev.preventDefault();
+      moveShell(ev.clientX,ev.clientY);
+    }
+    function hitAt(clientX,clientY){
+      var hit=null;
+      document.querySelectorAll(".basket").forEach(function(bk){
+        var r=bk.getBoundingClientRect();
+        if(clientX>r.left&&clientX<r.right&&clientY>r.top&&clientY<r.bottom) hit=bk;
+      });
+      return hit;
+    }
+    function up(ev){
+      if(String(ev.pointerId)!==el.dataset.dragId) return;
+      var hit=hitAt(ev.clientX,ev.clientY);
+      var wasMoved=el.dataset.moved==="1";
+      cleanup();
+      if(hit){ deposit(el, hit.dataset.color); }
+      else if(!wasMoved){ /* plain tap: let click handler select */ }
+      // Suppress the synthetic click that follows a real drag
+      if(wasMoved){ setTimeout(function(){ el.dataset.moved="0"; },80); }
+      else { el.dataset.moved="0"; }
+    }
+    function cancel(ev){
+      if(String(ev.pointerId)!==el.dataset.dragId) return;
+      cleanup();
+      setTimeout(function(){ el.dataset.moved="0"; },80);
+    }
+    el.addEventListener("pointermove",move); el.addEventListener("pointerup",up); el.addEventListener("pointercancel",cancel);
+  }
+  function floatText(x,y,txt,color){
+    var f=document.createElement("div"); f.className="float-score"; f.textContent=txt;
+    f.style.left=x+"px"; f.style.top=y+"px"; if(color) f.style.color=color;
+    pool.appendChild(f); setTimeout(function(){f.remove();},850);
+  }
+  function deposit(shellEl, basketColor){
+    if(!running||!pool.contains(shellEl)) return;
+    var shellColor=shellEl.dataset.color;
+    var bk=document.querySelector('.basket[data-color="'+basketColor+'"]');
+    if(shellColor===basketColor){
+      streak++;
+      var pts=10+(streak>=3?5:0);
+      score+=pts; sorted++; counts[shellColor]++;
+      document.getElementById("count-"+shellColor).textContent=counts[shellColor]+" sorted";
+      floatText(shellEl.offsetLeft, shellEl.offsetTop, "+"+pts+(streak>=3?" 🔥":""));
+      shellEl.classList.add("pop");
+      var el=shellEl;
+      setTimeout(function(){ el.remove(); },280);
+      if(selected===shellEl) selected=null;
+      bk.classList.remove("bump"); void bk.offsetWidth; bk.classList.add("bump");
+      announce("Correct! "+NAMES[shellColor]+" shell sorted. +"+pts+". Score "+score+".");
+      spawnShell();
+    } else {
+      streak=0; score=Math.max(0,score-5);
+      bk.classList.remove("deny"); void bk.offsetWidth; bk.classList.add("deny");
+      floatText(shellEl.offsetLeft, shellEl.offsetTop, "−5", "#ffb3b3");
+      announce("Oops, that shell is "+NAMES[shellColor]+", not "+NAMES[basketColor]+". Minus 5.");
+    }
+    scoreEl.textContent=score; sortedEl.textContent=sorted;
+  }
+  document.querySelectorAll(".basket").forEach(function(bk){
+    bk.addEventListener("click", function(){ if(selected) deposit(selected, bk.dataset.color); });
+    bk.addEventListener("keydown", function(e){
+      if((e.key==="Enter"||e.key===" ")&&selected){ e.preventDefault(); deposit(selected, bk.dataset.color); }
+    });
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key==="r"||e.key==="R"){ restart(); }
+    else if(e.key==="Enter" && !running && !overlay.hidden){ start(); }
+    else if(["1","2","3","4"].indexOf(e.key)>=0 && running && selected && pool.contains(selected)){
+      var t=e.target;
+      var tag=t&&t.tagName?t.tagName.toLowerCase():"";
+      if(tag==="input"||tag==="textarea"||tag==="select"||t.isContentEditable) return;
+      // If focus is on a shell, its own keydown handler already deposits; avoid double-deposit.
+      if(t && t.classList && t.classList.contains("shell")) return;
+      e.preventDefault();
+      deposit(selected, COLORS[+e.key-1]);
+    }
+  });
+
+  function tick(){
+    timeLeft--;
+    timeText.textContent=timeLeft+"s";
+    timerBar.style.width=(timeLeft/GAME_LEN*100)+"%";
+    timerBar.classList.toggle("low", timeLeft<=10);
+    if(timeLeft<=0) end();
+  }
+  function start(){
+    if(running) return;
+    resetState(); running=true;
+    overlay.hidden=true;
+    timerId=setInterval(tick,1000);
+    for(var i=0;i<5;i++) spawnShell();
+    announce("Game started. 60 seconds. Sort shells into matching baskets.");
+    document.getElementById("startBtn").textContent="⏸ Playing… (R restarts)";
+  }
+  function resetState(){
+    score=0; sorted=0; streak=0; timeLeft=GAME_LEN; selected=null;
+    counts={coral:0,sun:0,kelp:0,violet:0};
+    scoreEl.textContent="0"; sortedEl.textContent="0";
+    timeText.textContent=GAME_LEN+"s"; timerBar.style.width="100%"; timerBar.classList.remove("low");
+    COLORS.forEach(function(c){document.getElementById("count-"+c).textContent="0 sorted";});
+    pool.querySelectorAll(".shell,.float-score").forEach(function(n){n.remove();});
+  }
+  function restart(){ clearInterval(timerId); timerId=null; running=false; start(); }
+  function end(){
+    running=false; clearInterval(timerId); timerId=null;
+    var isBest=false;
+    if(score>best){ best=score; isBest=true; try{localStorage.setItem("tidepoolBest",String(best));}catch(e){} }
+    bestEl.textContent="Best: "+best;
+    overlay.hidden=false;
+    overlayTitle.textContent="⏰ Time! Score: "+score;
+    overlayText.innerHTML="You sorted <strong>"+sorted+"</strong> shells."+(isBest?" New <strong>best score! 🎉</strong>":" Best: <strong>"+best+"</strong>")+"<br>Press <strong>R</strong> or Restart to play again.";
+    document.getElementById("startBtn").textContent="▶ Start (Enter)";
+    announce("Time up. Final score "+score+". "+sorted+" shells sorted.");
+    confetti();
+  }
+  function confetti(){
+    var wrap=document.getElementById("poolWrap");
+    var icons=["🐚","🫧","⭐","🐠","💧"];
+    for(var i=0;i<36;i++){
+      (function(i){
+        var c=document.createElement("div"); c.className="confetti";
+        c.textContent=icons[i%icons.length];
+        c.style.left=(Math.random()*100)+"%";
+        c.style.animationDuration=(1.4+Math.random()*1.6)+"s";
+        c.style.animationDelay=(Math.random()*0.6)+"s";
+        wrap.appendChild(c); setTimeout(function(){c.remove();},3600);
+      })(i);
+    }
+  }
+  document.getElementById("startBtn").addEventListener("click", start);
+  document.getElementById("restartBtn").addEventListener("click", restart);
+  document.getElementById("startBtn2").addEventListener("click", start);
+  // Pre-spawn decorative shells behind the start overlay
+  running=true; for(var k=0;k<5;k++) spawnShell(); running=false;
+})();
+</script>
+</body>
+</html>
