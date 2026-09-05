@@ -1,0 +1,1 @@
+Build a small playable browser game called Neon Parcel Dodge. The player moves a courier left and right to catch falling parcels while avoiding red hazards. Include a clear score, lives, start/restart flow, increasing difficulty, and polished responsive HTML/CSS/JavaScript presentation. Keep it self-contained and verify the core gameplay loop in the browser.

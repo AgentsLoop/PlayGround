@@ -1,0 +1,166 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Building your Neon Parcel Dodge game — self-contained with scoring, lives, and polish.
+[0m→ [0mRead .
+[0m→ [0mRead README.md
+[0m
+[0m$ [0mls -la; which python3 node npx chromium google-chrome playwright 2>&1; node --version 2>&1; python3 --version 2>&1
+total 56
+drwxr-xr-x 10 runner runner 4096 Sep  5 05:58 .
+drwxr-xr-x  3 runner runner 4096 Sep  5 05:56 ..
+drwxr-xr-x  5 runner runner 4096 Sep  5 05:56 .agents
+drwxr-xr-x  4 runner runner 4096 Sep  5 05:56 .agentsweb
+drwxr-xr-x  7 runner runner 4096 Sep  5 05:58 .git
+drwxr-xr-x  3 runner runner 4096 Sep  5 05:56 .github
+drwxr-xr-x  9 runner runner 4096 Sep  5 05:56 .omgithub-runtime
+drwx------  3 runner runner 4096 Sep  5 05:58 .opencode
+drwx------  2 runner runner 4096 Sep  5 05:57 .opencode-ssh
+drwx------  2 runner runner 4096 Sep  5 05:58 .opencode-web
+-rw-r--r--  1 runner runner 2250 Sep  5 05:56 Agents.md
+-rw-r--r--  1 runner runner   53 Sep  5 05:56 README.md
+-rw-------  1 runner runner  411 Sep  5 05:57 opencode-agentsweb-id_ed25519
+-rw-r--r--  1 runner runner  102 Sep  5 05:57 opencode-agentsweb-id_ed25519.pub
+/usr/bin/python3
+/usr/local/bin/node
+/usr/local/bin/npx
+/usr/bin/chromium
+/usr/bin/google-chrome
+v22.23.2
+Python 3.12.3
+[0m
+[0m# [0mTodos
+[•] Build self-contained neon-parcel-dodge.html game
+[ ] Verify core gameplay loop in browser (headless)
+[0m
+[0m← [0mWrite neon-parcel-dodge.html
+Wrote file successfully.
+[0m
+Game file created — now verifying it plays correctly in a browser.
+[0m$ [0mnpm ls -g --depth=0 2>&1 | head -20; ls /root/.cache/ms-playwright 2>&1; python3 -c "import playwright" 2>&1
+/usr/local/lib
+├── @bazel/bazelisk@v1.28.1
+├── corepack@0.34.6
+├── grunt@1.6.3
+├── gulp@5.0.1
+├── lerna@10.0.1
+├── n@10.2.0
+├── newman@6.2.2
+├── npm@10.9.8
+├── parcel@2.16.4
+├── typescript@7.0.2
+├── webpack-cli@7.2.3
+├── webpack@5.110.2
+└── yarn@1.22.22
+
+ls: cannot access '/root/.cache/ms-playwright': Permission denied
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'playwright'
+[0m
+[0m$ [0mnpm install --no-save puppeteer-core 2>&1 | tail -5
+added 25 packages in 2s
+
+8 packages are looking for funding
+  run `npm fund` for details
+[0m
+[0m$ [0mnode -e "
+const puppeteer = require('puppeteer-core');
+(async()=>{
+  const browser = await puppeteer.launch({executablePath:'/usr/bin/google-chrome', args:['--no-sandbox','--disable-gpu']});
+  const page = await browser.newPage();
+  await page.goto('file:///home/runner/work/PlayGround/PlayGround/neon-parcel-dodge.html');
+  await page.waitForSelector('#startBtn');
+  // start game
+  await page.click('#startBtn');
+  await new Promise(r=>setTimeout(r,500));
+  let s1 = await page.evaluate(()=>({state:window.__game.state, score:window.__game.score, lives:window.__game.lives, items:window.__game.items.length}));
+  console.log('after-start:', JSON.stringify(s1));
+  // move left/right
+  const x0 = await page.evaluate(()=>window.__game.player.x);
+  await page.keyboard.down('ArrowRight');
+  await new Promise(r=>setTimeout(r,600));
+  await page.keyboard.up('ArrowRight');
+  const x1 = await page.evaluate(()=>window.__game.player.x);
+  await page.keyboard.down('ArrowLeft');
+  await new Promise(r=>setTimeout(r,600));
+  await page.keyboard.up('ArrowLeft');
+  const x2 = await page.evaluate(()=>window.__game.player.x);
+  console.log('movement:', JSON.stringify({x0,x1,x2}));
+  // force a catch: place parcel on player
+  let catchTest = await page.evaluate(()=>{
+    const g=window.__game; g.score=0;
+    g.items.push({type:'parcel',x:g.player.x,y:640-56-10,w:34,h:26,vy:100,rot:0,vr:0,sway:0,swayF:1,t:0});
+    return 'injected';
+  });
+  await new Promise(r=>setTimeout(r,400));
+  let s2 = await page.evaluate(()=>({score:window.__game.score, caught:window.__game.caught, lives:window.__game.lives, state:window.__game.state}));
+  console.log('after-catch:', JSON.stringify(s2));
+  // force hazard hit
+  await page.evaluate(()=>{
+    const g=window.__game;
+    g.items.push({type:'hazard',x:g.player.x,y:640-56-10,w:34,h:26,vy:100,rot:0,vr:0,sway:0,swayF:1,t:0});
+  });
+  await new Promise(r=>setTimeout(r,400));
+  let s3 = await page.evaluate(()=>({score:window.__game.score, lives:window.__game.lives, hits:window.__game.hits}));
+  console.log('after-hazard:', JSON.stringify(s3));
+  // difficulty: score up -> level up
+  let s4 = await page.evaluate(()=>{ window.__game.score=300; return window.__game.score; });
+  await new Promise(r=>setTimeout(r,400));
+  let s5 = await page.evaluate(()=>({level:window.__game.level}));
+  console.log('difficulty:', JSON.stringify(s5));
+  // game over + restart
+  await page.evaluate(()=>{ window.__game.lives=1; window.__game.items.push({type:'hazard',x:window.__game.player.x,y:640-56-10,w:34,h:26,vy:100,rot:0,vr:0,sway:0,swayF:1,t:0}); });
+  await new Promise(r=>setTimeout(r,500));
+  let s6 = await page.evaluate(()=>({state:window.__game.state, overVisible:!document.getElementById('overScreen').hidden}));
+  console.log('gameover:', JSON.stringify(s6));
+  await page.click('#restartBtn');
+  await new Promise(r=>setTimeout(r,400));
+  let s7 = await page.evaluate(()=>({state:window.__game.state, score:window.__game.score, lives:window.__game.lives}));
+  console.log('restart:', JSON.stringify(s7));
+  await page.screenshot({path:'/tmp/opencode/neon-verify.png'});
+  console.log('screenshot ok');
+  await browser.close();
+})().catch(e=>{console.error('FAIL',e); process.exit(1);});
+"
+after-start: {"state":"playing","score":0,"lives":3,"items":1}
+movement: {"x0":240,"x1":434,"x2":206.03799999999987}
+after-catch: {"score":10,"caught":1,"lives":3,"state":"playing"}
+after-hazard: {"score":10,"lives":2,"hits":1}
+difficulty: {"level":3}
+gameover: {"state":"over","overVisible":true}
+restart: {"state":"playing","score":0,"lives":3}
+screenshot ok
+[0m
+[0m$ [0mnode -e "
+const puppeteer = require('puppeteer-core');
+(async()=>{
+  const browser = await puppeteer.launch({executablePath:'/usr/bin/google-chrome', args:['--no-sandbox','--disable-gpu']});
+  const page = await browser.newPage();
+  const errs=[];
+  page.on('pageerror',e=>errs.push('pageerror:'+e.message));
+  page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
+  await page.goto('file:///home/runner/work/PlayGround/PlayGround/neon-parcel-dodge.html');
+  await page.setViewport({width:390,height:844});
+  await new Promise(r=>setTimeout(r,800));
+  await page.screenshot({path:'/tmp/opencode/neon-mobile.png'});
+  console.log('errors:', JSON.stringify(errs));
+  console.log('responsive ok');
+  await browser.close();
+})();" 2>&1; ls -la /tmp/opencode/neon-*.png
+errors: []
+responsive ok
+-rw-r--r-- 1 runner runner 123034 Sep  5 05:59 /tmp/opencode/neon-mobile.png
+-rw-r--r-- 1 runner runner 128563 Sep  5 05:59 /tmp/opencode/neon-verify.png
+[0m
+[0m→ [0mRead /tmp/opencode/neon-verify.png
+[0m→ [0mRead /tmp/opencode/neon-mobile.png
+[0m
+[0m# [0mTodos
+[✓] Build self-contained neon-parcel-dodge.html game
+[✓] Verify core gameplay loop in browser (headless)
+[0m
+Neon Parcel Dodge is complete at `neon-parcel-dodge.html` — single self-contained file (no assets), canvas 60fps, neon responsive UI with score/lives/level HUD, start/game-over/restart overlays, keyboard + drag + touch controls, gold bonus parcels, particle effects, and level scaling (fall speed, spawn rate, hazard chance).
+
+[goal:evidence] file=neon-parcel-dodge.html; headless Chrome (puppeteer-core) verified: start->playing with spawn, ArrowRight 240->434 and ArrowLeft ->206 movement, injected parcel catch score 0->10 caught=1, hazard hit lives 3->2, score 300 -> level 3 difficulty scaling, last-life hazard -> over screen visible, restart resets to playing/score 0/lives 3; zero console/page errors; desktop + 390px mobile screenshots confirmed polished responsive rendering.
+[goal:complete]

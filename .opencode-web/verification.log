@@ -1,0 +1,381 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Verifying the app on port 3000 — checking entrypoint, server, and browser tests.
+[0m→ [0mRead Agents.md
+[0m
+[0m$ [0mls -la; ls index.html dist/index.html 2>&1; ls neon-parcel-dodge.html 2>&1; tmux ls 2>&1; cat ~/.config/opencode/current-goal.json 2>/dev/null; gh issue list --limit 5 2>&1 | head -20
+total 72
+drwxr-xr-x 10 runner runner  4096 Sep  5 05:58 .
+drwxr-xr-x  3 runner runner  4096 Sep  5 05:56 ..
+drwxr-xr-x  5 runner runner  4096 Sep  5 05:56 .agents
+drwxr-xr-x  4 runner runner  4096 Sep  5 05:56 .agentsweb
+drwxr-xr-x  7 runner runner  4096 Sep  5 05:59 .git
+drwxr-xr-x  3 runner runner  4096 Sep  5 05:56 .github
+drwxr-xr-x  9 runner runner  4096 Sep  5 05:56 .omgithub-runtime
+drwx------  3 runner runner  4096 Sep  5 05:58 .opencode
+drwx------  2 runner runner  4096 Sep  5 05:57 .opencode-ssh
+drwx------  2 runner runner  4096 Sep  5 05:59 .opencode-web
+-rw-r--r--  1 runner runner  2250 Sep  5 05:56 Agents.md
+-rw-r--r--  1 runner runner    53 Sep  5 05:56 README.md
+-rw-r--r--  1 runner runner 14496 Sep  5 05:58 neon-parcel-dodge.html
+-rw-------  1 runner runner   411 Sep  5 05:57 opencode-agentsweb-id_ed25519
+-rw-r--r--  1 runner runner   102 Sep  5 05:57 opencode-agentsweb-id_ed25519.pub
+ls: cannot access 'index.html': No such file or directory
+ls: cannot access 'dist/index.html': No such file or directory
+neon-parcel-dodge.html
+error connecting to /tmp/tmux-1001/default (No such file or directory)
+20	OPEN	Build an AAA-quality Three.js first-person shooter	OpenCode, Goal, skill/gauntlet-loop, skill/load-sketchfab-threejs	2026-09-05T05:59:25Z
+19	OPEN	Neon Parcel Dodge	OpenCode, in progress, Goal	2026-09-05T05:59:49Z
+18	OPEN	Tidepool Tangle: Sort the Shells	OpenCode, complete, Goal	2026-09-05T05:57:24Z
+17	OPEN	Signal Sprites: Neon Relay	OpenCode, complete, Goal	2026-09-04T08:38:32Z
+16	OPEN	Neon Kite Catcher	OpenCode, failed, Goal	2026-09-04T08:19:56Z
+[0m
+[0m$ [0mecho "TRIGGER=$TRIGGER_ISSUE_NUMBER REPO=$GITHUB_REPOSITORY"; git branch --show-current; git status --short; git log --oneline -5
+TRIGGER=19 REPO=AgentsLoop/PlayGround
+opencode/33948496613
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? neon-parcel-dodge.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+b4fe44a Grant reusable OpenCode workflow Pages permission
+[0m
+[0m$ [0mcp neon-parcel-dodge.html index.html && ls -la index.html && head -c 200 index.html
+-rw-r--r-- 1 runner runner 14496 Sep  5 06:00 index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Neon Parcel Dodge</tit
+[0m
+[0m$ [0mtmux new-session -d -s app-server -c /home/runner/work/PlayGround/PlayGround "python3 -m http.server 3000" && sleep 1 && tmux ls && curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/index.html && echo " OK"
+app-server: 1 windows (created Sat Sep  5 06:00:05 2026)
+200 OK
+[0m
+Entrypoint and server are up — running browser tests against port 3000.
+[0m$ [0mcurl -s http://localhost:3000/ | head -c 300; echo; mkdir -p screenshots && node -e "
+const puppeteer = require('puppeteer-core');
+(async()=>{
+  const browser = await puppeteer.launch({executablePath:'/usr/bin/google-chrome', args:['--no-sandbox','--disable-gpu']});
+  const page = await browser.newPage();
+  const errs=[];
+  page.on('pageerror',e=>errs.push('pageerror:'+e.message));
+  page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
+  await page.setViewport({width:800,height:900});
+  await page.goto('http://localhost:3000/index.html');
+  await page.waitForSelector('#startBtn');
+  const title = await page.title();
+  console.log('title:', title);
+  await page.click('#startBtn');
+  await new Promise(r=>setTimeout(r,500));
+  let s1 = await page.evaluate(()=>({state:window.__game.state, items:window.__game.items.length}));
+  console.log('after-start:', JSON.stringify(s1));
+  const x0 = await page.evaluate(()=>window.__game.player.x);
+  await page.keyboard.down('ArrowRight');
+  await new Promise(r=>setTimeout(r,500));
+  await page.keyboard.up('ArrowRight');
+  const x1 = await page.evaluate(()=>window.__game.player.x);
+  console.log('move-right:', JSON.stringify({x0,x1,pass:x1>x0}));
+  await page.evaluate(()=>{const g=window.__game; g.items.push({type:'parcel',x:g.player.x,y:640-56-10,w:34,h:26,vy:100,rot:0,vr:0,sway:0,swayF:1,t:0});});
+  await new Promise(r=>setTimeout(r,400));
+  let s2 = await page.evaluate(()=>({score:window.__game.score, caught:window.__game.caught}));
+  console.log('catch:', JSON.stringify(s2));
+  await page.evaluate(()=>{const g=window.__game; g.items.push({type:'hazard',x:g.player.x,y:640-56-10,w:34,h:26,vy:100,rot:0,vr:0,sway:0,swayF:1,t:0});});
+  await new Promise(r=>setTimeout(r,400));
+  let s3 = await page.evaluate(()=>({lives:window.__game.lives, hits:window.__game.hits}));
+  console.log('hazard:', JSON.stringify(s3));
+  await page.evaluate(()=>{window.__game.score=300;});
+  await new Promise(r=>setTimeout(r,400));
+  let s4 = await page.evaluate(()=>({level:window.__game.level}));
+  console.log('level:', JSON.stringify(s4));
+  await page.evaluate(()=>{window.__game.lives=1; const g=window.__game; g.items.push({type:'hazard',x:g.player.x,y:640-56-10,w:34,h:26,vy:100,rot:0,vr:0,sway:0,swayF:1,t:0});});
+  await new Promise(r=>setTimeout(r,500));
+  let s5 = await page.evaluate(()=>({state:window.__game.state, overVisible:!document.getElementById('overScreen').hidden}));
+  console.log('gameover:', JSON.stringify(s5));
+  await page.click('#restartBtn');
+  await new Promise(r=>setTimeout(r,400));
+  let s6 = await page.evaluate(()=>({state:window.__game.state, score:window.__game.score, lives:window.__game.lives}));
+  console.log('restart:', JSON.stringify(s6));
+  // gameplay screenshot mid-action
+  await page.evaluate(()=>{window.__game.score=80;});
+  await new Promise(r=>setTimeout(r,1200));
+  await page.screenshot({path:'screenshots/final-gameplay.png'});
+  // start screen shot
+  await page.evaluate(()=>{window.__game.state='menu'; document.getElementById('startScreen').hidden=false; document.getElementById('overScreen').hidden=true;});
+  await new Promise(r=>setTimeout(r,300));
+  await page.screenshot({path:'screenshots/final-start.png'});
+  console.log('errors:', JSON.stringify(errs));
+  await browser.close();
+  const pass = s1.state==='playing' && (x1>x0) && s2.score>=10 && s3.lives===2 && s4.level>=3 && s5.state==='over' && s6.state==='playing' && errs.length===0;
+  console.log(pass ? 'ALL TESTS PASS' : 'TESTS FAILED');
+  if(!pass) process.exit(1);
+})().catch(e=>{console.error('FAIL',e); process.exit(1);});
+" 2>&1; ls -la screenshots/
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Neon Parcel Dodge</title>
+<style>
+  :root{
+    --bg:#070714; --neon-cyan:#00f0ff; --neon-pink:#ff2fd6;
+    --neon-green:#3
+node:internal/modules/cjs/loader:1433
+  throw err;
+  ^
+
+Error: Cannot find module 'puppeteer-core'
+Require stack:
+- /home/runner/work/PlayGround/PlayGround/[eval]
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+    at Function._load (node:internal/modules/cjs/loader:1216:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Module.require (node:internal/modules/cjs/loader:1527:12)
+    at require (node:internal/modules/helpers:147:16)
+    at [eval]:2:19
+    at runScriptInThisContext (node:internal/vm:209:10)
+    at node:internal/process/execution:446:12 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [ '/home/runner/work/PlayGround/PlayGround/[eval]' ]
+}
+
+Node.js v22.23.2
+total 8
+drwxr-xr-x  2 runner runner 4096 Sep  5 06:00 .
+drwxr-xr-x 11 runner runner 4096 Sep  5 06:00 ..
+[0m
+[0m$ [0mnode -e "
+const puppeteer = require('puppeteer-core');
+(async()=>{
+  const browser = await puppeteer.launch({executablePath:'/usr/bin/google-chrome', args:['--no-sandbox','--disable-gpu']});
+  const page = await browser.newPage();
+  const errs=[];
+  page.on('pageerror',e=>errs.push('pageerror:'+e.message));
+  page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
+  await page.setViewport({width:800,height:900});
+  await page.goto('http://localhost:3000/index.html');
+  await page.waitForSelector('#startBtn');
+  const title = await page.title();
+  console.log('title:', title);
+  await page.click('#startBtn');
+  await new Promise(r=>setTimeout(r,500));
+  let s1 = await page.evaluate(()=>({state:window.__game.state, items:window.__game.items.length}));
+  console.log('after-start:', JSON.stringify(s1));
+  const x0 = await page.evaluate(()=>window.__game.player.x);
+  await page.keyboard.down('ArrowRight');
+  await new Promise(r=>setTimeout(r,500));
+  await page.keyboard.up('ArrowRight');
+  const x1 = await page.evaluate(()=>window.__game.player.x);
+  console.log('move-right:', JSON.stringify({x0,x1,pass:x1>x0}));
+  await page.evaluate(()=>{const g=window.__game; g.items.push({type:'parcel',x:g.player.x,y:640-56-10,w:34,h:26,vy:100,rot:0,vr:0,sway:0,swayF:1,t:0});});
+  await new Promise(r=>setTimeout(r,400));
+  let s2 = await page.evaluate(()=>({score:window.__game.score, caught:window.__game.caught}));
+  console.log('catch:', JSON.stringify(s2));
+  await page.evaluate(()=>{const g=window.__game; g.items.push({type:'hazard',x:g.player.x,y:640-56-10,w:34,h:26,vy:100,rot:0,vr:0,sway:0,swayF:1,t:0});});
+  await new Promise(r=>setTimeout(r,400));
+  let s3 = await page.evaluate(()=>({lives:window.__game.lives, hits:window.__game.hits}));
+  console.log('hazard:', JSON.stringify(s3));
+  await page.evaluate(()=>{window.__game.score=300;});
+  await new Promise(r=>setTimeout(r,400));
+  let s4 = await page.evaluate(()=>({level:window.__game.level}));
+  console.log('level:', JSON.stringify(s4));
+  await page.evaluate(()=>{window.__game.lives=1; const g=window.__game; g.items.push({type:'hazard',x:g.player.x,y:640-56-10,w:34,h:26,vy:100,rot:0,vr:0,sway:0,swayF:1,t:0});});
+  await new Promise(r=>setTimeout(r,500));
+  let s5 = await page.evaluate(()=>({state:window.__game.state, overVisible:!document.getElementById('overScreen').hidden}));
+  console.log('gameover:', JSON.stringify(s5));
+  await page.click('#restartBtn');
+  await new Promise(r=>setTimeout(r,400));
+  let s6 = await page.evaluate(()=>({state:window.__game.state, score:window.__game.score, lives:window.__game.lives}));
+  console.log('restart:', JSON.stringify(s6));
+  await page.evaluate(()=>{window.__game.score=80;});
+  await new Promise(r=>setTimeout(r,1200));
+  await page.screenshot({path:'/home/runner/work/PlayGround/PlayGround/screenshots/final-gameplay.png'});
+  await page.evaluate(()=>{window.__game.state='menu'; document.getElementById('startScreen').hidden=false; document.getElementById('overScreen').hidden=true;});
+  await new Promise(r=>setTimeout(r,300));
+  await page.screenshot({path:'/home/runner/work/PlayGround/PlayGround/screenshots/final-start.png'});
+  console.log('errors:', JSON.stringify(errs));
+  await browser.close();
+  const pass = s1.state==='playing' && (x1>x0) && s2.score>=10 && s3.lives===2 && s4.level>=3 && s5.state==='over' && s6.state==='playing' && errs.length===0;
+  console.log(pass ? 'ALL TESTS PASS' : 'TESTS FAILED');
+  if(!pass) process.exit(1);
+})().catch(e=>{console.error('FAIL',e); process.exit(1);});
+" 2>&1; ls -la /home/runner/work/PlayGround/PlayGround/screenshots/
+title: Neon Parcel Dodge
+after-start: {"state":"playing","items":1}
+move-right: {"x0":240,"x1":430.03799999999967,"pass":true}
+catch: {"score":10,"caught":1}
+hazard: {"lives":2,"hits":1}
+level: {"level":3}
+gameover: {"state":"over","overVisible":true}
+restart: {"state":"playing","score":0,"lives":3}
+errors: ["console:Failed to load resource: the server responded with a status of 404 (File not found)"]
+TESTS FAILED
+total 340
+drwxr-xr-x  2 runner runner   4096 Sep  5 06:00 .
+drwxr-xr-x 11 runner runner   4096 Sep  5 06:00 ..
+-rw-r--r--  1 runner runner 157447 Sep  5 06:00 final-gameplay.png
+-rw-r--r--  1 runner runner 177964 Sep  5 06:00 final-start.png
+[0m
+Tests pass except a favicon 404 — fixing that and re-verifying.
+[0m→ [0mRead index.html[90m [limit=10][0m
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -3,8 +3,9 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+ <title>Neon Parcel Dodge</title>
++<link rel="icon" href="data:,">
+ <style>
+   :root{
+     --bg:#070714; --neon-cyan:#00f0ff; --neon-pink:#ff2fd6;
+     --neon-green:#39ff14; --neon-red:#ff2b4e; --neon-yellow:#ffe14d;
+
+[0m
+[0m$ [0mcp index.html neon-parcel-dodge.html && ls -la index.html dist/index.html 2>&1; curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/index.html; curl -s http://localhost:3000/ | grep -o "<title>[^<]*</title>"
+ls: cannot access 'dist/index.html': No such file or directory
+-rw-r--r-- 1 runner runner 14528 Sep  5 06:00 index.html
+200
+<title>Neon Parcel Dodge</title>
+[0m
+[0m$ [0mnode -e "
+const puppeteer = require('puppeteer-core');
+(async()=>{
+  const browser = await puppeteer.launch({executablePath:'/usr/bin/google-chrome', args:['--no-sandbox','--disable-gpu']});
+  const page = await browser.newPage();
+  const errs=[];
+  page.on('pageerror',e=>errs.push('pageerror:'+e.message));
+  page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
+  await page.setViewport({width:800,height:900});
+  await page.goto('http://localhost:3000/index.html');
+  await page.waitForSelector('#startBtn');
+  await page.click('#startBtn');
+  await new Promise(r=>setTimeout(r,500));
+  let s1 = await page.evaluate(()=>({state:window.__game.state}));
+  const x0 = await page.evaluate(()=>window.__game.player.x);
+  await page.keyboard.down('ArrowRight');
+  await new Promise(r=>setTimeout(r,500));
+  await page.keyboard.up('ArrowRight');
+  const x1 = await page.evaluate(()=>window.__game.player.x);
+  await page.evaluate(()=>{const g=window.__game; g.items.push({type:'parcel',x:g.player.x,y:640-56-10,w:34,h:26,vy:100,rot:0,vr:0,sway:0,swayF:1,t:0});});
+  await new Promise(r=>setTimeout(r,400));
+  let s2 = await page.evaluate(()=>({score:window.__game.score}));
+  await page.evaluate(()=>{const g=window.__game; g.items.push({type:'hazard',x:g.player.x,y:640-56-10,w:34,h:26,vy:100,rot:0,vr:0,sway:0,swayF:1,t:0});});
+  await new Promise(r=>setTimeout(r,400));
+  let s3 = await page.evaluate(()=>({lives:window.__game.lives}));
+  await page.evaluate(()=>{window.__game.score=300;});
+  await new Promise(r=>setTimeout(r,400));
+  let s4 = await page.evaluate(()=>({level:window.__game.level}));
+  await page.evaluate(()=>{window.__game.lives=1; const g=window.__game; g.items.push({type:'hazard',x:g.player.x,y:640-56-10,w:34,h:26,vy:100,rot:0,vr:0,sway:0,swayF:1,t:0});});
+  await new Promise(r=>setTimeout(r,500));
+  let s5 = await page.evaluate(()=>({state:window.__game.state}));
+  await page.click('#restartBtn');
+  await new Promise(r=>setTimeout(r,400));
+  let s6 = await page.evaluate(()=>({state:window.__game.state, score:window.__game.score, lives:window.__game.lives}));
+  await page.evaluate(()=>{window.__game.score=80;});
+  await new Promise(r=>setTimeout(r,1200));
+  await page.screenshot({path:'/home/runner/work/PlayGround/PlayGround/screenshots/final-gameplay.png'});
+  await page.evaluate(()=>{window.__game.state='menu'; document.getElementById('startScreen').hidden=false; document.getElementById('overScreen').hidden=true;});
+  await new Promise(r=>setTimeout(r,300));
+  await page.screenshot({path:'/home/runner/work/PlayGround/PlayGround/screenshots/final-start.png'});
+  console.log(JSON.stringify({s1,move:{x0,x1},s2,s3,s4,s5,s6,errs}));
+  await browser.close();
+  const pass = s1.state==='playing' && (x1>x0) && s2.score>=10 && s3.lives===2 && s4.level>=3 && s5.state==='over' && s6.state==='playing' && errs.length===0;
+  console.log(pass ? 'ALL TESTS PASS' : 'TESTS FAILED');
+  if(!pass) process.exit(1);
+})().catch(e=>{console.error('FAIL',e); process.exit(1);});
+" 2>&1
+{"s1":{"state":"playing"},"move":{"x0":240,"x1":429.99999999999955},"s2":{"score":10},"s3":{"lives":2},"s4":{"level":3},"s5":{"state":"over"},"s6":{"state":"playing","score":0,"lives":3},"errs":[]}
+ALL TESTS PASS
+[0m
+All browser tests pass — confirming screenshots, then publishing.
+[0m→ [0mRead screenshots/final-gameplay.png
+[0m→ [0mRead screenshots/final-start.png
+[0m
+[0m$ [0mls .github/workflows/ 2>&1; git status --short | head; git add index.html neon-parcel-dodge.html screenshots/final-gameplay.png screenshots/final-start.png && git status --short && git commit -m "Neon Parcel Dodge: playable game at index.html with final screenshots" && git push origin opencode/33948496613 2>&1 | tail -3 && git rev-parse HEAD
+opencode.yml
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? neon-parcel-dodge.html
+?? opencode-agentsweb-id_ed25519
+A  index.html
+A  neon-parcel-dodge.html
+A  screenshots/final-gameplay.png
+A  screenshots/final-start.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+[opencode/33948496613 cdb48a6] Neon Parcel Dodge: playable game at index.html with final screenshots
+ 4 files changed, 760 insertions(+)
+ create mode 100644 index.html
+ create mode 100644 neon-parcel-dodge.html
+ create mode 100644 screenshots/final-gameplay.png
+ create mode 100644 screenshots/final-start.png
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/33948496613 -> opencode/33948496613
+cdb48a658ad4d8a3c63539f73e415266eecac163
+[0m
+[0m$ [0mgh issue comment 19 --repo AgentsLoop/PlayGround --body "## Neon Parcel Dodge — complete ✅
+
+**Summary:** Built a self-contained playable browser game (\`index.html\`, no external assets). Move the neon courier with ◀/▶, A/D, drag, or touch buttons. Catch green parcels (+10) and gold parcels (+30), dodge red hazards (−1♥). Missing a parcel costs a life; 3 lives total. Score/level HUD, start/game-over/restart flow, and level scaling (fall speed, spawn rate, hazard chance) included.
+
+**Public game link:** https://github.com/AgentsLoop/PlayGround/blob/opencode/33948496613/index.html (open \`index.html\`; Pages deployment handled by workflow)
+**Final commit:** https://github.com/AgentsLoop/PlayGround/commit/cdb48a658ad4d8a3c63539f73e415266eecac163
+
+**Deployment and test status:** App served from tmux session \`app-server\` on port 3000 (\`./index.html\` verified as the served page, HTTP 200). Headless-Chrome browser tests ALL PASS with zero console errors: start→playing, right-move 240→430, parcel catch score +10, hazard hit lives −1, score 300→level 3, game-over overlay on last life, restart resets to score 0/lives 3.
+
+**Known limitations:** None
+
+<details>
+<summary>Screenshot — gameplay</summary>
+<img src=\"https://raw.githubusercontent.com/AgentsLoop/PlayGround/cdb48a658ad4d8a3c63539f73e415266eecac163/screenshots/final-gameplay.png\" alt=\"Neon Parcel Dodge gameplay with falling parcels\">
+</details>
+
+<details>
+<summary>Screenshot — start screen</summary>
+<img src=\"https://raw.githubusercontent.com/AgentsLoop/PlayGround/cdb48a658ad4d8a3c63539f73e415266eecac163/screenshots/final-start.png\" alt=\"Neon Parcel Dodge start screen\">
+</details>" 2>&1
+https://github.com/AgentsLoop/PlayGround/issues/19#issuecomment-5549839119
+[0m
+[0m$ [0mls index.html screenshots/final-gameplay.png screenshots/final-start.png && curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/ && tmux ls 2>&1
+index.html
+screenshots/final-gameplay.png
+screenshots/final-start.png
+200
+app-server: 1 windows (created Sat Sep  5 06:00:05 2026)
+[0m
+Verification complete per Agents.md:
+- `./index.html` created (was missing; copied from the game) and confirmed as the page served on port 3000 (HTTP 200, correct title).
+- tmux session `app-server` running `python3 -m http.server 3000`.
+- Fixed favicon 404 with inline data-URI icon; re-ran headless-Chrome tests against `http://localhost:3000/index.html` — ALL PASS, zero console errors.
+- Captured `screenshots/final-gameplay.png` and `screenshots/final-start.png`, committed + pushed (`cdb48a6`), and posted the completion comment to issue #19 (comment 5549839119). No branch/PR created beyond pushing the existing session branch.
+
+[goal:evidence] index.html exists and served with HTTP 200 on tmux app-server:3000; browser tests ALL PASS (start, movement, catch +10, hazard −1 life, level scaling, game-over, restart, no console errors); screenshots/final-gameplay.png + screenshots/final-start.png committed as cdb48a6 and final comment posted to AgentsLoop/PlayGround#19
+[goal:complete]
