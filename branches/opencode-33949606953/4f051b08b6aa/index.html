@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Star Runner 3D — Sketchfab Spaceship Game</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="./project/style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="game-wrap">
+  <canvas id="game"></canvas>
+  <div id="hud">
+    <div class="hud-left">
+      <span id="score">⭐ 0</span>
+      <span id="lives">❤️❤️❤️</span>
+    </div>
+    <div class="hud-right">
+      <span id="time">⏱ 60</span>
+      <span id="stars-left">◆ 0/12</span>
+    </div>
+  </div>
+  <div id="overlay">
+    <div class="panel">
+      <h1>🚀 STAR RUNNER 3D</h1>
+      <p class="sub">Fly the Sketchfab spaceship. Collect all <b>12 stars</b> before time runs out. Avoid asteroids!</p>
+      <p class="controls">🎮 <b>WASD / Arrows</b> to fly &nbsp;•&nbsp; 📱 on-screen buttons on mobile</p>
+      <button id="start-btn">▶ Start Game</button>
+      <p id="status-line" class="status">Loading spaceship…</p>
+      <p class="credit">Ship: “Low Poly Spaceship” by EdwiixGG (CC Attribution) — see project/ATTRIBUTION.md</p>
+    </div>
+  </div>
+  <div id="touch-controls">
+    <div class="tc-col">
+      <button data-dir="left">◀</button>
+      <button data-dir="right">▶</button>
+    </div>
+    <div class="tc-col">
+      <button data-dir="up">▲</button>
+      <button data-dir="down">▼</button>
+    </div>
+  </div>
+</div>
+<script type="module" src="./project/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Capturing fresh final screenshots and posting the completion update with the public game URL.
+[0m$ [0mgit branch --show-current; git status --short | grep -v "^??" | head; echo "---"; ls -la index.html screenshots/ | head -n 20; echo "---"; tmux ls 2>&1; curl -s -o /dev/null -w "local3000:%{http_code}\n" http://127.0.0.1:3000/ --max-time 10
+opencode/33949606953
+---
+-rw-r--r-- 1 runner runner 1738 Sep  5 06:31 index.html
+
+screenshots/:
+total 504
+drwxr-xr-x  2 runner runner   4096 Sep  5 06:28 .
+drwxr-xr-x 13 runner runner   4096 Sep  5 06:31 ..
+-rw-r--r--  1 runner runner  31804 Sep  5 06:32 final-gameplay.png
+-rw-r--r--  1 runner runner  73200 Sep  5 06:32 final-menu.png
+-rw-r--r--  1 runner runner 400127 Sep  5 06:28 sketchfab-preview-sheet.png
+---
+app-server: 1 windows (created Sat Sep  5 06:31:38 2026)
+local3000:200
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "public:%{http_code}\n" https://aberdeen-gorgeous-fathers-fast.trycloudflare.com/ --max-time 20; curl -s https://aberdeen-gorgeous-fathers-fast.trycloudflare.com/ --max-time 20 | head -c 400; echo
+public:200
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Star Runner 3D — Sketchfab Spaceship Game</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="./project/style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/
+[0m
+[0m$ [0mNODE_PATH=/home/runner/work/PlayGround/PlayGround/node_modules node /tmp/verify3000.cjs 2>&1 | tail -n 5; ls -lh /tmp/verify-root-*.png
+PAGE / loaded=true info={"shipLoaded":true,"mode":"play","lives":3} errors=[]
+PAGE /project/ loaded=true info={"shipLoaded":true,"mode":"play","lives":3} errors=[]
+BROWSER TESTS PASSED
+-rw-r--r-- 1 runner runner 83K Sep  5 06:33 /tmp/verify-root-menu.png
+-rw-r--r-- 1 runner runner 37K Sep  5 06:33 /tmp/verify-root-play.png
+[0m
+[0m→ [0mRead /tmp/verify-root-menu.png
+[0m→ [0mRead /tmp/verify-root-play.png
+[0m
+[0m$ [0mcp /tmp/verify-root-menu.png screenshots/final-menu.png
+cp /tmp/verify-root-play.png screenshots/final-gameplay.png
+cp /tmp/verify-root-menu.png project/screenshots/final-menu.png
+cp /tmp/verify-root-play.png project/screenshots/final-gameplay.png
+ls -lh screenshots/final-*.png project/screenshots/final-*.png
+node project/test.mjs 2>&1 | tail -n 2
+-rw-r--r-- 1 runner runner 37K Sep  5 06:34 project/screenshots/final-gameplay.png
+-rw-r--r-- 1 runner runner 83K Sep  5 06:34 project/screenshots/final-menu.png
+-rw-r--r-- 1 runner runner 37K Sep  5 06:34 screenshots/final-gameplay.png
+-rw-r--r-- 1 runner runner 83K Sep  5 06:34 screenshots/final-menu.png
+OK   main.js contains "requestAnimationFrame"
+SMOKE TEST PASSED
+[0m
+[0m$ [0mgit add screenshots/final-menu.png screenshots/final-gameplay.png project/screenshots/final-menu.png project/screenshots/final-gameplay.png
+git diff --check && git status --short | grep -v "^??" | head
+git commit -m "Final verification: fresh playable-game screenshots from port 3000" 2>&1 | tail -n 2
+git push origin opencode/33949606953 2>&1 | tail -n 3
+git rev-parse HEAD
+M  project/screenshots/final-gameplay.png
+M  project/screenshots/final-menu.png
+M  screenshots/final-gameplay.png
+M  screenshots/final-menu.png
+[opencode/33949606953 f05a782] Final verification: fresh playable-game screenshots from port 3000
+ 4 files changed, 0 insertions(+), 0 deletions(-)
+To https://github.com/AgentsLoop/PlayGround
+   f1f9175..f05a782  opencode/33949606953 -> opencode/33949606953
+f05a78256f005dbef20231e53b7244aa910406be
+[0m
+Screenshots committed and pushed — posting the final completion comment.
+[0m$ [0mSHA=f05a78256f005dbef20231e53b7244aa910406be
+REPO="AgentsLoop/PlayGround"
+PUBLIC_URL="https://aberdeen-gorgeous-fathers-fast.trycloudflare.com"
+gh issue comment 21 --repo "$REPO" --body "## ✅ Complete — Star Runner 3D (final verification)
+
+**Summary:** Playable Three.js 3D browser game. Fly the Sketchfab spaceship (\"Low Poly Spaceship\" by EdwiixGG, CC Attribution, UID \`82f637f65f894ffe948300183ebe904d\`), collect 12 stars in 60 seconds, dodge 8 drifting asteroids. Score/lives/timer HUD, start/win/lose/restart loop, WASD + arrows + touch controls, WebAudio blips, starfield + grid arena. Playable entrypoints: repo-root \`index.html\` and \`project/index.html\`.
+
+**Public game link:** $PUBLIC_URL (verified 200, serves the game; backed by the app-server on port 3000, tmux session \`app-server\`)
+
+**Final commit:** https://github.com/$REPO/commit/$SHA
+
+**Deployment / test status:**
+- Local server on port 3000 (tmux \`app-server\`) — serving, \`/\` and \`/project/\` return 200, model GLB returns 200
+- \`node project/test.mjs\` — PASSED
+- Headless-Chrome browser tests vs port 3000 — PASSED on both entrypoints (ship loaded, mode=play after Start, lives=3, zero console/page errors)
+- Public tunnel URL — verified 200 with game HTML
+
+**Known limitations:** Ship colors are approximated with a material tint (source GLB uses archived \`KHR_materials_pbrSpecularGlossiness\` with no textures; bundled normalizer refused conversion); requires internet for the Three.js CDN importmap; no persistent high scores.
+
+<details>
+<summary>Screenshot — menu</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$SHA/screenshots/final-menu.png\" alt=\"Star Runner 3D start menu with spaceship loaded\">
+</details>
+
+<details>
+<summary>Screenshot — gameplay</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$SHA/screenshots/final-gameplay.png\" alt=\"Star Runner 3D gameplay with spaceship, stars and asteroids\">
+</details>" 2>&1 | tail -n 3
+https://github.com/AgentsLoop/PlayGround/issues/21#issuecomment-5550005698
+[0m
+[goal:evidence] Verified public game at https://aberdeen-gorgeous-fathers-fast.trycloudflare.com (HTTP 200, game HTML). Captured fresh playable-game screenshots via headless Chrome against port 3000 (menu + gameplay, ship loaded, mode=play, lives=3, zero console errors; smoke test passed), saved as screenshots/final-menu.png and screenshots/final-gameplay.png (+project/screenshots mirrors), committed and pushed f05a78256f005dbef20231e53b7244aa910406be to opencode/33949606953 (no PR). Posted final completion comment https://github.com/AgentsLoop/PlayGround/issues/21#issuecomment-5550005698 with public URL, embedded screenshots (immutable raw URLs), final commit link, deployment/test status, and known limitations.
+[goal:complete]

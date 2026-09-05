@@ -1,0 +1,915 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Building your 3D game — first mapping the workspace.
+[0m→ [0mRead .
+[0m→ [0mRead README.md
+[0m→ [0mRead Agents.md
+[0m
+[0m$ [0mpwd; ls -la; cat package.json 2>/dev/null; cat *.json 2>/dev/null | head -n 100
+/home/runner/work/PlayGround/PlayGround
+total 56
+drwxr-xr-x 10 runner runner 4096 Sep  5 06:23 .
+drwxr-xr-x  3 runner runner 4096 Sep  5 06:21 ..
+drwxr-xr-x  5 runner runner 4096 Sep  5 06:22 .agents
+drwxr-xr-x  4 runner runner 4096 Sep  5 06:22 .agentsweb
+drwxr-xr-x  7 runner runner 4096 Sep  5 06:23 .git
+drwxr-xr-x  3 runner runner 4096 Sep  5 06:22 .github
+drwxr-xr-x  9 runner runner 4096 Sep  5 06:22 .omgithub-runtime
+drwx------  3 runner runner 4096 Sep  5 06:23 .opencode
+drwx------  2 runner runner 4096 Sep  5 06:22 .opencode-ssh
+drwx------  2 runner runner 4096 Sep  5 06:23 .opencode-web
+-rw-r--r--  1 runner runner 2250 Sep  5 06:22 Agents.md
+-rw-r--r--  1 runner runner   53 Sep  5 06:22 README.md
+-rw-------  1 runner runner  411 Sep  5 06:22 opencode-agentsweb-id_ed25519
+-rw-r--r--  1 runner runner  102 Sep  5 06:22 opencode-agentsweb-id_ed25519.pub
+[0m
+[0m⚙ [0mget_goal_history Unknown
+[0m
+[0m$ [0menv | grep -i -E "trigger|issue|github|repo" | sort; echo "---"; git log --oneline -10; echo "---"; git branch -a; echo "---"; ls .github/; cat .github/* 2>/dev/null | head -n 200; ls .agents/
+ACTIONS_ID_TOKEN_REQUEST_URL=https://run-actions-2-azure-eastus.actions.githubusercontent.com/230//idtoken/ab81d27a-6c15-4336-af1b-22e117f88ecb/e9f14335-386d-553f-b403-74aa28bf4ac2?api-version=2.0
+GH_REPO=AgentsLoop/PlayGround
+GITHUB_ACTION=opencode_web
+GITHUB_ACTIONS=true
+GITHUB_ACTION_REF=
+GITHUB_ACTION_REPOSITORY=
+GITHUB_ACTOR=oh-my-github-app[bot]
+GITHUB_ACTOR_ID=322643646
+GITHUB_API_URL=https://api.github.com
+GITHUB_ARTIFACTS=/home/runner/work/_temp/_runner_file_commands/artifacts_17403f4b-fee6-4bb6-9236-ac9a29edc355
+GITHUB_ARTIFACTS_LIST=/home/runner/work/_temp/_runner_file_commands/artifacts_list_17403f4b-fee6-4bb6-9236-ac9a29edc355
+GITHUB_BASE_REF=
+GITHUB_ENV=/home/runner/work/_temp/_runner_file_commands/set_env_17403f4b-fee6-4bb6-9236-ac9a29edc355
+GITHUB_EVENT_NAME=workflow_dispatch
+GITHUB_EVENT_PATH=/home/runner/work/_temp/_github_workflow/event.json
+GITHUB_GRAPHQL_URL=https://api.github.com/graphql
+GITHUB_HEAD_REF=
+GITHUB_JOB=opencode
+GITHUB_OUTPUT=/home/runner/work/_temp/_runner_file_commands/set_output_17403f4b-fee6-4bb6-9236-ac9a29edc355
+GITHUB_PATH=/home/runner/work/_temp/_runner_file_commands/add_path_17403f4b-fee6-4bb6-9236-ac9a29edc355
+GITHUB_REF=refs/heads/main
+GITHUB_REF_NAME=main
+GITHUB_REF_PROTECTED=false
+GITHUB_REF_TYPE=branch
+GITHUB_REPOSITORY=AgentsLoop/PlayGround
+GITHUB_REPOSITORY_ID=1353029669
+GITHUB_REPOSITORY_OWNER=AgentsLoop
+GITHUB_REPOSITORY_OWNER_ID=318478564
+GITHUB_RETENTION_DAYS=90
+GITHUB_RUN_ATTEMPT=1
+GITHUB_RUN_ID=33949606953
+GITHUB_RUN_NUMBER=26
+GITHUB_SERVER_URL=https://github.com
+GITHUB_SHA=b4fe44a788e990e138c4d8d1a9b5f61988c117e2
+GITHUB_STATE=/home/runner/work/_temp/_runner_file_commands/save_state_17403f4b-fee6-4bb6-9236-ac9a29edc355
+GITHUB_STEP_SUMMARY=/home/runner/work/_temp/_runner_file_commands/step_summary_17403f4b-fee6-4bb6-9236-ac9a29edc355
+GITHUB_TRIGGERING_ACTOR=oh-my-github-app[bot]
+GITHUB_WORKFLOW=OpenCode
+GITHUB_WORKFLOW_REF=AgentsLoop/PlayGround/.github/workflows/opencode.yml@refs/heads/main
+GITHUB_WORKFLOW_SHA=b4fe44a788e990e138c4d8d1a9b5f61988c117e2
+GITHUB_WORKSPACE=/home/runner/work/PlayGround/PlayGround
+POWERSHELL_DISTRIBUTION_CHANNEL=GitHub-Actions-Linux
+RUNNER_ENVIRONMENT=github-hosted
+RUNNER_NAME=GitHub Actions 1000000112
+RUNNER_TRACKING_ID=github_4d39e5d7-9fef-4eea-ad83-48fb6a5169a3
+RUNTIME_DIR=/home/runner/work/PlayGround/PlayGround/.omgithub-runtime
+SSH_NAME=opencode-issue-21-33949606953-ssh
+TARGET_REPO=PlayGround
+TARGET_REPOSITORY=AgentsLoop/PlayGround
+TRIGGER_ISSUE_NUMBER=21
+npm_config_user_agent=npm/undefined node/v24.3.0 linux x64 workspaces/false ci/github-actions
+---
+b4fe44a Grant reusable OpenCode workflow Pages permission
+---
+  main
+* opencode/33949606953
+  remotes/origin/main
+---
+workflows
+README.md
+skills
+third-party-licenses
+[0m
+[0m$ [0mcat /home/runner/work/_temp/_github_workflow/event.json; echo "---"; gh issue view 21 --repo AgentsLoop/PlayGround 2>&1 | head -n 200
+{
+  "ref": "refs/heads/main",
+  "workflow": ".github/workflows/opencode.yml",
+  "inputs": {
+    "issue_number": "21",
+    "request": "make 3d game",
+    "issue_title": "make 3d game",
+    "labels_json": "[\"OpenCode\",\"Goal\",\"skill/load-sketchfab-threejs\"]",
+    "sender": "agents-dev"
+  },
+  "repository": {
+    "id": 1353029669,
+    "node_id": "R_kgDOUKWYJQ",
+    "name": "PlayGround",
+    "full_name": "AgentsLoop/PlayGround",
+    "private": false,
+    "owner": {
+      "login": "AgentsLoop",
+      "id": 318478564,
+      "node_id": "O_kgDOEvuY5A",
+      "avatar_url": "https://avatars.githubusercontent.com/u/318478564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/AgentsLoop",
+      "html_url": "https://github.com/AgentsLoop",
+      "followers_url": "https://api.github.com/users/AgentsLoop/followers",
+      "following_url": "https://api.github.com/users/AgentsLoop/following{/other_user}",
+      "gists_url": "https://api.github.com/users/AgentsLoop/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/AgentsLoop/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/AgentsLoop/subscriptions",
+      "organizations_url": "https://api.github.com/users/AgentsLoop/orgs",
+      "repos_url": "https://api.github.com/users/AgentsLoop/repos",
+      "events_url": "https://api.github.com/users/AgentsLoop/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/AgentsLoop/received_events",
+      "type": "Organization",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "html_url": "https://github.com/AgentsLoop/PlayGround",
+    "description": "Playground for browser game experiments",
+    "fork": false,
+    "url": "https://api.github.com/repos/AgentsLoop/PlayGround",
+    "forks_url": "https://api.github.com/repos/AgentsLoop/PlayGround/forks",
+    "keys_url": "https://api.github.com/repos/AgentsLoop/PlayGround/keys{/key_id}",
+    "collaborators_url": "https://api.github.com/repos/AgentsLoop/PlayGround/collaborators{/collaborator}",
+    "teams_url": "https://api.github.com/repos/AgentsLoop/PlayGround/teams",
+    "hooks_url": "https://api.github.com/repos/AgentsLoop/PlayGround/hooks",
+    "issue_events_url": "https://api.github.com/repos/AgentsLoop/PlayGround/issues/events{/number}",
+    "events_url": "https://api.github.com/repos/AgentsLoop/PlayGround/events",
+    "assignees_url": "https://api.github.com/repos/AgentsLoop/PlayGround/assignees{/user}",
+    "branches_url": "https://api.github.com/repos/AgentsLoop/PlayGround/branches{/branch}",
+    "tags_url": "https://api.github.com/repos/AgentsLoop/PlayGround/tags",
+    "blobs_url": "https://api.github.com/repos/AgentsLoop/PlayGround/git/blobs{/sha}",
+    "git_tags_url": "https://api.github.com/repos/AgentsLoop/PlayGround/git/tags{/sha}",
+    "git_refs_url": "https://api.github.com/repos/AgentsLoop/PlayGround/git/refs{/sha}",
+    "trees_url": "https://api.github.com/repos/AgentsLoop/PlayGround/git/trees{/sha}",
+    "statuses_url": "https://api.github.com/repos/AgentsLoop/PlayGround/statuses/{sha}",
+    "languages_url": "https://api.github.com/repos/AgentsLoop/PlayGround/languages",
+    "stargazers_url": "https://api.github.com/repos/AgentsLoop/PlayGround/stargazers",
+    "contributors_url": "https://api.github.com/repos/AgentsLoop/PlayGround/contributors",
+    "subscribers_url": "https://api.github.com/repos/AgentsLoop/PlayGround/subscribers",
+    "subscription_url": "https://api.github.com/repos/AgentsLoop/PlayGround/subscription",
+    "commits_url": "https://api.github.com/repos/AgentsLoop/PlayGround/commits{/sha}",
+    "git_commits_url": "https://api.github.com/repos/AgentsLoop/PlayGround/git/commits{/sha}",
+    "comments_url": "https://api.github.com/repos/AgentsLoop/PlayGround/comments{/number}",
+    "issue_comment_url": "https://api.github.com/repos/AgentsLoop/PlayGround/issues/comments{/number}",
+    "contents_url": "https://api.github.com/repos/AgentsLoop/PlayGround/contents/{+path}",
+    "compare_url": "https://api.github.com/repos/AgentsLoop/PlayGround/compare/{base}...{head}",
+    "merges_url": "https://api.github.com/repos/AgentsLoop/PlayGround/merges",
+    "archive_url": "https://api.github.com/repos/AgentsLoop/PlayGround/{archive_format}{/ref}",
+    "downloads_url": "https://api.github.com/repos/AgentsLoop/PlayGround/downloads",
+    "issues_url": "https://api.github.com/repos/AgentsLoop/PlayGround/issues{/number}",
+    "pulls_url": "https://api.github.com/repos/AgentsLoop/PlayGround/pulls{/number}",
+    "milestones_url": "https://api.github.com/repos/AgentsLoop/PlayGround/milestones{/number}",
+    "notifications_url": "https://api.github.com/repos/AgentsLoop/PlayGround/notifications{?since,all,participating}",
+    "labels_url": "https://api.github.com/repos/AgentsLoop/PlayGround/labels{/name}",
+    "releases_url": "https://api.github.com/repos/AgentsLoop/PlayGround/releases{/id}",
+    "deployments_url": "https://api.github.com/repos/AgentsLoop/PlayGround/deployments",
+    "created_at": "2026-09-01T01:57:50Z",
+    "updated_at": "2026-09-02T01:22:29Z",
+    "pushed_at": "2026-09-05T06:07:46Z",
+    "git_url": "git://github.com/AgentsLoop/PlayGround.git",
+    "ssh_url": "git@github.com:AgentsLoop/PlayGround.git",
+    "clone_url": "https://github.com/AgentsLoop/PlayGround.git",
+    "svn_url": "https://github.com/AgentsLoop/PlayGround",
+    "homepage": null,
+    "size": 60127,
+    "stargazers_count": 0,
+    "watchers_count": 0,
+    "language": null,
+    "has_issues": true,
+    "has_projects": true,
+    "has_downloads": false,
+    "has_wiki": true,
+    "has_pages": true,
+    "has_discussions": false,
+    "forks_count": 0,
+    "mirror_url": null,
+    "archived": false,
+    "disabled": false,
+    "open_issues_count": 21,
+    "license": null,
+    "allow_forking": true,
+    "is_template": false,
+    "web_commit_signoff_required": false,
+    "has_pull_requests": true,
+    "pull_request_creation_policy": "all",
+    "topics": [],
+    "visibility": "public",
+    "forks": 0,
+    "open_issues": 21,
+    "watchers": 0,
+    "default_branch": "main",
+    "custom_properties": {}
+  },
+  "organization": {
+    "login": "AgentsLoop",
+    "id": 318478564,
+    "node_id": "O_kgDOEvuY5A",
+    "url": "https://api.github.com/orgs/AgentsLoop",
+    "repos_url": "https://api.github.com/orgs/AgentsLoop/repos",
+    "events_url": "https://api.github.com/orgs/AgentsLoop/events",
+    "hooks_url": "https://api.github.com/orgs/AgentsLoop/hooks",
+    "issues_url": "https://api.github.com/orgs/AgentsLoop/issues",
+    "members_url": "https://api.github.com/orgs/AgentsLoop/members{/member}",
+    "public_members_url": "https://api.github.com/orgs/AgentsLoop/public_members{/member}",
+    "avatar_url": "https://avatars.githubusercontent.com/u/318478564?v=4",
+    "description": ""
+  },
+  "sender": {
+    "login": "oh-my-github-app[bot]",
+    "id": 322643646,
+    "node_id": "BOT_kgDOEzsmvg",
+    "avatar_url": "https://avatars.githubusercontent.com/u/318478564?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/oh-my-github-app%5Bbot%5D",
+    "html_url": "https://github.com/apps/oh-my-github-app",
+    "followers_url": "https://api.github.com/users/oh-my-github-app%5Bbot%5D/followers",
+    "following_url": "https://api.github.com/users/oh-my-github-app%5Bbot%5D/following{/other_user}",
+    "gists_url": "https://api.github.com/users/oh-my-github-app%5Bbot%5D/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/oh-my-github-app%5Bbot%5D/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/oh-my-github-app%5Bbot%5D/subscriptions",
+    "organizations_url": "https://api.github.com/users/oh-my-github-app%5Bbot%5D/orgs",
+    "repos_url": "https://api.github.com/users/oh-my-github-app%5Bbot%5D/repos",
+    "events_url": "https://api.github.com/users/oh-my-github-app%5Bbot%5D/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/oh-my-github-app%5Bbot%5D/received_events",
+    "type": "Bot",
+    "user_view_type": "public",
+    "site_admin": false
+  }
+}---
+title:	make 3d game
+state:	OPEN
+author:	agents-dev
+labels:	Goal, OpenCode, skill/load-sketchfab-threejs, validating
+comments:	1
+assignees:	
+projects:	
+milestone:	
+issue-type:	
+parent:	
+sub-issues:	
+sub-issues-completed:	
+blocked-by:	
+blocking:	
+number:	21
+--
+make 3d game
+[0m
+[0m→ [0mSkill "load-sketchfab-threejs"
+[0m→ [0mRead .github/workflows
+[0m
+[0m$ [0mls -R .agents/skills/load-sketchfab-threejs/scripts/ | head -n 50
+cat .agents/skills/load-sketchfab-threejs/AGENTS.md 2>/dev/null | head -n 100
+ls /tmp/opencode 2>/dev/null; node --version; python3 --version; which chromium google-chrome chromium-browser 2>&1; npx --version 2>&1 | head
+.agents/skills/load-sketchfab-threejs/scripts/:
+create_fixtures.mjs
+decompress_glb.mjs
+download_model.py
+extract_public_model.py
+inspect_glb.mjs
+lib
+normalize_glb.mjs
+prepare_playcanvas_glb.mjs
+prepare_viewer.py
+serve_public_extractor.py
+validate_glb.mjs
+
+.agents/skills/load-sketchfab-threejs/scripts/lib:
+glb.mjs
+# Repository guidance
+
+This directory contains the published `load-sketchfab-threejs` skill. Keep changes scoped to this skill and preserve the existing attribution, download, extraction, normalization, and browser-verification workflows.
+
+## Validation
+
+- Run `git diff --check` before committing.
+- Run the relevant scripts from this directory; serve browser viewers over HTTP rather than `file://`.
+- Do not commit `node_modules`, generated fixtures, downloaded models, credentials, API tokens, cookies, or session material.
+
+## Changes and commits
+
+- Review the staged diff and ensure unrelated repository changes are not included.
+- Commit each update with a clear, concise message.
+- Update `wiki/public-extraction.md` when public extraction behavior or repeatable verification commands change.
+
+## Wiki index
+
+- [Public extraction](wiki/public-extraction.md) — one-command browser-native extraction, correction rules, and verification commands.
+v22.23.2
+Python 3.12.3
+/usr/bin/chromium
+/usr/bin/google-chrome
+/usr/bin/chromium-browser
+10.9.8
+[0m
+[0m→ [0mRead .github/workflows/opencode.yml
+I've got the brief — a playable Three.js game with a Sketchfab model. I'll start building it now.
+[0m
+[0m$ [0mgit log --all --oneline --name-only | head -n 100
+echo "---BRANCH---"; git status; echo "---"; ls -la project 2>&1; ls -la screenshots 2>&1
+b4fe44a Grant reusable OpenCode workflow Pages permission
+.github/workflows/opencode.yml
+README.md
+---BRANCH---
+On branch opencode/33949606953
+Your branch is up to date with 'origin/main'.
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.agents/
+	.agentsweb/
+	.omgithub-runtime/
+	.opencode-ssh/
+	.opencode-web/
+	.opencode/
+	Agents.md
+	opencode-agentsweb-id_ed25519
+	opencode-agentsweb-id_ed25519.pub
+
+nothing added to commit but untracked files present (use "git add" to track)
+---
+ls: cannot access 'project': No such file or directory
+ls: cannot access 'screenshots': No such file or directory
+[0m
+[0m# [0mTodos
+[•] Search/download Sketchfab model for game hero
+[ ] Build playable Three.js 3D game in project/
+[ ] Verify in real browser + capture screenshots
+[ ] Commit, push, post issue progress comment
+[0m
+[0m$ [0mSKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs
+timeout 90 python3 "$SKILL_DIR/scripts/download_model.py" "low poly spaceship" --count 12 --max-glb-mb 8 --max-faces 30000 --require-glb --downloadable --no-animations --preview-sheet /tmp/spaceship-search.png 2>&1 | head -n 100
+ls -lh /tmp/spaceship-search.png 2>&1
+Traceback (most recent call last):
+  File "/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs/scripts/download_model.py", line 20, in <module>
+    from PIL import Image, ImageDraw, ImageFont
+ModuleNotFoundError: No module named 'PIL'
+ls: cannot access '/tmp/spaceship-search.png': No such file or directory
+[0m
+[0m$ [0mpip install pillow requests -q 2>&1 | tail -n 5
+SKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs
+timeout 120 python3 "$SKILL_DIR/scripts/download_model.py" "low poly spaceship" --count 12 --max-glb-mb 8 --max-faces 30000 --require-glb --downloadable --no-animations --preview-sheet /tmp/spaceship-search.png 2>&1 | head -n 150
+Preview sheet: /tmp/spaceship-search.png
+[0] Low Poly Spaceship | 82f637f65f894ffe948300183ebe904d | 0.8 MB | 20,236 faces | EdwiixGG | CC Attribution no animations
+[1] Pixel Low Poly Spaceship | eaad1ae4bf6a43fd9f3a80400dacbbfd | 0.0 MB | 112 faces | Tony | CC Attribution no animations
+[2] Low Poly Spaceship 1/10 | b8f3d810d55c431eb4f4533ba9592c77 | 2.4 MB | 550 faces | Duane's Mind | CC Attribution no animations
+[3] Pixel Low Poly Spaceship 3 | 8d54be9049ca4aa99041a0936b8e6db2 | 0.0 MB | 106 faces | Tony | CC Attribution no animations
+[4] Low Poly Spaceship 6/10 | 33d1512fa79f4af5ba9dc972172db90c | 2.2 MB | 468 faces | Duane's Mind | CC Attribution no animations
+[5] Low Poly Spaceship 4/10 | 70d47ef02ee5487e8c4e984ee7e13bd8 | 2.3 MB | 734 faces | Duane's Mind | CC Attribution no animations
+[6] Neolit Low Poly Spaceship 4 | 7dfe2c32db824a9c809235ff171ee1b5 | 3.7 MB | 17,774 faces | jakob_van_damme | CC Attribution no animations
+[0m
+[0m→ [0mRead /tmp/spaceship-search.png
+[0m
+[0m$ [0mmkdir -p project/public/models project/screenshots screenshots
+SKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs
+timeout 120 python3 "$SKILL_DIR/scripts/download_model.py" "low poly spaceship" --count 12 --max-glb-mb 8 --max-faces 30000 --require-glb --downloadable --no-animations --preview-sheet /tmp/spaceship-search2.png --download 0 --output /home/runner/work/PlayGround/PlayGround/project/public/models/spaceship.glb 2>&1 | tail -n 30
+ls -lh project/public/models/
+Preview sheet: /tmp/spaceship-search2.png
+[0] Low Poly Spaceship | 82f637f65f894ffe948300183ebe904d | 0.8 MB | 20,236 faces | EdwiixGG | CC Attribution no animations
+[1] Pixel Low Poly Spaceship | eaad1ae4bf6a43fd9f3a80400dacbbfd | 0.0 MB | 112 faces | Tony | CC Attribution no animations
+[2] Low Poly Spaceship 1/10 | b8f3d810d55c431eb4f4533ba9592c77 | 2.4 MB | 550 faces | Duane's Mind | CC Attribution no animations
+[3] Pixel Low Poly Spaceship 3 | 8d54be9049ca4aa99041a0936b8e6db2 | 0.0 MB | 106 faces | Tony | CC Attribution no animations
+[4] Low Poly Spaceship 6/10 | 33d1512fa79f4af5ba9dc972172db90c | 2.2 MB | 468 faces | Duane's Mind | CC Attribution no animations
+[5] Low Poly Spaceship 4/10 | 70d47ef02ee5487e8c4e984ee7e13bd8 | 2.3 MB | 734 faces | Duane's Mind | CC Attribution no animations
+[6] Neolit Low Poly Spaceship 4 | 7dfe2c32db824a9c809235ff171ee1b5 | 3.7 MB | 17,774 faces | jakob_van_damme | CC Attribution no animations
+Downloaded 801,192 bytes to /home/runner/work/PlayGround/PlayGround/project/public/models/spaceship.glb
+Attribution metadata: /home/runner/work/PlayGround/PlayGround/project/public/models/spaceship.glb.attribution.json
+total 788K
+-rw-r--r-- 1 runner runner 783K Sep  5 06:24 spaceship.glb
+-rw-r--r-- 1 runner runner  624 Sep  5 06:24 spaceship.glb.attribution.json
+[0m
+[0m$ [0mcat project/public/models/spaceship.glb.attribution.json
+SKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs
+node "$SKILL_DIR/scripts/inspect_glb.mjs" project/public/models/spaceship.glb 2>&1 | head -n 80
+{
+  "uid": "82f637f65f894ffe948300183ebe904d",
+  "name": "Low Poly Spaceship",
+  "author": "EdwiixGG",
+  "authorUrl": "https://sketchfab.com/Edwin3D",
+  "license": "CC Attribution",
+  "licenseUrl": null,
+  "modelUrl": "https://sketchfab.com/3d-models/none-82f637f65f894ffe948300183ebe904d",
+  "thumbnailUrl": "https://media.sketchfab.com/models/82f637f65f894ffe948300183ebe904d/thumbnails/5ac5f35e969448f1804d5179e006bd20/4371c7de8c6340839e80c7e2c0c97917.jpeg",
+  "glbBytes": 801192,
+  "faceCount": 20236,
+  "vertexCount": 22948,
+  "textureCount": 0,
+  "textureMaxResolution": 0,
+  "animationCount": 0,
+  "animations": []
+}
+{
+  "schemaVersion": 2,
+  "path": "/home/runner/work/PlayGround/PlayGround/project/public/models/spaceship.glb",
+  "bytes": 801192,
+  "sha256": "ce4333c4986240cc7577ae89de0d99a14f73eac9e5917324cf23ed8a4df7eff1",
+  "title": "Low Poly Spaceship",
+  "author": "EdwinRC (https://sketchfab.com/Edwin3D)",
+  "generator": "Sketchfab-12.65.0",
+  "extensionsUsed": [
+    "KHR_materials_pbrSpecularGlossiness"
+  ],
+  "extensionsRequired": [
+    "KHR_materials_pbrSpecularGlossiness"
+  ],
+  "scenes": 1,
+  "nodes": 12,
+  "meshes": 7,
+  "morphTargets": 0,
+  "skins": [],
+  "animations": [],
+  "materials": 7,
+  "textures": 0,
+  "images": [],
+  "materialDetails": [
+    {
+      "index": 0,
+      "name": "Mat0",
+      "baseColorFactor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "baseColorTexture": null,
+      "metallicFactor": 1,
+      "roughnessFactor": 1,
+      "metallicRoughnessTexture": null,
+      "normalTexture": null,
+      "occlusionTexture": null,
+      "emissiveFactor": [
+        1,
+        0.03279036152714274,
+        0.03279036152714274
+      ],
+      "emissiveTexture": null,
+      "alphaMode": "OPAQUE",
+      "alphaCutoff": 0.5,
+      "doubleSided": true,
+      "unlit": false,
+      "transmissionFactor": null,
+      "transmissionTexture": null,
+      "clearcoatFactor": null,
+      "clearcoatTexture": null,
+      "specularFactor": null,
+      "specGlossDiffuseTexture": null,
+      "extensions": [
+        "KHR_materials_pbrSpecularGlossiness"
+      ]
+    },
+    {
+      "index": 1,
+      "name": "Mat1",
+      "baseColorFactor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "baseColorTexture": null,
+      "metallicFactor": 1,
+      "roughnessFactor": 1,
+      "metallicRoughnessTexture": null,
+      "normalTexture": null,
+      "occlusionTexture": null,
+      "emissiveFactor": [
+        0,
+        0,
+        0
+      ],
+      "emissiveTexture": null,
+[0m
+Found a solid spaceship model — now preparing it and building the playable game.
+[0m$ [0mSKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs
+node "$SKILL_DIR/scripts/normalize_glb.mjs" project/public/models/spaceship.glb --output project/public/models/spaceship-normalized.glb 2>&1 | head -n 40
+ls -lh project/public/models/
+node "$SKILL_DIR/scripts/inspect_glb.mjs" project/public/models/spaceship-normalized.glb 2>&1 | head -n 30
+file:///home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs/scripts/normalize_glb.mjs:46
+    throw new Error(
+          ^
+
+Error: Mat1 has non-dielectric specular values; use a full material converter
+    at file:///home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs/scripts/normalize_glb.mjs:46:11
+
+Node.js v22.23.2
+total 788K
+-rw-r--r-- 1 runner runner 783K Sep  5 06:24 spaceship.glb
+-rw-r--r-- 1 runner runner  624 Sep  5 06:24 spaceship.glb.attribution.json
+node:internal/fs/promises:639
+  return new FileHandle(await PromisePrototypeThen(
+                        ^
+
+Error: ENOENT: no such file or directory, open '/home/runner/work/PlayGround/PlayGround/project/public/models/spaceship-normalized.glb'
+    at async open (node:internal/fs/promises:639:25)
+    at async readFile (node:internal/fs/promises:1252:14)
+    at async readGlb (file:///home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs/scripts/lib/glb.mjs:7:17)
+    at async file:///home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs/scripts/inspect_glb.mjs:16:15 {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/runner/work/PlayGround/PlayGround/project/public/models/spaceship-normalized.glb'
+}
+
+Node.js v22.23.2
+[0m
+[0m# [0mTodos
+[✓] Search/download Sketchfab model for game hero
+[•] Build playable Three.js 3D game in project/
+[ ] Verify in real browser + capture screenshots
+[ ] Commit, push, post issue progress comment
+[0m
+[0m← [0mWrite project/index.html
+Wrote file successfully.
+[0m
+[0m← [0mWrite project/style.css
+Wrote file successfully.
+[0m
+[0m← [0mWrite project/main.js
+Wrote file successfully.
+[0m
+[0m← [0mWrite project/ATTRIBUTION.md
+Wrote file successfully.
+[0m
+[0m← [0mWrite project/test.mjs
+Wrote file successfully.
+[0m
+[0m$ [0mnode project/test.mjs
+SKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs
+node "$SKILL_DIR/scripts/validate_glb.mjs" project/public/models/spaceship.glb 2>&1 | head -n 20
+OK   project/index.html (1682 bytes)
+OK   project/main.js (11661 bytes)
+OK   project/style.css (1773 bytes)
+OK   project/public/models/spaceship.glb (801192 bytes)
+OK   main.js contains "GLTFLoader"
+OK   main.js contains "startGame"
+OK   main.js contains "TOTAL_STARS"
+OK   main.js contains "requestAnimationFrame"
+SMOKE TEST PASSED
+node:internal/modules/package_json_reader:314
+  throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+        ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'sharp' imported from /home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs/scripts/validate_glb.mjs
+    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:314:9)
+    at packageResolve (node:internal/modules/esm/resolve:768:81)
+    at moduleResolve (node:internal/modules/esm/resolve:855:18)
+    at defaultResolve (node:internal/modules/esm/resolve:985:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:747:20)
+    at ModuleLoader.resolve (node:internal/modules/esm/loader:724:38)
+    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:320:38)
+    at ModuleJob._link (node:internal/modules/esm/module_job:182:49) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+
+Node.js v22.23.2
+[0m
+Core game code is ready — now verifying it runs in a real browser.
+[0m# [0mTodos
+[✓] Search/download Sketchfab model for game hero
+[✓] Build playable Three.js 3D game in project/
+[•] Verify in real browser + capture screenshots
+[ ] Commit, push, post issue progress comment
+[0m
+[0m$ [0mpython3 -m http.server 8000 --directory project >/tmp/http.log 2>&1 &
+echo $!; sleep 2; curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/index.html; echo; curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/public/models/spaceship.glb; echo
+5413
+200
+200
+[0m
+[0m$ [0mgoogle-chrome --headless --disable-gpu --no-sandbox --enable-unsafe-swiftshader --use-gl=swiftshader --window-size=1280,800 --virtual-time-budget=15000 --screenshot=/tmp/game-menu.png http://127.0.0.1:8000/ 2>&1 | tail -n 5
+ls -lh /tmp/game-menu.png
+[5665:5665:0905/062623.193842:ERROR:gpu/command_buffer/service/gl_utils.cc:427] [.WebGL-0x5400149c00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+[5665:5665:0905/062623.340098:ERROR:gpu/command_buffer/service/gl_utils.cc:427] [.WebGL-0x5400149c00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+[5665:5665:0905/062623.358752:ERROR:gpu/command_buffer/service/gl_utils.cc:427] [.WebGL-0x5400149c00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+[5665:5665:0905/062623.390151:ERROR:gpu/command_buffer/service/gl_utils.cc:427] [.WebGL-0x5400149c00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
+50019 bytes written to file /tmp/game-menu.png
+-rw-r--r-- 1 runner runner 49K Sep  5 06:26 /tmp/game-menu.png
+[0m
+[0m→ [0mRead /tmp/game-menu.png
+[0m
+[0m$ [0mnpm ls puppeteer playwright selenium-webdriver 2>&1 | head; ls /usr/lib/node_modules 2>&1 | head; python3 -c "import playwright" 2>&1 | head
+/home/runner/work/PlayGround/PlayGround
+└── (empty)
+
+ls: cannot access '/usr/lib/node_modules': No such file or directory
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'playwright'
+[0m
+[0m$ [0mnpm install --no-save puppeteer-core@22 2>&1 | tail -n 3
+7 packages are looking for funding
+  run `npm fund` for details
+[0m
+[0m← [0mWrite /tmp/shoot.cjs
+Wrote file successfully.
+[0m
+[0m$ [0mnode /tmp/shoot.cjs 2>&1 | tail -n 20; ls -lh /tmp/shot-*.png
+^
+
+Error: Cannot find module 'puppeteer-core'
+Require stack:
+- /tmp/shoot.cjs
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+    at Function._load (node:internal/modules/cjs/loader:1216:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Module.require (node:internal/modules/cjs/loader:1527:12)
+    at require (node:internal/modules/helpers:147:16)
+    at Object.<anonymous> (/tmp/shoot.cjs:1:19)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [ '/tmp/shoot.cjs' ]
+}
+
+Node.js v22.23.2
+ls: cannot access '/tmp/shot-*.png': No such file or directory
+[0m
+[0m$ [0mNODE_PATH=/home/runner/work/PlayGround/PlayGround/node_modules node /tmp/shoot.cjs 2>&1 | tail -n 20; ls -lh /tmp/shot-*.png 2>&1
+INFO {"shipLoaded":true,"mode":"play","score":10,"stars":true,"renderer":true}
+ERRORS ["Failed to load resource: the server responded with a status of 404 (File not found)","Failed to load resource: the server responded with a status of 404 (File not found)"]
+-rw-r--r-- 1 runner runner 92K Sep  5 06:27 /tmp/shot-menu.png
+-rw-r--r-- 1 runner runner 32K Sep  5 06:27 /tmp/shot-play.png
+[0m
+[0m→ [0mRead /tmp/shot-menu.png
+[0m→ [0mRead /tmp/shot-play.png
+Gameplay verified — polishing visuals and fixing spawn collisions.
+[0m→ [0mRead project/main.js[90m [offset=130, limit=60][0m
+[0m
+[0m← [0mEdit project/main.js
+Index: /home/runner/work/PlayGround/PlayGround/project/main.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/project/main.js
++++ /home/runner/work/PlayGround/PlayGround/project/main.js
+@@ -100,14 +100,18 @@
+ const starMat = new THREE.MeshStandardMaterial({ color: 0xffd54f, emissive: 0xffb300, emissiveIntensity: 1.2, roughness: 0.2, metalness: 0.6 });
+ const rockGeo = new THREE.IcosahedronGeometry(1.1, 0);
+ const rockMat = new THREE.MeshStandardMaterial({ color: 0x8a8f9d, roughness: 0.9, metalness: 0.1, flatShading: true });
+ 
+-function randPos(margin = 3) {
+-  return new THREE.Vector3(
+-    (Math.random() * 2 - 1) * (ARENA - margin),
+-    0,
+-    (Math.random() * 2 - 1) * (ARENA - margin)
+-  );
++function randPos(margin = 3, avoid = null, avoidDist = 5) {
++  for (let tries = 0; tries < 20; tries++) {
++    const p = new THREE.Vector3(
++      (Math.random() * 2 - 1) * (ARENA - margin),
++      0,
++      (Math.random() * 2 - 1) * (ARENA - margin)
++    );
++    if (!avoid || p.distanceTo(avoid) >= avoidDist) return p;
++  }
++  return new THREE.Vector3(-ARENA + margin, 0, -ARENA + margin);
+ }
+ 
+ function spawnWorld() {
+   for (const s of stars) scene.remove(s.mesh);
+
+[0m
+[0m← [0mEdit project/main.js
+Index: /home/runner/work/PlayGround/PlayGround/project/main.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/project/main.js
++++ /home/runner/work/PlayGround/PlayGround/project/main.js
+@@ -116,11 +116,12 @@
+ function spawnWorld() {
+   for (const s of stars) scene.remove(s.mesh);
+   for (const a of asteroids) scene.remove(a.mesh);
+   stars.length = 0; asteroids.length = 0;
++  const spawn = new THREE.Vector3(0, 0, 10);
+   for (let i = 0; i < TOTAL_STARS; i++) {
+     const m = new THREE.Mesh(starGeo, starMat.clone());
+-    m.position.copy(randPos()).y = 0.2 + Math.random() * 0.8;
++    m.position.copy(randPos(3, spawn, 5)).y = 0.2 + Math.random() * 0.8;
+     scene.add(m);
+     stars.push({ mesh: m, taken: false, phase: Math.random() * Math.PI * 2 });
+   }
+   for (let i = 0; i < 8; i++) {
+
+[0m
+[0m← [0mEdit project/main.js
+Index: /home/runner/work/PlayGround/PlayGround/project/main.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/project/main.js
++++ /home/runner/work/PlayGround/PlayGround/project/main.js
+@@ -127,9 +127,9 @@
+ for (let i = 0; i < 8; i++) {
+   const m = new THREE.Mesh(rockGeo, rockMat);
+   const s = 0.7 + Math.random() * 0.9;
+   m.scale.setScalar(s);
+-  m.position.copy(randPos(5)).y = 0;
++  m.position.copy(randPos(5, spawn, 6)).y = 0;
+   m.rotation.set(Math.random() * 3, Math.random() * 3, 0);
+   scene.add(m);
+   asteroids.push({ mesh: m, vel: new THREE.Vector3((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2), spin: (Math.random() - 0.5) * 2, radius: s * 1.1 });
+ }
+
+[0m
+[0m← [0mEdit project/main.js
+Index: /home/runner/work/PlayGround/PlayGround/project/main.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/project/main.js
++++ /home/runner/work/PlayGround/PlayGround/project/main.js
+@@ -184,9 +184,9 @@
+ }
+ 
+ function startGame() {
+   state.mode = 'play';
+-  state.score = 0; state.lives = 3; state.timeLeft = GAME_TIME; state.collected = 0; state.invuln = 0;
++  state.score = 0; state.lives = 3; state.timeLeft = GAME_TIME; state.collected = 0; state.invuln = 1.0;
+   playerRig.position.set(0, 0, 10);
+   spawnWorld();
+   updateHUD();
+   overlay.classList.add('hidden');
+
+[0m
+[0m← [0mEdit project/main.js
+Index: /home/runner/work/PlayGround/PlayGround/project/main.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/project/main.js
++++ /home/runner/work/PlayGround/PlayGround/project/main.js
+@@ -290,8 +290,21 @@
+ animate();
+ loadShip().then(model => {
+   if (model) {
+     shipModel = model;
++    // The source GLB uses archived KHR_materials_pbrSpecularGlossiness with no
++    // textures, so Three.js renders it near-white. Tint by part index to
++    // restore an orange/grey look matching the Sketchfab thumbnail.
++    const palette = [0xff7a2a, 0x2e3a55, 0x9fb2cc, 0x303848, 0x66ccff, 0xff5252, 0xbbbbbb];
++    let i = 0;
++    model.traverse(o => {
++      if (o.isMesh) {
++        o.material = new THREE.MeshStandardMaterial({
++          color: palette[i++ % palette.length], roughness: 0.45, metalness: 0.35
++        });
++        o.castShadow = false;
++      }
++    });
+     // normalize scale: frame from visible bounds
+     const box = new THREE.Box3().setFromObject(model);
+     const size = box.getSize(new THREE.Vector3());
+     const maxDim = Math.max(size.x, size.y, size.z) || 1;
+
+[0m
+[0m← [0mEdit project/index.html
+Index: /home/runner/work/PlayGround/PlayGround/project/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/project/index.html
++++ /home/runner/work/PlayGround/PlayGround/project/index.html
+@@ -3,8 +3,9 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Star Runner 3D — Sketchfab Spaceship Game</title>
++<link rel="icon" href="data:,">
+ <link rel="stylesheet" href="./style.css">
+ <script type="importmap">
+ {
+   "imports": {
+
+[0m
+[0m$ [0mnode project/test.mjs && NODE_PATH=/home/runner/work/PlayGround/PlayGround/node_modules node /tmp/shoot.cjs 2>&1 | tail -n 5; ls -lh /tmp/shot-*.png
+OK   project/index.html (1714 bytes)
+OK   project/main.js (12518 bytes)
+OK   project/style.css (1773 bytes)
+OK   project/public/models/spaceship.glb (801192 bytes)
+OK   main.js contains "GLTFLoader"
+OK   main.js contains "startGame"
+OK   main.js contains "TOTAL_STARS"
+OK   main.js contains "requestAnimationFrame"
+SMOKE TEST PASSED
+INFO {"shipLoaded":true,"mode":"play","score":0,"stars":true,"renderer":true}
+ERRORS []
+-rw-r--r-- 1 runner runner 88K Sep  5 06:28 /tmp/shot-menu.png
+-rw-r--r-- 1 runner runner 29K Sep  5 06:28 /tmp/shot-play.png
+[0m
+[0m→ [0mRead /tmp/shot-play.png
+Polish complete and gameplay is clean — now saving evidence and publishing.
+[0m
+[0m$ [0mcp /tmp/shot-menu.png screenshots/final-menu.png
+cp /tmp/shot-menu.png project/screenshots/final-menu.png
+cp /tmp/shot-play.png screenshots/final-gameplay.png
+cp /tmp/shot-play.png project/screenshots/final-gameplay.png
+cp /tmp/spaceship-search.png screenshots/sketchfab-preview-sheet.png
+ls -lh screenshots/ project/screenshots/
+project/screenshots/:
+total 120K
+-rw-r--r-- 1 runner runner 29K Sep  5 06:28 final-gameplay.png
+-rw-r--r-- 1 runner runner 88K Sep  5 06:28 final-menu.png
+
+screenshots/:
+total 512K
+-rw-r--r-- 1 runner runner  29K Sep  5 06:28 final-gameplay.png
+-rw-r--r-- 1 runner runner  88K Sep  5 06:28 final-menu.png
+-rw-r--r-- 1 runner runner 391K Sep  5 06:28 sketchfab-preview-sheet.png
+[0m
+[0m# [0mTodos
+[✓] Search/download Sketchfab model for game hero
+[✓] Build playable Three.js 3D game in project/
+[✓] Verify in real browser + capture screenshots
+[•] Commit, push, post issue progress comment
+[0m
+[0m$ [0mgit status --short | head -n 30
+git diff --check 2>&1 | head
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? node_modules/
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? project/
+?? screenshots/
+[0m
+[0m$ [0mcat .gitignore 2>&1; git add project screenshots && git status --short | head -n 20
+cat: .gitignore: No such file or directory
+A  project/ATTRIBUTION.md
+A  project/index.html
+A  project/main.js
+A  project/public/models/spaceship.glb
+A  project/public/models/spaceship.glb.attribution.json
+A  project/screenshots/final-gameplay.png
+A  project/screenshots/final-menu.png
+A  project/style.css
+A  project/test.mjs
+A  screenshots/final-gameplay.png
+A  screenshots/final-menu.png
+A  screenshots/sketchfab-preview-sheet.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? node_modules/
+[0m
+[0m$ [0mgit commit -m "Add Star Runner 3D: Three.js collect-a-thon with Sketchfab spaceship hero" 2>&1 | tail -n 5
+git push origin opencode/33949606953 2>&1 | tail -n 10
+git rev-parse HEAD
+create mode 100644 project/style.css
+ create mode 100644 project/test.mjs
+ create mode 100644 screenshots/final-gameplay.png
+ create mode 100644 screenshots/final-menu.png
+ create mode 100644 screenshots/sketchfab-preview-sheet.png
+remote: 
+remote: Create a pull request for 'opencode/33949606953' on GitHub by visiting:        
+remote:      https://github.com/AgentsLoop/PlayGround/pull/new/opencode/33949606953        
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/33949606953 -> opencode/33949606953
+25309ec48c2013ea402d688d27c22d7b564c3cff
+[0m
+[0m$ [0mSHA=25309ec48c2013ea402d688d27c22d7b564c3cff
+REPO="AgentsLoop/PlayGround"
+gh issue comment 21 --repo "$REPO" --body "## 🚀 Star Runner 3D — playable milestone
+
+**Completed:**
+- New playable 3D browser game in \`project/\` (Three.js 0.160 + GLTFLoader): fly a Sketchfab spaceship, collect 12 stars in 60s, dodge 8 drifting asteroids, score/lives/timer HUD, start/win/lose/restart loop, WASD+arrows+touch controls, WebAudio blips.
+- Hero model: “Low Poly Spaceship” by EdwiixGG (CC Attribution, UID \`82f637f65f894ffe948300183ebe904d\`), 801KB / 7 meshes / 20k faces, saved at \`project/public/models/spaceship.glb\` with attribution sidecar. GLB uses archived \`KHR_materials_pbrSpecularGlossiness\` with no textures; bundled normalizer refused conversion (non-dielectric specular), so original GLB is used with a palette tint + procedural fallback. Smoke test \`node project/test.mjs\` passes; real-browser puppeteer run: ship loaded, mode=play, no page errors.
+- Run locally: \`python3 -m http.server 8000 --directory project\` → http://127.0.0.1:8000/
+
+**Status / blockers:** None — playable and verified in headless Chrome.
+
+**Links:**
+- Branch commit: https://github.com/$REPO/commit/$SHA
+- Game entry: \`project/index.html\`
+- Public preview (Pages, after merge): https://agentsloop.github.io/PlayGround/
+
+<details>
+<summary>Screenshot</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$SHA/project/screenshots/final-gameplay.png\" alt=\"Star Runner 3D gameplay with spaceship, stars and asteroids\">
+</details>" 2>&1 | tail -n 5
+https://github.com/AgentsLoop/PlayGround/issues/21#issuecomment-5549976158
+[0m
+[0m$ [0mpkill -f "http.server 8000" 2>&1; git log --oneline -3; ls project/ screenshots/
+(no output)
+
+<shell_metadata>
+shell tool terminated command after exceeding timeout 120000 ms. If this command is expected to take longer and is not waiting for interactive input, retry with a larger timeout value in milliseconds.
+</shell_metadata>
+[0m
+Game published and announced — wrapping up the final checks.
+[0m$ [0mgit log --oneline -3
+25309ec Add Star Runner 3D: Three.js collect-a-thon with Sketchfab spaceship hero
+b4fe44a Grant reusable OpenCode workflow Pages permission
+[0m
+[0m# [0mTodos
+[✓] Search/download Sketchfab model for game hero
+[✓] Build playable Three.js 3D game in project/
+[✓] Verify in real browser + capture screenshots
+[✓] Commit, push, post issue progress comment
+[0m
+[goal:evidence] Built playable Three.js game "Star Runner 3D" in project/ (index.html, main.js, style.css) using Sketchfab "Low Poly Spaceship" by EdwiixGG CC-BY UID 82f637f65f894ffe948300183ebe904d (801KB, 7 meshes, 20k faces, attribution sidecar kept; normalizer refused spec-gloss conversion so original + tint/fallback used). Verified: node project/test.mjs passes, headless Chrome puppeteer run reached mode=play with no page errors, screenshots saved to screenshots/final-menu.png, screenshots/final-gameplay.png (+project/screenshots copies). Committed and pushed as 25309ec48c2013ea402d688d27c22d7b564c3cff on opencode/33949606953 and posted progress comment https://github.com/AgentsLoop/PlayGround/issues/21#issuecomment-5549976158 with embedded gameplay screenshot.
+[goal:complete]

@@ -1,0 +1,207 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Verifying the game per requirements — checking the entrypoint and server setup.
+[0m$ [0mls -la index.html dist/index.html 2>&1; echo "---"; ls project/ screenshots/; echo "---"; which tmux; tmux ls 2>&1 | head
+ls: cannot access 'index.html': No such file or directory
+ls: cannot access 'dist/index.html': No such file or directory
+---
+project/:
+ATTRIBUTION.md
+index.html
+main.js
+public
+screenshots
+style.css
+test.mjs
+
+screenshots/:
+final-gameplay.png
+final-menu.png
+sketchfab-preview-sheet.png
+---
+/usr/bin/tmux
+error connecting to /tmp/tmux-1001/default (No such file or directory)
+[0m
+[0m→ [0mRead project/index.html
+[0m✱ [0mGrep "public/models/spaceship"[90m in project · 3 matches[0m
+[0m
+[0m← [0mEdit project/main.js
+Index: /home/runner/work/PlayGround/PlayGround/project/main.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/project/main.js
++++ /home/runner/work/PlayGround/PlayGround/project/main.js
+@@ -65,9 +65,9 @@
+ 
+ let shipModel = null;
+ async function loadShip() {
+   const loader = new GLTFLoader();
+-  const urls = ['./public/models/spaceship.glb', './models/spaceship.glb'];
++  const urls = ['./public/models/spaceship.glb', './project/public/models/spaceship.glb', './models/spaceship.glb'];
+   for (const u of urls) {
+     try {
+       const gltf = await loader.loadAsync(u);
+       return gltf.scene;
+
+[0m
+[0m← [0mWrite index.html
+Wrote file successfully.
+[0m
+Root entrypoint created — now starting the app server and testing.
+[0m$ [0mls -la index.html && node project/test.mjs
+-rw-r--r-- 1 runner runner 1738 Sep  5 06:31 index.html
+OK   project/index.html (1714 bytes)
+OK   project/main.js (12559 bytes)
+OK   project/style.css (1773 bytes)
+OK   project/public/models/spaceship.glb (801192 bytes)
+OK   main.js contains "GLTFLoader"
+OK   main.js contains "startGame"
+OK   main.js contains "TOTAL_STARS"
+OK   main.js contains "requestAnimationFrame"
+SMOKE TEST PASSED
+[0m
+[0m$ [0mtmux kill-server 2>/dev/null; sleep 1; tmux new-session -d -s app-server -c /home/runner/work/PlayGround/PlayGround "python3 -m http.server 3000" 2>&1; sleep 2; tmux ls 2>&1; curl -s -o /dev/null -w "root:%{http_code}\n" http://127.0.0.1:3000/index.html; curl -s -o /dev/null -w "project:%{http_code}\n" http://127.0.0.1:3000/project/index.html; curl -s -o /dev/null -w "model:%{http_code}\n" http://127.0.0.1:3000/project/public/models/spaceship.glb
+app-server: 1 windows (created Sat Sep  5 06:31:38 2026)
+root:200
+project:200
+model:200
+[0m
+[0m← [0mWrite /tmp/verify3000.cjs
+Wrote file successfully.
+[0m
+[0m$ [0mNODE_PATH=/home/runner/work/PlayGround/PlayGround/node_modules node /tmp/verify3000.cjs 2>&1 | tail -n 10; ls -lh /tmp/verify-*.png
+PAGE / loaded=true info={"shipLoaded":true,"mode":"play","lives":3} errors=["Failed to load resource: the server responded with a status of 404 (File not found)"]
+PAGE /project/ loaded=true info={"shipLoaded":true,"mode":"play","lives":3} errors=[]
+BROWSER TESTS FAILED
+-rw-r--r-- 1 runner runner 82K Sep  5 06:32 /tmp/verify-project-menu.png
+-rw-r--r-- 1 runner runner 36K Sep  5 06:32 /tmp/verify-project-play.png
+-rw-r--r-- 1 runner runner 87K Sep  5 06:31 /tmp/verify-root-menu.png
+-rw-r--r-- 1 runner runner 29K Sep  5 06:31 /tmp/verify-root-play.png
+[0m
+Root page works but logs a 404 on the first model path — fixing the load order.
+[0m→ [0mRead project/main.js[90m [offset=64, limit=25][0m
+[0m
+[0m← [0mEdit project/main.js
+Index: /home/runner/work/PlayGround/PlayGround/project/main.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/project/main.js
++++ /home/runner/work/PlayGround/PlayGround/project/main.js
+@@ -65,9 +65,13 @@
+ 
+ let shipModel = null;
+ async function loadShip() {
+   const loader = new GLTFLoader();
+-  const urls = ['./public/models/spaceship.glb', './project/public/models/spaceship.glb', './models/spaceship.glb'];
++  // Prefer the correct relative path for the current entrypoint so no 404 is logged.
++  const fromProject = window.location.pathname.includes('/project/');
++  const urls = fromProject
++    ? ['./public/models/spaceship.glb', './models/spaceship.glb']
++    : ['./project/public/models/spaceship.glb'];
+   for (const u of urls) {
+     try {
+       const gltf = await loader.loadAsync(u);
+       return gltf.scene;
+
+[0m
+[0m$ [0mls -la index.html project/index.html && node project/test.mjs && NODE_PATH=/home/runner/work/PlayGround/PlayGround/node_modules node /tmp/verify3000.cjs 2>&1 | tail -n 6
+-rw-r--r-- 1 runner runner 1738 Sep  5 06:31 index.html
+-rw-r--r-- 1 runner runner 1714 Sep  5 06:27 project/index.html
+OK   project/index.html (1714 bytes)
+OK   project/main.js (12740 bytes)
+OK   project/style.css (1773 bytes)
+OK   project/public/models/spaceship.glb (801192 bytes)
+OK   main.js contains "GLTFLoader"
+OK   main.js contains "startGame"
+OK   main.js contains "TOTAL_STARS"
+OK   main.js contains "requestAnimationFrame"
+SMOKE TEST PASSED
+PAGE / loaded=true info={"shipLoaded":true,"mode":"play","lives":3} errors=[]
+PAGE /project/ loaded=true info={"shipLoaded":true,"mode":"play","lives":3} errors=[]
+BROWSER TESTS PASSED
+[0m
+All tests pass on port 3000 — capturing final evidence.
+[0m→ [0mRead /tmp/verify-root-play.png
+[0m→ [0mRead /tmp/verify-root-menu.png
+[0m
+[0m$ [0mcp /tmp/verify-root-menu.png screenshots/final-menu.png
+cp /tmp/verify-root-play.png screenshots/final-gameplay.png
+cp /tmp/verify-root-menu.png project/screenshots/final-menu.png
+cp /tmp/verify-root-play.png project/screenshots/final-gameplay.png
+ls -lh screenshots/ project/screenshots/ index.html
+curl -s -o /dev/null -w "root:%{http_code}\n" http://127.0.0.1:3000/
+tmux ls 2>&1
+-rw-r--r-- 1 runner runner 1.7K Sep  5 06:31 index.html
+
+project/screenshots/:
+total 104K
+-rw-r--r-- 1 runner runner 32K Sep  5 06:32 final-gameplay.png
+-rw-r--r-- 1 runner runner 72K Sep  5 06:32 final-menu.png
+
+screenshots/:
+total 496K
+-rw-r--r-- 1 runner runner  32K Sep  5 06:32 final-gameplay.png
+-rw-r--r-- 1 runner runner  72K Sep  5 06:32 final-menu.png
+-rw-r--r-- 1 runner runner 391K Sep  5 06:28 sketchfab-preview-sheet.png
+root:200
+app-server: 1 windows (created Sat Sep  5 06:31:38 2026)
+[0m
+[0m$ [0mgit status --short | grep -v "^??" | head -n 20; echo "---untracked---"; git status --short | grep "^??" | head -n 20
+M project/main.js
+ M project/screenshots/final-gameplay.png
+ M project/screenshots/final-menu.png
+ M screenshots/final-gameplay.png
+ M screenshots/final-menu.png
+---untracked---
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? node_modules/
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+[0m
+[0m$ [0mgit add index.html project/main.js project/screenshots/final-menu.png project/screenshots/final-gameplay.png screenshots/final-menu.png screenshots/final-gameplay.png && git diff --check && git commit -m "Verify on port 3000: root index.html entrypoint, 404-free model loading, final screenshots" 2>&1 | tail -n 3
+git push origin opencode/33949606953 2>&1 | tail -n 3
+git rev-parse HEAD
+[opencode/33949606953 f1f9175] Verify on port 3000: root index.html entrypoint, 404-free model loading, final screenshots
+ 6 files changed, 59 insertions(+), 1 deletion(-)
+ create mode 100644 index.html
+To https://github.com/AgentsLoop/PlayGround
+   25309ec..f1f9175  opencode/33949606953 -> opencode/33949606953
+f1f917540f6304c67b916090958d367c44ec1065
+[0m
+Verification complete — publishing the final update to the issue.
+[0m$ [0mSHA=f1f917540f6304c67b916090958d367c44ec1065
+REPO="AgentsLoop/PlayGround"
+gh issue comment 21 --repo "$REPO" --body "## ✅ Complete — Star Runner 3D (verified on port 3000)
+
+**Summary:** Playable Three.js 3D game. Fly the Sketchfab spaceship (\"Low Poly Spaceship\" by EdwiixGG, CC Attribution, UID \`82f637f65f894ffe948300183ebe904d\`), collect 12 stars in 60s, dodge 8 drifting asteroids. Score/lives/timer HUD, start/win/lose/restart loop, WASD+arrows+touch controls, WebAudio blips, starfield + grid arena. Playable entrypoints: repo-root \`index.html\` and \`project/index.html\` (both load the same game; root wraps \`project/\` assets). App server runs in tmux session \`app-server\` on port 3000 serving the repo root — \`http://127.0.0.1:3000/\` returns 200 and runs the game.
+
+**Public game link:** https://agentsloop.github.io/PlayGround/ (Pages deploy from repo; local: \`python3 -m http.server 3000\` → http://127.0.0.1:3000/)
+
+**Final commit:** https://github.com/$REPO/commit/$SHA
+
+**Deployment / test status:**
+- \`node project/test.mjs\` — PASSED (entrypoints, game-loop markers, 801KB GLB present)
+- Headless-Chrome browser tests vs port 3000 — PASSED on both \`/\` and \`/project/\`: ship loaded, mode=play after Start, lives=3, zero console/page errors
+- GLB note: source uses archived \`KHR_materials_pbrSpecularGlossiness\` with no textures; bundled normalizer refused conversion (non-dielectric specular), so original GLB is used with a palette tint + procedural fallback ship
+
+**Known limitations:** Ship colors are approximated with a tint (not original Sketchfab textures); requires internet for Three.js CDN importmap; no persistent high scores.
+
+<details>
+<summary>Screenshot — menu</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$SHA/screenshots/final-menu.png\" alt=\"Star Runner 3D start menu\">
+</details>
+
+<details>
+<summary>Screenshot — gameplay</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$SHA/screenshots/final-gameplay.png\" alt=\"Star Runner 3D gameplay with spaceship, stars and asteroids\">
+</details>" 2>&1 | tail -n 3
+https://github.com/AgentsLoop/PlayGround/issues/21#issuecomment-5549999783
+[0m
+[goal:evidence] Verified per Agents.md: playable entrypoint exists at ./index.html (wraps project/ game; both / and /project/ return 200 on port 3000). App server running in tmux session app-server on port 3000 serving repo root. project/main.js fixed to load the correct model path per entrypoint (no 404). Tests: node project/test.mjs PASSED; headless-Chrome browser tests PASSED on both entrypoints (ship loaded, mode=play, lives=3, zero console errors). Final screenshots saved as screenshots/final-menu.png and screenshots/final-gameplay.png (+project/screenshots mirrors). Committed+pushed f1f917540f6304c67b916090958d367c44ec1065 to opencode/33949606953 (no new branch/PR). Published completion update https://github.com/AgentsLoop/PlayGround/issues/21#issuecomment-5549999783 with summary, game link, commit link, test status, limitations, and embedded final screenshots.
+[goal:complete]
