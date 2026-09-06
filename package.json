@@ -1,0 +1,14 @@
+{
+  "name": "canyon-courier",
+  "version": "1.0.0",
+  "description": "Canyon Courier — a small arcade browser game. Pilot a glider through a canyon, thread moving gates and grab packages before time runs out.",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "test": "node --check game.js && node --check server.js && echo OK"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
