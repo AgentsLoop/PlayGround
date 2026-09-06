@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Courier: Signal Sprint</title>
+<style>
+  :root{
+    --bg:#05060f; --cyan:#00f0ff; --magenta:#ff2d95; --lime:#a6ff00;
+    --panel:rgba(10,14,32,.85); --text:#dff6ff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{
+    background:radial-gradient(1200px 700px at 50% -10%, #141b45 0%, var(--bg) 60%) fixed;
+    color:var(--text); font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:20px 12px 32px;
+  }
+  header{text-align:center; margin-bottom:10px}
+  h1{
+    font-size:clamp(22px,4vw,38px); letter-spacing:2px; font-weight:800;
+    background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--lime));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 30px rgba(0,240,255,.25);
+  }
+  .subtitle{opacity:.75; font-size:13px; letter-spacing:1px; margin-top:4px}
+  #hud{
+    display:flex; gap:10px; align-items:stretch; justify-content:center; flex-wrap:wrap;
+    width:min(760px,96vw); margin:12px 0;
+  }
+  .pill{
+    background:var(--panel); border:1px solid rgba(0,240,255,.35); border-radius:12px;
+    padding:8px 14px; min-width:110px; text-align:center;
+    box-shadow:0 0 18px rgba(0,240,255,.15), inset 0 0 18px rgba(0,240,255,.06);
+  }
+  .pill .label{font-size:10px; letter-spacing:2px; opacity:.65}
+  .pill .value{font-size:20px; font-weight:800; font-variant-numeric:tabular-nums}
+  #scoreVal{color:var(--lime); text-shadow:0 0 12px rgba(166,255,0,.7)}
+  #timeVal{color:var(--cyan); text-shadow:0 0 12px rgba(0,240,255,.7)}
+  #timeVal.danger{color:#ff4d4d; text-shadow:0 0 12px rgba(255,40,40,.9); animation:blink .5s infinite alternate}
+  @keyframes blink{from{opacity:1}to{opacity:.5}}
+  #livesVal{color:var(--magenta); text-shadow:0 0 12px rgba(255,45,149,.8); letter-spacing:2px}
+  button{
+    cursor:pointer; border:1px solid rgba(166,255,0,.6); background:rgba(166,255,0,.12);
+    color:#eaffc4; font-weight:800; letter-spacing:1px; border-radius:12px; padding:8px 18px; font-size:15px;
+    box-shadow:0 0 16px rgba(166,255,0,.25); transition:transform .08s, box-shadow .15s;
+  }
+  button:hover{transform:translateY(-1px); box-shadow:0 0 24px rgba(166,255,0,.45)}
+  button:active{transform:translateY(1px)}
+  #wrap{position:relative; width:min(760px,96vw)}
+  canvas{
+    width:100%; height:auto; display:block; border-radius:16px;
+    border:1px solid rgba(0,240,255,.4);
+    box-shadow:0 0 40px rgba(0,240,255,.18), 0 0 90px rgba(255,45,149,.12);
+    background:#05060f; touch-action:none;
+  }
+  #overlay{
+    position:absolute; inset:0; border-radius:16px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center; gap:12px; padding:24px;
+    background:rgba(3,5,16,.78); backdrop-filter:blur(3px);
+  }
+  #overlay.hidden{display:none}
+  #overlay h2{font-size:clamp(24px,5vw,40px); letter-spacing:2px;
+    color:#fff; text-shadow:0 0 18px var(--cyan),0 0 42px var(--magenta)}
+  #overlay p{max-width:46ch; line-height:1.5; opacity:.9; font-size:14px}
+  #overlay .keys{font-size:12px; opacity:.7}
+  kbd{background:#1a2140; border:1px solid #3a4670; border-bottom-width:3px; border-radius:6px; padding:1px 7px; font-family:inherit}
+  #hint{margin-top:10px; font-size:12px; opacity:.65; text-align:center; max-width:760px}
+  #dpad{display:none; gap:8px; margin-top:10px; user-select:none}
+  #dpad button{min-width:56px; border-color:rgba(0,240,255,.5); background:rgba(0,240,255,.1); color:#c8f6ff}
+  @media (pointer:coarse){ #dpad{display:grid; grid-template-columns:repeat(3,56px);} }
+  footer{margin-top:14px; font-size:11px; opacity:.5}
+</style>
+</head>
+<body>
+<header>
+  <h1>NEON COURIER: SIGNAL SPRINT</h1>
+  <div class="subtitle">Collect all signal orbs before the grid timer runs out — dodge the patrol blockers.</div>
+</header>
+
+<div id="hud">
+  <div class="pill"><div class="label">SCORE</div><div class="value" id="scoreVal">0</div></div>
+  <div class="pill"><div class="label">ORBS</div><div class="value" id="orbsVal">0/8</div></div>
+  <div class="pill"><div class="label">TIME</div><div class="value" id="timeVal">60</div></div>
+  <div class="pill"><div class="label">HULL</div><div class="value" id="livesVal">♥♥♥</div></div>
+  <div class="pill" style="display:flex;align-items:center"><button id="restartBtn" aria-label="Restart game">↻ RESTART</button></div>
+</div>
+
+<div id="wrap">
+  <canvas id="game" width="760" height="520"></canvas>
+  <div id="overlay">
+    <h2 id="ovTitle">SIGNAL SPRINT</h2>
+    <p id="ovText">Pilot the cyan courier drone. Grab <b style="color:#a6ff00">8 signal orbs</b> in 60 seconds.
+      Magenta patrol blockers drain your hull on contact — you have 3 hits.</p>
+    <p class="keys"><kbd>WASD</kbd> / <kbd>←↑↓→</kbd> to fly &nbsp;•&nbsp; <kbd>R</kbd> / <kbd>Space</kbd> to restart</p>
+    <button id="startBtn">▶ START DELIVERY</button>
+  </div>
+</div>
+
+<div id="dpad">
+  <span></span><button data-dx="0" data-dy="-1">▲</button><span></span>
+  <button data-dx="-1" data-dy="0">◀</button><button data-dx="0" data-dy="1">▼</button><button data-dx="1" data-dy="0">▶</button>
+</div>
+
+<div id="hint">Tip: blockers speed up as you collect orbs. Grab an orb to get +100 and a brief speed boost. Buildings are solid — route around them.</div>
+<footer>Neon Courier · single-file canvas game · no dependencies</footer>
+
+<script>
+"use strict";
+const W = 760, H = 520;
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('scoreVal');
+const orbsEl = document.getElementById('orbsVal');
+const timeEl = document.getElementById('timeVal');
+const livesEl = document.getElementById('livesVal');
+const overlay = document.getElementById('overlay');
+const ovTitle = document.getElementById('ovTitle');
+const ovText = document.getElementById('ovText');
+const startBtn = document.getElementById('startBtn');
+const restartBtn = document.getElementById('restartBtn');
+
+const TOTAL_ORBS = 8, TIME_LIMIT = 60, MAX_LIVES = 3;
+const BASE_SPEED = 240;
+
+// Solid city blocks (x,y,w,h)
+const BUILDINGS = [
+  {x:130, y:110, w:120, h:90},
+  {x:510, y:100, w:130, h:100},
+  {x:130, y:340, w:140, h:100},
+  {x:490, y:330, w:150, h:110},
+  {x:330, y:220, w:100, h:80},
+];
+
+let state = 'ready'; // ready | playing | won | lost
+let player, orbs, blockers, particles, trail;
+let score = 0, lives = MAX_LIVES, timeLeft = TIME_LIMIT, collected = 0;
+let elapsed = 0, shake = 0, flashT = 0, boostT = 0, invulnT = 0;
+
+const keys = {};
+addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k === ' ' ? ' ' : k) || k.startsWith('arrow')) e.preventDefault();
+  keys[k] = true;
+  if (k === 'arrowup') keys['w'] = true;
+  if (k === 'arrowdown') keys['s'] = true;
+  if (k === 'arrowleft') keys['a'] = true;
+  if (k === 'arrowright') keys['d'] = true;
+  if ((k === 'r' || k === ' ' || k === 'enter') && state !== 'playing') startGame();
+});
+addEventListener('keyup', e => {
+  const k = e.key.toLowerCase();
+  keys[k] = false;
+  if (k === 'arrowup') keys['w'] = false;
+  if (k === 'arrowdown') keys['s'] = false;
+  if (k === 'arrowleft') keys['a'] = false;
+  if (k === 'arrowright') keys['d'] = false;
+});
+// touch dpad
+document.querySelectorAll('#dpad button').forEach(b => {
+  const dx = +b.dataset.dx, dy = +b.dataset.dy;
+  const on = e => { e.preventDefault(); touchDir.x = dx; touchDir.y = dy; touchActive = true; };
+  const off = e => { e.preventDefault(); touchActive = false; touchDir.x = 0; touchDir.y = 0; };
+  b.addEventListener('pointerdown', on);
+  b.addEventListener('pointerup', off);
+  b.addEventListener('pointerleave', off);
+});
+const touchDir = {x:0, y:0};
+let touchActive = false;
+
+startBtn.addEventListener('click', startGame);
+restartBtn.addEventListener('click', startGame);
+
+function randFreeSpot(margin, avoidR) {
+  for (let i = 0; i < 200; i++) {
+    const x = margin + Math.random() * (W - margin * 2);
+    const y = margin + Math.random() * (H - margin * 2);
+    if (rectHit(x, y, 14, BUILDINGS)) continue;
+    if (avoidR && Math.hypot(x - avoidR.x, y - avoidR.y) < 120) continue;
+    return {x, y};
+  }
+  return {x: W/2, y: 80};
+}
+function rectHit(x, y, r, rects) {
+  return rects.some(b => x + r > b.x && x - r < b.x + b.w && y + r > b.y && y - r < b.y + b.h);
+}
+function collideBuildings(p, r) {
+  for (const b of BUILDINGS) {
+    const nx = Math.max(b.x, Math.min(p.x, b.x + b.w));
+    const ny = Math.max(b.y, Math.min(p.y, b.y + b.h));
+    const dx = p.x - nx, dy = p.y - ny;
+    if (dx*dx + dy*dy < r*r) {
+      // push out along smallest axis
+      const overlapL = (p.x + r) - b.x, overlapR = (b.x + b.w) - (p.x - r);
+      const overlapT = (p.y + r) - b.y, overlapB = (b.y + b.h) - (p.y - r);
+      const m = Math.min(overlapL, overlapR, overlapT, overlapB);
+      if (m === overlapL) p.x = b.x - r;
+      else if (m === overlapR) p.x = b.x + b.w + r;
+      else if (m === overlapT) p.y = b.y - r;
+      else p.y = b.y + b.h + r;
+    }
+  }
+}
+
+function startGame() {
+  player = {x: W/2, y: H - 50, r: 12, vx: 0, vy: 0, angle: -Math.PI/2};
+  score = 0; lives = MAX_LIVES; timeLeft = TIME_LIMIT; collected = 0;
+  elapsed = 0; shake = 0; flashT = 0; boostT = 0; invulnT = 0;
+  particles = []; trail = [];
+  orbs = [];
+  for (let i = 0; i < TOTAL_ORBS; i++) {
+    const s = randFreeSpot(40, player);
+    orbs.push({x: s.x, y: s.y, r: 10, phase: Math.random() * Math.PI * 2, taken: false});
+  }
+  // 5 patrolling blockers: mix of horizontal / vertical
+  blockers = [
+    mkBlocker('h', 90, 250, 200, 130),
+    mkBlocker('v', 380, 90, 160, 300),
+    mkBlocker('h', 480, 260, 220, 120),
+    mkBlocker('v', 640, 300, 150, 280),
+    mkBlocker('h', 200, 300, 260, 380),
+  ];
+  state = 'playing';
+  overlay.classList.add('hidden');
+  updateHUD();
+  beep(520, .08, 'square', .12);
+}
+
+function mkBlocker(axis, x, y, speed, range) {
+  return {axis, hx: x, hy: y, x, y, r: 14, speed, range, t: Math.random() * 10, hue: 320};
+}
+
+function updateHUD() {
+  scoreEl.textContent = score;
+  orbsEl.textContent = collected + '/' + TOTAL_ORBS;
+  timeEl.textContent = Math.ceil(timeLeft);
+  timeEl.classList.toggle('danger', timeLeft <= 10 && state === 'playing');
+  livesEl.textContent = '♥'.repeat(Math.max(0, lives)) + '·'.repeat(Math.max(0, MAX_LIVES - lives));
+}
+
+function endGame(win) {
+  state = win ? 'won' : 'lost';
+  overlay.classList.remove('hidden');
+  if (win) {
+    const bonus = Math.ceil(timeLeft) * 10;
+    score += bonus;
+    ovTitle.textContent = 'DELIVERY COMPLETE ✓';
+    ovText.innerHTML = `All ${TOTAL_ORBS} signals delivered with <b>${Math.ceil(timeLeft)}s</b> left.<br>` +
+      `Time bonus <b style="color:#a6ff00">+${bonus}</b> · Final score <b style="color:#a6ff00">${score}</b>.<br>` +
+      `<span class="keys"><kbd>R</kbd> to run it again</span>`;
+    startBtn.textContent = '↻ RUN AGAIN';
+    updateHUD();
+    fanfare(true);
+  } else {
+    ovTitle.textContent = lives <= 0 ? 'DRONE DOWN ✕' : "TIME'S UP ✕";
+    ovText.innerHTML = lives <= 0
+      ? `Your courier was scrapped by patrol blockers.<br>Score <b>${score}</b> · Orbs <b>${collected}/${TOTAL_ORBS}</b>.`
+      : `The grid timer expired with <b>${TOTAL_ORBS - collected}</b> orb(s) left.<br>Score <b>${score}</b>.`;
+    startBtn.textContent = '↻ TRY AGAIN';
+    fanfare(false);
+  }
+}
+
+// --- audio (tiny synth, no assets) ---
+let AC = null;
+function beep(freq, dur, type, vol) {
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type || 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol || .1, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001, AC.currentTime + dur);
+    o.connect(g); g.connect(AC.destination);
+    o.start(); o.stop(AC.currentTime + dur);
+  } catch (e) {}
+}
+function fanfare(win) {
+  if (win) [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, .15, 'square', .1), i * 110));
+  else [330, 260, 180].forEach((f, i) => setTimeout(() => beep(f, .2, 'sawtooth', .1), i * 140));
+}
+
+// --- update ---
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(.033, (now - last) / 1000);
+  last = now;
+  if (state === 'playing') update(dt);
+  render(now / 1000);
+  requestAnimationFrame(loop);
+}
+
+function update(dt) {
+  elapsed += dt;
+  timeLeft -= dt;
+  if (boostT > 0) boostT -= dt;
+  if (invulnT > 0) invulnT -= dt;
+  if (flashT > 0) flashT -= dt;
+  if (shake > 0) shake = Math.max(0, shake - dt * 30);
+
+  if (timeLeft <= 0) { timeLeft = 0; updateHUD(); endGame(false); return; }
+
+  // input
+  let ix = (keys['d'] ? 1 : 0) - (keys['a'] ? 1 : 0);
+  let iy = (keys['s'] ? 1 : 0) - (keys['w'] ? 1 : 0);
+  if (touchActive) { ix = touchDir.x; iy = touchDir.y; }
+  const len = Math.hypot(ix, iy) || 1;
+  ix /= len; iy /= len;
+  const spd = BASE_SPEED * (boostT > 0 ? 1.45 : 1);
+  player.x += ix * spd * dt;
+  player.y += iy * spd * dt;
+  if (ix || iy) player.angle = Math.atan2(iy, ix);
+  player.x = Math.max(player.r + 4, Math.min(W - player.r - 4, player.x));
+  player.y = Math.max(player.r + 4, Math.min(H - player.r - 4, player.y));
+  collideBuildings(player, player.r);
+
+  trail.push({x: player.x, y: player.y, life: .35});
+  if (trail.length > 40) trail.shift();
+  trail.forEach(t => t.life -= dt);
+  trail = trail.filter(t => t.life > 0);
+
+  // blockers patrol (speed ramps with collected orbs)
+  const ramp = 1 + collected * 0.12;
+  for (const b of blockers) {
+    b.t += dt * ramp;
+    const off = Math.sin(b.t * b.speed / 130) * b.range / 2;
+    if (b.axis === 'h') { b.x = clamp(b.hx + off, 30, W - 30); b.y = b.hy; }
+    else { b.x = b.hx; b.y = clamp(b.hy + off, 30, H - 30); }
+  }
+
+  // orb pickup
+  for (const o of orbs) {
+    if (o.taken) continue;
+    if (Math.hypot(player.x - o.x, player.y - o.y) < player.r + o.r + 4) {
+      o.taken = true; collected++;
+      score += 100; boostT = 1.2;
+      burst(o.x, o.y, '#a6ff00', 26);
+      beep(660 + collected * 60, .12, 'square', .12);
+      setTimeout(() => beep(990 + collected * 40, .1, 'sine', .1), 60);
+      if (collected >= TOTAL_ORBS) { updateHUD(); endGame(true); return; }
+    }
+  }
+
+  // blocker collision
+  if (invulnT <= 0) {
+    for (const b of blockers) {
+      if (Math.hypot(player.x - b.x, player.y - b.y) < player.r + b.r - 2) {
+        lives--; invulnT = 1.4; flashT = .35; shake = 10;
+        burst(player.x, player.y, '#ff2d95', 30);
+        beep(160, .25, 'sawtooth', .15);
+        // knockback away
+        const dx = player.x - b.x, dy = player.y - b.y, d = Math.hypot(dx, dy) || 1;
+        player.x = clamp(player.x + dx / d * 40, 20, W - 20);
+        player.y = clamp(player.y + dy / d * 40, 20, H - 20);
+        if (lives <= 0) { updateHUD(); endGame(false); return; }
+        break;
+      }
+    }
+  }
+
+  particles.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; });
+  particles = particles.filter(p => p.life > 0);
+  updateHUD();
+}
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+function burst(x, y, color, n) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, s = 60 + Math.random() * 220;
+    particles.push({x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: .4 + Math.random() * .5, color});
+  }
+}
+
+// --- render ---
+function render(t) {
+  ctx.save();
+  if (shake > 0) ctx.translate((Math.random()-.5) * shake, (Math.random()-.5) * shake);
+  // bg
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#0a1030'); g.addColorStop(1, '#05060f');
+  ctx.fillStyle = g; ctx.fillRect(-20, -20, W + 40, H + 40);
+  // grid
+  ctx.strokeStyle = 'rgba(0,240,255,.12)'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let x = 0; x <= W; x += 38) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+  for (let y = 0; y <= H; y += 38) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
+  ctx.stroke();
+  // patrol lanes (subtle)
+  ctx.strokeStyle = 'rgba(255,45,149,.14)'; ctx.setLineDash([6, 8]); ctx.lineWidth = 2;
+  for (const b of (blockers || [])) {
+    ctx.beginPath();
+    if (b.axis === 'h') { ctx.moveTo(clamp(b.hx - b.range/2, 20, W-20), b.hy); ctx.lineTo(clamp(b.hx + b.range/2, 20, W-20), b.hy); }
+    else { ctx.moveTo(b.hx, clamp(b.hy - b.range/2, 20, H-20)); ctx.lineTo(b.hx, clamp(b.hy + b.range/2, 20, H-20)); }
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  // buildings
+  for (const b of BUILDINGS) {
+    ctx.fillStyle = '#0d1430';
+    ctx.strokeStyle = 'rgba(0,240,255,.55)'; ctx.lineWidth = 2;
+    ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 14;
+    roundRect(b.x, b.y, b.w, b.h, 8); ctx.fill(); ctx.stroke();
+    ctx.shadowBlur = 0;
+    // windows
+    ctx.fillStyle = 'rgba(255,45,149,.5)';
+    for (let wx = b.x + 12; wx < b.x + b.w - 8; wx += 20)
+      for (let wy = b.y + 12; wy < b.y + b.h - 8; wy += 18)
+        ctx.fillRect(wx, wy, 8, 5);
+  }
+  // orbs
+  for (const o of (orbs || [])) {
+    if (o.taken) continue;
+    const pulse = 1 + Math.sin(t * 4 + o.phase) * .15;
+    ctx.save();
+    ctx.shadowColor = '#a6ff00'; ctx.shadowBlur = 22;
+    ctx.fillStyle = '#a6ff00';
+    ctx.beginPath(); ctx.arc(o.x, o.y, o.r * pulse, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#f4ffdd';
+    ctx.beginPath(); ctx.arc(o.x - 2, o.y - 2, 4 * pulse, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(166,255,0,.5)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(o.x, o.y, (o.r + 7) * pulse, t * 2 + o.phase, t * 2 + o.phase + 4.5); ctx.stroke();
+    ctx.restore();
+  }
+  // trail
+  for (const tr of (trail || [])) {
+    ctx.globalAlpha = tr.life * 1.6;
+    ctx.fillStyle = '#00f0ff';
+    ctx.beginPath(); ctx.arc(tr.x, tr.y, 5, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  // blockers
+  for (const b of (blockers || [])) {
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.shadowColor = '#ff2d95'; ctx.shadowBlur = 24;
+    ctx.fillStyle = '#2a0618';
+    ctx.strokeStyle = '#ff2d95'; ctx.lineWidth = 3;
+    ctx.beginPath();
+    const r = b.r;
+    for (let i = 0; i < 6; i++) {
+      const a = t * 1.5 + i * Math.PI / 3;
+      const px = Math.cos(a) * r, py = Math.sin(a) * r;
+      i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+    }
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ff2d95';
+    ctx.beginPath(); ctx.arc(0, 0, 4 + Math.sin(t * 6) * 1.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  // player drone
+  if (player) {
+    const blink = invulnT > 0 && Math.floor(t * 12) % 2 === 0;
+    ctx.save();
+    ctx.translate(player.x, player.y);
+    ctx.rotate(player.angle);
+    if (!blink) {
+      ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 26;
+      ctx.fillStyle = '#062a33';
+      ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(16, 0); ctx.lineTo(-10, -11); ctx.lineTo(-5, 0); ctx.lineTo(-10, 11);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#d9fbff';
+      ctx.beginPath(); ctx.arc(2, 0, 4, 0, Math.PI * 2); ctx.fill();
+      if (boostT > 0) {
+        ctx.fillStyle = 'rgba(166,255,0,.9)';
+        ctx.beginPath();
+        ctx.moveTo(-10, -6); ctx.lineTo(-10 - Math.random() * 18 - 8, 0); ctx.lineTo(-10, 6);
+        ctx.closePath(); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+  // particles
+  for (const p of (particles || [])) {
+    ctx.globalAlpha = Math.max(0, p.life * 2);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+  // hit flash
+  if (flashT > 0) {
+    ctx.fillStyle = `rgba(255,45,80,${flashT * .8})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+  // vignette
+  const v = ctx.createRadialGradient(W/2, H/2, H/3, W/2, H/2, H);
+  v.addColorStop(0, 'rgba(0,0,0,0)');
+  v.addColorStop(1, 'rgba(0,0,0,.45)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+}
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+// idle demo background before start
+player = {x: W/2, y: H - 50, r: 12, angle: -Math.PI/2};
+orbs = [{x: W/2, y: 140, r: 10, phase: 0, taken: false}];
+blockers = [mkBlocker('h', 380, 300, 160, 300)];
+trail = []; particles = [];
+updateHUD();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
