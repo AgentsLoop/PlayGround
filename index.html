@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orbit Salvage</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230b1330' stroke='%2357f2c6' stroke-width='2'/%3E%3Cpath d='M16 7 L22 23 L16 19 L10 23 Z' fill='%2357c8f2'/%3E%3C/svg%3E" />
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    background: #05070f; color: #d7e3ff;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  header { text-align: center; padding: 14px 12px 4px; }
+  header h1 { margin: 0; font-size: 28px; letter-spacing: 2px; }
+  header h1 span { color: #57f2c6; }
+  header p { margin: 6px 0 0; color: #8ea0c8; font-size: 14px; }
+  #hud {
+    display: flex; gap: 18px; align-items: center; justify-content: center;
+    margin: 10px 0; font-size: 16px; flex-wrap: wrap;
+  }
+  #score { font-weight: 700; font-size: 20px; }
+  #hullWrap {
+    width: 220px; height: 16px; background: #1a2440;
+    border: 1px solid #3a4a7a; border-radius: 999px; overflow: hidden;
+  }
+  #hullBar { height: 100%; width: 100%; background: linear-gradient(90deg,#57f2c6,#2fbf9a); transition: width .2s; }
+  #hullBar.low { background: linear-gradient(90deg,#ff5d5d,#c22); }
+  #wrap { position: relative; }
+  canvas {
+    background: radial-gradient(circle at 50% 50%, #0b1330 0%, #05070f 72%);
+    border: 1px solid #2a3a66; border-radius: 12px;
+    max-width: min(92vw, 760px); height: auto; display: block;
+  }
+  #overlay {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    background: rgba(3,6,16,.78); border-radius: 12px; padding: 20px;
+  }
+  #overlay.hidden { display: none; }
+  #overlay h2 { margin: 0 0 8px; font-size: 30px; }
+  #overlay p { margin: 6px 0; color: #aebdDC; max-width: 420px; }
+  #overlay button {
+    margin-top: 12px; font-size: 17px; font-weight: 700; cursor: pointer;
+    background: #57f2c6; color: #04231b; border: 0; border-radius: 999px;
+    padding: 10px 26px;
+  }
+  #overlay button:hover { background: #7dffd8; }
+  footer { color: #5f719c; font-size: 12px; padding: 10px; text-align: center; }
+  kbd { background: #1a2440; border: 1px solid #3a4a7a; border-radius: 4px; padding: 1px 6px; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>ORBIT <span>SALVAGE</span></h1>
+  <p>Pilot the drone &bull; collect scrap &loz; &bull; dodge 3 rotating debris</p>
+</header>
+<div id="hud">
+  <div>Score: <span id="score">0</span></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span>Hull:</span>
+    <div id="hullWrap" role="progressbar" aria-label="Hull integrity"><div id="hullBar"></div></div>
+    <span id="hullText">100</span>
+  </div>
+  <div>Scrap: <span id="scrap">0</span>/<span id="best">0</span> best</div>
+</div>
+<div id="wrap">
+  <canvas id="game" width="760" height="600"></canvas>
+  <div id="overlay">
+    <h2 id="ovTitle">Orbit Salvage</h2>
+    <p id="ovText">Steer with <kbd>WASD</kbd> or <kbd>&larr;&uarr;&darr;&rarr;</kbd>. Collect yellow scrap (+10). Avoid red debris &mdash; 3 hits destroy the drone.</p>
+    <button id="restartBtn">Launch (Enter)</button>
+  </div>
+</div>
+<footer>Stay inside the circular arena. Press <kbd>R</kbd> / <kbd>Enter</kbd> to restart after destruction.</footer>
+<script>
+(() => {
+  'use strict';
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const hullBar = document.getElementById('hullBar');
+  const hullText = document.getElementById('hullText');
+  const scrapEl = document.getElementById('scrap');
+  const bestEl = document.getElementById('best');
+  const overlay = document.getElementById('overlay');
+  const ovTitle = document.getElementById('ovTitle');
+  const ovText = document.getElementById('ovText');
+  const restartBtn = document.getElementById('restartBtn');
+
+  const W = canvas.width, H = canvas.height;
+  const CX = W / 2, CY = H / 2 + 10;
+  const ARENA_R = 260;
+
+  const keys = Object.create(null);
+  addEventListener('keydown', (e) => {
+    const k = e.key.toLowerCase();
+    if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k) || ['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key)) e.preventDefault();
+    keys[k] = true;
+    keys[e.key] = true;
+    if ((k === 'enter' || k === 'r' || k === ' ') && state !== 'play') startGame();
+  });
+  addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; keys[e.key] = false; });
+
+  // Starfield
+  const stars = Array.from({length: 140}, () => ({
+    x: Math.random() * W, y: Math.random() * H,
+    r: Math.random() * 1.4 + 0.3, tw: Math.random() * Math.PI * 2
+  }));
+
+  let state = 'menu'; // menu | play | dead
+  let player, scraps, hazards, score, scrapCount, lastTime, invuln, shake;
+
+  function randInArena(margin) {
+    for (let i = 0; i < 50; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const d = Math.random() * (ARENA_R - (margin || 30));
+      const x = CX + Math.cos(a) * d, y = CY + Math.sin(a) * d;
+      if (Math.hypot(x - CX, y - CY) < ARENA_R - (margin || 30)) return {x, y};
+    }
+    return {x: CX, y: CY};
+  }
+
+  function spawnScrap(minCenterDist) {
+    for (let tries = 0; tries < 60; tries++) {
+      const p = randInArena(36);
+      if (minCenterDist && Math.hypot(p.x - CX, p.y - CY) < minCenterDist) continue;
+      if (player && Math.hypot(p.x - player.x, p.y - player.y) < 50) continue;
+      const a = Math.random() * Math.PI * 2;
+      const sp = 12 + Math.random() * 22;
+      return { x: p.x, y: p.y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, r: 8, spin: Math.random()*6.28, collected: 0 };
+    }
+    const p = randInArena(36);
+    const a = Math.random() * Math.PI * 2;
+    const sp = 12 + Math.random() * 22;
+    return { x: p.x, y: p.y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, r: 8, spin: Math.random()*6.28, collected: 0 };
+  }
+
+  function startGame() {
+    player = { x: CX, y: CY, vx: 0, vy: 0, r: 11, angle: -Math.PI/2, hull: 100, thrust: 0 };
+    scraps = Array.from({length: 6}, () => spawnScrap(70));
+    hazards = [
+      { orbitR: 90,  size: 16, angle: 0,            speed:  0.9,  spin: 0, spinSp: 2.2, x: 0, y: 0 },
+      { orbitR: 160, size: 19, angle: Math.PI*0.7,  speed: -0.65, spin: 0, spinSp: -1.6, x: 0, y: 0 },
+      { orbitR: 220, size: 14, angle: Math.PI*1.4,  speed:  0.5,  spin: 0, spinSp: 3.0, x: 0, y: 0 },
+    ];
+    score = 0; scrapCount = 0; invuln = 0; shake = 0;
+    state = 'play';
+    overlay.classList.add('hidden');
+    updateHUD();
+  }
+
+  function updateHUD() {
+    scoreEl.textContent = score;
+    scrapEl.textContent = scrapCount;
+    const h = Math.max(0, Math.round(player ? player.hull : 100));
+    hullText.textContent = h;
+    hullBar.style.width = h + '%';
+    hullBar.classList.toggle('low', h <= 34);
+    const best = Number(localStorage.getItem('orbitSalvageBest') || 0);
+    bestEl.textContent = Math.max(best, score);
+  }
+
+  function damage(amount) {
+    if (invuln > 0 || state !== 'play') return;
+    player.hull -= amount;
+    invuln = 1.1;
+    shake = 9;
+    updateHUD();
+    if (player.hull <= 0) {
+      player.hull = 0;
+      state = 'dead';
+      const best = Number(localStorage.getItem('orbitSalvageBest') || 0);
+      if (score > best) localStorage.setItem('orbitSalvageBest', String(score));
+      ovTitle.textContent = 'Drone Destroyed';
+      ovText.innerHTML = 'Final score: <b>' + score + '</b> &bull; scrap: <b>' + scrapCount + '</b><br>Press <kbd>R</kbd> or click Relaunch to try again.';
+      restartBtn.textContent = 'Relaunch (R)';
+      overlay.classList.remove('hidden');
+      updateHUD();
+    }
+  }
+
+  function step(dt) {
+    // input accel
+    let ax = 0, ay = 0;
+    const A = 420;
+    if (keys['a'] || keys['arrowleft'] || keys['ArrowLeft']) ax -= A;
+    if (keys['d'] || keys['arrowright'] || keys['ArrowRight']) ax += A;
+    if (keys['w'] || keys['arrowup'] || keys['ArrowUp']) ay -= A;
+    if (keys['s'] || keys['arrowdown'] || keys['ArrowDown']) ay += A;
+    player.vx += ax * dt; player.vy += ay * dt;
+    player.thrust = (ax || ay) ? 1 : 0;
+    // damping
+    const damp = Math.pow(0.35, dt);
+    player.vx *= damp; player.vy *= damp;
+    const maxV = 300;
+    const sp = Math.hypot(player.vx, player.vy);
+    if (sp > maxV) { player.vx *= maxV/sp; player.vy *= maxV/sp; }
+    player.x += player.vx * dt; player.y += player.vy * dt;
+    if (sp > 20) player.angle = Math.atan2(player.vy, player.vx);
+
+    // arena constraint: bounce inside circle
+    const dx = player.x - CX, dy = player.y - CY;
+    const dist = Math.hypot(dx, dy);
+    const lim = ARENA_R - player.r;
+    if (dist > lim) {
+      const nx = dx/dist, ny = dy/dist;
+      player.x = CX + nx*lim; player.y = CY + ny*lim;
+      const vn = player.vx*nx + player.vy*ny;
+      if (vn > 0) { player.vx -= 1.6*vn*nx; player.vy -= 1.6*vn*ny; }
+    }
+
+    if (invuln > 0) invuln -= dt;
+    if (shake > 0) shake = Math.max(0, shake - dt*30);
+
+    // hazards orbit
+    for (const hz of hazards) {
+      hz.angle += hz.speed * dt;
+      hz.spin += hz.spinSp * dt;
+      hz.x = CX + Math.cos(hz.angle) * hz.orbitR;
+      hz.y = CY + Math.sin(hz.angle) * hz.orbitR;
+      const d = Math.hypot(player.x - hz.x, player.y - hz.y);
+      if (d < player.r + hz.size - 2) damage(34);
+    }
+
+    // scraps drift + collect
+    for (let i = 0; i < scraps.length; i++) {
+      const s = scraps[i];
+      s.x += s.vx * dt; s.y += s.vy * dt; s.spin += dt * 2;
+      // bounce off arena edge
+      const sdx = s.x - CX, sdy = s.y - CY;
+      const sd = Math.hypot(sdx, sdy);
+      if (sd > ARENA_R - s.r) {
+        const nx = sdx/(sd||1), ny = sdy/(sd||1);
+        s.x = CX + nx*(ARENA_R - s.r); s.y = CY + ny*(ARENA_R - s.r);
+        const vn = s.vx*nx + s.vy*ny;
+        if (vn > 0) { s.vx -= 2*vn*nx; s.vy -= 2*vn*ny; }
+      }
+      if (Math.hypot(player.x - s.x, player.y - s.y) < player.r + s.r + 2) {
+        scraps[i] = spawnScrap();
+        score += 10; scrapCount++;
+        updateHUD();
+      }
+    }
+  }
+
+  function draw(t) {
+    ctx.save();
+    if (shake > 0) ctx.translate((Math.random()-.5)*shake, (Math.random()-.5)*shake);
+    ctx.clearRect(-20,-20,W+40,H+40);
+
+    // stars
+    for (const s of stars) {
+      const a = 0.35 + 0.35*Math.sin(t/700 + s.tw);
+      ctx.globalAlpha = a;
+      ctx.fillStyle = '#9db4e8';
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // arena
+    ctx.beginPath(); ctx.arc(CX, CY, ARENA_R, 0, 7);
+    ctx.fillStyle = 'rgba(20,32,68,.55)'; ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = '#3f5da8'; ctx.stroke();
+    for (const r of [90,160,220]) {
+      ctx.beginPath(); ctx.arc(CX, CY, r, 0, 7);
+      ctx.strokeStyle = 'rgba(90,120,200,.25)'; ctx.lineWidth = 1.5;
+      ctx.setLineDash([6,6]); ctx.stroke(); ctx.setLineDash([]);
+    }
+    // planet core
+    const g = ctx.createRadialGradient(CX,CY,2,CX,CY,44);
+    g.addColorStop(0,'#9ff5e0'); g.addColorStop(.4,'#2fbf9a'); g.addColorStop(1,'rgba(20,60,50,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(CX,CY,44,0,7); ctx.fill();
+    ctx.fillStyle = '#0e2a23'; ctx.beginPath(); ctx.arc(CX,CY,16,0,7); ctx.fill();
+    ctx.strokeStyle = '#57f2c6'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(CX,CY,16,0,7); ctx.stroke();
+
+    // scraps (yellow diamonds)
+    for (const s of scraps) {
+      ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.spin);
+      ctx.fillStyle = '#ffd54a'; ctx.strokeStyle = '#7a5b00'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0,-9); ctx.lineTo(7,0); ctx.lineTo(0,9); ctx.lineTo(-7,0); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fff3b0';
+      ctx.beginPath(); ctx.moveTo(0,-4); ctx.lineTo(3,0); ctx.lineTo(0,4); ctx.lineTo(-3,0); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+    // hazards (red jagged rocks)
+    for (const hz of hazards) {
+      ctx.save(); ctx.translate(hz.x, hz.y); ctx.rotate(hz.spin);
+      ctx.fillStyle = '#3a0f18'; ctx.strokeStyle = '#ff4d5e'; ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      const n = 8;
+      for (let i = 0; i <= n; i++) {
+        const a = (i/n)*Math.PI*2;
+        const rr = hz.size * (i%2 ? 0.78 : 1.08);
+        const px = Math.cos(a)*rr, py = Math.sin(a)*rr;
+        i ? ctx.lineTo(px,py) : ctx.moveTo(px,py);
+      }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ff8a94';
+      ctx.beginPath(); ctx.arc(0,0,hz.size*0.28,0,7); ctx.fill();
+      ctx.restore();
+    }
+
+    // player drone (triangle)
+    if (state !== 'dead' && player) {
+      const blink = invuln > 0 && Math.floor(t/100)%2 === 0;
+      ctx.save(); ctx.translate(player.x, player.y); ctx.rotate(player.angle + Math.PI/2);
+      if (player.thrust) {
+        ctx.fillStyle = '#ff9d2e';
+        ctx.beginPath(); ctx.moveTo(-5,10); ctx.lineTo(0,10+10+Math.random()*8); ctx.lineTo(5,10); ctx.closePath(); ctx.fill();
+      }
+      ctx.globalAlpha = blink ? 0.35 : 1;
+      ctx.fillStyle = '#57c8f2'; ctx.strokeStyle = '#e8fbff'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0,-13); ctx.lineTo(9,9); ctx.lineTo(0,4); ctx.lineTo(-9,9); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#0a2432'; ctx.beginPath(); ctx.arc(0,-2,3.4,0,7); ctx.fill();
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+
+    if (state === 'play') {
+      ctx.fillStyle = 'rgba(160,180,230,.8)';
+      ctx.font = '13px system-ui';
+      ctx.fillText('Collect +10  •  Hull -34 per hit  •  3 hits = destroyed', 14, H - 12);
+    }
+  }
+
+  function frame(ts) {
+    requestAnimationFrame(frame);
+    if (lastTime == null) lastTime = ts;
+    let dt = (ts - lastTime) / 1000;
+    lastTime = ts;
+    dt = Math.min(dt, 0.033);
+    if (state === 'play') step(dt);
+    draw(ts || 0);
+  }
+
+  restartBtn.addEventListener('click', startGame);
+  // debug/testing hooks (harmless in production)
+  window.__orbit = {
+    get state() { return state; },
+    get score() { return score; },
+    get player() { return player; },
+    get hazards() { return hazards; },
+    get scraps() { return scraps; },
+    start: startGame,
+    hurt(n) { invuln = 0; damage(n || 34); },
+  };
+  // idle demo behind menu
+  startGame(); state = 'menu';
+  ovTitle.textContent = 'Orbit Salvage';
+  ovText.innerHTML = 'Steer with <kbd>WASD</kbd> or <kbd>&larr;&uarr;&darr;&rarr;</kbd>. Collect yellow scrap (+10). Avoid red debris &mdash; 3 hits destroy the drone.';
+  restartBtn.textContent = 'Launch (Enter)';
+  overlay.classList.remove('hidden');
+  updateHUD();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
