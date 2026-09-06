@@ -229,7 +229,9 @@
   stage.addEventListener("pointerdown", (e) => {
     input.pointerActive = true;
     input.pointerX = pointerToX(e);
-    stage.setPointerCapture && e.pointerId !== undefined && stage.setPointerCapture(e.pointerId);
+    if (e.pointerId !== undefined && stage.setPointerCapture) {
+      try { stage.setPointerCapture(e.pointerId); } catch (err) { /* no active pointer (synthetic events) */ }
+    }
   });
   stage.addEventListener("pointermove", (e) => {
     if (input.pointerActive) input.pointerX = pointerToX(e);
