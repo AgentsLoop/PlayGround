@@ -462,7 +462,7 @@ document.getElementById('resumeBtn').onclick=()=>GameSys.play();
 document.getElementById('restartBtn').onclick=()=>GameSys.restart();
 const GameSys={
   play(){ AudioSys.init(); AudioSys.ctx&&AudioSys.ctx.resume(); AudioSys.ui();
-    canvas.requestPointerLock(); Game.state='playing'; HUD.show('hud'); },
+    try{ const p=canvas.requestPointerLock(); if(p&&p.catch)p.catch(()=>{}); }catch(e){} Game.state='playing'; HUD.show('hud'); },
   pause(){ if(Game.state!=='playing')return; Game.state='paused'; mouseDown=false; adsHeld=false; HUD.show('hud','pause'); },
   gameOver(){ Game.state='gameover'; document.exitPointerLock&&document.exitPointerLock();
     document.getElementById('finalStats').textContent=`WAVE ${Game.wave} · SCORE ${Game.score} · KILLS ${Game.kills}`;
