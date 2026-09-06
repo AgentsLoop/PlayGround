@@ -1,0 +1,50 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+[0m$ [0mgit branch --show-current; git status --short | grep -v "^??" | head; curl -s --max-time 15 -o /dev/null -w "tunnel:%{http_code}\n" https://targets-tips-upgrade-cutting.trycloudflare.com/index.html; tmux ls 2>&1 | head -3
+opencode/34010515573
+ D .opencode/ralph-loop.local.md
+tunnel:200
+app-server: 1 windows (created Sun Sep  6 04:32:34 2026)
+[0m
+Tunnel is live — capturing final screenshots through the public URL.
+[0m← [0mWrite /tmp/shot/testpub.mjs
+Wrote file successfully.
+[0m
+[0m$ [0mnode /tmp/shot/testpub.mjs; ls -la /tmp/shot/pub-*.png
+MENU_HTTP=200 TITLE=STRIKEPOINT — Browser FPS
+CLICK_STATE={"state":"play","bots":4}
+STATE={"state":"play","bots":4,"wave":1,"kills":1,"glb":true}
+SHOTS_OK
+ERRORS=0
+-rw-r--r--  1 runner  wheel  392888 Sep  6 04:37 /tmp/shot/pub-game.png
+-rw-r--r--  1 runner  wheel  393226 Sep  6 04:37 /tmp/shot/pub-game2.png
+-rw-r--r--  1 runner  wheel  357397 Sep  6 04:37 /tmp/shot/pub-menu.png
+[0m
+[0m→ [0mRead /tmp/shot/pub-game.png
+Public build verified visually — committing final evidence and posting completion.
+[0m
+[0m$ [0mcp /tmp/shot/pub-menu.png screenshots/final-menu.png && cp /tmp/shot/pub-game.png screenshots/final-gameplay.png && cp /tmp/shot/pub-game2.png screenshots/final-combat.png && cp screenshots/final-*.png project/screenshots/ && git add screenshots project/screenshots && git commit -m "Final public-URL verified screenshots" && git push origin opencode/34010515573 && git rev-parse HEAD
+[opencode/34010515573 96dc572] Final public-URL verified screenshots
+ 6 files changed, 0 insertions(+), 0 deletions(-)
+To https://github.com/AgentsLoop/PlayGround
+   32e320f..96dc572  opencode/34010515573 -> opencode/34010515573
+96dc5729afa6de777e6a4d3b2f343736df1a7358
+[0m
+[0m$ [0mSHA=96dc5729afa6de777e6a4d3b2f343736df1a7358; PUB=https://targets-tips-upgrade-cutting.trycloudflare.com; gh issue comment 32 --repo AgentsLoop/PlayGround --body "## COMPLETE — STRIKEPOINT playable at public URL
+
+**Concise summary:** STRIKEPOINT, a Three.js wave-defense FPS, is finished and verified live. Courtyard arena, Sketchfab GLB soldier enemies (MLGprogect, CC Attribution, see \`ATTRIBUTION.md\`), procedural rifle with recoil/ADS/reload, bot AI waves, exploding barrels, resupply depot, HUD/minimap/killfeed, procedural WebAudio. Root \`index.html\` served by tmux \`app-server\` on port 3000 and published via tunnel.
+
+**Public game link:** $PUB ($PUB/index.html — click DEPLOY; pointer lock required)
+**Final commit:** https://github.com/AgentsLoop/PlayGround/commit/$SHA (branch \`opencode/34010515573\`; no PR created — workflow owns it)
+**Deployment status:** Live — tunnel HTTP 200, correct title, click-through DEPLOY spawns wave (4 hostiles), GLB soldier loads in production.
+**Test status:** Real headless-Chromium suite against the PUBLIC URL: menu 200, click-to-play state=play, autofire run scored kills (score 100+), 0 console/page errors.
+**Known limitations:** Stylized low-poly visuals, not literal CoD parity; no multiplayer; tunnel URL is ephemeral (re-verify if rotated).
+
+<details><summary>Screenshot — menu (public)</summary><img src=\"https://raw.githubusercontent.com/AgentsLoop/PlayGround/$SHA/project/screenshots/final-menu.png\" alt=\"Public menu\"></details>
+<details><summary>Screenshot — gameplay (public)</summary><img src=\"https://raw.githubusercontent.com/AgentsLoop/PlayGround/$SHA/project/screenshots/final-gameplay.png\" alt=\"Public gameplay with kill scored\"></details>
+<details><summary>Screenshot — combat (public)</summary><img src=\"https://raw.githubusercontent.com/AgentsLoop/PlayGround/$SHA/project/screenshots/final-combat.png\" alt=\"Public combat\"></details>" && echo COMMENT_OK
+https://github.com/AgentsLoop/PlayGround/issues/32#issuecomment-5556934945
+COMMENT_OK
+[0m
+<promise>DONE</promise>
