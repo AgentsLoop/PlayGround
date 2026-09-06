@@ -812,13 +812,26 @@ function damagePlayer(d) {
   if (P.hp <= 0) gameOver();
 }
 const mini = $('mini').getContext('2d');
+/* static compound layout for the minimap (world x,z,w,d -> 140px, 60m range) */
+const MINI_RECTS = [
+  [0, -28, 62, 2.2], [0, 28, 62, 2.2], [-29, 0, 2.2, 60], [29, 0, 2.2, 60],
+  [-8, -14, 10, 1], [8, 12, 10, 1], [-6, 2, 2, 2], [6, -2, 2, 2], [0, 6, 2, 2],
+  [-2, -8, 2, 2], [-11, -2, 6, 2.4], [11, -6, 6, 2.4], [2, -18, 6, 2.4],
+];
 function drawMini() {
   mini.clearRect(0, 0, 140, 140);
   mini.save(); mini.translate(70, 70);
   mini.strokeStyle = 'rgba(140,255,140,.7)'; mini.lineWidth = 2;
   mini.beginPath(); mini.arc(0, 0, 58, 0, 7); mini.stroke();
+  mini.save();
+  mini.beginPath(); mini.arc(0, 0, 58, 0, 7); mini.clip();
   mini.rotate(-P.yaw + Math.PI);
-  const R = 60;
+  const R = 60, k = 58 / R;
+  mini.fillStyle = 'rgba(160,160,160,.55)';
+  for (const [rx, rz, w, d] of MINI_RECTS) {
+    const dx = (rx - playerObj.position.x) * k, dz = (rz - playerObj.position.z) * k;
+    mini.fillRect(dx - w * k / 2, dz - d * k / 2, Math.max(1.5, w * k), Math.max(1.5, d * k));
+  }
   for (const e of enemies) {
     if (e.dead) continue;
     const dx = e.g.position.x - playerObj.position.x, dz = e.g.position.z - playerObj.position.z;
@@ -826,6 +839,7 @@ function drawMini() {
     mini.fillStyle = '#ff4b3e';
     mini.beginPath(); mini.arc(dx / R * 58, dz / R * 58, 3.4, 0, 7); mini.fill();
   }
+  mini.restore(); // un-clip + un-rotate for the player arrow
   mini.fillStyle = '#7CFC00';
   mini.beginPath(); mini.moveTo(0, -7); mini.lineTo(5, 6); mini.lineTo(-5, 6); mini.fill();
   mini.restore();
