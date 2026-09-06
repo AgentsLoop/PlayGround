@@ -97,6 +97,61 @@ let baseY = 0;
 
 let spin = qs.get('static') !== '1';
 
+// ---- run-cycle preview (procedural, in place) ----
+const POSE_NODES = ['hips', 'torso', 'neck', 'head', 'ear-l', 'ear-r',
+  'shoulder-l', 'shoulder-r', 'elbow-l', 'elbow-r',
+  'hip-l', 'hip-r', 'knee-l', 'knee-r', 'ankle-l', 'ankle-r',
+  'tail', 'tail-mid', 'tail-tip'];
+const rt0 = model.userData && model.userData.sculptRuntime;
+const nodeMap = (rt0 && rt0.nodes) || {};
+const basePose = {};
+for (const n of POSE_NODES) {
+  const o = nodeMap[n];
+  if (o) basePose[n] = { p: o.position.clone(), r: o.rotation.clone() };
+}
+let runMode = qs.get('run') === '1';
+let runPhase = parseFloat(qs.get('runphase') || 'NaN');
+const runFrozen = Number.isFinite(runPhase);
+if (runFrozen) { runMode = true; spin = false; }
+if (!Number.isFinite(runPhase)) runPhase = 0;
+const RUN_SPEED = 9.0; // rad/s ~ 1.4 strides/s
+let lastT = 0;
+
+function applyRunPose(ph) {
+  const set = (n, rx = 0, ry = 0, rz = 0, dy = 0) => {
+    const o = nodeMap[n]; const b = basePose[n];
+    if (!o || !b) return;
+    o.rotation.set(b.r.x + rx, b.r.y + ry, b.r.z + rz);
+    o.position.set(b.p.x, b.p.y + dy, b.p.z);
+  };
+  const sL = Math.sin(ph), sR = Math.sin(ph + Math.PI);
+  // legs: swing + knee flexion during swing-through + ankle compensation
+  const kneeL = 0.3 + 1.1 * Math.pow(Math.max(0, -Math.sin(ph - 0.9)), 1.2);
+  const kneeR = 0.3 + 1.1 * Math.pow(Math.max(0, -Math.sin(ph + Math.PI - 0.9)), 1.2);
+  const hipL = -0.85 * sL, hipR = -0.85 * sR;
+  set('hip-l', hipL); set('hip-r', hipR);
+  set('knee-l', kneeL); set('knee-r', kneeR);
+  set('ankle-l', -(hipL + kneeL) * 0.38); set('ankle-r', -(hipR + kneeR) * 0.38);
+  // arms: opposite swing, elbows bent
+  set('shoulder-l', 0.7 * sL); set('shoulder-r', 0.7 * sR);
+  set('elbow-l', -0.6 - 0.35 * Math.max(0, sL)); set('elbow-r', -0.6 - 0.35 * Math.max(0, sR));
+  // torso lean + double-frequency bob, head steady
+  set('torso', 0.18); set('hips', 0, 0, 0, -0.04 + 0.045 * Math.cos(2 * ph));
+  set('head', 0.08); set('neck', 0.05);
+  // ears pinned back, tail streams behind with wag
+  set('ear-l', -0.45); set('ear-r', -0.45);
+  set('tail', -0.35, 0.1 * Math.sin(2 * ph));
+  set('tail-mid', -0.25, 0.14 * Math.sin(2 * ph + 0.7));
+  set('tail-tip', -0.15);
+}
+function restoreBasePose() {
+  for (const n of POSE_NODES) {
+    const o = nodeMap[n]; const b = basePose[n];
+    if (!o || !b) continue;
+    o.rotation.copy(b.r); o.position.copy(b.p);
+  }
+}
+
 const clock = new THREE.Clock();
 // fit camera to model after the skeleton settles (bbox can grow post-bind)
 let fitted = false, fitFrames = 0;
