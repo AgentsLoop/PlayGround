@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STRIKE PROTOCOL — Three.js FPS</title>
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
+</script>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="ui">
+  <div id="menu" class="overlay">
+    <div class="panel">
+      <div class="kicker">THREE.JS // WAVE DEFENSE</div>
+      <h1>STRIKE<br>PROTOCOL</h1>
+      <p class="sub">WASD move &middot; Shift sprint &middot; Space jump &middot; Click shoot &middot; R reload</p>
+      <button id="playBtn">▶ CLICK TO DEPLOY</button>
+      <p class="hint">Click locks the mouse. Esc pauses. Survive the waves.</p>
+      <div class="specs"><span>60fps</span><span>Procedural audio</span><span>No assets</span></div>
+    </div>
+  </div>
+  <div id="pause" class="overlay hidden">
+    <div class="panel"><h2>PAUSED</h2><p class="sub">Pointer lock lost</p><button id="resumeBtn">RESUME</button></div>
+  </div>
+  <div id="gameover" class="overlay hidden">
+    <div class="panel"><h2>GAME OVER</h2><div id="finalStats"></div><button id="restartBtn">REDEPLOY</button></div>
+  </div>
+  <div id="hud" class="hidden">
+    <div id="crosshair"><span class="l t"></span><span class="l b"></span><span class="l lf"></span><span class="l rt"></span><span class="dot"></span></div>
+    <div id="hitmarker"><span></span><span></span><span></span><span></span></div>
+    <div id="vignette"></div>
+    <div id="dmgdir"></div>
+    <div id="topbar"><span id="wave">WAVE 1</span><span id="score">SCORE 0</span><span id="kills">KILLS 0</span></div>
+    <div id="healthWrap"><label>HP</label><div class="bar"><div id="healthBar"></div></div></div>
+    <div id="ammo">30<span>/90</span></div>
+    <div id="killfeed"></div>
+    <canvas id="minimap" width="140" height="140"></canvas>
+    <div id="reloadTip" class="hidden">RELOADING…</div>
+    <div id="waveBanner" class="hidden">WAVE 1</div>
+    <div id="hurtFlash"></div>
+  </div>
+</div>
+<script type="module" src="main.js"></script>
+</body>
+</html>
