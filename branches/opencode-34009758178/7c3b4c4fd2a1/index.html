@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Canyon Courier</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="wrap">
+    <header id="topbar">
+      <div class="logo">🪂 CANYON <span>COURIER</span></div>
+      <div class="top-links">
+        <button id="muteBtn" class="chip" title="Toggle sound">🔊</button>
+        <button id="helpBtn" class="chip" title="How to play">?</button>
+      </div>
+    </header>
+
+    <main id="stage">
+      <canvas id="game" width="480" height="720" aria-label="Canyon Courier game canvas"></canvas>
+
+      <!-- HUD -->
+      <div id="hud" class="hidden">
+        <div class="hud-left">
+          <div class="hud-pill" id="scorePill">⭐ <b id="score">0</b></div>
+          <div class="hud-pill hearts" id="lives">❤❤❤</div>
+        </div>
+        <div class="hud-center">
+          <div id="combo" class="hidden">COMBO ×2 🔥</div>
+        </div>
+        <div class="hud-right">
+          <div class="hud-pill" id="timePill">⏱ <b id="time">60</b>s</div>
+          <div class="hud-pill small" id="levelPill">LV <b id="level">1</b></div>
+        </div>
+      </div>
+      <div id="toast" class="hidden"></div>
+
+      <!-- Start screen -->
+      <div id="startScreen" class="overlay">
+        <div class="card">
+          <div class="kite">🪂</div>
+          <h1>CANYON<br /><span>COURIER</span></h1>
+          <p class="tag">Thread the gates. Grab the parcels.<br />Beat the clock.</p>
+          <div class="rules">
+            <div>🚪 Fly through gate gaps <b>+10</b></div>
+            <div>📦 Grab packages <b>+25</b></div>
+            <div>🔥 Gate + package streaks build <b>combo</b></div>
+            <div>💥 3 hits = crash · ⏱ 60s run</div>
+          </div>
+          <div class="controls-hint">◀ ▶ / A D · drag · touch</div>
+          <button id="startBtn" class="big-btn">▶ &nbsp;START DELIVERY</button>
+          <div class="best">Best: <b id="bestStart">0</b></div>
+        </div>
+      </div>
+
+      <!-- Game over screen -->
+      <div id="overScreen" class="overlay hidden">
+        <div class="card">
+          <div class="kite" id="overEmoji">💥</div>
+          <h1 id="overTitle">TIME UP!</h1>
+          <p class="tag" id="overSub">Route complete, courier.</p>
+          <div class="stats">
+            <div class="stat"><span>SCORE</span><b id="finalScore">0</b></div>
+            <div class="stat"><span>GATES</span><b id="finalGates">0</b></div>
+            <div class="stat"><span>PACKAGES</span><b id="finalPkgs">0</b></div>
+            <div class="stat"><span>BEST</span><b id="bestOver">0</b></div>
+          </div>
+          <div id="newBest" class="hidden">🏆 NEW BEST! 🏆</div>
+          <button id="retryBtn" class="big-btn">↻ &nbsp;FLY AGAIN</button>
+          <div class="controls-hint">press <b>Space / Enter</b> to restart</div>
+        </div>
+      </div>
+
+      <!-- Help modal -->
+      <div id="helpModal" class="overlay hidden">
+        <div class="card small">
+          <h2>How to fly</h2>
+          <p>Steer the glider <b>left / right</b> to slip through the glowing gate gaps and scoop up 📦 parcels.</p>
+          <ul>
+            <li>⌨️ <b>◀ ▶</b> or <b>A / D</b> to steer</li>
+            <li>🖱️ drag, or 👆 touch &amp; slide</li>
+            <li>🚪 gates drift &amp; narrow as you level up</li>
+            <li>💥 wall / pylon hits cost 1 ❤ (3 = crash)</li>
+            <li>⏱ run lasts <b>60s</b> — deliver fast!</li>
+          </ul>
+          <button id="closeHelp" class="big-btn">GOT IT</button>
+        </div>
+      </div>
+    </main>
+
+    <footer id="foot">
+      <span><code>npm run dev</code> → http://localhost:3000</span>
+      <span id="fps"></span>
+    </footer>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
