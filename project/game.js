@@ -580,7 +580,19 @@ function spawnSoldier(pos, waveNum) {
     const sh = skinnedHeight(wrap);
     wrap.scale.setScalar(1.8 / sh.h);
     wrap.position.y -= sh.mn * (1.8 / sh.h);
-    model.rotation.y = Math.PI; // face +Z (corrected by lookAt each frame anyway)
+    /* Mixamo faces +Z and group lookAt aims +Z at the player: no extra yaw.
+       Hostile carries a compact rifle across the chest (group space). */
+    const egun = new THREE.Group();
+    const egMat = new THREE.MeshStandardMaterial({ color: 0x17181c, roughness: 0.6, metalness: 0.4 });
+    const egBody = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.12, 0.62), egMat);
+    const egGrip = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.16, 0.07), egMat);
+    egGrip.position.set(0, -0.12, 0.05); egGrip.rotation.x = 0.3;
+    const egBar = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.25, 8), egMat);
+    egBar.rotation.x = Math.PI / 2; egBar.position.set(0, 0.02, -0.4);
+    egun.add(egBody, egGrip, egBar);
+    egun.position.set(0.24, 1.28, 0.3); egun.rotation.y = -0.15;
+    egun.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    g.add(egun);
     model.traverse(o => {
       if (o.isMesh) {
         o.castShadow = true;
