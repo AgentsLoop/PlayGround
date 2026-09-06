@@ -1,0 +1,405 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Starting your Orbit Salvage build loop — setting up the workspace.
+[0m→ [0mRead .
+[0m→ [0mSkill "ralph-loop"
+[0m
+[0m$ [0mmkdir -p .opencode && cat > .opencode/ralph-loop.local.md << 'EOF'
+---
+active: true
+iteration: 0
+maxIterations: 100
+---
+
+"Build a small playable browser game called Orbit Salvage. The player pilots a tiny salvage drone around a circular orbital arena, collects drifting scrap, and avoids three rotating debris hazards. Use keyboard arrows or WASD to steer, show a clear score and remaining hull meter, and make the game restartable after damage destroys the drone. Keep the scope compact and make it playable from index.html or dist/index.html. Verify the game in a browser and leave the project in a runnable state."
+EOF
+cat .opencode/ralph-loop.local.md
+---
+active: true
+iteration: 0
+maxIterations: 100
+---
+
+"Build a small playable browser game called Orbit Salvage. The player pilots a tiny salvage drone around a circular orbital arena, collects drifting scrap, and avoids three rotating debris hazards. Use keyboard arrows or WASD to steer, show a clear score and remaining hull meter, and make the game restartable after damage destroys the drone. Keep the scope compact and make it playable from index.html or dist/index.html. Verify the game in a browser and leave the project in a runnable state."
+[0m
+[0m⚙ [0mralph-loop {"maxIterations":100,"task":"Build a small playable browser game called Orbit Salvage. The player pilots a tiny salvage drone around a circular orbital arena, collects drifting scrap, and avoids three rotating debris hazards. Use keyboard arrows or WASD to steer, show a clear score and remaining hull meter, and make the game restartable after damage destroys the drone. Keep the scope compact and make it playable from index.html or dist/index.html. Verify the game in a browser and leave the project in a runnable state."}
+Loop active — now building Orbit Salvage.
+[0m
+[0m# [0mTodos
+[•] Design and implement Orbit Salvage game in index.html
+[ ] Verify game in browser (syntax check + headless run)
+[ ] Ensure runnable state and finalize
+[0m
+[0m$ [0mls -la; echo "---"; which node python3 npx 2>&1; node --version 2>&1; python3 --version 2>&1
+total 56
+drwxr-xr-x 10 runner runner 4096 Sep  6 00:48 .
+drwxr-xr-x  3 runner runner 4096 Sep  6 00:46 ..
+drwxr-xr-x  5 runner runner 4096 Sep  6 00:46 .agents
+drwxr-xr-x  4 runner runner 4096 Sep  6 00:46 .agentsweb
+drwxr-xr-x  7 runner runner 4096 Sep  6 00:48 .git
+drwxr-xr-x  3 runner runner 4096 Sep  6 00:46 .github
+drwxr-xr-x 10 runner runner 4096 Sep  6 00:46 .omgithub-runtime
+drwxr-xr-x  2 runner runner 4096 Sep  6 00:48 .opencode
+drwx------  2 runner runner 4096 Sep  6 00:47 .opencode-ssh
+drwx------  3 runner runner 4096 Sep  6 00:48 .opencode-web
+-rw-r--r--  1 runner runner 2669 Sep  6 00:46 Agents.md
+-rw-r--r--  1 runner runner   53 Sep  6 00:46 README.md
+-rw-------  1 runner runner  411 Sep  6 00:47 opencode-agentsweb-id_ed25519
+-rw-r--r--  1 runner runner  102 Sep  6 00:47 opencode-agentsweb-id_ed25519.pub
+---
+/usr/local/bin/node
+/usr/bin/python3
+/usr/local/bin/npx
+v22.23.2
+Python 3.12.3
+[0m
+[0m→ [0mRead README.md
+[0m
+[0m← [0mWrite index.html
+Wrote file successfully.
+[0m
+[0m# [0mTodos
+[✓] Design and implement Orbit Salvage game in index.html
+[•] Verify game in browser (syntax check + headless run)
+[ ] Ensure runnable state and finalize
+[0m
+[0m$ [0mnode -e "
+const fs=require('fs');
+const html=fs.readFileSync('index.html','utf8');
+const m=html.match(/<script>([\s\S]*)<\/script>/);
+if(!m){console.error('no script found');process.exit(1);}
+fs.writeFileSync('/tmp/opencode/game.js',m[1]);
+console.log('script bytes',m[1].length);
+" && node --check /tmp/opencode/game.js && echo "JS SYNTAX OK"
+ls -la *.html
+python3 -c "import html.parser; p=html.parser.HTMLParser(); p.feed(open('index.html').read()); print('HTML parse OK')"
+script bytes 10465
+JS SYNTAX OK
+-rw-r--r-- 1 runner runner 13821 Sep  6 00:48 index.html
+HTML parse OK
+[0m
+[0m$ [0mwhich chromium chromium-browser google-chrome google-chrome-stable 2>&1; npx --yes playwright --version 2>&1 | head -5; ls /root/.cache/ms-playwright 2>&1 | head; python3 -c "import playwright" 2>&1 | head
+/usr/bin/chromium
+/usr/bin/chromium-browser
+/usr/bin/google-chrome
+/usr/bin/google-chrome-stable
+Version 1.63.0
+ls: cannot access '/root/.cache/ms-playwright': Permission denied
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'playwright'
+[0m
+Core game built and syntax-clean — now verifying in a real browser.
+[0m$ [0mchromium --headless --disable-gpu --no-sandbox --screenshot=/tmp/opencode/shot1.png --window-size=800,700 file:///home/runner/work/PlayGround/PlayGround/index.html 2>&1 | head -20; ls -la /tmp/opencode/shot1.png
+[4698:4721:0906/004907.253039:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[4698:4721:0906/004908.211240:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[4698:4721:0906/004909.444405:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[4698:4721:0906/004910.851985:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[4698:4698:0906/004912.782513:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[4698:4721:0906/004912.782603:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[4698:4698:0906/004912.782914:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[4698:4721:0906/004912.782972:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[4698:4698:0906/004912.789323:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[4698:4698:0906/004912.832260:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[4698:4698:0906/004912.853555:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[4698:4698:0906/004912.858565:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[4698:4721:0906/004912.871453:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[4698:4698:0906/004913.008856:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[4698:4698:0906/004913.008917:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files
+[4698:4721:0906/004913.008945:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[4698:4698:0906/004913.050107:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[4698:4721:0906/004913.050189:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[4698:4698:0906/004913.057173:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+116385 bytes written to file /tmp/opencode/shot1.png
+-rw-r--r-- 1 runner runner 116385 Sep  6 00:49 /tmp/opencode/shot1.png
+[0m
+[0m→ [0mRead /tmp/opencode/shot1.png
+[0m
+[0m$ [0mnode -e "try{require('playwright');console.log('playwright ok')}catch(e){console.log('no playwright:',e.message.slice(0,120))}; try{require('puppeteer');console.log('puppeteer ok')}catch(e){console.log('no puppeteer')}" 2>&1
+ls /tmp/opencode/
+no playwright: Cannot find module 'playwright'
+Require stack:
+- /home/runner/work/PlayGround/PlayGround/[eval]
+no puppeteer
+game.js
+shot1.png
+[0m
+[0m$ [0mnpm ls -g --depth=0 2>&1 | head -20; npm root -g 2>&1; ls "$(npm root -g)" 2>&1 | head -20
+/usr/local/lib
+├── @bazel/bazelisk@v1.28.1
+├── corepack@0.34.6
+├── grunt@1.6.3
+├── gulp@5.0.1
+├── lerna@10.0.1
+├── n@10.2.0
+├── newman@6.2.2
+├── npm@10.9.8
+├── parcel@2.16.4
+├── typescript@7.0.2
+├── webpack-cli@7.2.3
+├── webpack@5.110.2
+└── yarn@1.22.22
+
+/usr/local/lib/node_modules
+@bazel
+corepack
+grunt
+gulp
+lerna
+n
+newman
+npm
+parcel
+typescript
+webpack
+webpack-cli
+yarn
+[0m
+[0m$ [0mnpm init -y --prefix /tmp/opencode/pwtest >/dev/null 2>&1; npm install --prefix /tmp/opencode/pwtest playwright-core >/dev/null 2>&1; echo "install done"; node -e "require('/tmp/opencode/pwtest/node_modules/playwright-core'); console.log('pw-core ok')"
+install done
+pw-core ok
+[0m
+Menu renders cleanly — now adding test hooks to verify gameplay.
+[0m→ [0mRead index.html[90m [offset=200][0m
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -333,8 +333,18 @@
+   draw(ts || 0);
+ }
+ 
+ restartBtn.addEventListener('click', startGame);
++// debug/testing hooks (harmless in production)
++window.__orbit = {
++  get state() { return state; },
++  get score() { return score; },
++  get player() { return player; },
++  get hazards() { return hazards; },
++  get scraps() { return scraps; },
++  start: startGame,
++  hurt(n) { invuln = 0; damage(n || 34); },
++};
+ // idle demo behind menu
+ startGame(); state = 'menu';
+ ovTitle.textContent = 'Orbit Salvage';
+ ovText.innerHTML = 'Steer with <kbd>WASD</kbd> or <kbd>&larr;&uarr;&darr;&rarr;</kbd>. Collect yellow scrap (+10). Avoid red debris &mdash; 3 hits destroy the drone.';
+
+[0m
+[0m← [0mWrite /tmp/opencode/verify.js
+Wrote file successfully.
+[0m
+[0m$ [0mnode /tmp/opencode/verify.js 2>&1
+title: Orbit Salvage hasCanvas: true
+state after launch: play
+moved from {"x":380,"y":310} to {"x":529.7809846185768,"y":160.10527963136695} dist= 211.9
+movement OK: true
+hazards: 3
+score before/after scrap teleport: 20 30 collect OK: true
+after 3 hits: {"state":"dead","hull":0} overlay: true title: Drone Destroyed
+after restart: {"state":"play","score":20,"hull":100}
+console errors: none
+VERIFY FAIL
+[0m
+Verification caught instant scrap spawns at the restart point — fixing that now.
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -122,9 +122,17 @@
+   }
+   return {x: CX, y: CY};
+ }
+ 
+-function spawnScrap() {
++function spawnScrap(minCenterDist) {
++  for (let tries = 0; tries < 60; tries++) {
++    const p = randInArena(36);
++    if (minCenterDist && Math.hypot(p.x - CX, p.y - CY) < minCenterDist) continue;
++    if (player && Math.hypot(p.x - player.x, p.y - player.y) < 50) continue;
++    const a = Math.random() * Math.PI * 2;
++    const sp = 12 + Math.random() * 22;
++    return { x: p.x, y: p.y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, r: 8, spin: Math.random()*6.28, collected: 0 };
++  }
+   const p = randInArena(36);
+   const a = Math.random() * Math.PI * 2;
+   const sp = 12 + Math.random() * 22;
+   return { x: p.x, y: p.y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, r: 8, spin: Math.random()*6.28, collected: 0 };
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -139,9 +139,9 @@
+ }
+ 
+ function startGame() {
+   player = { x: CX, y: CY, vx: 0, vy: 0, r: 11, angle: -Math.PI/2, hull: 100, thrust: 0 };
+-  scraps = Array.from({length: 6}, spawnScrap);
++  scraps = Array.from({length: 6}, () => spawnScrap(70));
+   hazards = [
+     { orbitR: 90,  size: 16, angle: 0,            speed:  0.9,  spin: 0, spinSp: 2.2, x: 0, y: 0 },
+     { orbitR: 160, size: 19, angle: Math.PI*0.7,  speed: -0.65, spin: 0, spinSp: -1.6, x: 0, y: 0 },
+     { orbitR: 220, size: 14, angle: Math.PI*1.4,  speed:  0.5,  spin: 0, spinSp: 3.0, x: 0, y: 0 },
+
+[0m
+[0m$ [0mnode /tmp/opencode/verify.js 2>&1
+title: Orbit Salvage hasCanvas: true
+state after launch: play
+moved from {"x":380,"y":310} to {"x":526.3203598105688,"y":163.67964018943127} dist= 206.9
+movement OK: true
+hazards: 3
+score before/after scrap teleport: 10 20 collect OK: true
+after 3 hits: {"state":"dead","hull":0} overlay: true title: Drone Destroyed
+after restart: {"state":"play","score":0,"hull":100}
+console errors: none
+VERIFY PASS
+[0m
+All gameplay checks pass — final review and screenshots.
+[0m→ [0mRead /tmp/opencode/shot2.png
+[0m
+[0m$ [0mnode -e "
+const fs=require('fs');
+const html=fs.readFileSync('index.html','utf8');
+const m=html.match(/<script>([\s\S]*)<\/script>/);
+fs.writeFileSync('/tmp/opencode/game2.js',m[1]);
+" && node --check /tmp/opencode/game2.js && echo OK
+ls -la index.html
+grep -c -i -E "arrow|wasd|score|hull|restart" index.html
+OK
+-rw-r--r-- 1 runner runner 14627 Sep  6 00:50 index.html
+41
+[0m
+[0m$ [0mcat > /tmp/opencode/verify2.js << 'JS'
+const { chromium } = require('/tmp/opencode/pwtest/node_modules/playwright-core');
+(async () => {
+  const browser = await chromium.launch({ executablePath: '/usr/bin/chromium', args: ['--no-sandbox'] });
+  const page = await browser.newPage();
+  await page.goto('file:///home/runner/work/PlayGround/PlayGround/index.html');
+  await page.click('#restartBtn');
+  await page.waitForTimeout(300);
+  const p0 = await page.evaluate(() => ({x: window.__orbit.player.x, y: window.__orbit.player.y}));
+  await page.keyboard.down('ArrowLeft'); await page.waitForTimeout(600); await page.keyboard.up('ArrowLeft');
+  await page.keyboard.down('ArrowUp'); await page.waitForTimeout(600); await page.keyboard.up('ArrowUp');
+  const p1 = await page.evaluate(() => ({x: window.__orbit.player.x, y: window.__orbit.player.y}));
+  const d = Math.hypot(p1.x-p0.x, p1.y-p0.y);
+  console.log('arrow-key move dist:', d.toFixed(1), d>20?'OK':'FAIL');
+  await browser.close();
+  process.exit(d>20?0:1);
+})().catch(e=>{console.error(e);process.exit(1);});
+JS
+node /tmp/opencode/verify2.js 2>&1
+echo "--- http server test ---"
+python3 -m http.server 8901 >/dev/null 2>&1 &
+SRV=$!; sleep 1
+curl -s -o /dev/null -w "HTTP %{http_code}, %{size_download} bytes\n" http://localhost:8901/index.html
+kill $SRV
+arrow-key move dist: 157.8 OK
+--- http server test ---
+HTTP 200, 14627 bytes
+[0m
+[0m$ [0mls -a; cat .gitignore 2>&1 | head; git status --short 2>&1 | head
+.
+..
+.agents
+.agentsweb
+.git
+.github
+.omgithub-runtime
+.opencode
+.opencode-ssh
+.opencode-web
+Agents.md
+README.md
+index.html
+opencode-agentsweb-id_ed25519
+opencode-agentsweb-id_ed25519.pub
+package.json
+cat: .gitignore: No such file or directory
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+[0m
+[0m$ [0mcat package.json 2>&1; cat package-lock.json 2>&1 | head -3; ls /tmp/opencode/pwtest 2>&1
+{
+  "name": "playground",
+  "version": "1.0.0",
+  "description": "Playground for browser game experiments",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AgentsLoop/PlayGround.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AgentsLoop/PlayGround/issues"
+  },
+  "homepage": "https://github.com/AgentsLoop/PlayGround#readme"
+}
+cat: package-lock.json: No such file or directory
+node_modules
+package-lock.json
+package.json
+[0m
+[0m$ [0mgit status --short 2>&1; echo "---"; git log --oneline -3 2>&1; echo "---"; git diff --stat 2>&1 | head
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? package.json
+---
+b4fe44a Grant reusable OpenCode workflow Pages permission
+---
+[0m
+[0m$ [0mls node_modules 2>&1 | head -3; rm -f package.json && echo "removed stray package.json"; git status --short 2>&1
+ls: cannot access 'node_modules': No such file or directory
+removed stray package.json
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+[0m
+[0m# [0mTodos
+[✓] Design and implement Orbit Salvage game in index.html
+[✓] Verify game in browser (syntax check + headless run)
+[✓] Ensure runnable state and finalize
+[0m
+Orbit Salvage is complete and verified in a real browser (Chromium headless via playwright-core):
+
+- `index.html` (single file, no build): circular arena, drone with WASD + arrow steering, 6 drifting scrap (+10 each), 3 rotating debris hazards on orbits 90/160/220, score + hull meter + best (localStorage), destroyed overlay with Relaunch via button/R/Enter.
+- Verified: zero console errors, WASD move ~207px, arrow-key move ~158px, collect +10, 3×34 damage → dead + "Drone Destroyed" overlay, restart resets to score 0 / hull 100, renders correctly in screenshots, serves over HTTP 200.
+- Project left runnable: open `index.html` directly or via any static server.
+
+```
+<promise>DONE</promise>
+```
