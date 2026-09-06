@@ -1,0 +1,1 @@
+Build a small playable browser game called Neon Parcel Panic: steer a courier through a top-down neon city, deliver packages to matching drop zones, dodge patrol drones, track score and time, and provide restart plus keyboard controls.

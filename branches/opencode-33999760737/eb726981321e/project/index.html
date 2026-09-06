@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>Neon Parcel Panic</title>
+<style>
+  :root{
+    --bg:#05050f; --cyan:#00f0ff; --magenta:#ff2bd6; --yellow:#ffe14d;
+    --lime:#39ff6a; --orange:#ff7a1a; --red:#ff2b4e; --panel:#0b0b1e;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:radial-gradient(1200px 800px at 50% -10%, #14143a 0%, var(--bg) 60%) fixed;
+    color:#e8f6ff; font-family:"Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    display:flex; flex-direction:column; align-items:center; min-height:100vh;
+  }
+  header{ text-align:center; padding:18px 12px 6px; }
+  h1{
+    margin:0; font-size:clamp(24px,4vw,44px); letter-spacing:2px; font-weight:900;
+    color:#fff; text-shadow:0 0 8px var(--cyan),0 0 24px var(--cyan),0 0 48px var(--magenta);
+  }
+  h1 span{ color:var(--magenta); text-shadow:0 0 8px var(--magenta),0 0 24px var(--magenta); }
+  .sub{ opacity:.85; margin:6px 0 0; font-size:14px; }
+  #wrap{
+    width:min(980px,96vw); background:var(--panel); border:1px solid #22225a;
+    border-radius:14px; padding:10px; box-shadow:0 0 0 1px #000, 0 0 32px rgba(0,240,255,.15), 0 0 64px rgba(255,43,214,.12);
+  }
+  #hud{
+    display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    padding:8px 6px; font-size:14px;
+  }
+  .pill{
+    background:#12122b; border:1px solid #2a2a6a; border-radius:999px; padding:6px 12px;
+    display:inline-flex; gap:8px; align-items:center; min-width:max-content;
+  }
+  .pill b{ font-size:16px; }
+  #carryDot{ width:14px; height:14px; border-radius:4px; background:#333; display:inline-block; box-shadow:0 0 10px currentColor; }
+  #controls{ display:flex; gap:8px; flex-wrap:wrap; }
+  button{
+    cursor:pointer; border:1px solid var(--cyan); background:#062a30; color:#fff;
+    border-radius:10px; padding:8px 14px; font-weight:700; letter-spacing:.5px;
+    box-shadow:0 0 12px rgba(0,240,255,.4), inset 0 0 12px rgba(0,240,255,.15);
+  }
+  button:hover{ background:#0a3d44; }
+  button.secondary{ border-color:var(--magenta); background:#2b0a26; box-shadow:0 0 12px rgba(255,43,214,.4); }
+  #stage{ position:relative; }
+  canvas{
+    width:100%; height:auto; display:block; background:#05050f; border-radius:10px;
+    border:1px solid #1e1e4d;
+  }
+  #overlay{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    text-align:center; background:rgba(3,3,12,.72); backdrop-filter:blur(2px);
+    border-radius:10px; padding:20px;
+  }
+  #overlay.hidden{ display:none; }
+  #overlay .card{
+    max-width:560px; background:#0b0b20; border:1px solid var(--cyan); border-radius:14px; padding:22px;
+    box-shadow:0 0 24px rgba(0,240,255,.35);
+  }
+  #overlay h2{ margin:0 0 8px; font-size:28px; text-shadow:0 0 12px var(--cyan); }
+  #overlay p{ margin:8px 0; line-height:1.5; font-size:15px; }
+  kbd{ background:#1a1a3a; border:1px solid #444; border-bottom-width:3px; border-radius:6px; padding:1px 7px; font-family:monospace; }
+  #help{ font-size:13px; opacity:.9; padding:8px 6px 2px; line-height:1.6; }
+  .legend{ display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+  .swatch{ display:inline-flex; align-items:center; gap:6px; }
+  .box{ width:14px; height:14px; border-radius:4px; display:inline-block; }
+  footer{ opacity:.6; font-size:12px; padding:10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>NEON <span>PARCEL</span> PANIC</h1>
+  <p class="sub">Top-down neon courier &mdash; grab parcels, match the drop-zone color, dodge patrol drones!</p>
+</header>
+
+<div id="wrap">
+  <div id="hud">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="pill">SCORE <b id="score">0</b></span>
+      <span class="pill">TIME <b id="time">90</b>s</span>
+      <span class="pill">DELIVERED <b id="delivered">0</b></span>
+      <span class="pill">LIVES <b id="lives">♥♥♥</b></span>
+      <span class="pill">CARRY <span id="carryDot"></span><b id="carryLabel">—</b></span>
+    </div>
+    <div id="controls">
+      <button id="startBtn">▶ Start / Restart (R)</button>
+      <button id="pauseBtn" class="secondary">⏸ Pause (P)</button>
+    </div>
+  </div>
+
+  <div id="stage">
+    <canvas id="game" width="960" height="600"></canvas>
+    <div id="overlay">
+      <div class="card">
+        <h2 id="ovTitle">NEON PARCEL PANIC</h2>
+        <p id="ovText">Steer with <kbd>WASD</kbd> / <kbd>arrows</kbd>. Pick up a glowing parcel, deliver it to the drop zone of the <b>same color</b>. Avoid red patrol drones. You have <b>90 seconds</b> and <b>3 lives</b>. Each delivery: <b>+100</b> and <b>+5s</b>.</p>
+        <p><button id="playBtn">Start Delivery Run (Enter)</button></p>
+        <p style="font-size:13px;opacity:.8">R = restart &nbsp;•&nbsp; P = pause &nbsp;•&nbsp; M = mute</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="help">
+    <b>How to play:</b> Drive over a parcel to pick it up (one at a time). Then drive into the matching colored drop pad. Wrong pad = no delivery. Drone hit = lose a life, drop parcel, 2s shield. Survive the clock!
+    <div class="legend">
+      <span class="swatch"><span class="box" style="background:#ff2bd6;box-shadow:0 0 8px #ff2bd6"></span> magenta parcel/drop</span>
+      <span class="swatch"><span class="box" style="background:#ffe14d;box-shadow:0 0 8px #ffe14d"></span> yellow</span>
+      <span class="swatch"><span class="box" style="background:#39ff6a;box-shadow:0 0 8px #39ff6a"></span> lime</span>
+      <span class="swatch"><span class="box" style="background:#00f0ff;box-shadow:0 0 8px #00f0ff"></span> courier</span>
+      <span class="swatch"><span class="box" style="background:#ff2b4e;box-shadow:0 0 8px #ff2b4e"></span> patrol drone</span>
+    </div>
+  </div>
+</div>
+<footer>Canvas 2D • no assets • WebAudio bleeps • keyboard + buttons • restart anytime</footer>
+
+<script>
+(() => {
+"use strict";
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+const el = id => document.getElementById(id);
+const scoreEl = el('score'), timeEl = el('time'), delEl = el('delivered'),
+      livesEl = el('lives'), carryDot = el('carryDot'), carryLabel = el('carryLabel'),
+      overlay = el('overlay'), ovTitle = el('ovTitle'), ovText = el('ovText');
+
+const COLORS = [
+  { name:'MAGENTA', c:'#ff2bd6' },
+  { name:'YELLOW',  c:'#ffe14d' },
+  { name:'LIME',    c:'#39ff6a' },
+];
+const colorByName = n => COLORS.find(k=>k.name===n);
+
+// ---- City layout: buildings leave roads ----
+const buildings = [
+  // row 1
+  {x:40,  y:70,  w:180, h:120},
+  {x:270, y:70,  w:180, h:120},
+  {x:500, y:70,  w:180, h:120},
+  {x:730, y:70,  w:190, h:120},
+  // row 2
+  {x:40,  y:250, w:180, h:130},
+  {x:270, y:250, w:180, h:130},
+  {x:500, y:250, w:180, h:130},
+  {x:730, y:250, w:190, h:130},
+  // row 3 (shorter, leaves bottom avenue)
+  {x:40,  y:440, w:180, h:80},
+  {x:270, y:440, w:180, h:80},
+  {x:500, y:440, w:180, h:80},
+  {x:730, y:440, w:190, h:80},
+];
+function rectsOverlap(a,b){ return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y; }
+function circleHitsRect(cx,cy,r,rc){
+  const nx = Math.max(rc.x, Math.min(cx, rc.x+rc.w));
+  const ny = Math.max(rc.y, Math.min(cy, rc.y+rc.h));
+  const dx = cx-nx, dy = cy-ny; return dx*dx+dy*dy < r*r;
+}
+function resolveCircleBuildings(p, r){
+  for(const b of buildings){
+    if(!circleHitsRect(p.x,p.y,r,b)) continue;
+    const nx = Math.max(b.x, Math.min(p.x, b.x+b.w));
+    const ny = Math.max(b.y, Math.min(p.y, b.y+b.h));
+    let dx = p.x-nx, dy = p.y-ny;
+    if(dx===0 && dy===0){
+      // center inside: push out along smallest penetration
+      const l = p.x-b.x, rr = b.x+b.w-p.x, t = p.y-b.y, bb = b.y+b.h-p.y;
+      const m = Math.min(l,rr,t,bb);
+      if(m===l) p.x = b.x-r; else if(m===rr) p.x = b.x+b.w+r;
+      else if(m===t) p.y = b.y-r; else p.y = b.y+b.h+r;
+    } else {
+      const d = Math.hypot(dx,dy) || 1;
+      const push = r-d;
+      p.x += dx/d*push; p.y += dy/d*push;
+    }
+  }
+  p.x = Math.max(r+4, Math.min(W-r-4, p.x));
+  p.y = Math.max(r+4, Math.min(H-r-4, p.y));
+}
+function randomRoadPoint(){
+  for(let i=0;i<200;i++){
+    const x = 30+Math.random()*(W-60), y = 30+Math.random()*(H-60);
+    const probe = {x:x-14,y:y-14,w:28,h:28};
+    let bad=false;
+    for(const b of buildings){ if(rectsOverlap(probe,b)){bad=true;break;} }
+    if(!bad) return {x,y};
+  }
+  return {x:W/2,y:H-40};
+}
+
+// Drop zones: fixed on roads, one per color
+const dropZones = [
+  { color:'MAGENTA', x:100, y:560, w:110, h:26 },
+  { color:'YELLOW',  x:425, y:560, w:110, h:26 },
+  { color:'LIME',    x:750, y:560, w:110, h:26 },
+];
+
+// ---- Audio (tiny synth) ----
+let audioCtx=null, muted=false;
+function beep(freq=440,dur=0.08,type='square',vol=0.06){
+  if(muted) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type=type; o.frequency.value=freq; g.gain.value=vol;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+dur);
+    o.stop(audioCtx.currentTime+dur);
+  }catch(e){}
+}
+
+// ---- Game state ----
+const G = {
+  mode:'menu', // menu | play | pause | over
+  time:90, score:0, delivered:0, lives:3,
+  carry:null, // color name or null
+  parcels:[], drones:[], particles:[], floaters:[],
+  shake:0, lastTs:0, spawnT:0,
+};
+const player = { x:W/2, y:300, vx:0, vy:0, r:12, angle:0, inv:0, trail:[] };
+const keys = {};
+
+function resetGame(){
+  G.time=90; G.score=0; G.delivered=0; G.lives=3; G.carry=null;
+  G.parcels=[]; G.drones=[]; G.particles=[]; G.floaters=[]; G.shake=0; G.spawnT=0;
+  player.x=W/2; player.y=220; player.vx=0; player.vy=0; player.inv=2; player.trail=[];
+  // initial parcels: one of each color
+  for(const c of COLORS) spawnParcel(c.name);
+  // drones: 5 patrollers on roads
+  const droneDefs = [
+    {x:240,y:220,sp:95},{x:600,y:220,sp:105},{x:760,y:320,sp:115},
+    {x:360,y:410,sp:125},{x:640,y:410,sp:135},
+  ];
+  droneDefs.forEach((d,i)=> G.drones.push({
+    x:d.x,y:d.y,r:13,sp:d.sp,phase:Math.random()*Math.PI*2,
+    wx:d.x,wy:d.y,mode:'patrol',tx:d.x,ty:d.y,retarget:0,
+  }));
+  updateHUD();
+}
+function spawnParcel(forceColor){
+  const p = randomRoadPoint();
+  // avoid spawning inside drop zones
+  for(const z of dropZones){
+    if(p.x>z.x-20&&p.x<z.x+z.w+20&&p.y>z.y-30&&p.y<z.y+z.h+30){ p.y = 320; }
+  }
+  const color = forceColor || COLORS[(Math.random()*COLORS.length)|0].name;
+  G.parcels.push({x:p.x,y:p.y,color,bob:Math.random()*6});
+}
+function updateHUD(){
+  scoreEl.textContent = G.score;
+  timeEl.textContent = Math.ceil(G.time);
+  delEl.textContent = G.delivered;
+  livesEl.textContent = G.lives>0 ? '♥'.repeat(G.lives)+'♡'.repeat(3-G.lives) : '—';
+  if(G.carry){ const c=colorByName(G.carry); carryDot.style.background=c.c; carryDot.style.color=c.c; carryLabel.textContent=G.carry; }
+  else { carryDot.style.background='#333'; carryDot.style.color='#333'; carryLabel.textContent='—'; }
+}
+function floater(x,y,text,color='#fff'){ G.floaters.push({x,y,text,color,life:1.4}); }
+function burst(x,y,color,n=18){
+  for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2, s=60+Math.random()*220;
+    G.particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.5+Math.random()*.5,color}); }
+}
+function showOverlay(title, html){ ovTitle.textContent=title; ovText.innerHTML=html; overlay.classList.remove('hidden'); }
+function hideOverlay(){ overlay.classList.add('hidden'); }
+
+function startGame(){
+  resetGame(); G.mode='play'; hideOverlay(); beep(660,.09); setTimeout(()=>beep(880,.09),90);
+}
+function gameOver(reason){
+  G.mode='over'; beep(160,.4,'sawtooth',.08);
+  const title = reason==='time' ? "TIME UP!" : "COURIER DOWN!";
+  showOverlay(title,
+    `You delivered <b>${G.delivered}</b> parcel(s) for <b>${G.score}</b> pts.<br>`+
+    (reason==='time' ? "The city clock hit zero." : "The drones finally caught you.")+
+    `<br><br>Steer: <kbd>WASD</kbd>/<kbd>arrows</kbd> • Restart: <kbd>R</kbd>`);
+  el('playBtn').textContent='Run Again (Enter)';
+}
+function damage(){
+  if(player.inv>0 || G.mode!=='play') return;
+  G.lives--; player.inv=2; G.shake=10;
+  burst(player.x,player.y,'#ff2b4e',26); beep(140,.3,'sawtooth',.09);
+  if(G.carry){ floater(player.x,player.y-20,'PARCEL LOST','#ff7a1a'); G.carry=null; }
+  else floater(player.x,player.y-20,'HIT!','#ff2b4e');
+  player.vx*=-0.4; player.vy*=-0.4;
+  if(G.lives<=0){ updateHUD(); gameOver('lives'); return; }
+  updateHUD();
+}
+
+// ---- Update ----
+function update(dt){
+  if(G.mode!=='play') return;
+  G.time -= dt;
+  if(G.time<=0){ G.time=0; updateHUD(); gameOver('time'); return; }
+
+  // player movement
+  const ACC=950, MAX=290;
+  let ax=0, ay=0;
+  if(keys['arrowleft']||keys['a']) ax-=1;
+  if(keys['arrowright']||keys['d']) ax+=1;
+  if(keys['arrowup']||keys['w']) ay-=1;
+  if(keys['arrowdown']||keys['s']) ay+=1;
+  if(ax&&ay){ ax*=Math.SQRT1_2; ay*=Math.SQRT1_2; }
+  player.vx += ax*ACC*dt; player.vy += ay*ACC*dt;
+  const fr = Math.pow(0.0015, dt); // friction
+  if(!ax) player.vx*=fr; if(!ay) player.vy*=fr;
+  const sp = Math.hypot(player.vx,player.vy);
+  if(sp>MAX){ player.vx*=MAX/sp; player.vy*=MAX/sp; }
+  player.x += player.vx*dt; player.y += player.vy*dt;
+  resolveCircleBuildings(player, player.r);
+  if(sp>30) player.angle = Math.atan2(player.vy,player.vx);
+  if(player.inv>0) player.inv-=dt;
+  player.trail.push({x:player.x,y:player.y,life:.35});
+  if(player.trail.length>40) player.trail.shift();
+  player.trail.forEach(t=>t.life-=dt);
+  player.trail = player.trail.filter(t=>t.life>0);
+
+  // parcels pickup
+  for(let i=G.parcels.length-1;i>=0;i--){
+    const p=G.parcels[i];
+    p.bob+=dt*3;
+    if(!G.carry && Math.hypot(player.x-p.x,player.y-p.y) < player.r+14){
+      G.carry=p.color; G.parcels.splice(i,1);
+      const c=colorByName(G.carry);
+      floater(player.x,player.y-24,'PICKED UP '+G.carry,c.c);
+      burst(player.x,player.y,c.c,14); beep(520,.08); setTimeout(()=>beep(780,.08),70);
+      G.spawnT=0;
+    }
+  }
+  // keep at least 2 parcels on field
+  G.spawnT+=dt;
+  if(G.parcels.length<2 && G.spawnT>1.2){ spawnParcel(); G.spawnT=0; }
+
+  // deliveries
+  if(G.carry){
+    for(const z of dropZones){
+      const cx=Math.max(z.x,Math.min(player.x,z.x+z.w)), cy=Math.max(z.y,Math.min(player.y,z.y+z.h));
+      if(Math.hypot(player.x-cx,player.y-cy) < player.r+4){
+        if(z.color===G.carry){
+          const c=colorByName(G.carry);
+          G.score+=100; G.delivered++; G.time=Math.min(99,G.time+5);
+          floater(player.x,player.y-26,'+100 DELIVERED! '+z.color+' +5s',c.c);
+          burst(player.x,player.y,c.c,30); beep(660,.09); setTimeout(()=>beep(990,.12),80);
+          G.carry=null; spawnParcel();
+        } else {
+          // wrong pad nudge (throttled)
+          if(!G._wrongT || performance.now()-G._wrongT>900){
+            G._wrongT=performance.now();
+            floater(player.x,player.y-24,'WRONG PAD — need '+G.carry,'#ff7a1a'); beep(220,.12,'square',.05);
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  // drones: patrol waypoints on roads + chase nearby player
+  for(const d of G.drones){
+    const distP = Math.hypot(player.x-d.x, player.y-d.y);
+    const diff = Math.min(1, (G.delivered*0.06)) ;
+    const chaseR = 190 + G.delivered*6;
+    if(distP < chaseR && G.mode==='play'){ d.mode='chase'; }
+    else if(distP > chaseR+60){ d.mode='patrol'; }
+
+    let tvx=0, tvy=0;
+    if(d.mode==='chase'){
+      const a=Math.atan2(player.y-d.y, player.x-d.x);
+      const chaseSp = d.sp*(1.05+diff);
+      tvx=Math.cos(a)*chaseSp; tvy=Math.sin(a)*chaseSp;
+    } else {
+      d.retarget-=dt;
+      if(d.retarget<=0 || Math.hypot(d.tx-d.x,d.ty-d.y)<12){
+        const rp=randomRoadPoint(); d.tx=rp.x; d.ty=rp.y; d.retarget=4+Math.random()*3;
+      }
+      const a=Math.atan2(d.ty-d.y,d.tx-d.x);
+      tvx=Math.cos(a)*d.sp*0.7; tvy=Math.sin(a)*d.sp*0.7;
+      // wobble for patrol character
+      d.phase+=dt*2;
+      tvx+=Math.cos(d.phase)*20; tvy+=Math.sin(d.phase)*20;
+    }
+    // smooth steering
+    d.x+= (tvx)*dt; d.y+=(tvy)*dt;
+    // drones avoid buildings (slide): if inside, push out + retarget
+    const before={x:d.x,y:d.y};
+    resolveCircleBuildings(d,d.r);
+    if(Math.abs(before.x-d.x)+Math.abs(before.y-d.y)>0 && d.mode==='patrol'){ d.retarget=0; }
+
+    // hit player?
+    if(Math.hypot(player.x-d.x,player.y-d.y) < player.r+d.r-2){ damage(); }
+  }
+  // difficulty ramp: speed up slightly over time
+  for(const d of G.drones) d.sp = Math.min(190, d.sp + dt*0.6);
+
+  // particles/floaters
+  for(const p of G.particles){ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vx*=0.96; p.vy*=0.96; p.life-=dt; }
+  G.particles=G.particles.filter(p=>p.life>0);
+  for(const f of G.floaters){ f.y-=28*dt; f.life-=dt; }
+  G.floaters=G.floaters.filter(f=>f.life>0);
+  if(G.shake>0) G.shake-=dt*30;
+
+  updateHUD();
+}
+
+// ---- Render ----
+function neonRect(x,y,w,h,color,fill=true){
+  ctx.save();
+  ctx.shadowColor=color; ctx.shadowBlur=18;
+  ctx.strokeStyle=color; ctx.lineWidth=2;
+  if(fill){ ctx.fillStyle='rgba(10,10,30,0.9)'; ctx.fillRect(x,y,w,h); }
+  ctx.strokeRect(x,y,w,h);
+  ctx.shadowBlur=0; ctx.fillStyle=color; ctx.globalAlpha=.9;
+  // corner dots
+  ctx.restore();
+}
+function draw(){
+  ctx.save();
+  if(G.shake>0) ctx.translate((Math.random()-.5)*G.shake,(Math.random()-.5)*G.shake);
+
+  // bg + grid
+  ctx.fillStyle='#05050f'; ctx.fillRect(-20,-20,W+40,H+40);
+  ctx.strokeStyle='rgba(0,240,255,0.07)'; ctx.lineWidth=1;
+  ctx.beginPath();
+  for(let x=0;x<=W;x+=40){ ctx.moveTo(x,0); ctx.lineTo(x,H); }
+  for(let y=0;y<=H;y+=40){ ctx.moveTo(0,y); ctx.lineTo(W,y); }
+  ctx.stroke();
+
+  // drop zones
+  for(const z of dropZones){
+    const c=colorByName(z.color).c;
+    const active = G.carry===z.color;
+    ctx.save();
+    ctx.shadowColor=c; ctx.shadowBlur= active?30:16;
+    ctx.fillStyle= active? c+'33' : 'rgba(12,12,30,.9)';
+    ctx.strokeStyle=c; ctx.lineWidth= active?3:2;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(z.x,z.y,z.w,z.h,8); else ctx.rect(z.x,z.y,z.w,z.h);
+    ctx.fill(); ctx.stroke();
+    ctx.shadowBlur=0; ctx.fillStyle=c; ctx.font='bold 13px monospace'; ctx.textAlign='center';
+    ctx.fillText(z.color+' DROP', z.x+z.w/2, z.y+z.h/2+5);
+    // pulsing beacon if active
+    if(active){
+      const t=performance.now()/300;
+      ctx.globalAlpha=.35+.25*Math.sin(t);
+      ctx.fillStyle=c;
+      ctx.fillRect(z.x-4,z.y-6,4,6+Math.sin(t)*3);
+      ctx.fillRect(z.x+z.w,z.y-6,4,6+Math.cos(t)*3);
+      ctx.globalAlpha=1;
+    }
+    ctx.restore();
+  }
+
+  // buildings (neon blocks with windows)
+  for(const b of buildings){
+    ctx.save();
+    ctx.fillStyle='#0c0c22'; ctx.fillRect(b.x,b.y,b.w,b.h);
+    // windows
+    ctx.fillStyle='rgba(0,240,255,0.10)';
+    for(let wy=b.y+10; wy<b.y+b.h-8; wy+=18)
+      for(let wx=b.x+10; wx<b.x+b.w-8; wx+=22)
+        ctx.fillRect(wx,wy,10,7);
+    ctx.shadowColor='#4d4dff'; ctx.shadowBlur=12;
+    ctx.strokeStyle='#5a5aff'; ctx.lineWidth=2; ctx.strokeRect(b.x,b.y,b.w,b.h);
+    ctx.restore();
+  }
+
+  // parcels
+  for(const p of G.parcels){
+    const c=colorByName(p.color).c;
+    const bobY=Math.sin(p.bob)*3;
+    ctx.save();
+    ctx.translate(p.x,p.y+bobY);
+    ctx.shadowColor=c; ctx.shadowBlur=20;
+    ctx.fillStyle='#0b0b1e'; ctx.strokeStyle=c; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.rect(-11,-11,22,22); ctx.fill(); ctx.stroke();
+    // parcel tape
+    ctx.strokeStyle=c; ctx.beginPath(); ctx.moveTo(-11,0); ctx.lineTo(11,0); ctx.moveTo(0,-11); ctx.lineTo(0,11); ctx.stroke();
+    ctx.shadowBlur=0; ctx.fillStyle=c; ctx.font='bold 9px monospace'; ctx.textAlign='center';
+    ctx.fillText(p.color, 0, 24);
+    // glow ring
+    ctx.globalAlpha=.5+.3*Math.sin(p.bob*2);
+    ctx.strokeStyle=c; ctx.beginPath(); ctx.arc(0,0,18,0,Math.PI*2); ctx.stroke();
+    ctx.restore();
+  }
+
+  // courier trail
+  for(const t of player.trail){
+    ctx.save(); ctx.globalAlpha=t.life*1.6;
+    ctx.fillStyle='#00f0ff'; ctx.shadowColor='#00f0ff'; ctx.shadowBlur=10;
+    ctx.beginPath(); ctx.arc(t.x,t.y,4,0,Math.PI*2); ctx.fill(); ctx.restore();
+  }
+
+  // courier
+  const blink = player.inv>0 && (performance.now()/120|0)%2===0;
+  ctx.save();
+  ctx.translate(player.x,player.y); ctx.rotate(player.angle);
+  ctx.shadowColor='#00f0ff'; ctx.shadowBlur= blink?4:22;
+  ctx.globalAlpha= blink? .45 : 1;
+  ctx.fillStyle='#062a30'; ctx.strokeStyle='#00f0ff'; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.moveTo(14,0); ctx.lineTo(-10,-10); ctx.lineTo(-5,0); ctx.lineTo(-10,10); ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.shadowBlur=8;
+  ctx.beginPath(); ctx.arc(2,0,3.4,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+  // shield ring
+  if(player.inv>0){
+    ctx.save(); ctx.strokeStyle='#00f0ff'; ctx.globalAlpha=.6; ctx.setLineDash([6,6]);
+    ctx.beginPath(); ctx.arc(player.x,player.y,20,0,Math.PI*2); ctx.stroke(); ctx.restore();
+  }
+  // carry indicator above courier
+  if(G.carry){
+    const c=colorByName(G.carry).c;
+    ctx.save(); ctx.fillStyle=c; ctx.shadowColor=c; ctx.shadowBlur=12;
+    ctx.fillRect(player.x-9,player.y-24,18,7);
+    ctx.fillStyle='#000'; ctx.font='bold 7px monospace'; ctx.textAlign='center';
+    ctx.fillText('📦', player.x, player.y-17); ctx.restore();
+  }
+
+  // drones
+  for(const d of G.drones){
+    const chasing = d.mode==='chase';
+    ctx.save(); ctx.translate(d.x,d.y);
+    ctx.shadowColor= chasing?'#ff2b4e':'#ff7a5a'; ctx.shadowBlur= chasing?26:14;
+    ctx.fillStyle= chasing?'#3a0a12':'#1e0f0f';
+    ctx.strokeStyle= chasing?'#ff2b4e':'#ff6a3d'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.arc(0,0,d.r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    // eye
+    const ang=Math.atan2(player.y-d.y,player.x-d.x);
+    ctx.rotate(ang);
+    ctx.fillStyle= chasing?'#fff':'#ffb08a'; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.arc(5,0,4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#f00'; ctx.beginPath(); ctx.arc(6,0,1.8,0,Math.PI*2); ctx.fill();
+    // rotor ticks
+    ctx.strokeStyle='rgba(255,80,80,.6)'; ctx.beginPath();
+    const t=performance.now()/120;
+    for(let k=0;k<3;k++){ const a=t+k*Math.PI*2/3; ctx.moveTo(Math.cos(a)*(d.r+3),Math.sin(a)*(d.r+3)); ctx.lineTo(Math.cos(a)*(d.r+7),Math.sin(a)*(d.r+7)); }
+    ctx.stroke();
+    ctx.restore();
+    if(chasing){
+      ctx.save(); ctx.fillStyle='#ff2b4e'; ctx.font='bold 10px monospace'; ctx.textAlign='center';
+      ctx.fillText('!', d.x, d.y-18); ctx.restore();
+    }
+  }
+
+  // particles
+  for(const p of G.particles){
+    ctx.save(); ctx.globalAlpha=Math.max(0,p.life*1.6);
+    ctx.fillStyle=p.color; ctx.shadowColor=p.color; ctx.shadowBlur=8;
+    ctx.fillRect(p.x-2,p.y-2,4,4); ctx.restore();
+  }
+  // floaters
+  ctx.save(); ctx.textAlign='center'; ctx.font='bold 14px monospace';
+  for(const f of G.floaters){
+    ctx.globalAlpha=Math.min(1,f.life);
+    ctx.fillStyle=f.color; ctx.shadowColor=f.color; ctx.shadowBlur=10;
+    ctx.fillText(f.text,f.x,f.y);
+  }
+  ctx.restore();
+
+  // vignette + scanlines
+  const g=ctx.createRadialGradient(W/2,H/2,H*0.35,W/2,H/2,H*0.75);
+  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,10,0.45)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+  ctx.restore();
+
+  // top timer bar
+  if(G.mode==='play'){
+    ctx.save();
+    ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(0,0,W,6);
+    ctx.fillStyle= G.time<15 ? '#ff2b4e' : '#00f0ff';
+    ctx.shadowColor=ctx.fillStyle; ctx.shadowBlur=8;
+    ctx.fillRect(0,0,W*(G.time/90),6);
+    ctx.restore();
+  }
+}
+
+// ---- Loop ----
+function loop(ts){
+  const dt=Math.min(0.033,(ts-G.lastTs)/1000||0.016);
+  G.lastTs=ts;
+  update(dt); draw();
+  requestAnimationFrame(loop);
+}
+
+// ---- Input ----
+window.addEventListener('keydown', e=>{
+  const k=e.key.toLowerCase();
+  keys[k]=true;
+  if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
+  if(k==='r'){ startGame(); }
+  if(k==='enter'||k===' '){ if(G.mode!=='play') startGame(); }
+  if(k==='p'){ togglePause(); }
+  if(k==='m'){ muted=!muted; floater(player.x,player.y-20,muted?'MUTED':'SOUND ON'); }
+});
+window.addEventListener('keyup', e=>{ keys[e.key.toLowerCase()]=false; });
+function togglePause(){
+  if(G.mode==='play'){ G.mode='pause'; showOverlay('PAUSED','Press <kbd>P</kbd> or Start to resume. <kbd>R</kbd> restarts.'); el('playBtn').textContent='Resume (Enter)'; }
+  else if(G.mode==='pause'){ G.mode='play'; hideOverlay(); }
+}
+el('startBtn').addEventListener('click', startGame);
+el('playBtn').addEventListener('click', ()=>{
+  if(G.mode==='pause'){ togglePause(); } else startGame();
+});
+el('pauseBtn').addEventListener('click', togglePause);
+
+// init
+resetGame(); G.mode='menu';
+showOverlay('NEON PARCEL PANIC',
+  `Steer with <kbd>WASD</kbd> / <kbd>arrows</kbd>. Pick up a glowing parcel, deliver it to the drop zone of the <b>same color</b>. Avoid red patrol drones. You have <b>90 seconds</b> and <b>3 lives</b>. Each delivery: <b>+100</b> and <b>+5s</b>.`);
+requestAnimationFrame(ts=>{ G.lastTs=ts; requestAnimationFrame(loop); });
+// autostart for automated screenshots: ?play=1
+try{ if(new URLSearchParams(location.search).get('play')==='1'){ startGame(); } }catch(e){}
+
+// expose for quick automated smoke test
+window.__NPP = { G, player, startGame, resetGame };
+})();
+</script>
+</body>
+</html>

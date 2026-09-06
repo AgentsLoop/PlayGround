@@ -1,0 +1,185 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Capturing final evidence from the public URL — verifying it serves the game first.
+[0m# [0mTodos
+[•] Verify public game URL serves playable entrypoint + local server state
+[ ] Capture final screenshots from public URL under screenshots/final-*
+[ ] Commit, push current branch, post final completion comment to issue #24
+[0m
+[0m$ [0mls -la index.html && echo "ENTRYPOINT PRESENT"
+tmux ls 2>&1
+curl -s -o /dev/null -w "local3000 /:%{http_code}\n" --max-time 10 http://localhost:3000/
+curl -s -o /tmp/opencode/public.html -w "public URL HTTP:%{http_code} bytes:%{size_download}\n" --max-time 25 https://comparative-race-katrina-devoted.trycloudflare.com/
+python3 -c "
+a=open('/tmp/opencode/public.html',encoding='utf-8',errors='replace').read()
+print('public page bytes chars:', len(a))
+for s in ['Neon Parcel Panic','id=\"game\"','startGame','DROP']:
+    print(('PASS ' if s in a else 'FAIL ')+'public page contains '+s)
+b=open('index.html',encoding='utf-8').read()
+print('public page matches repo ./index.html:', a==b)
+"
+-rw-r--r-- 1 runner runner 25289 Sep  5 23:56 index.html
+ENTRYPOINT PRESENT
+app-server: 1 windows (created Sat Sep  5 23:57:59 2026)
+local3000 /:200
+public URL HTTP:200 bytes:25289
+public page bytes chars: 25250
+PASS public page contains Neon Parcel Panic
+PASS public page contains id="game"
+PASS public page contains startGame
+PASS public page contains DROP
+public page matches repo ./index.html: True
+[0m
+Public URL serves the exact game — capturing final screenshots from it.
+[0m# [0mTodos
+[✓] Verify public game URL serves playable entrypoint + local server state
+[•] Capture final screenshots from public URL under screenshots/final-*
+[ ] Commit, push current branch, post final completion comment to issue #24
+[0m
+[0m$ [0mcat > /tmp/opencode/shot_public.py << 'PY'
+from playwright.sync_api import sync_playwright
+URL="https://comparative-race-katrina-devoted.trycloudflare.com/"
+errors=[]
+with sync_playwright() as p:
+    b = p.chromium.launch(executable_path="/usr/bin/chromium", args=["--no-sandbox"])
+    pg = b.new_page(viewport={"width":1000,"height":760})
+    pg.on("console", lambda m: errors.append(m.text) if m.type=="error" else None)
+    pg.on("pageerror", lambda e: errors.append(str(e)))
+    # menu
+    pg.goto(URL, wait_until="load")
+    pg.wait_for_timeout(1000)
+    assert pg.is_visible("#overlay"), "menu overlay not visible on public URL"
+    pg.screenshot(path="screenshots/final-menu.png")
+    print("PASS public menu")
+    # gameplay
+    pg.goto(URL+"?play=1", wait_until="load")
+    pg.wait_for_timeout(1200)
+    assert pg.evaluate("window.__NPP.G.mode")== "play", "game did not autostart"
+    pg.keyboard.down("d"); pg.wait_for_timeout(900); pg.keyboard.up("d")
+    pg.keyboard.down("s"); pg.wait_for_timeout(300); pg.keyboard.up("s")
+    pg.screenshot(path="screenshots/final-gameplay.png")
+    print("PASS public gameplay, time:", pg.evaluate("window.__NPP.G.time"))
+    # delivery with shielded staging
+    for attempt in range(6):
+        if pg.evaluate("window.__NPP.G.carry"): break
+        pg.evaluate("""(i)=>{const{G,player}=window.__NPP;player.inv=10;
+          G.drones.forEach(d=>{d.x=80+(i*50)%800;d.y=120;d.tx=d.x;d.ty=d.y;d.mode='patrol';});
+          const pl=G.parcels[i%G.parcels.length];player.x=pl.x;player.y=pl.y;player.vx=0;player.vy=0;}""", attempt)
+        pg.wait_for_timeout(400)
+    carry = pg.evaluate("window.__NPP.G.carry")
+    assert carry, "pickup staging failed on public URL"
+    print("PASS public pickup carry:", carry)
+    pg.evaluate("""()=>{const{G,player}=window.__NPP;player.inv=10;
+      const zones=[{"color":"MAGENTA","x":100,"y":560,"w":110,"h":26},{"color":"YELLOW","x":425,"y":560,"w":110,"h":26},{"color":"LIME","x":750,"y":560,"w":110,"h":26}];
+      const z=zones.find(z=>z.color===G.carry);player.x=z.x+z.w/2;player.y=z.y-12;player.vx=0;player.vy=0;}""")
+    pg.wait_for_timeout(250)
+    print("public score:", pg.evaluate("window.__NPP.G.score"), "delivered:", pg.evaluate("window.__NPP.G.delivered"))
+    assert pg.evaluate("window.__NPP.G.score")>=100, "delivery did not score"
+    pg.screenshot(path="screenshots/final-delivery.png")
+    print("PASS public delivery")
+    b.close()
+print("CONSOLE ERRORS:", errors if errors else "none")
+assert not errors, errors
+print("ALL PUBLIC-URL CHECKS PASSED")
+PY
+python3 /tmp/opencode/shot_public.py
+cp screenshots/final-menu.png project/screenshots/final-menu.png
+cp screenshots/final-gameplay.png project/screenshots/final-gameplay.png
+cp screenshots/final-delivery.png project/screenshots/final-delivery.png
+ls -lh screenshots/ project/screenshots/
+PASS public menu
+PASS public gameplay, time: 87.46680000000015
+PASS public pickup carry: MAGENTA
+public score: 100 delivered: 1
+PASS public delivery
+CONSOLE ERRORS: none
+ALL PUBLIC-URL CHECKS PASSED
+project/screenshots/:
+total 792K
+-rw-r--r-- 1 runner runner 274K Sep  6 00:01 final-delivery.png
+-rw-r--r-- 1 runner runner 271K Sep  6 00:01 final-gameplay.png
+-rw-r--r-- 1 runner runner 242K Sep  6 00:01 final-menu.png
+
+screenshots/:
+total 792K
+-rw-r--r-- 1 runner runner 274K Sep  6 00:01 final-delivery.png
+-rw-r--r-- 1 runner runner 271K Sep  6 00:01 final-gameplay.png
+-rw-r--r-- 1 runner runner 242K Sep  6 00:01 final-menu.png
+[0m
+[0m→ [0mRead screenshots/final-gameplay.png
+[0m→ [0mRead screenshots/final-delivery.png
+[0m→ [0mRead screenshots/final-menu.png
+All public-URL screenshots verified — committing and posting the final update.
+[0m
+[0m# [0mTodos
+[✓] Verify public game URL serves playable entrypoint + local server state
+[✓] Capture final screenshots from public URL under screenshots/final-*
+[•] Commit, push current branch, post final completion comment to issue #24
+[0m
+[0m$ [0mgit branch --show-current
+git status --short | grep -v "^??"
+git add screenshots/final-menu.png screenshots/final-gameplay.png screenshots/final-delivery.png project/screenshots/final-menu.png project/screenshots/final-gameplay.png project/screenshots/final-delivery.png
+git diff --cached --stat
+git commit -m "Capture final screenshots from verified public game URL" 
+git push origin opencode/33999760737 2>&1 | tail -n 3
+git rev-parse HEAD
+opencode/33999760737
+ M project/screenshots/final-delivery.png
+ M project/screenshots/final-gameplay.png
+ M project/screenshots/final-menu.png
+ M screenshots/final-delivery.png
+ M screenshots/final-gameplay.png
+ M screenshots/final-menu.png
+ project/screenshots/final-delivery.png | Bin 282096 -> 280316 bytes
+ project/screenshots/final-gameplay.png | Bin 283869 -> 276901 bytes
+ project/screenshots/final-menu.png     | Bin 244205 -> 247772 bytes
+ screenshots/final-delivery.png         | Bin 282096 -> 280316 bytes
+ screenshots/final-gameplay.png         | Bin 283869 -> 276901 bytes
+ screenshots/final-menu.png             | Bin 244205 -> 247772 bytes
+ 6 files changed, 0 insertions(+), 0 deletions(-)
+[opencode/33999760737 084efdc] Capture final screenshots from verified public game URL
+ 6 files changed, 0 insertions(+), 0 deletions(-)
+To https://github.com/AgentsLoop/PlayGround
+   332f90f..084efdc  opencode/33999760737 -> opencode/33999760737
+084efdcee3c9e97add0ffbc42b4ef601c92720e2
+[0m
+[0m$ [0mfor f in final-menu final-gameplay final-delivery; do curl -s -o /dev/null -w "$f:%{http_code}\n" "https://raw.githubusercontent.com/AgentsLoop/PlayGround/084efdcee3c9e97add0ffbc42b4ef601c92720e2/project/screenshots/$f.png"; done
+final-menu:200
+final-gameplay:200
+final-delivery:200
+[0m
+[0m$ [0mexport REPO="AgentsLoop/PlayGround" SHA="084efdcee3c9e97add0ffbc42b4ef601c92720e2" ISSUE="24" GAME="https://comparative-race-katrina-devoted.trycloudflare.com"
+gh issue comment "$ISSUE" --repo "$REPO" --body "## Complete — Neon Parcel Panic verified on the public game URL
+
+**Summary:** Single-file Canvas 2D game (\`./index.html\`, mirrored at \`project/index.html\`). Steer a neon courier through a top-down city, pick up color-coded parcels, deliver to matching drop pads, dodge 5 patrol drones (patrol + chase AI). Score/deliveries/lives/time HUD, 90s timer, +100 pts and +5s per delivery, 3 lives with 2s hit shield, restart (R/button), pause (P), mute (M), full keyboard (WASD/arrows/Enter) plus on-screen buttons and WebAudio bleeps.
+
+**Public game link:** $GAME (verified: serves byte-identical \`./index.html\`, HTTP 200)
+**Final commit:** https://github.com/$REPO/commit/$SHA
+**Deployment / test status:** tmux \`app-server\` on port 3000 serves the game; public URL confirmed live. Playwright + system Chromium suite run directly against the public URL passed: menu visible, autostart play mode, keyboard driving, parcel pickup (MAGENTA), matching delivery (score 100, delivered 1), zero console errors. Final screenshots below were captured from the running public game.
+**Known limitations:** None.
+
+<details>
+<summary>Screenshot — menu</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$SHA/project/screenshots/final-menu.png\" alt=\"Neon Parcel Panic start menu on the public game URL\">
+</details>
+
+<details>
+<summary>Screenshot — gameplay</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$SHA/project/screenshots/final-gameplay.png\" alt=\"Neon Parcel Panic live gameplay on the public URL with courier, drones and parcels\">
+</details>
+
+<details>
+<summary>Screenshot — delivery (+100)</summary>
+<img src=\"https://raw.githubusercontent.com/$REPO/$SHA/project/screenshots/final-delivery.png\" alt=\"Neon Parcel Panic delivery moment on the public URL showing plus 100 score\">
+</details>" 2>&1 | tail -n 3
+https://github.com/AgentsLoop/PlayGround/issues/24#issuecomment-5555662651
+[0m
+[0m# [0mTodos
+[✓] Verify public game URL serves playable entrypoint + local server state
+[✓] Capture final screenshots from public URL under screenshots/final-*
+[✓] Commit, push current branch, post final completion comment to issue #24
+[0m
+Done per Agents.md: public URL verified live (byte-identical game, HTTP 200), final screenshots captured from the running public game under `screenshots/final-*` (mirrored to `project/screenshots/`), committed/pushed as `084efdc` on the current branch (no PR), and the final completion comment with the public game URL, embedded screenshots, final commit, deployment/test status, and limitations posted to issue #24.
+
+<promise>DONE</promise>
