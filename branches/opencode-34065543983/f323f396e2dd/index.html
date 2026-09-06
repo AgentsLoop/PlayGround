@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 28 L12 10 L16 4 L20 10 L24 28 Z' fill='%23fed954'/%3E%3Ccircle cx='16' cy='20' r='6' fill='%237b5aa6'/%3E%3C/svg%3E">
+<title>Renamon — img2threejs procedural model</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0b0b0d; color: #eee;
+    font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
+  #app { display: flex; height: 100%; }
+  #stage { flex: 1; position: relative; }
+  #stage canvas { display: block; width: 100%; height: 100%; }
+  #side { width: 300px; background: #141417; border-left: 1px solid #2a2a30;
+    padding: 14px; overflow-y: auto; font-size: 13px; }
+  #side img { width: 100%; border-radius: 8px; border: 1px solid #333; }
+  #side h2 { font-size: 15px; margin: 12px 0 6px; }
+  #side p { color: #aaa; line-height: 1.5; }
+  #hud { position: absolute; top: 12px; left: 12px; background: rgba(10,10,12,.72);
+    border: 1px solid #333; border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+  #hud .row { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
+  #hud button { background: #2b2b33; color: #eee; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+  #hud button.on { background: #6d4fa3; border-color: #9a7fd0; }
+  #badge { position: absolute; bottom: 12px; left: 12px; font-size: 12px; color: #888;
+    background: rgba(10,10,12,.72); padding: 6px 10px; border-radius: 8px; }
+  kbd { background: #222; padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <div id="hud">
+      <div><strong>Renamon</strong> · procedural Three.js (img2threejs)</div>
+      <div class="row">
+        <button id="btn-spin" class="on">spin</button>
+        <button id="btn-wire">wireframe</button>
+        <button id="btn-front">front</button>
+        <button id="btn-side">side</button>
+      </div>
+      <div class="row"><span>drag to orbit · wheel to zoom · <kbd>R</kbd> reset</span></div>
+    </div>
+    <div id="badge">code-only model · no mesh files · spec: object-sculpt-spec.json</div>
+  </div>
+  <div id="side">
+    <h2>Reference</h2>
+    <img src="./project/assets/renamon-reference.png" alt="Renamon reference image">
+    <h2>About</h2>
+    <p>Renamon rebuilt as a code-only procedural <code>THREE.Group</code> factory
+    (<code>src/createRenamonModel.ts</code>) via the
+    <a href="https://github.com/img2threejs/img2threejs" style="color:#b79df0">img2threejs</a>
+    pipeline: image probe → pre-spec assessment → detail inventory → sculpt spec
+    (strict-quality ✅) → staged factory generation.</p>
+    <p>Identity details: tall ears with white tips, narrow snout, blue eyes, purple
+    facial marking, white chest ruff, baggy purple sleeves (yin-yang emblem),
+    spiral thigh markings, digitigrade white feet with dark claws, long tail with white tip.</p>
+  </div>
+</div>
+<script src="./project/bundle.js"></script>
+</body>
+</html>
