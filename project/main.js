@@ -222,7 +222,8 @@ let magMesh;
 const HIP_POS=new THREE.Vector3(0.24,-0.21,-0.55), ADS_POS=new THREE.Vector3(0,-0.168,-0.38);
 gun.position.copy(HIP_POS);
 camera.add(gun);
-scene.add(camera);
+// NOTE: do NOT scene.add(camera) — it would reparent the camera out of
+// pitchObj and freeze the view. It stays under scene→yawObj→pitchObj.
 const muzzle=new THREE.PointLight(0xffc266,0,10,1.7); muzzle.position.set(0.24,-0.17,-0.95); camera.add(muzzle);
 const flash=new THREE.Mesh(new THREE.PlaneGeometry(0.34,0.34),
   new THREE.MeshBasicMaterial({color:0xffd27d,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
@@ -259,6 +260,7 @@ function spawnEnemy(waveN){
   const g=makeEnemy(hp);
   const a=Math.random()*Math.PI*2, r=13+Math.random()*7;
   g.position.set(Math.cos(a)*r,0,Math.sin(a)*r);
+  slideMove(g.position,0,0,0.5); // nudge out of any obstacle
   scene.add(g);
   const e={group:g,alive:true,hp,maxHp:hp,speed:2.1+Math.min(2.2,waveN*0.18)+Math.random()*0.8,atkCd:0,name:'HOSTILE-'+(100+enemies.length|0),dmg:8+waveN*1.5};
   enemies.push(e); enemyMeshes.push(...g.children);
@@ -364,7 +366,7 @@ function shoot(){
   flash.position.x=ADS_POS.x+(HIP_POS.x-ADS_POS.x)*(1-adsK);
   ejectShell();
   camera.getWorldDirection(camDir);
-  const sp=THREE.MathUtils.lerp(0.02,0.0035,adsK)+player.pos.length()*0+ (player.sprinting?0.012:0);
+  const sp=THREE.MathUtils.lerp(0.02,0.0035,adsK)+(player.sprinting?0.012:0);
   camDir.x+=(Math.random()-0.5)*sp; camDir.y+=(Math.random()-0.5)*sp; camDir.normalize();
   ray.set(camera.getWorldPosition(new THREE.Vector3()),camDir); ray.far=120;
   const targets=[]; for(const e of enemies){ if(e.alive)targets.push(e.group); }
@@ -402,8 +404,22 @@ function reload(){ if(player.reloading||player.reserve<=0||player.ammo===player.
     player.ammo+=take; player.reserve-=take; player.reloading=false; HUD.ammo(player.ammo,player.reserve); HUD.reloading(false); },1400); }
 
 // ============ ENEMY UPDATE / COLLISION ============
-function collide(px,pz){ for(const c of colliders){ const dx=px-c.x,dz=pz-c.z; const d=Math.hypot(dx,dz); if(d<c.r+0.6&&d>0.001){ px=c.x+dx/d*(c.r+0.6); pz=c.z+dz/d*(c.r+0.6); } }
-  const R=32; const d=Math.hypot(px,pz); if(d>R){ px*=R/d; pz*=R/d; } return [px,pz]; }
+// Axis-separated circle collision: move X, resolve on X, then Z —
+// this makes characters SLIDE around obstacles instead of sticking.
+function slideMove(p, dx, dz, r=0.55){
+  p.x+=dx;
+  for(const c of colliders){
+    const rr=c.r+r+0.01, ddx=p.x-c.x, ddz=p.z-c.z;
+    if(Math.abs(ddx)<rr&&Math.abs(ddz)<rr) p.x=c.x+(ddx>=0?rr:-rr);
+  }
+  p.z+=dz;
+  for(const c of colliders){
+    const rr=c.r+r+0.01, ddx=p.x-c.x, ddz=p.z-c.z;
+    if(Math.abs(ddx)<rr&&Math.abs(ddz)<rr) p.z=c.z+(ddz>=0?rr:-rr);
+  }
+  const R=32, d=Math.hypot(p.x,p.z);
+  if(d>R){ p.x*=R/d; p.z*=R/d; }
+}
 let stepT=0, vy=0, grounded=true;
 function updatePlayer(dt){
   player.sprinting=(keys['ShiftLeft']||keys['ShiftRight'])&&keys['KeyW']&&!adsHeld;
@@ -413,8 +429,7 @@ function updatePlayer(dt){
   let mx=(-sin*f+cos*s), mz=(-cos*f-sin*s);
   const ml=Math.hypot(mx,mz)||1; mx/=ml; mz/=ml; const moving=(f||s);
   const amt=moving?sp*dt:0;
-  let nx=yawObj.position.x+mx*amt, nz=yawObj.position.z+mz*amt;
-  [nx,nz]=collide(nx,nz); yawObj.position.x=nx; yawObj.position.z=nz;
+  slideMove(yawObj.position, mx*amt, mz*amt, 0.55);
   if(grounded&&keys['Space']){ vy=4.6; grounded=false; AudioSys.jump(); }
   vy-=12*dt; yawObj.position.y+=vy*dt;
   if(yawObj.position.y<=1.7){ yawObj.position.y=1.7; vy=0; grounded=true; }
@@ -452,11 +467,21 @@ function updateEnemies(dt){
     g.position.y=Math.abs(Math.sin(g.userData.walkT))*0.05;
     g.userData.barBg.lookAt(camWorld); g.userData.barFg.lookAt(camWorld);
     e.atkCd-=dt;
-    if(dist>1.9){ let nx=g.position.x-d.x*e.speed*dt, nz=g.position.z-d.z*e.speed*dt; [nx,nz]=collide(nx,nz); g.position.x=nx; g.position.z=nz; }
+    if(dist>1.9){ slideMove(g.position, -d.x*e.speed*dt, -d.z*e.speed*dt, 0.45); }
     else if(e.atkCd<=0&&Game.state==='playing'&&!player.dead){ e.atkCd=0.9;
       player.hp-=e.dmg; player.lastHurt=performance.now()/1000; HUD.health(player.hp,player.maxHp); HUD.damage(0.85); AudioSys.hurt();
-      g.position.addScaledVector(d,-0.4);
+      g.position.addScaledVector(d,-0.4); slideMove(g.position,0,0,0.45);
       if(player.hp<=0){ player.hp=0; player.dead=true; GameSys.gameOver(); } }
+  }
+  // separation: keep enemies from stacking into a conga line
+  for(let i=0;i<enemies.length;i++){ const a=enemies[i]; if(!a.alive) continue;
+    for(let j=i+1;j<enemies.length;j++){ const b=enemies[j]; if(!b.alive) continue;
+      const dx=b.group.position.x-a.group.position.x, dz=b.group.position.z-a.group.position.z;
+      const d2=dx*dx+dz*dz;
+      if(d2<1.0&&d2>1e-6){ const d=Math.sqrt(d2), push=(1.0-d)*0.5/d;
+        a.group.position.x-=dx*push; a.group.position.z-=dz*push;
+        b.group.position.x+=dx*push; b.group.position.z+=dz*push; }
+    }
   }
 }
 
