@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>STRIKEPOINT — Tactical FPS</title>
+<style>
+  :root { --sp: 7px; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#0a0c10;
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif; color:#fff;
+    -webkit-user-select:none; user-select:none; touch-action:none; }
+  #game-canvas { position:fixed; inset:0; display:block; }
+  /* ---------- HUD ---------- */
+  #hud { position:fixed; inset:0; pointer-events:none; display:none; z-index:10; }
+  #hud.on { display:block; }
+  #xh { position:absolute; left:50%; top:50%; width:0; height:0; }
+  #xh .l { position:absolute; background:#7CFC00; box-shadow:0 0 3px #000,0 0 2px #000; }
+  #xh .t { left:-1px; top:calc(-9px - var(--sp)); width:2px; height:9px; }
+  #xh .b { left:-1px; top:var(--sp); width:2px; height:9px; }
+  #xh .ll { top:-1px; left:calc(-9px - var(--sp)); width:9px; height:2px; }
+  #xh .rr { top:-1px; left:var(--sp); width:9px; height:2px; }
+  #dot { position:absolute; left:-1px; top:-1px; width:2px; height:2px; background:#7CFC00; }
+  #hitm { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) scale(1.5) rotate(45deg);
+    font-size:26px; font-weight:900; color:#fff; opacity:0; text-shadow:0 0 4px #000; line-height:1; }
+  #hitm.on { opacity:1; }
+  #hitm.kill { color:#ff3b30; transform:translate(-50%,-50%) scale(1.9) rotate(45deg); }
+  #dmg { position:absolute; inset:0; box-shadow:inset 0 0 140px 70px rgba(255,0,0,0); transition:box-shadow .18s; }
+  #dmg.on { box-shadow:inset 0 0 140px 70px rgba(255,0,0,.55); }
+  #heal-flash { position:absolute; inset:0; background:radial-gradient(ellipse at center,transparent 55%,rgba(80,255,120,.12) 100%); opacity:0; }
+  #banner { position:absolute; top:16%; width:100%; text-align:center; font-size:clamp(28px,5vw,52px);
+    font-weight:800; letter-spacing:6px; text-shadow:0 2px 10px #000; opacity:0; transition:opacity .4s; color:#ffd76a; }
+  #banner.on { opacity:1; }
+  #subbanner { position:absolute; top:calc(16% + 60px); width:100%; text-align:center; font-size:15px;
+    letter-spacing:2px; opacity:0; transition:opacity .4s; color:#fff; text-shadow:0 1px 4px #000; }
+  #subbanner.on { opacity:.9; }
+  #feed { position:absolute; right:14px; top:14px; text-align:right; font-size:13px; text-shadow:0 1px 3px #000; }
+  #feed div { background:rgba(0,0,0,.45); border-right:3px solid #ffd76a; padding:3px 8px; margin-bottom:4px; border-radius:3px; }
+  #bl { position:absolute; left:16px; bottom:14px; }
+  #hpbar { width:min(200px,32vw); height:14px; background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.35);
+    border-radius:3px; overflow:hidden; display:inline-block; vertical-align:middle; }
+  #hpbar i { display:block; height:100%; width:100%; background:linear-gradient(90deg,#3fe05a,#7CFC00); transition:width .2s; }
+  #hpnum { font-size:22px; font-weight:700; margin-left:8px; text-shadow:0 1px 4px #000; }
+  #br { position:absolute; right:16px; bottom:14px; text-align:right; }
+  #ammo { font-size:34px; font-weight:800; text-shadow:0 2px 6px #000; }
+  #ammo.low { color:#ff5b4d; }
+  #reload-tip { font-size:12px; opacity:.85; letter-spacing:1px; }
+  #score { display:block; font-size:14px; opacity:.95; letter-spacing:1px; margin-top:2px; text-shadow:0 1px 3px #000; }
+  #mini { position:absolute; left:16px; top:14px; border-radius:50%; background:rgba(0,0,0,.5);
+    border:2px solid rgba(255,255,255,.4); }
+  #obj { position:absolute; top:14px; width:100%; text-align:center; font-size:13px; letter-spacing:2px;
+    color:#ffd76a; text-shadow:0 1px 4px #000; }
+  #vignette { position:absolute; inset:0; background:radial-gradient(ellipse at center,transparent 62%,rgba(0,0,0,.42) 100%); }
+  /* ---------- Overlays ---------- */
+  .overlay { position:fixed; inset:0; z-index:20; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(ellipse at 50% 35%,rgba(20,28,40,.88),rgba(5,7,10,.96)); text-align:center; padding:20px; }
+  .panel { max-width:640px; width:100%; }
+  .panel h1 { font-size:clamp(34px,7vw,64px); letter-spacing:8px; font-weight:900;
+    background:linear-gradient(180deg,#fff,#ffb84d); -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 4px 24px rgba(255,150,40,.25); }
+  .panel h2 { font-size:14px; letter-spacing:4px; color:#ffb84d; margin:6px 0 18px; font-weight:600; }
+  .card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); border-radius:10px;
+    padding:14px 18px; margin:10px 0; font-size:14px; line-height:1.65; text-align:left; }
+  .card b { color:#ffd76a; }
+  .keys { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; font-size:13px; }
+  .keys span:nth-child(odd) { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25);
+    border-radius:4px; padding:1px 8px; font-weight:700; text-align:center; white-space:nowrap; }
+  #play-btn { pointer-events:auto; cursor:pointer; margin-top:14px; font-size:20px; font-weight:800; letter-spacing:3px;
+    color:#0a0c10; background:linear-gradient(180deg,#ffd76a,#ff9d2e); border:none; border-radius:8px;
+    padding:14px 54px; box-shadow:0 6px 30px rgba(255,157,46,.45); }
+  #play-btn:hover { filter:brightness(1.08); }
+  .credit { margin-top:12px; font-size:11px; opacity:.65; line-height:1.6; }
+  #gameover { display:none; }
+  #final-stats { font-size:18px; margin:8px 0 2px; letter-spacing:1px; }
+  /* ---------- Touch ---------- */
+  #touch-ui { display:none; position:fixed; inset:0; z-index:15; pointer-events:none; }
+  #stick { position:absolute; left:26px; bottom:90px; width:120px; height:120px; border-radius:50%;
+    background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.3); pointer-events:auto; }
+  #nub { position:absolute; left:38px; top:38px; width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.35); }
+  #fire-btn { position:absolute; right:30px; bottom:100px; width:96px; height:96px; border-radius:50%;
+    background:rgba(255,60,40,.35); border:2px solid rgba(255,120,100,.7); color:#fff; font-weight:800;
+    font-size:15px; pointer-events:auto; }
+  #ads-btn { position:absolute; right:140px; bottom:200px; width:64px; height:64px; border-radius:50%;
+    background:rgba(255,255,255,.12); border:2px solid rgba(255,255,255,.4); color:#fff; font-weight:700; pointer-events:auto; }
+</style>
+<script type="importmap">
+{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="game-canvas"></canvas>
+
+<div id="hud">
+  <div id="vignette"></div>
+  <div id="obj">◈ ELIMINATE ALL HOSTILES — WAVE <span id="obj-wave">1</span></div>
+  <div id="xh"><span class="l t"></span><span class="l b"></span><span class="l ll"></span><span class="l rr"></span><div id="dot"></div></div>
+  <div id="hitm">✕</div>
+  <div id="dmg"></div><div id="heal-flash"></div>
+  <div id="banner"></div><div id="subbanner"></div>
+  <div id="feed"></div>
+  <div id="bl"><div id="hpbar"><i></i></div><span id="hpnum">100</span></div>
+  <div id="br"><span id="ammo">30</span><span id="reload-tip"></span><span id="score">KILLS 0 · WAVE 1</span></div>
+  <canvas id="mini" width="140" height="140"></canvas>
+</div>
+
+<div id="touch-ui">
+  <div id="stick"><div id="nub"></div></div>
+  <button id="fire-btn">FIRE</button>
+  <button id="ads-btn">ADS</button>
+</div>
+
+<div id="menu" class="overlay">
+  <div class="panel">
+    <h1>STRIKEPOINT</h1>
+    <h2>TACTICAL COMPOUND ASSAULT</h2>
+    <div class="card">
+      <div class="keys">
+        <span>W A S D</span><span>Move (hold <b>SHIFT</b> to sprint)</span>
+        <span>MOUSE</span><span>Look · <b>LEFT CLICK</b> fire · <b>RIGHT CLICK</b> aim (ADS)</span>
+        <span>R</span><span>Reload · <b>SPACE</b> jump</span>
+      </div>
+    </div>
+    <div class="card">◈ Eliminate every hostile in the compound. Health regenerates out of fire.
+      Watch the <b>minimap</b> — hostiles are <b style="color:#ff5b4d">red</b>. Survive escalating waves.</div>
+    <button id="play-btn">▶ DEPLOY</button>
+    <div class="credit">3D assets (CC Attribution): “Low poly M4 rifle” by Jithran ·
+      “FREE [Military Soldier] RIGGED” by BAMEN · via Sketchfab. Full credits in attribution.md.</div>
+  </div>
+</div>
+
+<div id="gameover" class="overlay">
+  <div class="panel">
+    <h1>K.I.A.</h1>
+    <h2 id="final-stats">KILLS 0 · WAVES CLEARED 0</h2>
+    <div class="card">You fought well, operator. The compound still stands — redeploy and take it back.</div>
+    <button id="play-btn-2" style="pointer-events:auto;cursor:pointer;margin-top:14px;font-size:20px;font-weight:800;letter-spacing:3px;color:#0a0c10;background:linear-gradient(180deg,#ffd76a,#ff9d2e);border:none;border-radius:8px;padding:14px 54px;">↻ REDEPLOY</button>
+  </div>
+</div>
+
+<script type="module" src="./game.js"></script>
+</body>
+</html>
