@@ -107,9 +107,9 @@ function onEnemyFire(origin, dir, e) {
   spawnTracer(scene, origin, origin.clone().addScaledVector(dir, 60), 0xff6a5a);
   audio.enemyShoot(dist);
   // hit chance falls with distance
-  const hitP = dist < 15 ? 0.42 : dist < 28 ? 0.26 : 0.12;
+  const hitP = dist < 15 ? 0.30 : dist < 28 ? 0.18 : 0.08;
   if (player.alive && Math.random() < hitP) {
-    damagePlayer(5 + Math.random() * 6, e.group.position);
+    damagePlayer(4 + Math.random() * 4, e.group.position);
   } else {
     // near-miss crack
     spawnTracer(scene, origin, player.pos.clone().setY(EYE).add(new THREE.Vector3((Math.random() - 0.5) * 2, Math.random(), (Math.random() - 0.5) * 2)), 0xff6a5a);
@@ -128,6 +128,7 @@ function damagePlayer(amount, fromPos) {
   hud.setHealth(player.health, player.maxHealth);
   if (player.health <= 0) {
     player.health = 0;
+    hud.setHealth(0, player.maxHealth);
     player.alive = false;
     gameOver();
   }
@@ -514,5 +515,13 @@ if (DEMO) {
   // pre-warm: run a few frames of enemy movement before screenshot
   window.__demoReady = true;
 }
-window.__game = { player, enemies, spawnWave };
+window.__game = {
+  player,
+  get enemies() { return enemies; },
+  get waveActive() { return waveActive; },
+  spawnWave,
+  debugKillAll() { for (const e of enemies) if (!e.dead) takeDamage(e, 1000, null); },
+  debugDetonate() { const b = world.barrels[0]; if (b) detonateBarrel(b); return world.barrels.length; },
+  debugHurt(n) { damagePlayer(n, { x: player.pos.x + 5, z: player.pos.z }); },
+};
 animate();
