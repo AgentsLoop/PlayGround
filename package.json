@@ -1,0 +1,23 @@
+{
+  "name": "playground",
+  "version": "1.0.0",
+  "description": "Playground for browser game experiments",
+  "main": "index.js",
+  "scripts": {
+    "start": "python3 -m http.server ${PORT:-3000} --bind 127.0.0.1",
+    "start:project": "python3 -m http.server ${PORT:-3000} --bind 127.0.0.1 --directory project",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AgentsLoop/PlayGround.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AgentsLoop/PlayGround/issues"
+  },
+  "homepage": "https://github.com/AgentsLoop/PlayGround#readme"
+}
