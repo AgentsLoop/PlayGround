@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STRIKEPOINT — Browser FPS</title>
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "./lib/three.module.js",
+  "three/addons/": "./lib/addons/"
+} }
+</script>
+</head>
+<body>
+<div id="app">
+  <canvas id="game-canvas"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="crosshair"><span class="c t"></span><span class="c b"></span><span class="c l"></span><span class="c r"></span><span class="dot"></span></div>
+    <div id="hitmarker"><span></span><span></span><span></span><span></span></div>
+    <div id="damage-vignette"></div>
+    <div id="heal-vignette"></div>
+    <div id="topbar">
+      <div class="tb-box"><div class="tb-label">SCORE</div><div id="score" class="tb-val">0</div></div>
+      <div class="tb-box"><div class="tb-label">WAVE</div><div id="wave" class="tb-val">1</div></div>
+      <div class="tb-box"><div class="tb-label">HOSTILES</div><div id="enemies" class="tb-val">0</div></div>
+    </div>
+    <div id="killfeed"></div>
+    <div id="hitdir"></div>
+    <div id="bottom-left">
+      <div id="health-wrap"><div id="health-bar"></div><span id="health-num">100</span></div>
+      <div id="armor-wrap"><div id="armor-bar"></div><span>ARMOR</span></div>
+    </div>
+    <div id="bottom-right">
+      <div id="ammo"><span id="ammo-mag">30</span><span id="ammo-div">/</span><span id="ammo-reserve">90</span></div>
+      <div id="weapon-name">AR-77 “HORNET” · AUTO</div>
+      <div id="reload-tip" class="hidden">RELOADING…</div>
+    </div>
+    <canvas id="minimap" width="140" height="140"></canvas>
+    <div id="wave-banner" class="hidden"><span id="wave-banner-text">WAVE 1</span></div>
+    <div id="interact-tip" class="hidden">Hold <b>F</b> to resupply</div>
+  </div>
+
+  <!-- Main menu -->
+  <div id="menu" class="overlay">
+    <div class="menu-card">
+      <div class="kicker">BROWSER COMBAT OPERATION</div>
+      <h1>STRIKEPOINT</h1>
+      <p class="sub">Wave-defense FPS · Three.js · procedural arena, rifle &amp; audio — plus a Sketchfab soldier.</p>
+      <div class="controls-grid">
+        <div><b>WASD</b><span>move</span></div>
+        <div><b>Mouse</b><span>look / LMB fire</span></div>
+        <div><b>RMB</b><span>aim down sights</span></div>
+        <div><b>Shift / Space</b><span>sprint / jump</span></div>
+        <div><b>R / F</b><span>reload / resupply</span></div>
+        <div><b>P / M</b><span>pause / mute</span></div>
+      </div>
+      <div class="menu-row">
+        <label>Sensitivity <input id="opt-sens" type="range" min="0.3" max="3" step="0.1" value="1"></label>
+        <label>Quality
+          <select id="opt-quality"><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select>
+        </label>
+        <label class="chk"><input id="opt-shake" type="checkbox" checked> Screen shake</label>
+      </div>
+      <button id="play-btn" class="big-btn">▶ DEPLOY</button>
+      <div class="foot">Click deploys you into the courtyard. Pointer lock required.<br>Enemy: “Low Poly Soldier” by MLGprogect (CC Attribution, Sketchfab).</div>
+    </div>
+  </div>
+
+  <!-- Pause -->
+  <div id="pause" class="overlay hidden">
+    <div class="menu-card">
+      <h2>PAUSED</h2>
+      <p class="sub">Click resume to re-lock your weapon.</p>
+      <button id="resume-btn" class="big-btn">RESUME</button>
+      <button id="restart-btn" class="ghost-btn">Restart run</button>
+    </div>
+  </div>
+
+  <!-- Game over -->
+  <div id="gameover" class="overlay hidden">
+    <div class="menu-card">
+      <div class="kicker red">K.I.A.</div>
+      <h2>MISSION FAILED</h2>
+      <div id="final-stats"></div>
+      <button id="retry-btn" class="big-btn">REDEPLOY</button>
+    </div>
+  </div>
+
+  <div id="toast" class="hidden"></div>
+  <div id="fps-counter">60</div>
+</div>
+<script type="module" src="game.js"></script>
+</body>
+</html>
