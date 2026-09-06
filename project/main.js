@@ -1,0 +1,183 @@
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { createRenamonModel } from './src/createRenamonModel.ts';
+
+const qs = new URLSearchParams(location.search);
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0b0d);
+scene.fog = new THREE.Fog(0x0b0b0d, 8, 20);
+
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+function sideView() { camera.position.set(2.6, 1.5, 0.6); controls.target.set(0, 1.0, 0); }
+function frontView() { camera.position.set(0.4, 1.5, 2.8); controls.target.set(0, 1.0, 0); }
+camera.position.set(2.6, 1.5, 0.6);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.target.set(0, 1.0, 0);
+
+// key / fill / rim per spec lightingFromPhoto
+const key = new THREE.DirectionalLight(0xffffff, 2.2);
+key.position.set(-3, 5, 4);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+scene.add(key);
+const fill = new THREE.DirectionalLight(0xbfd0ff, 0.55);
+fill.position.set(4, 2, -1);
+scene.add(fill);
+const rim = new THREE.DirectionalLight(0xfff2cc, 1.1);
+rim.position.set(1, 4, -4);
+scene.add(rim);
+scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(4, 48),
+  new THREE.ShadowMaterial({ opacity: 0.35 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const grid = new THREE.GridHelper(8, 16, 0x333333, 0x222222);
+grid.position.y = -0.001;
+scene.add(grid);
+
+const model = createRenamonModel({ castShadow: true, receiveShadow: true });
+model.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+// drop fully-transparent blockout proxies (e.g. root volume) in all modes
+{
+  const dead = [];
+  model.traverse((o) => {
+    if (o.isMesh) {
+      const m = o.material;
+      if (m && (m.transparent || (typeof m.opacity === 'number' && m.opacity < 0.5))) dead.push(o);
+    }
+  });
+  for (const o of dead) o.parent?.remove(o);
+}
+// map-stripped evidence mode: unlit flat gray proves geometry carries the form
+if (qs.get('flat') === '1') {
+  const flat = new THREE.MeshBasicMaterial({ color: 0xbbbbbb });
+  model.traverse((o) => {
+    if (o.isMesh) {
+      const m = o.material;
+      if (m && (m.transparent || (typeof m.opacity === 'number' && m.opacity < 0.5))) {
+        o.visible = false; // hide transparent blockout proxies (e.g. root volume)
+      } else {
+        o.material = flat;
+      }
+    }
+  });
+}
+let wire = false;
+scene.add(model);
+
+// normalize: fit model into ~2.2 units tall standing on ground
+let baseY = 0;
+{
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const s = 2.2 / Math.max(size.y, 1e-6);
+  model.scale.setScalar(s);
+  model.position.x -= center.x * s;
+  model.position.z -= center.z * s;
+  model.position.y -= box.min.y * s;
+  baseY = model.position.y;
+}
+
+let spin = qs.get('static') !== '1';
+
+const clock = new THREE.Clock();
+// fit camera to model after the skeleton settles (bbox can grow post-bind)
+let fitted = false, fitFrames = 0;
+function fitCamera() {
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const h = Math.max(size.y, 0.5);
+  const dist = (h * 1.15) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  const view = qs.get('view') || 'hero';
+  const dirs = {
+    hero: new THREE.Vector3(0.85, 0.32, 0.45),
+    front: new THREE.Vector3(0.12, 0.18, 1),
+    side: new THREE.Vector3(1, 0.15, 0.12),
+    back: new THREE.Vector3(-0.5, 0.3, -1),
+  };
+  const dir = (dirs[view] || dirs.hero).clone().normalize();
+  camera.position.copy(center).addScaledVector(dir, dist);
+  controls.target.copy(center);
+  camera.near = dist / 100; camera.far = dist * 20;
+  camera.updateProjectionMatrix();
+}
+function tickFn() {
+  const t = clock.getElapsedTime();
+  // gentle idle: breathing sway + tail sway via runtime sockets if present
+  model.rotation.y += spin ? 0.0035 : 0;
+  model.position.y = baseY + Math.abs(Math.sin(t * 1.4)) * 0.008;
+  const rt = model.userData && model.userData.sculptRuntime;
+  if (rt && typeof rt.tick === 'function') { try { rt.tick(t); } catch (e) {} }
+  else if (rt && rt.sockets) {
+    const tail = rt.sockets.tail || rt.nodes?.tail;
+    if (tail) tail.rotation.y = Math.sin(t * 1.8) * 0.12;
+  }
+}
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+try { fitCamera(); fitted = true; } catch (e) { console.error('initial fit', e); }
+
+renderer.setAnimationLoop(() => {
+  tickFn(); controls.update(); renderer.render(scene, camera);
+  if (!fitted && ++fitFrames >= 5) { try { fitCamera(); } catch (e) { console.error('fitCamera', e); } fitted = true; }
+});
+
+document.getElementById('btn-spin').onclick = (e) => {
+  spin = !spin; e.target.classList.toggle('on', spin);
+};
+document.getElementById('btn-wire').onclick = (e) => {
+  wire = !wire; e.target.classList.toggle('on', wire);
+  model.traverse((o) => { if (o.isMesh) o.material.wireframe = wire; });
+};
+document.getElementById('btn-front').onclick = () => frontView();
+document.getElementById('btn-side').onclick = () => sideView();
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'r' || e.key === 'R') sideView();
+});
+
+// expose for automated verification
+window.__renamon = { scene, camera, model, renderer, controls, THREE };
+window.__diag = () => {
+  const box = new THREE.Box3().setFromObject(model);
+  const mats = {};
+  let n = 0;
+  model.traverse((o) => {
+    if (o.isMesh) {
+      n++;
+      const mt = o.material;
+      const k = (mt.type || '?') + ' color=#' + (mt.color ? mt.color.getHexString() : '?')
+        + ' rough=' + mt.roughness + ' metal=' + mt.metalness
+        + ' map=' + (mt.map ? 'Y' : 'N');
+      mats[k] = (mats[k] || 0) + 1;
+    }
+  });
+  return { meshes: n, boxMin: box.min.toArray(), boxMax: box.max.toArray(),
+    modelPos: model.position.toArray(), modelScale: model.scale.x,
+    camPos: camera.position.toArray(), tgt: controls.target.toArray(), mats };
+};
+console.log('renamon meshes:', (() => { let n = 0; model.traverse((o) => { if (o.isMesh) n++; }); return n; })());
