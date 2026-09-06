@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>mac — Macintosh Apple Catcher</title>
+<link rel="icon" href="data:,">
+<style>
+  :root{
+    --bg0:#070b16; --bg1:#0d1526; --neon:#7CFFB2; --apple:#ff5d5d;
+    --gold:#ffd166; --muted:#8b98b8; --panel:rgba(13,21,38,.82);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    background:radial-gradient(1200px 600px at 50% -10%, #16244a 0%, var(--bg1) 40%, var(--bg0) 100%);
+    color:#e8eefc; display:flex; align-items:center; justify-content:center;
+    min-height:100vh; padding:16px; overflow:hidden;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; opacity:.5;
+    background-image:linear-gradient(rgba(124,255,178,.06) 1px, transparent 1px),
+                     linear-gradient(90deg, rgba(124,255,178,.06) 1px, transparent 1px);
+    background-size:32px 32px;
+    mask-image:radial-gradient(600px 400px at 50% 40%, black 30%, transparent 75%);
+  }
+  .wrap{width:min(480px,100%); z-index:1;}
+  .hud{
+    display:flex; gap:8px; align-items:stretch; margin-bottom:10px;
+  }
+  .pill{
+    flex:1; background:var(--panel); border:1px solid rgba(124,255,178,.25);
+    border-radius:12px; padding:8px 10px; text-align:center; backdrop-filter:blur(6px);
+  }
+  .pill small{display:block; font-size:10px; letter-spacing:.14em; color:var(--muted); text-transform:uppercase;}
+  .pill b{font-size:18px;}
+  #score{color:var(--neon);} #lives{color:#ff8fa3;} #time{color:var(--gold);}
+  .stage{
+    position:relative; background:var(--panel); border:1px solid rgba(124,255,178,.25);
+    border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.5), 0 0 40px rgba(124,255,178,.08);
+  }
+  canvas{display:block; width:100%; height:560px; touch-action:none; cursor:ew-resize;}
+  @media (max-height:700px){ canvas{height:480px;} }
+  .overlay{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(4,8,18,.72); backdrop-filter:blur(4px); text-align:center; padding:24px;
+  }
+  .overlay[hidden]{display:none;}
+  .card{max-width:360px;}
+  .card h1{margin:0 0 6px; font-size:34px; letter-spacing:-.02em;}
+  .card h1 .mac{
+    background:linear-gradient(90deg,#7CFFB2,#7dd3fc,#ffd166);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .card p{color:var(--muted); font-size:13px; line-height:1.6; margin:8px 0;}
+  .kbd{
+    display:inline-block; border:1px solid rgba(232,238,252,.3); border-bottom-width:2px;
+    border-radius:6px; padding:1px 7px; font-size:12px; background:rgba(255,255,255,.06);
+  }
+  button{
+    font:inherit; font-weight:700; color:#06130c; background:linear-gradient(180deg,#a7ffcf,#7CFFB2);
+    border:0; border-radius:12px; padding:12px 22px; font-size:15px; cursor:pointer; margin-top:12px;
+    box-shadow:0 8px 24px rgba(124,255,178,.35);
+  }
+  button:active{transform:translateY(1px);}
+  button.ghost{background:transparent; color:#e8eefc; border:1px solid rgba(232,238,252,.3); box-shadow:none;}
+  .legend{display:flex; gap:10px; justify-content:center; margin-top:12px; font-size:12px; color:var(--muted);}
+  .footer{display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hud">
+    <div class="pill"><small>Score</small><b id="score">0</b></div>
+    <div class="pill"><small>Lives</small><b id="lives">●●●</b></div>
+    <div class="pill"><small>Time</small><b id="time">60</b></div>
+  </div>
+  <div class="stage">
+    <canvas id="game" width="480" height="560" aria-label="mac apple catcher game"></canvas>
+    <div class="overlay" id="menu">
+      <div class="card">
+        <h1><span class="mac">mac</span> 🍏</h1>
+        <p><b style="color:#e8eefc">Macintosh Apple Catcher.</b><br>
+        Slide your vintage Mac left &amp; right to catch glowing apples.
+        Dodge corrupted floppy disks. 60 seconds, 3 lives.</p>
+        <p><span class="kbd">◀</span> <span class="kbd">▶</span> or
+        <span class="kbd">A</span> <span class="kbd">D</span> · drag · touch</p>
+        <button id="startBtn">▶ Start catching</button>
+        <div class="legend"><span>🍏 +10</span><span>🌟 +25</span><span>💾 −1 ❤</span></div>
+      </div>
+    </div>
+    <div class="overlay" id="over" hidden>
+      <div class="card">
+        <h1 id="overTitle">Time up!</h1>
+        <p id="overStats">Score 0 · Best 0</p>
+        <p id="overHint" style="color:#7CFFB2"></p>
+        <button id="againBtn">↻ Play again</button><br>
+        <button id="menuBtn" class="ghost">menu</button>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>mac · single-file · no deps</span><span id="best">best 0</span></div>
+</div>
+<script>
+(function(){
+  "use strict";
+  var cv = document.getElementById('game');
+  var ctx = cv.getContext('2d');
+  var W = cv.width, H = cv.height;
+  var scoreEl = document.getElementById('score');
+  var livesEl = document.getElementById('lives');
+  var timeEl = document.getElementById('time');
+  var bestEl = document.getElementById('best');
+  var menu = document.getElementById('menu');
+  var over = document.getElementById('over');
+  var overTitle = document.getElementById('overTitle');
+  var overStats = document.getElementById('overStats');
+  var overHint = document.getElementById('overHint');
+
+  var state = 'menu'; // menu | play | over
+  var score = 0, lives = 3, tLeft = 60, best = 0;
+  try { best = parseInt(localStorage.getItem('mac-best')||'0',10)||0; } catch(e){}
+  bestEl.textContent = 'best ' + best;
+
+  var player = { x: W/2, w: 84, h: 30, tx: W/2, speed: 7 };
+  var items = [], parts = [];
+  var spawnT = 0, lastTs = 0, elapsed = 0;
+  var keys = {};
+
+  function rnd(a,b){ return a + Math.random()*(b-a); }
+  function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+
+  // tiny beeps, no assets
+  var AC = null;
+  function beep(f, d, type, g){
+    try{
+      AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+      var o = AC.createOscillator(), gn = AC.createGain();
+      o.type = type||'square'; o.frequency.value = f;
+      gn.gain.setValueAtTime(g||0.06, AC.currentTime);
+      gn.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + (d||0.09));
+      o.connect(gn); gn.connect(AC.destination);
+      o.start(); o.stop(AC.currentTime + (d||0.09));
+    }catch(e){}
+  }
+
+  function spawn(){
+    var r = Math.random();
+    var kind = r < 0.62 ? 'apple' : (r < 0.78 ? 'star' : 'virus');
+    items.push({
+      kind: kind,
+      x: rnd(24, W-24),
+      y: -24,
+      vy: rnd(1.6, 2.6) + Math.min(2.2, elapsed/30),
+      vx: rnd(-0.5, 0.5),
+      rot: rnd(0, 6.28),
+      vr: rnd(-0.05, 0.05),
+      r: kind === 'star' ? 13 : 15
+    });
+  }
+
+  function burst(x, y, color, n){
+    for(var i=0;i<(n||12);i++){
+      parts.push({x:x, y:y, vx:rnd(-3,3), vy:rnd(-4,-0.5), life:1, decay:rnd(0.02,0.05), color:color, r:rnd(2,4.5)});
+    }
+  }
+
+  function reset(){
+    score = 0; lives = 3; tLeft = 60; elapsed = 0;
+    items = []; parts = []; spawnT = 0;
+    player.x = W/2; player.tx = W/2;
+    updateHud();
+  }
+  function updateHud(){
+    scoreEl.textContent = score;
+    livesEl.textContent = lives > 0 ? '●'.repeat(lives) + '○'.repeat(3-lives) : '○○○';
+    timeEl.textContent = Math.ceil(tLeft);
+  }
+
+  function start(){
+    reset();
+    state = 'play'; lastTs = performance.now();
+    menu.hidden = true; over.hidden = true;
+    beep(660, .08, 'square'); setTimeout(function(){beep(880,.09,'square');}, 90);
+  }
+  function end(win){
+    state = 'over';
+    if(score > best){ best = score; try{localStorage.setItem('mac-best', String(best));}catch(e){} bestEl.textContent='best '+best; }
+    overTitle.textContent = lives <= 0 ? '💾 Crashed!' : (score >= 200 ? '🏆 Mac legend!' : 'Time up!');
+    overStats.textContent = 'Score ' + score + ' · Best ' + best + ' · ' + (win ? 'you win!' : (lives<=0?'out of lives':'60s survived'));
+    overHint.textContent = score >= 200 ? 'Crisp delivery. The orchard salutes you.' : 'Tip: golden stars are worth +25. Catch the middle, ignore the edges.';
+    over.hidden = false;
+    beep(220, .25, 'sawtooth', .05);
+    requestAnimationFrame(function(){});
+  }
+
+  // input
+  window.addEventListener('keydown', function(e){
+    if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') keys.left = true;
+    if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') keys.right = true;
+    if((e.key===' '||e.key==='Enter') && state!=='play'){ e.preventDefault(); start(); }
+    if(e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key===' ') e.preventDefault();
+  });
+  window.addEventListener('keyup', function(e){
+    if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') keys.left = false;
+    if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') keys.right = false;
+  });
+  function pointerTo(e){
+    var r = cv.getBoundingClientRect();
+    var cx = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+    return (cx - r.left) * (W / r.width);
+  }
+  var dragging = false;
+  cv.addEventListener('pointerdown', function(e){ dragging = true; player.tx = clamp(pointerTo(e), 30, W-30); cv.setPointerCapture && cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', function(e){ if(dragging) player.tx = clamp(pointerTo(e), 30, W-30); });
+  window.addEventListener('pointerup', function(){ dragging = false; });
+  document.getElementById('startBtn').addEventListener('click', start);
+  document.getElementById('againBtn').addEventListener('click', start);
+  document.getElementById('menuBtn').addEventListener('click', function(){ state='menu'; over.hidden=true; menu.hidden=false; });
+
+  function step(dt){
+    elapsed += dt; tLeft -= dt;
+    if(tLeft <= 0){ tLeft = 0; updateHud(); end(true); return; }
+    if(keys.left) player.tx -= player.speed * dt * 60;
+    if(keys.right) player.tx += player.speed * dt * 60;
+    player.tx = clamp(player.tx, 30, W-30);
+    player.x += (player.tx - player.x) * Math.min(1, dt*12);
+
+    spawnT -= dt;
+    if(spawnT <= 0){ spawn(); spawnT = Math.max(0.22, 0.72 - elapsed*0.008); }
+
+    var py = H - 56;
+    for(var i=items.length-1; i>=0; i--){
+      var it = items[i];
+      it.y += it.vy * dt * 60; it.x += it.vx * dt * 60; it.rot += it.vr * dt * 60;
+      var caught = (it.y > py - 14 && it.y < py + 22 && Math.abs(it.x - player.x) < (player.w/2 + 10));
+      if(caught){
+        if(it.kind === 'virus'){
+          lives--; burst(it.x, it.y, '#ff5d7a', 16); beep(160,.2,'sawtooth',.07);
+          if(lives <= 0){ updateHud(); end(false); return; }
+        } else if(it.kind === 'star'){
+          score += 25; burst(it.x, it.y, '#ffd166', 14); beep(990,.1,'sine',.07);
+        } else {
+          score += 10; burst(it.x, it.y, '#7CFFB2', 10); beep(740,.07,'sine',.05);
+        }
+        items.splice(i,1); updateHud(); continue;
+      }
+      if(it.y > H + 30){
+        if(it.kind !== 'virus'){ lives--; beep(200,.12,'triangle',.05); if(lives<=0){ updateHud(); end(false); return; } updateHud(); }
+        items.splice(i,1);
+      }
+    }
+    for(var j=parts.length-1;j>=0;j--){ var p=parts[j]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.15; p.life-=p.decay; if(p.life<=0) parts.splice(j,1); }
+    updateHud();
+  }
+
+  function drawMac(x, y){
+    // vintage mac body
+    ctx.save(); ctx.translate(x, y);
+    ctx.shadowColor = 'rgba(124,255,178,.5)'; ctx.shadowBlur = 18;
+    ctx.fillStyle = '#e9e4d8';
+    roundRect(-player.w/2, -14, player.w, 34, 7); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#101828';
+    roundRect(-player.w/2+10, -8, player.w-20, 16, 3); ctx.fill();
+    // screen glow face
+    ctx.fillStyle = '#7CFFB2';
+    ctx.font = '11px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('◕‿◕', 0, 4);
+    ctx.fillStyle = '#9aa5c0';
+    ctx.fillRect(-14, 22, 28, 4); // stand
+    ctx.restore();
+  }
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+  }
+
+  function drawItem(it){
+    ctx.save(); ctx.translate(it.x, it.y); ctx.rotate(it.rot);
+    if(it.kind === 'apple'){
+      ctx.shadowColor = 'rgba(255,93,93,.8)'; ctx.shadowBlur = 14;
+      ctx.font = '26px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('🍏', 0, 0);
+    } else if(it.kind === 'star'){
+      ctx.shadowColor = 'rgba(255,209,102,.9)'; ctx.shadowBlur = 16;
+      ctx.font = '24px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('🌟', 0, 0);
+    } else {
+      ctx.shadowColor = 'rgba(255,93,122,.7)'; ctx.shadowBlur = 12;
+      ctx.font = '24px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('💾', 0, 0);
+    }
+    ctx.restore();
+  }
+
+  function render(){
+    ctx.clearRect(0,0,W,H);
+    // orchard rows
+    ctx.strokeStyle = 'rgba(124,255,178,.10)'; ctx.lineWidth = 1;
+    for(var y=40; y<H; y+=44){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+    var i, it;
+    for(i=0;i<items.length;i++) drawItem(items[i]);
+    // particles
+    for(i=0;i<parts.length;i++){ var p=parts[i]; ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.283); ctx.fill(); }
+    ctx.globalAlpha = 1;
+    drawMac(player.x, H - 56);
+    // catch line glow
+    ctx.fillStyle = 'rgba(124,255,178,.25)'; ctx.fillRect(8, H-30, W-16, 1);
+  }
+
+  function loop(ts){
+    requestAnimationFrame(loop);
+    if(state !== 'play'){ render(); return; }
+    if(!lastTs) lastTs = ts;
+    var dt = Math.min(0.05, (ts - lastTs)/1000); lastTs = ts;
+    step(dt); render();
+  }
+
+  updateHud();
+  requestAnimationFrame(loop);
+  // expose for automated checks
+  window.__mac = { get state(){return state;}, get score(){return score;}, start: start };
+})();
+</script>
+</body>
+</html>
