@@ -176,12 +176,19 @@ function fitCamera() {
 }
 function tickFn() {
   const t = clock.getElapsedTime();
+  const dt = Math.min(0.05, t - lastT); lastT = t;
   // gentle idle: breathing sway + tail sway via runtime sockets if present
   model.rotation.y += spin ? 0.0035 : 0;
-  model.position.y = baseY + Math.abs(Math.sin(t * 1.4)) * 0.008;
+  if (runMode) {
+    if (!runFrozen) runPhase += dt * RUN_SPEED;
+    applyRunPose(runPhase);
+    model.position.y = baseY;
+  } else {
+    model.position.y = baseY + Math.abs(Math.sin(t * 1.4)) * 0.008;
+  }
   const rt = model.userData && model.userData.sculptRuntime;
-  if (rt && typeof rt.tick === 'function') { try { rt.tick(t); } catch (e) {} }
-  else if (rt && rt.sockets) {
+  if (!runMode && rt && typeof rt.tick === 'function') { try { rt.tick(t); } catch (e) {} }
+  else if (!runMode && rt && rt.sockets) {
     const tail = rt.sockets.tail || rt.nodes?.tail;
     if (tail) tail.rotation.y = Math.sin(t * 1.8) * 0.12;
   }
@@ -204,6 +211,12 @@ renderer.setAnimationLoop(() => {
 
 document.getElementById('btn-spin').onclick = (e) => {
   spin = !spin; e.target.classList.toggle('on', spin);
+};
+if (runMode && !runFrozen) document.getElementById('btn-run')?.classList.add('on');
+document.getElementById('btn-run').onclick = (e) => {
+  runMode = !runMode;
+  e.target.classList.toggle('on', runMode);
+  if (!runMode) restoreBasePose();
 };
 document.getElementById('btn-wire').onclick = (e) => {
   wire = !wire; e.target.classList.toggle('on', wire);

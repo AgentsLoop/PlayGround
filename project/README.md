@@ -25,7 +25,19 @@ npx esbuild main.js --bundle --format=iife --loader:.ts=ts --outfile=bundle.js
 
 Viewer goodies: drag to orbit, wheel to zoom, `R` resets. URL params:
 `?static=1` (freeze turntable), `?view=side|front|hero|back`,
-`?flat=1` (unlit map-stripped geometry proof), `?wire=1`.
+`?flat=1` (unlit map-stripped geometry proof), `?wire=1`,
+`?run=1` (run-cycle preview), `?runphase=<radians>` (frozen stride pose).
+
+## Run animation preview
+
+The HUD **run** button (or `?run=1`) plays a procedural run cycle in place at
+~1.4 strides/s: contra-lateral leg/arm swing, knee flexion during
+swing-through, ankle compensation, forward torso lean with double-frequency
+bob, pinned ears, and a streaming tail with wag — all driven through the
+`sculptRuntime` node hierarchy (`hips/hip-*/knee-*/ankle-*`,
+`shoulder-*/elbow-*`, `tail/tail-mid/tail-tip`, `ear-*`). Toggling run off
+restores the base pose exactly. `screenshots/final-run-side.png` and
+`final-run-front.png` show frozen stride phases.
 
 ## Pipeline evidence (`forge-out/`)
 

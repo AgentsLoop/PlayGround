@@ -31639,6 +31639,85 @@
     baseY = model.position.y;
   }
   var spin = qs.get("static") !== "1";
+  var POSE_NODES = [
+    "hips",
+    "torso",
+    "neck",
+    "head",
+    "ear-l",
+    "ear-r",
+    "shoulder-l",
+    "shoulder-r",
+    "elbow-l",
+    "elbow-r",
+    "hip-l",
+    "hip-r",
+    "knee-l",
+    "knee-r",
+    "ankle-l",
+    "ankle-r",
+    "tail",
+    "tail-mid",
+    "tail-tip"
+  ];
+  var rt0 = model.userData && model.userData.sculptRuntime;
+  var nodeMap = rt0 && rt0.nodes || {};
+  var basePose = {};
+  for (const n of POSE_NODES) {
+    const o = nodeMap[n];
+    if (o) basePose[n] = { p: o.position.clone(), r: o.rotation.clone() };
+  }
+  var runMode = qs.get("run") === "1";
+  var runPhase = parseFloat(qs.get("runphase") || "NaN");
+  var runFrozen = Number.isFinite(runPhase);
+  if (runFrozen) {
+    runMode = true;
+    spin = false;
+  }
+  if (!Number.isFinite(runPhase)) runPhase = 0;
+  var RUN_SPEED = 9;
+  var lastT = 0;
+  function applyRunPose(ph) {
+    const set = (n, rx = 0, ry = 0, rz = 0, dy = 0) => {
+      const o = nodeMap[n];
+      const b = basePose[n];
+      if (!o || !b) return;
+      o.rotation.set(b.r.x + rx, b.r.y + ry, b.r.z + rz);
+      o.position.set(b.p.x, b.p.y + dy, b.p.z);
+    };
+    const sL = Math.sin(ph), sR = Math.sin(ph + Math.PI);
+    const kneeL = 0.3 + 1.1 * Math.pow(Math.max(0, -Math.sin(ph - 0.9)), 1.2);
+    const kneeR = 0.3 + 1.1 * Math.pow(Math.max(0, -Math.sin(ph + Math.PI - 0.9)), 1.2);
+    const hipL = -0.85 * sL, hipR = -0.85 * sR;
+    set("hip-l", hipL);
+    set("hip-r", hipR);
+    set("knee-l", kneeL);
+    set("knee-r", kneeR);
+    set("ankle-l", -(hipL + kneeL) * 0.38);
+    set("ankle-r", -(hipR + kneeR) * 0.38);
+    set("shoulder-l", 0.7 * sL);
+    set("shoulder-r", 0.7 * sR);
+    set("elbow-l", -0.6 - 0.35 * Math.max(0, sL));
+    set("elbow-r", -0.6 - 0.35 * Math.max(0, sR));
+    set("torso", 0.18);
+    set("hips", 0, 0, 0, -0.04 + 0.045 * Math.cos(2 * ph));
+    set("head", 0.08);
+    set("neck", 0.05);
+    set("ear-l", -0.45);
+    set("ear-r", -0.45);
+    set("tail", -0.35, 0.1 * Math.sin(2 * ph));
+    set("tail-mid", -0.25, 0.14 * Math.sin(2 * ph + 0.7));
+    set("tail-tip", -0.15);
+  }
+  function restoreBasePose() {
+    for (const n of POSE_NODES) {
+      const o = nodeMap[n];
+      const b = basePose[n];
+      if (!o || !b) continue;
+      o.rotation.copy(b.r);
+      o.position.copy(b.p);
+    }
+  }
   var clock = new Clock();
   var fitted = false;
   var fitFrames = 0;
@@ -31664,15 +31743,23 @@
   }
   function tickFn() {
     const t = clock.getElapsedTime();
+    const dt = Math.min(0.05, t - lastT);
+    lastT = t;
     model.rotation.y += spin ? 35e-4 : 0;
-    model.position.y = baseY + Math.abs(Math.sin(t * 1.4)) * 8e-3;
+    if (runMode) {
+      if (!runFrozen) runPhase += dt * RUN_SPEED;
+      applyRunPose(runPhase);
+      model.position.y = baseY;
+    } else {
+      model.position.y = baseY + Math.abs(Math.sin(t * 1.4)) * 8e-3;
+    }
     const rt = model.userData && model.userData.sculptRuntime;
-    if (rt && typeof rt.tick === "function") {
+    if (!runMode && rt && typeof rt.tick === "function") {
       try {
         rt.tick(t);
       } catch (e) {
       }
-    } else if (rt && rt.sockets) {
+    } else if (!runMode && rt && rt.sockets) {
       const tail = rt.sockets.tail || rt.nodes?.tail;
       if (tail) tail.rotation.y = Math.sin(t * 1.8) * 0.12;
     }
@@ -31707,6 +31794,12 @@
   document.getElementById("btn-spin").onclick = (e) => {
     spin = !spin;
     e.target.classList.toggle("on", spin);
+  };
+  if (runMode && !runFrozen) document.getElementById("btn-run")?.classList.add("on");
+  document.getElementById("btn-run").onclick = (e) => {
+    runMode = !runMode;
+    e.target.classList.toggle("on", runMode);
+    if (!runMode) restoreBasePose();
   };
   document.getElementById("btn-wire").onclick = (e) => {
     wire = !wire;
