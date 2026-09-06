@@ -26,9 +26,9 @@ export function buildWorld(scene) {
   const solids = [];
   const addSolid = (m) => { m.updateMatrixWorld(true); solids.push(m); return m; };
 
-  scene.fog = new THREE.Fog(0xc8d4dd, 55, 260);
+  scene.fog = new THREE.Fog(0xd9c39a, 55, 260);
   scene.background = new THREE.Color(0x87b5d9);
-  const hemi = new THREE.HemisphereLight(0xcfe4f8, 0x6a6252, 1.05);
+  const hemi = new THREE.HemisphereLight(0xcfe4f8, 0x6a6252, 1.32);
   scene.add(hemi);
   const sun = new THREE.DirectionalLight(0xfff2dd, 2.0);
   sun.position.set(45, 70, 25);
@@ -99,21 +99,20 @@ export function buildWorld(scene) {
     scene.add(sp);
   }
 
-  // ground
+  // ground — desert sand: grain noise, sun-bleached blotches, faint tire arcs
   const groundTex = canvasTex(512, (g, s) => {
-    g.fillStyle = '#9a8f78'; g.fillRect(0, 0, s, s);
-    noiseOn(g, s, 5200, ['#7a7260', '#b3a888', '#6b6558', '#8f8672'], 0.05, 0.16, 3);
-    g.strokeStyle = 'rgba(60,58,50,0.30)'; g.lineWidth = 2;
-    for (let i = 0; i <= 4; i++) {
-      const p = (i * s) / 4;
-      g.beginPath(); g.moveTo(p, 0); g.lineTo(p, s); g.stroke();
-      g.beginPath(); g.moveTo(0, p); g.lineTo(s, p); g.stroke();
+    g.fillStyle = '#b99a68'; g.fillRect(0, 0, s, s);
+    noiseOn(g, s, 7000, ['#8f7448', '#d3b67e', '#7a6550', '#a8895a'], 0.05, 0.17, 3);
+    for (let i = 0; i < 12; i++) { // soft darker patches break tiling
+      g.globalAlpha = 0.07 + Math.random() * 0.06; g.fillStyle = '#7c6540';
+      g.beginPath(); g.ellipse(Math.random() * s, Math.random() * s, 30 + Math.random() * 90, 20 + Math.random() * 60, Math.random() * 3, 0, 7); g.fill();
     }
-    g.strokeStyle = 'rgba(255,200,80,0.5)'; g.lineWidth = 2; g.setLineDash([14, 10]);
-    g.beginPath(); g.moveTo(0, s / 2); g.lineTo(s, s / 2); g.stroke();
-    g.beginPath(); g.moveTo(s / 2, 0); g.lineTo(s / 2, s); g.stroke();
-    g.setLineDash([]);
-  }, 12, 12);
+    g.globalAlpha = 1; g.strokeStyle = 'rgba(90,70,45,0.20)'; g.lineWidth = 7;
+    for (let i = 0; i < 4; i++) { // faint tire arcs
+      g.beginPath(); g.arc(Math.random() * s, Math.random() * s, 90 + Math.random() * 160, Math.random() * 3, Math.random() * 1.2 + 0.4); g.stroke();
+    }
+    g.globalAlpha = 1;
+  }, 14, 14);
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(120, 120),
     new THREE.MeshStandardMaterial({ map: groundTex, roughness: 0.96, metalness: 0.02 }));
   ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
@@ -140,8 +139,8 @@ export function buildWorld(scene) {
     noiseOn(g, s, 700, ['#6b421f', '#b3804d'], 0.06, 0.18, 3);
   });
   const wallTex = canvasTex(256, (g, s) => {
-    g.fillStyle = '#8d8d90'; g.fillRect(0, 0, s, s);
-    noiseOn(g, s, 1200, ['#6f6f72', '#a8a8ab'], 0.06, 0.18, 3);
+    g.fillStyle = '#a89f8d'; g.fillRect(0, 0, s, s);
+    noiseOn(g, s, 1200, ['#8a8272', '#c4bba6'], 0.06, 0.18, 3);
     g.fillStyle = 'rgba(40,40,44,0.6)'; g.fillRect(0, 0, s, 10); g.fillRect(0, s - 10, s, 10);
   }, 8, 1);
   const matCrate = new THREE.MeshStandardMaterial({ map: crateTex, roughness: 0.9 });
