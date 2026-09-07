@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STARFALL COMMAND — Browser RTS</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <!-- LOADING -->
+  <section id="screen-loading" class="screen active">
+    <div class="load-box">
+      <div class="logo">STARFALL <span>COMMAND</span></div>
+      <div class="load-sub">Initializing theater systems…</div>
+      <div class="load-bar"><div id="load-fill"></div></div>
+      <div id="load-text">Booting…</div>
+    </div>
+  </section>
+
+  <!-- MENU -->
+  <section id="screen-menu" class="screen">
+    <div class="menu-bg"></div>
+    <div class="menu-panel">
+      <div class="logo">STARFALL <span>COMMAND</span></div>
+      <p class="tagline">An original browser real-time strategy game. Build, expand, annihilate.</p>
+      <div class="menu-cols">
+        <div class="menu-col">
+          <h2>1 · Choose Command</h2>
+          <div class="faction-cards">
+            <button class="faction-card selected" data-faction="vanguard">
+              <b>Vanguard Accord</b>
+              <i>Balanced · sturdy Bulwarks</i>
+              <span>Lancers +10% damage</span>
+            </button>
+            <button class="faction-card" data-faction="nomad">
+              <b>Nomad Pact</b>
+              <i>Fast · cheap expansion</i>
+              <span>Workers &amp; Cores −15% cost, units +8% speed</span>
+            </button>
+          </div>
+          <h2>2 · Choose Scenario</h2>
+          <div class="faction-cards">
+            <button class="faction-card selected" data-scenario="standard">
+              <b>Broken Alliance</b><i>Standard battle · balanced AI</i>
+              <span>Enemy expands steadily. Recommended first.</span>
+            </button>
+            <button class="faction-card" data-scenario="rush">
+              <b>Crimson Tide</b><i>Rush defense · aggressive AI</i>
+              <span>Early waves. Hold the line, then counter.</span>
+            </button>
+            <button class="faction-card" data-scenario="siege">
+              <b>Iron Bastion</b><i>Turtle · fortified AI</i>
+              <span>Enemy turrets up early. Out-expand and break it.</span>
+            </button>
+          </div>
+        </div>
+        <div class="menu-col">
+          <h2>Field Briefing</h2>
+          <ol class="brief">
+            <li>Command <b>Collectors</b> onto <span class="c-alloy">■ alloy crystals</span> and <span class="c-plasma">■ plasma vents</span> (build an <b>Extractor</b> on a vent first).</li>
+            <li>Raise a <b>Supply Pylon</b> before you hit your cap — production halts while <b class="warn">SUPPLY BLOCKED</b>.</li>
+            <li>Build a <b>War Gate</b> to train <b>Lancers</b> &amp; <b>Bulwarks</b>. Select army, press <kbd>A</kbd>, click to attack-move.</li>
+            <li>Raze every <b>Crimson Hive structure</b> to win.</li>
+          </ol>
+          <div class="controls-grid">
+            <div><kbd>Left-drag</kbd> select · <kbd>Right-click</kbd> order</div>
+            <div><kbd>A</kbd> attack · <kbd>S</kbd> stop · <kbd>H</kbd> hold</div>
+            <div><kbd>Ctrl</kbd>+<kbd>1–0</kbd> group · <kbd>F1</kbd> idle worker</div>
+            <div><kbd>←↑↓→</kbd>/edge/minimap pan · wheel zoom</div>
+            <div><kbd>Space</kbd> last alert · <kbd>⌫</kbd> cycle bases</div>
+          </div>
+          <div class="menu-actions">
+            <button id="btn-start" class="btn primary">▶ Deploy</button>
+            <button id="btn-manual" class="btn">Field Manual</button>
+            <button id="btn-recover" class="btn hidden">Recover Autosave</button>
+          </div>
+          <div id="menu-hint" class="menu-hint"></div>
+        </div>
+      </div>
+    </div>
+    <div id="manual" class="manual hidden">
+      <div class="manual-box">
+        <h2>Field Manual</h2>
+        <div class="manual-body">
+          <h3>Goal</h3><p>Raze every Crimson Hive structure (Core, Gates, Sentinels, Pylons, Extractors). Lose all of your own and you fall.</p>
+          <h3>Economy</h3><p>Collectors carry <b>5 alloy</b> per trip from blue crystals, <b>4 plasma</b> from green vents (needs Extractor). Right-click a crystal to gather; new Collectors can be rallied with right-click while the Core is selected. Keep training workers; expand to the side fields when yours run dry.</p>
+          <h3>Building</h3><p>Select a Collector → build buttons (or <kbd>B</kbd> pylon, <kbd>G</kbd> gate, <kbd>E</kbd> extractor, <kbd>T</kbd> sentinel, <kbd>C</kbd> core). Green ghost = valid. Collector walks over and constructs it.</p>
+          <h3>Army</h3><p>Lancers (fast, cheap), Bulwarks (tanky, gas-hungry). Drag-select, <kbd>A</kbd>-click to attack-move, focus Sentinels with right-click. Watch the minimap for red pings.</p>
+          <h3>Vision</h3><p>Unexplored = black. Explored = dim. Only attack what your units currently see — scouting wins games.</p>
+        </div>
+        <button id="btn-manual-close" class="btn primary">Close</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="screen-game" class="screen">
+    <div id="topbar">
+      <div class="tb-logo">STARFALL</div>
+      <div class="tb-res"><span class="dot alloy"></span><b id="res-alloy">0</b><small>ALLOY</small><em id="inc-alloy">+0/m</em></div>
+      <div class="tb-res"><span class="dot plasma"></span><b id="res-plasma">0</b><small>PLASMA</small><em id="inc-plasma">+0/m</em></div>
+      <div class="tb-res"><span class="dot supply"></span><b id="res-supply">0/0</b><small>SUPPLY</small></div>
+      <div class="tb-res"><span class="dot workers"></span><b id="res-workers">0</b><small>WORKERS</small></div>
+      <div class="tb-right">
+        <span id="match-timer">00:00</span>
+        <span id="objective">Raze every Hive structure</span>
+        <button id="btn-mute" class="btn small" title="Mute">🔊</button>
+        <button id="btn-pause" class="btn small">❚❚ Menu</button>
+      </div>
+    </div>
+    <div id="stage">
+      <canvas id="game-canvas"></canvas>
+      <div id="toasts"></div>
+      <div id="coach" class="hidden">
+        <div id="coach-text"></div>
+        <button id="coach-skip" class="btn small">Skip tutorial</button>
+      </div>
+      <div id="alert-banner" class="hidden"></div>
+    </div>
+    <div id="bottombar">
+      <div id="minimap-wrap"><canvas id="minimap" width="220" height="220"></canvas><label>MINIMAP</label></div>
+      <div id="sel-panel">
+        <div id="sel-title">No selection</div>
+        <div id="sel-portraits"></div>
+        <div id="sel-stats"></div>
+        <div id="queue-wrap"></div>
+      </div>
+      <div id="cmd-panel">
+        <div id="cmd-label">COMMANDS</div>
+        <div id="cmd-buttons"></div>
+      </div>
+    </div>
+    <div id="pause-overlay" class="hidden">
+      <div class="dialog">
+        <h2>Paused — Command Uplink Held</h2>
+        <p id="pause-stats"></p>
+        <div class="dlg-actions">
+          <button id="btn-resume" class="btn primary">Resume</button>
+          <button id="btn-restart" class="btn">Restart Match</button>
+          <button id="btn-quit" class="btn">Abandon (Menu)</button>
+        </div>
+      </div>
+    </div>
+    <div id="end-overlay" class="hidden">
+      <div class="dialog">
+        <h2 id="end-title">Victory</h2>
+        <p id="end-sub"></p>
+        <div id="end-stats"></div>
+        <div class="dlg-actions">
+          <button id="btn-again" class="btn primary">Play Again</button>
+          <button id="btn-tomenu" class="btn">Menu</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
