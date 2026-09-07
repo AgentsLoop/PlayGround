@@ -187,6 +187,7 @@ scout:{name:'LR-12 “LONGVIEW”',dmg:55,rpm:220,mag:10,reserve:50,reload:2.4,s
 let L=LOADOUTS.assault,loadoutKey='assault';
 const S={mode:'menu',hp:100,armor:0,plates:2,mag:30,reserve:120,kills:0,shots:0,hits:0,t0:0,zonePhase:0,uav:false,uavT:0,reloading:false,lastHurt:-99,ads:0,dead:false};
 const ZONES=[{r:58,wait:20},{r:44,wait:22},{r:30,wait:20},{r:18,wait:18},{r:8,wait:16},{r:2,wait:99}];
+let runId=0; // match generation: stale async enemy/reload callbacks from a prior run must no-op
 // ---------- Three setup ----------
 let renderer,scene,camera,gunGroup,muzzle,ground;
 const canvas=$('game');
@@ -299,7 +300,7 @@ function hurtPlayer(dmg,from){if(S.dead||S.mode!=='play')return;S.lastHurt=perfo
   updateBars();if(S.hp<=0){S.hp=0;updateBars();endGame(false);}}
 function usePlate(){if(S.mode!=='play'||S.dead||S.armor>=150||S.plates<=0)return;S.plates--;S.armor=Math.min(150,S.armor+50);sPlate();toast('ARMOR PLATED +50');updateBars();}
 function useUAV(){if(!S.uav||S.mode!=='play')return;S.uav=false;S.uavT=12;sUav();$('slot-uav').textContent='UAV ○';$('slot-uav').classList.remove('ready');toast('UAV SWEEP — HOSTILES ON MINIMAP');feed('UAV sweep active (12 s)',true);}
-function startReload(){if(S.reloading||S.mag>=L.mag||S.reserve<=0)return;S.reloading=true;sReload();$('reload-tip').style.display='block';setTimeout(()=>{const need=L.mag-S.mag,take=Math.min(need,S.reserve);S.mag+=take;S.reserve-=take;S.reloading=false;$('reload-tip').style.display='none';updateAmmo();},L.reload*1000);}
+function startReload(){if(S.reloading||S.mag>=L.mag||S.reserve<=0)return;S.reloading=true;const rid=runId;sReload();$('reload-tip').style.display='block';setTimeout(()=>{if(rid!==runId)return;const need=L.mag-S.mag,take=Math.min(need,S.reserve);S.mag+=take;S.reserve-=take;S.reloading=false;$('reload-tip').style.display='none';updateAmmo();},L.reload*1000);}
 // ---------- Zone ----------
 let zone={x:0,z:0,r:70,next:20,t:0,idx:0};
 function zoneUpdate(dt){if(S.mode!=='play')return;zone.t+=dt;const cfg=ZONES[Math.min(zone.idx,ZONES.length-1)];
@@ -342,7 +343,7 @@ $('btn-resume').onclick=()=>pause(false);
 $('btn-quit').onclick=()=>location.reload();
 $('btn-again').onclick=()=>restart();
 function applyLoadout(){S.mag=L.mag;S.reserve=L.reserve;$('weapon-name').textContent=L.name;camera.fov=75;camera.updateProjectionMatrix();updateAmmo();}
-function startMatch(){ac();applyLoadout();S.mode='play';S.t0=performance.now();S.hp=100;S.armor=0;S.plates=2;S.kills=0;S.shots=0;S.hits=0;S.zonePhase=0;S.uav=false;S.uavT=0;S.dead=false;zone={x:0,z:0,r:70,next:20,t:0,idx:0};
+function startMatch(){ac();applyLoadout();runId++;const rid=runId;S.mode='play';S.t0=performance.now();S.hp=100;S.armor=0;S.plates=2;S.kills=0;S.shots=0;S.hits=0;S.zonePhase=0;S.uav=false;S.uavT=0;S.dead=false;S.reloading=false;S.lastHurt=-99;S.ads=0;mouseDown=false;adsDown=false;quietAcc=0;$('reload-tip').style.display='none';zone={x:0,z:0,r:70,next:20,t:0,idx:0};
   $('screen-start').classList.add('hidden');$('screen-end').classList.add('hidden');$('hud').classList.add('on');
   canvas.requestPointerLock&&canvas.requestPointerLock();feed('Match start — good hunting',true);toast('INFIL COMPLETE — WEAPONS FREE');updateBars();}
 function pause(on){if(on&&S.mode==='play'){S.mode='pause';$('screen-pause').classList.remove('hidden');document.exitPointerLock&&document.exitPointerLock();}else if(!on&&(S.mode==='pause')){S.mode='play';$('screen-pause').classList.add('hidden');canvas.requestPointerLock&&canvas.requestPointerLock();}}
@@ -399,8 +400,8 @@ function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),0
         e.shootT-=dt;
         if(e.shootT<=0&&d<48){e.shootT=0.9+Math.random()*1.4-(zone.idx*0.08);
           // enemy tracer + sound-ish flash
-          const spread=0.05+(d/48)*0.08;const hitCh=Math.max(0.12,0.42-d*0.006-(P.crouch?0.08:0)-((keys.ShiftLeft)?0.05:0));
-          setTimeout(()=>{if(S.mode!=='play'||!e.alive)return;if(Math.random()<hitCh){hurtPlayer(9+Math.random()*10+zone.idx*1.5,e.g.position);}else{blip(300,.03,.05);}},d*8);}}
+          const spread=0.05+(d/48)*0.08;const hitCh=Math.max(0.12,0.42-d*0.006-(P.crouch?0.08:0)-((keys.ShiftLeft)?0.05:0));const rid=runId;
+          setTimeout(()=>{if(rid!==runId||S.mode!=='play'||!e.alive)return;if(Math.random()<hitCh){hurtPlayer(9+Math.random()*10+zone.idx*1.5,e.g.position);}else{blip(300,.03,.05);}},d*8);}}
       const ml=Math.hypot(mvx,mvz)||1;const step=Math.min(esp*dt,d>1?99:0);
       const ex=e.g.position.x+mvx/ml*step,ez=e.g.position.z+mvz/ml*step;
       if(!collide(ex,ez)&&Math.abs(ex)<60&&Math.abs(ez)<60){e.g.position.x=ex;e.g.position.z=ez;}
