@@ -1,0 +1,114 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Capturing final evidence from the public game URL, then committing and posting.
+[0m$ [0mgit branch --show-current; git status --short | head -20; echo ---; ls -lh screenshots/ index.html; echo ---; curl -s -o /dev/null -w "public:%{http_code} %{size_download}\n" --max-time 20 https://dos-alot-accessory-enlargement.trycloudflare.com/ ; curl -s -o /dev/null -w "local:%{http_code}\n" --max-time 10 http://localhost:3000/index.html; tmux ls 2>&1 | head -3
+opencode/34119865115
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? PROGRESS.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? screenshots/
+?? twisted-metal/
+---
+-rw-r--r-- 1 runner runner 105K Sep  7 12:31 index.html
+
+screenshots/:
+total 640K
+-rw-r--r-- 1 runner runner 289K Sep  7 12:38 final-gameplay.png
+-rw-r--r-- 1 runner runner 345K Sep  7 12:38 final-title.png
+---
+public:200 107270
+local:200
+app-server: 1 windows (created Mon Sep  7 12:32:07 2026)
+[0m
+[0m$ [0mtimeout 60 chromium --headless --disable-gpu --no-sandbox --window-size=1280,720 --screenshot=/tmp/opencode/pub-title.png "https://dos-alot-accessory-enlargement.trycloudflare.com/" 2>&1 | tail -1; ls -lh /tmp/opencode/pub-title.png 2>&1
+352295 bytes written to file /tmp/opencode/pub-title.png
+-rw-r--r-- 1 runner runner 345K Sep  7 12:42 /tmp/opencode/pub-title.png
+[0m
+[0m$ [0mtimeout 60 chromium --headless --disable-gpu --no-sandbox --window-size=1280,720 --screenshot=/tmp/opencode/pub-game.png "https://dos-alot-accessory-enlargement.trycloudflare.com/?autostart=1&car=giggles&demo=1&screenshot=1" 2>&1 | tail -1; ls -lh /tmp/opencode/pub-*.png
+288998 bytes written to file /tmp/opencode/pub-game.png
+-rw-r--r-- 1 runner runner 283K Sep  7 12:42 /tmp/opencode/pub-game.png
+-rw-r--r-- 1 runner runner 345K Sep  7 12:42 /tmp/opencode/pub-title.png
+[0m
+[0m→ [0mRead /tmp/opencode/pub-title.png
+[0m→ [0mRead /tmp/opencode/pub-game.png
+Public URL serves the live game — finalizing screenshots, commit, and issue update.
+[0m
+[0m$ [0mcp /tmp/opencode/pub-title.png screenshots/final-title.png && cp /tmp/opencode/pub-game.png screenshots/final-gameplay.png && ls -lh screenshots/ && git add index.html screenshots/final-title.png screenshots/final-gameplay.png PROGRESS.md twisted-metal/index.html && git status --short | head -10
+total 632K
+-rw-r--r-- 1 runner runner 283K Sep  7 12:42 final-gameplay.png
+-rw-r--r-- 1 runner runner 345K Sep  7 12:42 final-title.png
+A  PROGRESS.md
+A  index.html
+A  screenshots/final-gameplay.png
+A  screenshots/final-title.png
+A  twisted-metal/index.html
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+[0m
+[0m$ [0mgit commit -m "Twisted Metal-inspired Neon Scrapyard: playable game, verified screenshots, critic PASS 28.5/40" && git log --oneline -3 && git rev-parse HEAD
+[opencode/34119865115 e889141] Twisted Metal-inspired Neon Scrapyard: playable game, verified screenshots, critic PASS 28.5/40
+ 5 files changed, 4154 insertions(+)
+ create mode 100644 PROGRESS.md
+ create mode 100644 index.html
+ create mode 100644 screenshots/final-gameplay.png
+ create mode 100644 screenshots/final-title.png
+ create mode 100644 twisted-metal/index.html
+e889141 Twisted Metal-inspired Neon Scrapyard: playable game, verified screenshots, critic PASS 28.5/40
+b4fe44a Grant reusable OpenCode workflow Pages permission
+e889141b77c6cae6316d6314119795e99483b709
+[0m
+[0m$ [0mgit push origin opencode/34119865115 2>&1 | tail -5
+remote: Create a pull request for 'opencode/34119865115' on GitHub by visiting:        
+remote:      https://github.com/AgentsLoop/PlayGround/pull/new/opencode/34119865115        
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34119865115 -> opencode/34119865115
+[0m
+[0m$ [0mgh issue comment 61 --body "## Final completion — Neon Scrapyard (Twisted Metal-inspired) PLAYABLE & VERIFIED
+
+**Play now:** https://dos-alot-accessory-enlargement.trycloudflare.com
+Pick a ride (GIGGLES / WRAITH / OUTLAW-X) -> START ENGINE. Controls: WASD/arrows drive, Space/Left-click MG, F/Right-click fire selected weapon, 1-4/Q/E select, G special, Shift turbo, H handbrake, P pause, M mute, R restart. Touch joystick + buttons on mobile.
+
+**Final screenshots** (captured fresh from the public URL above, committed under \`screenshots/\`):
+![Title / vehicle select](https://raw.githubusercontent.com/AgentsLoop/PlayGround/e889141b77c6cae6316d6314119795e99483b709/screenshots/final-title.png)
+![Live gameplay on public URL](https://raw.githubusercontent.com/AgentsLoop/PlayGround/e889141b77c6cae6316d6314119795e99483b709/screenshots/final-gameplay.png)
+
+**Final commit:** \`e889141b77c6cae6316d6314119795e99483b709\` on branch \`opencode/34119865115\` (pushed; files: \`index.html\`, \`twisted-metal/index.html\`, \`PROGRESS.md\`, \`screenshots/final-title.png\`, \`screenshots/final-gameplay.png\`).
+
+**Deployment status:**
+- Public tunnel: HTTP 200, 107270 bytes, title + gameplay screenshots verified against it just now.
+- Local: tmux \`app-server\` serves repo root on port 3000 (\`GET / -> 200 NEON SCRAPYARD\`); \`./index.html\` (2044 lines) is the served entrypoint.
+
+**Test status:**
+- \`node --check\` on extracted game script: PASS.
+- Served-page content checks (three.js, title, minimap, GIGGLES, autostart): ALL_PASS.
+- Headless Chromium renders (title menu + autostart demo gameplay): PASS, screenshots above.
+- Fresh-context AAA art-director critic: **28.5/40 PASS** (prev rounds 24.5 FAIL -> 27.0 FAIL), 0 blocking errors.
+
+**Known limitations:**
+- Single arena (Neon Scrapyard) and 3 playable vehicles / 5 AI rivals; no multiplayer or additional stages.
+- Vehicles are stylized low-poly originals (no licensed Sweet Tooth/Mr. Grimm likenesses); skyline/enemies read small at long chase distance.
+- Minimap dots are subtle at screenshot scale though present in-canvas; combat damage numbers/explosions are transient (visible in play, easy to miss in stills).
+- Three.js loads via CDN (unpkg); offline file:// play falls back to 2D canvas mode.
+- Public URL is a temporary tunnel (trycloudflare); for permanence serve \`index.html\` from this branch via Pages/static hosting." && echo COMMENT_OK
+https://github.com/AgentsLoop/PlayGround/issues/61#issuecomment-5570826371
+COMMENT_OK
+[0m
+Done per `./Agents.md`:
+
+- **Screenshots**: captured fresh from the public game URL (`http://…trycloudflare.com` → 200, title menu + live gameplay verified visually) and saved as `screenshots/final-title.png` and `screenshots/final-gameplay.png`.
+- **Commit**: `e889141` — "Twisted Metal-inspired Neon Scrapyard: playable game, verified screenshots, critic PASS 28.5/40" (5 files: `index.html`, `twisted-metal/index.html`, `PROGRESS.md`, 2 screenshots).
+- **Push**: branch `opencode/34119865115` pushed to origin.
+- **Issue #61**: final completion comment posted (comment 5570826371) with the public game URL, embedded screenshots (commit-pinned raw links), final commit/branch, deployment + test status, and known limitations.
