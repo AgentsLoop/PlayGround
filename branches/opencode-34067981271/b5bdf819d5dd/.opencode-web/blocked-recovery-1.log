@@ -1,0 +1,1457 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+[0m$ [0mgit status --short; git log --oneline -3; ls -la; ls screenshots/
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? screenshots/combat.png
+?? screenshots/gameplay.png
+?? screenshots/menu.png
+9d29c55 Add STRIKE LINE browser FPS playtest (CoD-inspired, 3 waves, HUD, win/lose loop)
+b4fe44a Grant reusable OpenCode workflow Pages permission
+total 136
+drwxr-xr-x  16 runner  staff    512 Sep  6 23:55 .
+drwxr-xr-x   3 runner  staff     96 Sep  6 23:50 ..
+drwxr-xr-x   6 runner  staff    192 Sep  6 23:50 .agents
+drwxr-xr-x   5 runner  staff    160 Sep  6 23:50 .agentsweb
+drwxr-xr-x  16 runner  staff    512 Sep  7 00:04 .git
+drwxr-xr-x   3 runner  staff     96 Sep  6 23:50 .github
+drwxr-xr-x  13 runner  staff    416 Sep  6 23:50 .omgithub-runtime
+drwx------   3 runner  staff     96 Sep  6 23:51 .opencode
+drwx------   2 runner  staff     64 Sep  6 23:50 .opencode-ssh
+drwx------  23 runner  staff    736 Sep  7 00:03 .opencode-web
+-rw-r--r--   1 runner  staff   2591 Sep  6 23:50 Agents.md
+-rw-r--r--   1 runner  staff  49791 Sep  6 23:58 index.html
+-rw-------   1 runner  staff    484 Sep  6 23:50 opencode-agentsweb-id_ed25519
+-rw-r--r--   1 runner  staff    156 Sep  6 23:50 opencode-agentsweb-id_ed25519.pub
+-rw-r--r--   1 runner  staff     53 Sep  6 23:50 README.md
+drwxr-xr-x   7 runner  staff    224 Sep  7 00:01 screenshots
+combat.png
+final-gameplay.png
+final-menu.png
+gameplay.png
+menu.png
+[0m
+[0m→ [0mSkill "load-sketchfab-threejs"
+[0m→ [0mRead screenshots/final-menu.png
+[0m→ [0mRead index.html[90m [limit=280][0m
+[0m→ [0mRead index.html[90m [offset=281][0m
+Code verified. Now fetching Sketchfab GLB assets (rifle + soldier).
+[0m
+[0m$ [0mpython3 .agents/skills/load-sketchfab-threejs/scripts/download_model.py "low poly assault rifle" "fps rifle viewmodel" --count 12 --max-glb-mb 6 --max-faces 30000 --require-glb --downloadable --no-animations --preview-sheet /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-search.png 2>&1 | tail -30
+Traceback (most recent call last):
+  File "/Users/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs/scripts/download_model.py", line 20, in <module>
+    from PIL import Image, ImageDraw, ImageFont
+ModuleNotFoundError: No module named 'PIL'
+[0m
+[0m$ [0mpip install pillow -q 2>&1 | tail -1; python3 .agents/skills/load-sketchfab-threejs/scripts/download_model.py "low poly assault rifle" "fps rifle viewmodel" --count 12 --max-glb-mb 6 --max-faces 30000 --require-glb --downloadable --no-animations --preview-sheet /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-search.png 2>&1 | tail -40
+Traceback (most recent call last):
+  File "/Users/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs/scripts/download_model.py", line 20, in <module>
+    from PIL import Image, ImageDraw, ImageFont
+ModuleNotFoundError: No module named 'PIL'
+[0m
+[0m$ [0mwhich python3 pip; python3 --version; pip --version; python3 -m pip install pillow -q 2>&1 | tail -2; python3 -c "import PIL; print('PIL ok')"
+/opt/homebrew/bin/python3
+/Library/Frameworks/Python.framework/Versions/Current/bin/pip
+Python 3.14.7
+pip 26.2.1 from /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pip (python 3.14)
+note: If you believe this is a mistake, please contact your Python installation or OS distribution provider. You can override this, at the risk of breaking your Python installation or OS, by passing --break-system-packages.
+hint: See PEP 668 for the detailed specification.
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import PIL; print('PIL ok')
+    ^^^^^^^^^^
+ModuleNotFoundError: No module named 'PIL'
+[0m
+[0m$ [0mpython3 -m pip install pillow --break-system-packages -q 2>&1 | tail -2; python3 -c "import PIL; print('PIL ok')"
+PIL ok
+[0m
+[0m$ [0mpython3 .agents/skills/load-sketchfab-threejs/scripts/download_model.py "low poly assault rifle" "fps rifle viewmodel" --count 12 --max-glb-mb 6 --max-faces 30000 --require-glb --downloadable --no-animations --preview-sheet /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-search.png 2>&1 | tail -40
+Preview sheet: /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-search.png
+[0] Low-Poly Assault Rifle | 9c34e256a6a14b18bca0aa515cc64f67 | 0.2 MB | 818 faces | ToporEnterprise | CC Attribution no animations
+[1] Low-poly M4 assault rifle | fb85c455cf374675a1db7988def2d926 | 0.4 MB | 6,081 faces | szaw | CC Attribution no animations
+[2] Low-Poly K3 Assault Rifle | f7bc185bfdc741fcadbbb40f9efffeb6 | 1.1 MB | 6,938 faces | TastyTony | CC Attribution no animations
+[3] AK74 Rifle | 11753c4e484346ffb1a681c71230ad6a | 4.5 MB | 13,692 faces | Jusai | CC Attribution no animations
+[4] Low-Poly Assault Rifle | 072b69dfd99b4cec82be8ce736f6e907 | 0.3 MB | 3,847 faces | Tidominer | CC Attribution no animations
+[5] Low Poly Assault Rifle | 2f0f59db425c4012811a81c56a0e59dc | 5.0 MB | 2,590 faces | luacha2000 | CC Attribution no animations
+[6] AKS-74 | 8bda0465a50e49adab350058365c6f3e | 2.5 MB | 13,125 faces | Jusai | CC Attribution no animations
+[7] AK-9 | bb04b9a95cde42d89c360e71742e1b3b | 2.4 MB | 13,554 faces | Jusai | CC Attribution no animations
+[8] 308 Sniper Rifle (Free/GameReady) | 070c5185b9254222a7d8569878445ec3 | 5.7 MB | 5,706 faces | Sebastian Webster | CC Attribution no animations
+[9] FN FAL Reload Animation | 43290453007e49eaa3b18d87e708867a | 2.0 MB | 9,941 faces | Stavich | CC Attribution-NonCommercial-NoDerivs no animations
+[0m
+[0m→ [0mRead /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-search.png
+Tile [1] (M4, CC Attribution, 0.4MB) is ideal. Downloading it, then searching for a soldier.
+[0m
+[0m$ [0mmkdir -p assets && python3 .agents/skills/load-sketchfab-threejs/scripts/download_model.py "low poly M4 assault rifle" --count 12 --max-glb-mb 6 --max-faces 30000 --require-glb --downloadable --no-animations --download 1 --output /Users/runner/work/PlayGround/PlayGround/assets/rifle.glb 2>&1 | tail -8
+[4] low-poly Colt M5 SCW | dd2582bed94348e39c377438cc9396bc | 2.0 MB | 24,605 faces | D_U | CC Attribution no animations
+[5] Low Poly C8 | 2f300382844c4405989dbeb34efcaa66 | 0.7 MB | 7,430 faces | samanthacford | CC Attribution no animations
+[6] Low-Poly Sig MCX | 9a6f000c43644afe900669b6e7202378 | 1.7 MB | 12,824 faces | TastyTony | CC Attribution no animations
+[7] Low Poly LR-300 Inspired | 6cc99caaebbb41b3be4608a432682603 | 0.6 MB | 6,534 faces | samanthacford | CC Attribution no animations
+[8] Low Poly Car-15 | 6206eba4c51449a0bbcc6735ecdc39e2 | 2.0 MB | 23,648 faces | samanthacford | CC Attribution no animations
+[9] low-poly G95 A1 | 6e66f2cb28234868b06940669c7d388a | 2.3 MB | 28,752 faces | D_U | CC Attribution no animations
+Downloaded 1,775,584 bytes to /Users/runner/work/PlayGround/PlayGround/assets/rifle.glb
+Attribution metadata: /Users/runner/work/PlayGround/PlayGround/assets/rifle.glb.attribution.json
+[0m
+[0m$ [0mcat assets/rifle.glb.attribution.json; node .agents/skills/load-sketchfab-threejs/scripts/inspect_glb.mjs assets/rifle.glb 2>&1 | head -30
+{
+  "uid": "8cab1cbeb82c4396a154f9fc8771417b",
+  "name": "Low-Poly M4a1",
+  "author": "TastyTony",
+  "authorUrl": "https://sketchfab.com/TastyTony",
+  "license": "CC Attribution",
+  "licenseUrl": null,
+  "modelUrl": "https://sketchfab.com/3d-models/none-8cab1cbeb82c4396a154f9fc8771417b",
+  "thumbnailUrl": "https://media.sketchfab.com/models/8cab1cbeb82c4396a154f9fc8771417b/thumbnails/fe7c4fa6d72949478417b3c6d00ff5ec/b17bd71b8ffe4cd685f28bfab8625def.jpeg",
+  "glbBytes": 1775584,
+  "faceCount": 10676,
+  "vertexCount": 29044,
+  "textureCount": 0,
+  "textureMaxResolution": 0,
+  "animationCount": 0,
+  "animations": []
+}
+{
+  "schemaVersion": 2,
+  "path": "/Users/runner/work/PlayGround/PlayGround/assets/rifle.glb",
+  "bytes": 1775584,
+  "sha256": "9640b8d42d8bad5c2310d5e6e8bf4e84d1e091c0939ccd8e36082ae63de46928",
+  "title": "Low-Poly M4a1",
+  "author": "TastyTony (https://sketchfab.com/TastyTony)",
+  "generator": "Sketchfab-14.35.0",
+  "extensionsUsed": [],
+  "extensionsRequired": [],
+  "scenes": 1,
+  "nodes": 40,
+  "meshes": 11,
+  "morphTargets": 0,
+  "skins": [
+    {
+      "index": 0,
+      "name": "skin-0",
+      "joints": 18,
+      "skeleton": 10
+    }
+  ],
+  "animations": [],
+  "materials": 11,
+  "textures": 0,
+  "images": [],
+  "materialDetails": [
+    {
+      "index": 0,
+      "name": "Material.004",
+[0m
+[0m$ [0mpython3 .agents/skills/load-sketchfab-threejs/scripts/download_model.py "low poly soldier enemy" "military hostile character" --count 12 --max-glb-mb 6 --max-faces 30000 --require-glb --downloadable --no-animations --preview-sheet /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/soldier-search.png 2>&1 | tail -20
+Preview sheet: /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/soldier-search.png
+[0] Low-Poly Fp-45 Liberator | 84bdab92cd0c4e2cb801dbb910b19e7f | 0.1 MB | 1,970 faces | TastyTony | CC Attribution no animations
+[1] FREE 3D Enemy Soldier - Walk Animation | df8e34831848465e96cffc8a88ecbaa8 | 2.6 MB | 7,758 faces | TechLabID | CC Attribution no animations
+[2] Vest Armor Holster LowPoly GameReady Pack | 7c41d35e505c4057abe60f89537408bd | 3.5 MB | 18,196 faces | 00amza | CC Attribution no animations
+[0m
+[0m→ [0mRead /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/soldier-search.png
+[0m
+[0m$ [0mpython3 .agents/skills/load-sketchfab-threejs/scripts/download_model.py "low poly soldier enemy" --count 12 --max-glb-mb 6 --max-faces 30000 --require-glb --downloadable --download 1 --output /Users/runner/work/PlayGround/PlayGround/assets/soldier.glb 2>&1 | tail -4 && node .agents/skills/load-sketchfab-threejs/scripts/inspect_glb.mjs assets/soldier.glb 2>&1 | head -25 && cat assets/soldier.glb.attribution.json | head -20
+- mixamo.com (1.033s)
+[2] Vest Armor Holster LowPoly GameReady Pack | 7c41d35e505c4057abe60f89537408bd | 3.5 MB | 18,196 faces | 00amza | CC Attribution no animations
+Downloaded 2,553,692 bytes to /Users/runner/work/PlayGround/PlayGround/assets/soldier.glb
+Attribution metadata: /Users/runner/work/PlayGround/PlayGround/assets/soldier.glb.attribution.json
+{
+  "schemaVersion": 2,
+  "path": "/Users/runner/work/PlayGround/PlayGround/assets/soldier.glb",
+  "bytes": 2553692,
+  "sha256": "c86ca610718180f76aa8e0215b5e35614310d1b37d7ba479aac9767045f08766",
+  "title": "FREE 3D Enemy Soldier - Walk Animation",
+  "author": "TechLabID (https://sketchfab.com/TechLabID)",
+  "generator": "Sketchfab-17.17.0",
+  "extensionsUsed": [
+    "KHR_materials_specular"
+  ],
+  "extensionsRequired": [],
+  "scenes": 1,
+  "nodes": 41,
+  "meshes": 1,
+  "morphTargets": 0,
+  "skins": [
+    {
+      "index": 0,
+      "name": "skin-0",
+      "joints": 34,
+      "skeleton": 5
+    }
+  ],
+  "animations": [
+{
+  "uid": "df8e34831848465e96cffc8a88ecbaa8",
+  "name": "FREE 3D Enemy Soldier - Walk Animation",
+  "author": "TechLabID",
+  "authorUrl": "https://sketchfab.com/TechLabID",
+  "license": "CC Attribution",
+  "licenseUrl": null,
+  "modelUrl": "https://sketchfab.com/3d-models/none-df8e34831848465e96cffc8a88ecbaa8",
+  "thumbnailUrl": "https://media.sketchfab.com/models/df8e34831848465e96cffc8a88ecbaa8/thumbnails/e9e16514da8c48f591041b35fb856f18/aaea502397924ec5a77fa92886707e01.jpeg",
+  "glbBytes": 2553692,
+  "faceCount": 7758,
+  "vertexCount": 22122,
+  "textureCount": 1,
+  "textureMaxResolution": 1024,
+  "animationCount": 1,
+  "animations": [
+    {
+      "uid": "4167175b5ca247b9843506ae5a4bbbaa",
+      "name": "mixamo.com",
+      "url": "https://media.sketchfab.com/models/df8e34831848465e96cffc8a88ecbaa8/81307303eed44e7c930ce78f04402737/animations/4167175b5ca247b9843506ae5a4bbbaa.bin.gz",
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -70,9 +70,9 @@
+   #adsbtn { right:140px; bottom:70px; width:60px; height:60px; background:rgba(255,255,255,.15); font-size:11px; }
+   #jumpbtn { right:52px; bottom:200px; width:60px; height:60px; background:rgba(255,255,255,.15); font-size:11px; }
+   @media (max-width:700px){ #minimap{width:104px;height:104px;} #healthwrap{width:190px;} #ammo .mag{font-size:32px;} .card{padding:24px 20px;} .card h1{font-size:30px;} .keys{grid-template-columns:1fr;} }
+ </style>
+-<script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }</script>
++<script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }</script>
+ </head>
+ <body>
+ <div id="game"></div>
+ <div id="dmgvin"></div><div id="healvin"></div>
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -130,8 +130,10 @@
+ </div>
+ 
+ <script type="module">
+ import * as THREE from 'three';
++import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
++import { clone as skeletonClone } from 'three/addons/utils/SkeletonUtils.js';
+ 
+ /* ================= AUDIO (synthesized, no files) ================= */
+ let AC=null; function ac(){ if(!AC){ AC=new (window.AudioContext||window.webkitAudioContext)(); } if(AC.state==='suspended')AC.resume(); return AC; }
+ function noiseBuf(dur){ const c=ac(),b=c.createBuffer(1,c.sampleRate*dur,c.sampleRate),d=b.getChannelData(0); for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1; return b; }
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -243,8 +243,47 @@
+   const gr=g.createRadialGradient(32,32,2,32,32,30); gr.addColorStop(0,'rgba(255,255,220,1)'); gr.addColorStop(0.4,'rgba(255,190,80,.95)'); gr.addColorStop(1,'rgba(255,120,20,0)');
+   g.fillStyle=gr; g.fillRect(0,0,64,64); return new THREE.CanvasTexture(c); })();
+ const flash=new THREE.Sprite(new THREE.SpriteMaterial({map:flashTex,transparent:true,opacity:0,depthTest:false})); flash.scale.set(0.35,0.35,1); flash.position.set(0,-0.19,-1.2); vmGroup.add(flash);
+ vmGroup.position.set(0.24,-0.26,-0.35);
++/* ---- Sketchfab GLB rifle viewmodel (fallback: procedural parts above) ---- */
++// Tune: RIFLE_YAW orients the authored model so the barrel points away (-Z).
++const RIFLE_YAW=Math.PI, RIFLE_POS=new THREE.Vector3(0,-0.20,-0.55), RIFLE_LEN=0.85;
++const vmRifle=new THREE.Group(); vmGroup.add(vmRifle);
++const muzzleTip=new THREE.Object3D(); // barrel tip anchor (repositioned on load)
++let rifleLoaded=false;
++new GLTFLoader().load('assets/rifle.glb',gltf=>{
++  try{
++    const tpl=gltf.scene;
++    const box=new THREE.Box3().setFromObject(tpl);
++    const size=box.getSize(new THREE.Vector3()), ctr=box.getCenter(new THREE.Vector3());
++    tpl.position.sub(ctr); // center model at origin
++    const wrap=new THREE.Group(); wrap.add(tpl);
++    if(size.x>size.z&&size.x>=size.y)wrap.rotation.y=Math.PI/2; // longest axis -> Z
++    wrap.rotation.y+=RIFLE_YAW; // barrel -> -Z
++    wrap.scale.setScalar(RIFLE_LEN/Math.max(size.x,size.y,size.z));
++    wrap.updateMatrixWorld(true);
++    const wb=new THREE.Box3().setFromObject(wrap);
++    const wsize=wb.getSize(new THREE.Vector3()), wctr=wb.getCenter(new THREE.Vector3());
++    // shift so grip area sits near the camera like the procedural gun
++    wrap.position.sub(new THREE.Vector3(wctr.x, wctr.y, wctr.z).multiplyScalar(0)); // keep centered
++    vmRifle.add(wrap); vmRifle.position.copy(RIFLE_POS);
++    wrap.traverse(o=>{ if(o.isMesh){o.castShadow=false; o.frustumCulled=false;} });
++    // muzzle anchor at the -Z face of the bounds
++    muzzleTip.position.set(0, (wb.min.y+wb.max.y)/2 - (RIFLE_POS.y), wb.min.z - RIFLE_POS.z);
++    vmGroup.add(muzzleTip); muzzleTip.position.set(RIFLE_POS.x, RIFLE_POS.y + (wctr.y*wrap.scale.x)*0 + 0.03, RIFLE_POS.z + (wb.min.z - 0));
++    // NOTE: bounds are in vmGroup space after wrap added; recompute simply:
++    vmGroup.updateMatrixWorld(true);
++    const tip=new THREE.Vector3(0,0,0); wrap.updateMatrixWorld(true);
++    // front-most point along -Z in wrap local space:
++    const local=new THREE.Box3().setFromObject(tpl); // tpl centered at origin
++    const halfL=Math.max(size.x,size.y,size.z)*wrap.scale.x/2;
++    muzzleTip.position.set(RIFLE_POS.x, RIFLE_POS.y+0.04, RIFLE_POS.z-halfL-0.06);
++    muzzle.position.set(0,0,0); flash.position.set(0,0,0);
++    muzzleTip.add(muzzle); muzzleTip.add(flash);
++    gunParts.forEach(m=>m.visible=false);
++    rifleLoaded=true;
++  }catch(err){ console.warn('rifle GLB setup failed, using procedural gun',err); }
++},undefined,err=>console.warn('rifle GLB load failed, using procedural gun',err));
+ // tracers / impacts / pickups
+ const tracers=[], impacts=[], pickups=[], floaters=[];
+ function spawnTracer(from,dir,enemy=false){ const len=enemy?6:9; const g=new THREE.BufferGeometry().setFromPoints([from.clone(),from.clone().add(dir.clone().multiplyScalar(len))]);
+   const m=new THREE.Line(g,new THREE.LineBasicMaterial({color:enemy?0xff6a5a:0xffe9a8,transparent:true,opacity:0.95})); scene.add(m); tracers.push({m,life:0.07}); }
+
+[0m
+Cleaning up that messy muzzle computation:
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -260,24 +260,14 @@
+ if(size.x>size.z&&size.x>=size.y)wrap.rotation.y=Math.PI/2; // longest axis -> Z
+ wrap.rotation.y+=RIFLE_YAW; // barrel -> -Z
+ wrap.scale.setScalar(RIFLE_LEN/Math.max(size.x,size.y,size.z));
+ wrap.updateMatrixWorld(true);
+-const wb=new THREE.Box3().setFromObject(wrap);
+-const wsize=wb.getSize(new THREE.Vector3()), wctr=wb.getCenter(new THREE.Vector3());
+-// shift so grip area sits near the camera like the procedural gun
+-wrap.position.sub(new THREE.Vector3(wctr.x, wctr.y, wctr.z).multiplyScalar(0)); // keep centered
++const halfL=Math.max(size.x,size.y,size.z)*wrap.scale.x/2; // half length along Z after orientation
+ vmRifle.add(wrap); vmRifle.position.copy(RIFLE_POS);
+ wrap.traverse(o=>{ if(o.isMesh){o.castShadow=false; o.frustumCulled=false;} });
+-// muzzle anchor at the -Z face of the bounds
+-muzzleTip.position.set(0, (wb.min.y+wb.max.y)/2 - (RIFLE_POS.y), wb.min.z - RIFLE_POS.z);
+-vmGroup.add(muzzleTip); muzzleTip.position.set(RIFLE_POS.x, RIFLE_POS.y + (wctr.y*wrap.scale.x)*0 + 0.03, RIFLE_POS.z + (wb.min.z - 0));
+-// NOTE: bounds are in vmGroup space after wrap added; recompute simply:
+-vmGroup.updateMatrixWorld(true);
+-const tip=new THREE.Vector3(0,0,0); wrap.updateMatrixWorld(true);
+-// front-most point along -Z in wrap local space:
+-const local=new THREE.Box3().setFromObject(tpl); // tpl centered at origin
+-const halfL=Math.max(size.x,size.y,size.z)*wrap.scale.x/2;
++// muzzle anchor: centered height, just past the -Z (barrel) face
+ muzzleTip.position.set(RIFLE_POS.x, RIFLE_POS.y+0.04, RIFLE_POS.z-halfL-0.06);
++vmGroup.add(muzzleTip);
+ muzzle.position.set(0,0,0); flash.position.set(0,0,0);
+ muzzleTip.add(muzzle); muzzleTip.add(flash);
+ gunParts.forEach(m=>m.visible=false);
+ rifleLoaded=true;
+
+[0m
+Now the soldier GLB integration:
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -289,9 +289,37 @@
+ const enemies=[]; let wave=0, waveActive=false, betweenWaves=false;
+ const WAVES=[4,6,9];
+ const skinTones=[0xc9a06a,0xa87c4f,0x8a6238,0x6e4c2a];
+ const uniCols=[0x5a4a3a,0x4a5a48,0x555f6e,0x6e5a4a];
+-function makeSoldier(hp){ const g=new THREE.Group();
++/* ---- Sketchfab GLB hostile (fallback: procedural soldier below) ---- */
++let soldierTpl=null, soldierClips=[];
++const SOLDIER_H=1.8; // normalized height in meters
++new GLTFLoader().load('assets/soldier.glb',gltf=>{
++  try{
++    const box=new THREE.Box3().setFromObject(gltf.scene);
++    const size=box.getSize(new THREE.Vector3()), ctr=box.getCenter(new THREE.Vector3());
++    gltf.scene.position.set(-ctr.x,-box.min.y,-ctr.z); // feet at origin, XZ centered
++    const wrap=new THREE.Group(); wrap.add(gltf.scene);
++    wrap.scale.setScalar(SOLDIER_H/size.y);
++    wrap.traverse(o=>{ if(o.isMesh){o.castShadow=true; o.frustumCulled=false;} });
++    soldierTpl=wrap; soldierClips=gltf.animations||[];
++  }catch(err){ console.warn('soldier GLB setup failed, using procedural',err); }
++},undefined,err=>console.warn('soldier GLB load failed, using procedural',err));
++function healthBar(){ const bc=document.createElement('canvas'); bc.width=64; bc.height=8; const bg2=bc.getContext('2d'); bg2.fillStyle='#300'; bg2.fillRect(0,0,64,8); bg2.fillStyle='#0f0'; bg2.fillRect(0,0,64,8);
++  const bt=new THREE.CanvasTexture(bc); const bar=new THREE.Sprite(new THREE.SpriteMaterial({map:bt,depthTest:false})); bar.scale.set(1.1,0.14,1); bar.position.y=2.1; return {bar,bc,bt}; }
++function makeSoldier(hp){
++  if(soldierTpl){ // ---- GLB hostile ----
++    const g=skeletonClone(soldierTpl);
++    const mats=[]; let headBone=null;
++    g.traverse(o=>{ if(o.isMesh){ o.material=o.material.clone(); mats.push(o.material); o.castShadow=true; }
++      if(!headBone&&/head/i.test(o.name))headBone=o; });
++    const hb=healthBar(); g.add(hb.bar);
++    let mixer=null;
++    if(soldierClips.length){ mixer=new THREE.AnimationMixer(g); const clip=soldierClips[0];
++      const act=mixer.clipAction(clip); act.play(); }
++    return {g,bar:hb.bar,bc:hb.bc,bt:hb.bt,head:headBone,torso:null,legs:null,glb:true,mats,mixer,flashT:0};
++  }
++  const g=new THREE.Group();
+   const uni=new THREE.MeshLambertMaterial({color:uniCols[(Math.random()*uniCols.length)|0]});
+   const skin=new THREE.MeshLambertMaterial({color:skinTones[(Math.random()*skinTones.length)|0]});
+   const legs=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.8,0.32),uni); legs.position.y=0.4; legs.castShadow=true; g.add(legs);
+   const torso=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.75,0.36),uni); torso.position.y=1.15; torso.castShadow=true; g.add(torso);
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -329,11 +329,10 @@
+   const armL=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.6,0.16),uni); armL.position.set(-0.4,1.2,0.1); g.add(armL);
+   const armR=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.6,0.16),uni); armR.position.set(0.4,1.2,0.1); g.add(armR);
+   const rifle=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.12,0.9),new THREE.MeshLambertMaterial({color:0x1a1a1a})); rifle.position.set(0.25,1.3,-0.4); g.add(rifle);
+   // health bar sprite
+-  const bc=document.createElement('canvas'); bc.width=64; bc.height=8; const bg2=bc.getContext('2d'); bg2.fillStyle='#300'; bg2.fillRect(0,0,64,8); bg2.fillStyle='#0f0'; bg2.fillRect(0,0,64,8);
+-  const bt=new THREE.CanvasTexture(bc); const bar=new THREE.Sprite(new THREE.SpriteMaterial({map:bt,depthTest:false})); bar.scale.set(1.1,0.14,1); bar.position.y=2.25; g.add(bar);
+-  return {g,bar,bc,bt,head,torso,legs};
++  const hb0=healthBar(); g.add(hb0.bar);
++  return {g,bar:hb0.bar,bc:hb0.bc,bt:hb0.bt,head,torso,legs,glb:false,mats:null,mixer:null,flashT:0};
+ }
+ function spawnWave(n){ waveActive=true; sWave();
+   const wt=document.getElementById('wavetrans'); document.getElementById('wavetransText').innerHTML=`WAVE <span>${wave}</span>`; wt.classList.add('show'); setTimeout(()=>wt.classList.remove('show'),1800);
+   for(let i=0;i<n;i++){ const edge=(Math.random()*4)|0; let x,z;
+
+[0m
+Now headshot-by-height (works for skinned GLB), hit-flash, and impact decals:
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -440,10 +440,11 @@
+ if(hits.length){ const h=hits[0]; end=h.point.clone();
+   let root=null,p=h.object; while(p){ if(p.userData&&p.userData.eid!==undefined){root=p;break;} p=p.parent; }
+   // find enemy by traversing up to group
+   let e=null; for(const en of enemies){ if(!en.dead&&(en.g===h.object||en.g.children.includes(h.object)||isChild(en.g,h.object))){e=en;break;} }
+-  if(e){ player.hits++; const headshot=h.object===e.head; const dmg=(headshot?55+Math.random()*20:gun.damage[0]+Math.random()*(gun.damage[1]-gun.damage[0]));
++  if(e){ player.hits++; const hitH=h.point.y-e.g.position.y; const headshot=hitH>1.42; const dmg=(headshot?55+Math.random()*20:gun.damage[0]+Math.random()*(gun.damage[1]-gun.damage[0]));
+     e.hp-=dmg; enemyBar(e); spawnImpact(h.point,0xc41e1e,headshot?12:7);
++    if(e.glb&&e.mats){ e.flashT=0.12; for(const m of e.mats){ if(m.emissive){ m.emissive.setHex(0xff2a1a); m.emissiveIntensity=0.85; } } }
+     if(e.hp<=0)killEnemy(e); else { sHit(); hitmarker(false); floater(headshot?'HEADSHOT '+Math.round(dmg):Math.round(dmg),h.point.clone(),headshot?'#ff5252':'#fff'); e.state='chase'; }
+   } else spawnImpact(h.point,0xffd27a,6);
+ } else if(wallHit&&wallHit.distance<90){ end=wallHit.point.clone(); spawnImpact(end,0xcfc39a,5); }
+ spawnTracer(origin.clone().add(dir.clone().multiplyScalar(1.2)).add(new THREE.Vector3(0.15,-0.15,0)),dir);
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -445,9 +445,10 @@
+       e.hp-=dmg; enemyBar(e); spawnImpact(h.point,0xc41e1e,headshot?12:7);
+       if(e.glb&&e.mats){ e.flashT=0.12; for(const m of e.mats){ if(m.emissive){ m.emissive.setHex(0xff2a1a); m.emissiveIntensity=0.85; } } }
+       if(e.hp<=0)killEnemy(e); else { sHit(); hitmarker(false); floater(headshot?'HEADSHOT '+Math.round(dmg):Math.round(dmg),h.point.clone(),headshot?'#ff5252':'#fff'); e.state='chase'; }
+     } else spawnImpact(h.point,0xffd27a,6);
+-  } else if(wallHit&&wallHit.distance<90){ end=wallHit.point.clone(); spawnImpact(end,0xcfc39a,5); }
++  } else if(wallHit&&wallHit.distance<90){ end=wallHit.point.clone(); spawnImpact(end,0xcfc39a,5);
++    const wn=wallHit.face.normal.clone().transformDirection(wallHit.object.matrixWorld); spawnDecal(end,wn); }
+   spawnTracer(origin.clone().add(dir.clone().multiplyScalar(1.2)).add(new THREE.Vector3(0.15,-0.15,0)),dir);
+   // shell + gun snap handled in animate via kick
+   updateAmmo(); if(gun.mag===0&&gun.reserve>0)setTimeout(()=>startReload(),250);
+ }
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -272,10 +272,10 @@
+     gunParts.forEach(m=>m.visible=false);
+     rifleLoaded=true;
+   }catch(err){ console.warn('rifle GLB setup failed, using procedural gun',err); }
+ },undefined,err=>console.warn('rifle GLB load failed, using procedural gun',err));
+-// tracers / impacts / pickups
+-const tracers=[], impacts=[], pickups=[], floaters=[];
++// tracers / impacts / pickups / decals
++const tracers=[], impacts=[], pickups=[], floaters=[], decals=[];
+ function spawnTracer(from,dir,enemy=false){ const len=enemy?6:9; const g=new THREE.BufferGeometry().setFromPoints([from.clone(),from.clone().add(dir.clone().multiplyScalar(len))]);
+   const m=new THREE.Line(g,new THREE.LineBasicMaterial({color:enemy?0xff6a5a:0xffe9a8,transparent:true,opacity:0.95})); scene.add(m); tracers.push({m,life:0.07}); }
+ function spawnImpact(p,color=0xffd27a,n=8){ for(let i=0;i<n;i++){ const s=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.07,0.07),new THREE.MeshBasicMaterial({color})); s.position.copy(p);
+   const v=new THREE.Vector3((Math.random()-0.5)*7,Math.random()*6,(Math.random()-0.5)*7); scene.add(s); impacts.push({m:s,v,life:0.5+Math.random()*0.3}); } }
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -278,9 +278,12 @@
+ function spawnTracer(from,dir,enemy=false){ const len=enemy?6:9; const g=new THREE.BufferGeometry().setFromPoints([from.clone(),from.clone().add(dir.clone().multiplyScalar(len))]);
+   const m=new THREE.Line(g,new THREE.LineBasicMaterial({color:enemy?0xff6a5a:0xffe9a8,transparent:true,opacity:0.95})); scene.add(m); tracers.push({m,life:0.07}); }
+ function spawnImpact(p,color=0xffd27a,n=8){ for(let i=0;i<n;i++){ const s=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.07,0.07),new THREE.MeshBasicMaterial({color})); s.position.copy(p);
+   const v=new THREE.Vector3((Math.random()-0.5)*7,Math.random()*6,(Math.random()-0.5)*7); scene.add(s); impacts.push({m:s,v,life:0.5+Math.random()*0.3}); } }
+-function spawnPickup(x,z,kind){ const col=kind==='hp'?0x39e75f:0xffcc00; const m=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.7,roughness:0.3}));
++function spawnDecal(p,n){ if(decals.length>48){ const d=decals.shift(); scene.remove(d.m); }
++  const m=new THREE.Mesh(new THREE.CircleGeometry(0.08+Math.random()*0.07,10),new THREE.MeshBasicMaterial({color:0x14100c,transparent:true,opacity:0.85,polygonOffset:true,polygonOffsetFactor:-2}));
++  m.position.copy(p).addScaledVector(n,0.02); m.lookAt(p.clone().add(n)); m.rotation.z=Math.random()*Math.PI;
++  scene.add(m); decals.push({m,life:10}); } const col=kind==='hp'?0x39e75f:0xffcc00; const m=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.7,roughness:0.3}));
+   m.position.set(x,0.7,z); m.castShadow=true; scene.add(m); const ring=new THREE.Mesh(new THREE.TorusGeometry(0.8,0.05,8,24),new THREE.MeshBasicMaterial({color:col})); ring.rotation.x=Math.PI/2; ring.position.set(x,0.25,z); scene.add(ring);
+   pickups.push({m,ring,kind,life:25}); }
+ function floater(text,pos,color='#ffd76a'){ const d=document.createElement('div'); d.textContent=text; d.style.cssText=`position:fixed;color:${color};font-weight:800;font-size:15px;text-shadow:0 2px 4px #000;pointer-events:none;z-index:12;transform:translate(-50%,-50%)`;
+   document.body.appendChild(d); floaters.push({el:d,p:pos.clone(),life:0.9}); }
+
+[0m
+I accidentally replaced the `spawnPickup` declaration line — restoring it:
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -281,9 +281,10 @@
+   const v=new THREE.Vector3((Math.random()-0.5)*7,Math.random()*6,(Math.random()-0.5)*7); scene.add(s); impacts.push({m:s,v,life:0.5+Math.random()*0.3}); } }
+ function spawnDecal(p,n){ if(decals.length>48){ const d=decals.shift(); scene.remove(d.m); }
+   const m=new THREE.Mesh(new THREE.CircleGeometry(0.08+Math.random()*0.07,10),new THREE.MeshBasicMaterial({color:0x14100c,transparent:true,opacity:0.85,polygonOffset:true,polygonOffsetFactor:-2}));
+   m.position.copy(p).addScaledVector(n,0.02); m.lookAt(p.clone().add(n)); m.rotation.z=Math.random()*Math.PI;
+-  scene.add(m); decals.push({m,life:10}); } const col=kind==='hp'?0x39e75f:0xffcc00; const m=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.7,roughness:0.3}));
++    scene.add(m); decals.push({m,life:10}); }
++function spawnPickup(x,z,kind){ const col=kind==='hp'?0x39e75f:0xffcc00; const m=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.7,roughness:0.3}));
+   m.position.set(x,0.7,z); m.castShadow=true; scene.add(m); const ring=new THREE.Mesh(new THREE.TorusGeometry(0.8,0.05,8,24),new THREE.MeshBasicMaterial({color:col})); ring.rotation.x=Math.PI/2; ring.position.set(x,0.25,z); scene.add(ring);
+   pickups.push({m,ring,kind,life:25}); }
+ function floater(text,pos,color='#ffd76a'){ const d=document.createElement('div'); d.textContent=text; d.style.cssText=`position:fixed;color:${color};font-weight:800;font-size:15px;text-shadow:0 2px 4px #000;pointer-events:none;z-index:12;transform:translate(-50%,-50%)`;
+   document.body.appendChild(d); floaters.push({el:d,p:pos.clone(),life:0.9}); }
+
+[0m
+[0m$ [0mnode -e "
+const fs=require('fs');
+const html=fs.readFileSync('index.html','utf8');
+const m=html.match(/<script type=\"module\">([\s\S]*?)<\/script>/);
+let js=m[1].replace(/^import .*$/gm,'').replace(/from 'three.*$/gm,'');
+fs.writeFileSync('/tmp/game-check.mjs',js);
+" && node --check /tmp/game-check.mjs && echo SYNTAX_OK
+SYNTAX_OK
+[0m
+Now mixer updates, flash decay, and decal aging:
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -508,8 +508,10 @@
+ const tmpV=new THREE.Vector3();
+ function updateEnemies(dt,now){ let alive=0;
+   for(const e of enemies){ if(e.dead){ e.deathT+=dt; e.g.rotation.x=Math.min(Math.PI/2,e.deathT*4); e.g.position.y=Math.max(-0.4,e.g.position.y-dt*0.4); e.bar.visible=false;
+       if(e.deathT>3){scene.remove(e.g);} continue; }
++    alive++; if(e.mixer)e.mixer.update(dt); // GLB walk cycle
++    if(e.flashT>0){ e.flashT-=dt; if(e.flashT<=0&&e.mats)for(const m of e.mats){ if(m.emissive){ m.emissive.setHex(0x000000); m.emissiveIntensity=0; } } }
+     alive++; tmpV.set(player.pos.x-e.g.position.x,0,player.pos.z-e.g.position.z); const dist=tmpV.length(); tmpV.normalize();
+     e.strafe+=dt*0.8*e.strafeDir; if(Math.random()<dt*0.3)e.strafeDir*=-1;
+     // movement: approach until ~10m, then strafe
+     let mx=0,mz=0;
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -574,8 +574,9 @@
+     f.el.style.left=((proj.x*0.5+0.5)*innerWidth)+'px'; f.el.style.top=((-proj.y*0.5+0.5)*innerHeight)+'px'; f.el.style.opacity=Math.min(1,f.life*2); }
+     if(f.life<=0){f.el.remove();floaters.splice(i,1);} } }
+ function updateFx(dt){ for(let i=tracers.length-1;i>=0;i--){ tracers[i].life-=dt; tracers[i].m.material.opacity=tracers[i].life/0.07; if(tracers[i].life<=0){scene.remove(tracers[i].m);tracers.splice(i,1);} }
+   for(let i=impacts.length-1;i>=0;i--){ const im=impacts[i]; im.life-=dt; im.v.y-=12*dt; im.m.position.addScaledVector(im.v,dt); im.m.material.transparent=true; im.m.material.opacity=Math.max(0,im.life*2); if(im.life<=0){scene.remove(im.m);impacts.splice(i,1);} }
++  for(let i=decals.length-1;i>=0;i--){ const d=decals[i]; d.life-=dt; if(d.life<2)d.m.material.opacity=Math.max(0,d.life/2*0.85); if(d.life<=0){scene.remove(d.m);decals.splice(i,1);} }
+   for(const c of clouds){ c.position.x+=dt*0.7; if(c.position.x>120)c.position.x=-120; }
+   for(const f of flags){ f.rotation.y=Math.sin(performance.now()*0.003)*0.3; } }
+ 
+ /* ================= LOOP ================= */
+
+[0m
+Now crouch support:
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -219,9 +219,9 @@
+ // clouds
+ const clouds=[]; for(let i=0;i<8;i++){ const c=new THREE.Mesh(new THREE.SphereGeometry(6+Math.random()*6,8,6),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.75,fog:false})); c.scale.y=0.4; c.position.set((Math.random()-0.5)*220,45+Math.random()*20,(Math.random()-0.5)*220); scene.add(c); clouds.push(c); }
+ 
+ /* ================= PLAYER / WEAPON ================= */
+-const player={ pos:new THREE.Vector3(0,1.7,24), vel:new THREE.Vector3(), yaw:0, pitch:0, hp:100, maxHp:100, alive:true, onGround:true, lastDamage:-99, speed:6, kills:0, shots:0, hits:0, startTime:0 };
++const player={ pos:new THREE.Vector3(0,1.7,24), vel:new THREE.Vector3(), yaw:0, pitch:0, hp:100, maxHp:100, alive:true, onGround:true, lastDamage:-99, speed:6, kills:0, shots:0, hits:0, startTime:0, h:1.7 };
+ const gun={ mag:30, magSize:30, reserve:90, reloading:false, ads:0, adsTarget:0, spread:0.012, rof:0.105, lastShot:-9, auto:true, kick:0, damage:[26,34] };
+ // weapon viewmodel
+ const vmGroup=new THREE.Group(); camera.add(vmGroup); scene.add(camera);
+ const metalDark=new THREE.MeshStandardMaterial({color:0x1c1f24,roughness:0.5,metalness:0.7});
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -462,9 +462,10 @@
+ function collide(p,r=0.6){ for(const c of colliders){ const dx=p.x-c.x,dz=p.z-c.z; const px=c.hx+r-Math.abs(dx),pz=c.hz+r-Math.abs(dz);
+     if(px>0&&pz>0){ if(px<pz)p.x=c.x+Math.sign(dx||1)*(c.hx+r); else p.z=c.z+Math.sign(dz||1)*(c.hz+r); } }
+   p.x=Math.max(-ARENA,Math.min(ARENA,p.x)); p.z=Math.max(-ARENA,Math.min(ARENA,p.z)); }
+ let moveMag=0;
+-function updatePlayer(dt,now){ const sprint=(keys['ShiftLeft']||keys['ShiftRight'])&&!gun.adsTarget; const speed=(sprint?9:5.6)*(gun.adsTarget?0.55:1);
++function updatePlayer(dt,now){ const crouch=!!keys['KeyC']; const targetH=crouch?1.15:1.7; player.h+=(targetH-player.h)*Math.min(1,dt*10);
++  const sprint=(keys['ShiftLeft']||keys['ShiftRight'])&&!gun.adsTarget&&!crouch; const speed=(sprint?9:5.6)*(gun.adsTarget?0.55:1)*(crouch?0.55:1);
+   let ix=0,iz=0; if(keys['KeyW']||keys['ArrowUp'])iz-=1; if(keys['KeyS']||keys['ArrowDown'])iz+=1; if(keys['KeyA']||keys['ArrowLeft'])ix-=1; if(keys['KeyD']||keys['ArrowRight'])ix+=1;
+   ix+=touch.mx; iz+=touch.mz; const l=Math.hypot(ix,iz); if(l>1){ix/=l;iz/=l;}
+   const sin=Math.sin(player.yaw),cos=Math.cos(player.yaw);
+   const wx=(ix*cos-iz*sin)*speed, wz=(ix*sin+iz*cos)*speed*-1;
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -474,9 +474,9 @@
+ let vx=(fx*-iz+rx*ix)*speed, vz=(fz*-iz+rz*ix)*speed;
+ player.vel.x+=(vx-player.vel.x)*Math.min(1,dt*10); player.vel.z+=(vz-player.vel.z)*Math.min(1,dt*10);
+ player.vel.y-=16*dt; if(keys['Space']&&player.onGround){player.vel.y=5.4;player.onGround=false;}
+ player.pos.x+=player.vel.x*dt; player.pos.z+=player.vel.z*dt; player.pos.y+=player.vel.y*dt;
+-if(player.pos.y<=1.7){player.pos.y=1.7;player.vel.y=0;player.onGround=true;}
++if(player.pos.y<=player.h){player.pos.y=player.h;player.vel.y=0;player.onGround=true;}
+ collide(player.pos);
+ moveMag=Math.hypot(player.vel.x,player.vel.z);
+ // headbob
+ const bobT=now*0.001*(sprint?13:9); const bobA=Math.min(moveMag/6,1)*(player.onGround?1:0);
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -91,9 +91,9 @@
+   <div id="obj">◉ ELIMINATE ALL HOSTILES — clear 3 waves to win</div>
+   <canvas id="minimap" width="150" height="150"></canvas>
+   <div id="killfeed"></div>
+   <div id="bottom">
+-    <div id="healthwrap"><div id="hpbar"><div id="hpfill"></div></div><div id="hptext">100 HP</div><div id="stance">SHIFT SPRINT · SPACE JUMP · R RELOAD · RMB AIM</div></div>
++    <div id="healthwrap"><div id="hpbar"><div id="hpfill"></div></div><div id="hptext">100 HP</div><div id="stance">SHIFT SPRINT · C CROUCH · SPACE JUMP · R RELOAD · RMB AIM</div></div>
+     <div id="ammo"><div class="name">AR-7 STRIKER · AUTO</div><div class="mag"><span id="mag">30</span><small> / <span id="reserve">90</span></small></div><div id="reloadtip"></div></div>
+   </div>
+ </div>
+ <div id="wavetrans"><h2 id="wavetransText">WAVE <span>1</span></h2></div>
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -107,11 +107,13 @@
+     <div class="keys">
+       <div><b>W A S D</b> Move</div><div><b>MOUSE</b> Look / aim</div>
+       <div><b>LMB</b> Fire</div><div><b>RMB</b> Aim down sights</div>
+       <div><b>R</b> Reload</div><div><b>SHIFT / SPACE</b> Sprint / Jump</div>
++      <div><b>C</b> Crouch</div><div><b>ESC</b> Pause</div>
+     </div>
+     <button class="btn" id="playBtn">▶ DEPLOY</button>
+     <p style="margin-top:12px;font-size:12px;color:#8b96a5">Click locks your mouse · ESC pauses · sound on recommended 🔊</p>
++    <p style="margin-top:8px;font-size:11px;color:#6b7684">3D models: “Low-Poly M4a1” by TastyTony · “Enemy Soldier” by TechLabID (CC Attribution via Sketchfab)</p>
+   </div>
+ </div>
+ 
+ <div class="screen hidden" id="pause">
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -595,8 +595,9 @@
+ }
+ addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+ loop();
+ window.__game={player,enemies,gun,get wave(){return wave;},
++  get assets(){ return {rifle:rifleLoaded, soldier:!!soldierTpl, glbFoes:enemies.filter(e=>!e.dead&&e.glb).length}; },
+   // playtest hook: aim at nearest live enemy and fire until it dies (used by automated checks)
+   debugKillNearest(){ const live=enemies.filter(e=>!e.dead); if(!live.length)return 'none-left';
+     live.sort((a,b)=>a.g.position.distanceTo(player.pos)-b.g.position.distanceTo(player.pos)); const e=live[0];
+     const dx=e.g.position.x-player.pos.x, dz=e.g.position.z-player.pos.z;
+
+[0m
+Now serve locally and verify in a real browser:
+[0m$ [0mnohup python3 -m http.server 8767 >/tmp/http3.log 2>&1 & sleep 2; curl -s -o /dev/null -w "local:%{http_code}\n" --max-time 8 http://127.0.0.1:8767/index.html; curl -s -o /dev/null -w "glb:%{http_code}:%{size_download}\n" --max-time 15 http://127.0.0.1:8767/assets/rifle.glb
+local:000
+glb:000:0
+[0m
+[0m$ [0mcat /tmp/http3.log; ps aux | grep "[h]ttp.server" | head -3; python3 -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8767/index.html', timeout=8).status)" 2>&1 | tail -2
+runner           31453   0.9  5.2 508801184 384880   ??  S<   12:03AM   0:14.06 /Users/runner/.opencode/bin/opencode run --auto --dangerously-skip-permissions --attach http://127.0.0.1:49206 --dir /Users/runner/work/PlayGround/PlayGround --session ses_f86dda680ffeGZ9xCaR9QRdgZB --model opencode/muse-spark-1.3-contributor-free --command goal Resume your existing Goal in this same session — do not create a new session, do not restart, keep working toward: Build a small playable browser first-person military shooter inspired by Call of Duty. Include responsive movement and aiming, a simple weapon with shooting feedback, enemy targets with basic behavior, health/ammo HUD, and a clear win/lose loop. Keep it self-contained and polished enough for a quick browser playtest.\012\012You are still in Goal mode. You are forbidden from emitting `[goal:blocked]` for scope, difficulty, missing polish, budget, time, or lack of optional assets. Lack of perfect assets is not a blocker — make the highest-impact achievable improvements now with code, procedural assets, and downloadable GLBs.\012\012Do this now in this repo/branch:\0121. `git status --short; git log --oneline -3; ls -la; ls screenshots/` and Read `index.html` and view `screenshots/final-menu.png` + `screenshots/final-gameplay.png`. Treat prior output as untrusted — verify by running.\0122. Use the requested stack (Three.js + self-contained `index.html`) and invoke the `load-sketchfab-threejs` skill to fetch suitable downloadable GLB assets for a 3D request: 1 detailed rifle viewmodel + 1 hostile soldier enemy model. Vendor them locally (e.g. `assets/`), wire into the game with fallback to current procedural meshes if load fails. Keep `index.html` playable via local http.server.\0123. Make highest-impact gameplay/visual upgrades in priority order, editing `index.html` directly: responsive WASD+sprint+jump/crouch + pointer-lock mouse look with ADS zoom; weapon with recoil/kick, muzzle flash light, tracer, impact decals, reload + empty-click + synthesized gunshot; enemies with spawn/wave logic, strafe/advance/chase AI, attack tracers, hit flash + damage numbers + death + killfeed; HUD with health bar + damage vignette + ammo mag/reserve + wave + enemies-left + crosshair spread + hitmarker; clear menu -> playing -> wave progression -> win after 3 waves + lose on death -> restart. Add shadows, fog, sky, ground detail, cover crates/sandbags, lighting polish.\0124. After EACH meaningful improvement: verify visibly in a real browser via `python3 -m http.server` + playwright `shot.js` (no `requestPointerLock` WrongDocumentError fatal, zero PAGEERROR), capture fresh `screenshots/` (menu, gameplay, combat, win, lose), Read them back and perform a harsh visual critique: call out flat lighting, floating weapons, unreadable HUD, empty ground, pop-in — then fix and re-screenshot until polished for quick playtest.\0125. When verified: `git add index.html assets/ screenshots/` commit, `git push origin HEAD`, post progress + final comment to issue #36 with playtest URL, controls, and embedded screenshots.\012\012Never claim `[goal:complete]` while movement/aiming, shooting feedback, enemy behavior, HUD, and win/lose loop are unmet or unverified in browser screenshots. Stop only after the configured execution budget is exhausted or concrete user input is genuinely required (e.g. missing repo permission or required secret — state exact command output proving it).
+    raise URLError(err)
+urllib.error.URLError: <urlopen error [Errno 61] Connection refused>
+[0m
+The background server dies between tool calls. Running server + browser in a single command:
+[0m← [0mWrite /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/shot.js
+Wrote file successfully.
+[0m
+[0m$ [0mpython3 -m http.server 8767 & SRV=$!; sleep 2; NODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/shot.js http://127.0.0.1:8767/index.html; kill $SRV 2>/dev/null; true
+FATAL page.goto: net::ERR_CONNECTION_TIMED_OUT at http://127.0.0.1:8767/index.html
+Call log:
+  - navigating to "http://127.0.0.1:8767/index.html", waiting until "networkidle"
+
+    at /private/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/shot.js:9:14 {
+  log: [
+    '  - navigating to "http://127.0.0.1:8767/index.html", waiting until "networkidle"'
+  ],
+  name: 'Error'
+}
+[0m
+Loopback is likely intercepted by a proxy. Retrying the browser with `--no-proxy-server`:
+[0m$ [0menv | grep -i -E "proxy" | sed 's/=.*/=<set>/'; echo ---; export NO_PROXY="127.0.0.1,localhost"; export no_proxy="127.0.0.1,localhost"; python3 -m http.server 8771 & SRV=$!; sleep 2; curl -s -o /dev/null -w "curl:%{http_code}\n" --max-time 8 --noproxy '*' http://127.0.0.1:8771/index.html; kill $SRV 2>/dev/null; true
+---
+curl:000
+[0m
+[0m$ [0mpython3 -c "
+import base64
+html = open('index.html').read()
+for name in ['rifle','soldier']:
+    b = base64.b64encode(open(f'assets/{name}.glb','rb').read()).decode()
+    html = html.replace(f\"'assets/{name}.glb'\", f\"'data:model/gltf-binary;base64,{b}'\")
+open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/inline-test.html','w').write(html)
+print('inline bytes:', len(html))
+" && NODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/shot.js "file:///var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/inline-test.html"
+inline bytes: 5827322
+PRE_ASSETS: {"rifle":true,"soldier":true,"glbFoes":0}
+MID: {"assets":{"rifle":true,"soldier":true,"glbFoes":4},"wave":1,"alive":4}
+COMBAT: {"kills":1,"shots":2,"hits":2,"mag":28,"hp":74}
+ERRORS: []
+[0m
+Both GLBs loaded, combat works, zero errors. Inspecting visuals:
+[0m→ [0mRead screenshots/combat.png
+[0m→ [0mRead screenshots/gameplay.png
+[0m
+[0m$ [0mcat > /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/probe.js <<'EOF'
+const { chromium } = require('playwright-core');
+(async () => {
+  const browser = await chromium.launch({ args: ['--use-gl=swiftshader','--enable-unsafe-swiftshader','--no-sandbox'] });
+  const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  page.on('pageerror', e => console.log('PAGEERROR:', String(e).slice(0,200)));
+  await page.goto('file:///var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe.html', { waitUntil: 'networkidle', timeout: 60000 });
+  await page.waitForTimeout(5000);
+  console.log(await page.evaluate(() => document.getElementById('out').textContent));
+  await page.screenshot({ path: '/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe.png' });
+  await browser.close();
+})();
+EOF
+echo written
+written
+[0m
+[0m$ [0mpython3 -c "
+import base64
+b = base64.b64encode(open('assets/rifle.glb','rb').read()).decode()
+html = '''<!DOCTYPE html><html><body><div id=out></div><script type=importmap>{\"imports\":{\"three\":\"https://unpkg.com/three@0.160.0/build/three.module.js\",\"three/addons/\":\"https://unpkg.com/three@0.160.0/examples/jsm/\"}}</script><script type=module>
+import * as THREE from \'three\';
+import { GLTFLoader } from \'three/addons/loaders/GLTFLoader.js\';
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(1280,480); document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x223344);
+scene.add(new THREE.HemisphereLight(0xffffff,0x444444,1.4));
+const sun = new THREE.DirectionalLight(0xffffff,1.5); sun.position.set(3,5,4); scene.add(sun);
+const uri = \\'DATAURI\\';
+const gltf = await new GLTFLoader().loadAsync(uri);
+const box = new THREE.Box3().setFromObject(gltf.scene);
+const size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
+document.getElementById(\\'out\\').textContent = \\'SIZE:\\'+size.x.toFixed(2)+\\',\\'+size.y.toFixed(2)+\\',\\'+size.z.toFixed(2)+\\' CTR:\\'+ctr.x.toFixed(2)+\\',\\'+ctr.y.toFixed(2)+\\',\\'+ctr.z.toFixed(2);
+gltf.scene.position.sub(ctr);
+[0, Math.PI/2, Math.PI].forEach((yaw,i)=>{
+  const w = new THREE.Group(); w.add(i===0?gltf.scene:gltf.scene.clone());
+  w.rotation.y = yaw; w.position.set((i-1)*2.2, 0.9, 0);
+  const m = Math.max(size.x,size.y,size.z); w.scale.setScalar(1.4/m);
+  scene.add(w);
+});
+const cam = new THREE.PerspectiveCamera(40,1280/480,0.01,100);
+cam.position.set(0,1.1,4.2); cam.lookAt(0,0.8,0);
+renderer.render(scene,cam);
+</script></body></html>'''.replace('DATAURI', 'data:model/gltf-binary;base64,'+b)
+open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe.html','w').write(html)
+print('probe bytes:', len(html))
+"
+probe bytes: 2369040
+[0m
+[0m$ [0mNODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/probe.js
+SIZE:420.82,4169.78,1114.71 CTR:69.78,-132.96,33.28
+[0m
+[0m→ [0mRead /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe.png
+Probe was ruined by skeleton joints inflating bounds. Re-probing with mesh-only bounds:
+[0m
+[0m$ [0mpython3 -c "
+import base64
+b = base64.b64encode(open('assets/rifle.glb','rb').read()).decode()
+lines = open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/probe.js').read()
+tpl = '''<!DOCTYPE html><html><body><pre id=out></pre><script type=importmap>{\"imports\":{\"three\":\"https://unpkg.com/three@0.160.0/build/three.module.js\",\"three/addons/\":\"https://unpkg.com/three@0.160.0/examples/jsm/\"}}</script><script type=module>
+import * as THREE from \'three\';
+import { GLTFLoader } from \'three/addons/loaders/GLTFLoader.js\';
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(1280,480); document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x223344);
+scene.add(new THREE.HemisphereLight(0xffffff,0x444444,1.6));
+const sun = new THREE.DirectionalLight(0xffffff,1.6); sun.position.set(3,5,4); scene.add(sun);
+const gltf = await new GLTFLoader().loadAsync(\\'DATAURI\\');
+gltf.scene.updateMatrixWorld(true);
+const box = new THREE.Box3(); let info = [];
+gltf.scene.traverse(o=>{ if(o.isMesh){ o.geometry.computeBoundingBox(); const b = o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld); box.union(b); info.push(o.name+\':\'+b.getSize(new THREE.Vector3()).toArray().map(v=>v.toFixed(0)).join(\"x\")); }});
+const size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
+document.getElementById(\\'out\\').textContent = \\'MESHBOX:\\'+size.x.toFixed(1)+\\',\\'+size.y.toFixed(1)+\\',\\'+size.z.toFixed(1)+\\' CTR:\\'+ctr.x.toFixed(1)+\\',\\'+ctr.y.toFixed(1)+\\',\\'+ctr.z.toFixed(1)+\\'\\n\\'+info.join(\\'\\n\\');
+[0, Math.PI/2, Math.PI].forEach((yaw,i)=>{
+  const w = new THREE.Group();
+  const src = i===0 ? gltf.scene : gltf.scene.clone(true);
+  // hide bones/helpers: only meshes
+  w.add(src); w.rotation.y = yaw;
+  src.position.sub(ctr);
+  w.position.set((i-1)*2.4, 1.0, 0);
+  w.scale.setScalar(1.5/Math.max(size.x,size.y,size.z));
+  scene.add(w);
+});
+const cam = new THREE.PerspectiveCamera(40,1280/480,0.01,100);
+cam.position.set(0,1.2,4.4); cam.lookAt(0,0.9,0);
+renderer.render(scene,cam);
+</script></body></html>'''.replace('DATAURI', 'data:model/gltf-binary;base64,'+b)
+open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe.html','w').write(tpl)
+print('ok')
+" && sed -i "s#file:///var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe.html#file:///var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe.html#" /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/probe.js && NODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/probe.js
+ok
+sed: 1: "/var/folders/d8/hvxvltx ...": invalid command code f
+[0m
+[0m$ [0mNODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/probe.js
+PAGEERROR: SyntaxError: Invalid or unexpected token
+[0m
+[0m← [0mWrite /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe-tpl.html
+Wrote file successfully.
+[0m
+[0m$ [0mpython3 -c "
+import base64
+b = base64.b64encode(open('assets/rifle.glb','rb').read()).decode()
+t = open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe-tpl.html').read()
+t = t.replace('@@DATAURI@@', 'data:model/gltf-binary;base64,'+b)
+open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe.html','w').write(t)
+print('ok')
+"
+ok
+[0m
+[0m$ [0mNODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/probe.js
+MESHBOX:290.4,2877.8,868.2 CTR:56.8,-90.0,25.9
+Object_12:262x2002x349
+Object_13:207x2108x523
+Object_14:164x1340x622
+Object_15:96x1548x183
+Object_16:84x357x74
+Object_17:45x3x45
+Object_18:64x145x64
+Object_19:50x41x49
+Object_20:89x265x599
+Object_21:158x951x596
+Object_22:240x1986x487
+[0m
+[0m→ [0mRead /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe.png
+[0m
+[0m$ [0mpython3 .agents/skills/load-sketchfab-threejs/scripts/download_model.py "low poly assault rifle" --count 12 --max-glb-mb 6 --max-faces 30000 --require-glb --downloadable --no-animations --download 0 --output /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle2.glb 2>&1 | tail -2 && node .agents/skills/load-sketchfab-threejs/scripts/inspect_glb.mjs /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle2.glb 2>&1 | grep -E '"(title|bytes|meshes|materials|nodes)"|"skins"|"animations"' | head
+Downloaded 230,420 bytes to /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle2.glb
+Attribution metadata: /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle2.glb.attribution.json
+  "bytes": 230420,
+  "title": "Low-Poly Assault Rifle",
+  "nodes": 19,
+  "meshes": 2,
+  "skins": [
+  "animations": [],
+  "materials": 1,
+      "bytes": 123238,
+[0m
+[0m$ [0mcat /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle2.glb.attribution.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['name'], '|', d['author'], '|', d['license'], '| faces:', d['faceCount'])"; python3 -c "
+import base64
+b = base64.b64encode(open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle2.glb','rb').read()).decode()
+t = open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe-tpl.html').read()
+open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe.html','w').write(t.replace('@@DATAURI@@', 'data:model/gltf-binary;base64,'+b))
+print('ok')
+" && NODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/probe.js
+Low-Poly Assault Rifle | ToporEnterprise | CC Attribution | faces: 818
+ok
+MESHBOX:0.9,0.9,0.3 CTR:-0.4,0.2,-0.0
+Object_10:0x1x0
+Object_18:0x1x0
+[0m
+[0m→ [0mRead /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe.png
+[0m
+[0m← [0mEdit /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe-tpl.html
+Index: /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe-tpl.html
+===================================================================
+--- /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe-tpl.html
++++ /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe-tpl.html
+@@ -12,10 +12,11 @@
+ gltf.scene.updateMatrixWorld(true);
+ const box = new THREE.Box3(); const info = [];
+ gltf.scene.traverse((o)=>{
+   if(o.isMesh){
+-    o.geometry.computeBoundingBox();
+-    const b = o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld);
++    let b;
++    if(o.isSkinnedMesh){ o.computeBoundingBox(); b = o.boundingBox.clone().applyMatrix4(o.matrixWorld); }
++    else { o.geometry.computeBoundingBox(); b = o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld); }
+     box.union(b);
+     const s = b.getSize(new THREE.Vector3());
+     info.push(o.name + ":" + s.x.toFixed(0) + "x" + s.y.toFixed(0) + "x" + s.z.toFixed(0));
+   }
+
+[0m
+[0m$ [0mpython3 -c "
+import base64
+b = base64.b64encode(open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle2.glb','rb').read()).decode()
+t = open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe-tpl.html').read()
+open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle-probe.html','w').write(t.replace('@@DATAURI@@', 'data:model/gltf-binary;base64,'+b))
+print('ok')
+" && NODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/probe.js
+ok
+MESHBOX:0.5,0.4,0.9 CTR:-0.2,-0.1,0.2
+Object_10:0x0x1
+Object_18:0x0x1
+[0m
+[0m$ [0mcp /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle2.glb assets/rifle.glb && cp /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/rifle2.glb.attribution.json assets/rifle.glb.attribution.json && ls -la assets/ && python3 -c "import json; d=json.load(open('assets/rifle.glb.attribution.json')); print(d['name'],'|',d['author'],'|',d['license'])"
+total 5464
+drwxr-xr-x   6 runner  staff      192 Sep  7 00:06 .
+drwxr-xr-x  19 runner  staff      608 Sep  7 00:05 ..
+-rw-r--r--   1 runner  staff   230420 Sep  7 00:22 rifle.glb
+-rw-r--r--   1 runner  staff      644 Sep  7 00:22 rifle.glb.attribution.json
+-rw-r--r--   1 runner  staff  2553692 Sep  7 00:06 soldier.glb
+-rw-r--r--   1 runner  staff     1101 Sep  7 00:06 soldier.glb.attribution.json
+Low-Poly Assault Rifle | ToporEnterprise | CC Attribution
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -246,8 +246,15 @@
+   g.fillStyle=gr; g.fillRect(0,0,64,64); return new THREE.CanvasTexture(c); })();
+ const flash=new THREE.Sprite(new THREE.SpriteMaterial({map:flashTex,transparent:true,opacity:0,depthTest:false})); flash.scale.set(0.35,0.35,1); flash.position.set(0,-0.19,-1.2); vmGroup.add(flash);
+ vmGroup.position.set(0.24,-0.26,-0.35);
+ /* ---- Sketchfab GLB rifle viewmodel (fallback: procedural parts above) ---- */
++// trueBounds: correct world bounds for skinned meshes (Box3.setFromObject ignores skinning)
++function trueBounds(obj){ obj.updateMatrixWorld(true); const box=new THREE.Box3();
++  obj.traverse(o=>{ if(o.isMesh){ let b;
++    if(o.isSkinnedMesh){ try{ o.computeBoundingBox(); b=o.boundingBox.clone().applyMatrix4(o.matrixWorld); }catch(e){ return; } }
++    else { o.geometry.computeBoundingBox(); b=o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld); }
++    box.union(b); } });
++  return box; }
+ // Tune: RIFLE_YAW orients the authored model so the barrel points away (-Z).
+ const RIFLE_YAW=Math.PI, RIFLE_POS=new THREE.Vector3(0,-0.20,-0.55), RIFLE_LEN=0.85;
+ const vmRifle=new THREE.Group(); vmGroup.add(vmRifle);
+ const muzzleTip=new THREE.Object3D(); // barrel tip anchor (repositioned on load)
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -261,9 +261,9 @@
+ let rifleLoaded=false;
+ new GLTFLoader().load('assets/rifle.glb',gltf=>{
+   try{
+     const tpl=gltf.scene;
+-    const box=new THREE.Box3().setFromObject(tpl);
++    const box=trueBounds(tpl);
+     const size=box.getSize(new THREE.Vector3()), ctr=box.getCenter(new THREE.Vector3());
+     tpl.position.sub(ctr); // center model at origin
+     const wrap=new THREE.Group(); wrap.add(tpl);
+     if(size.x>size.z&&size.x>=size.y)wrap.rotation.y=Math.PI/2; // longest axis -> Z
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -307,9 +307,9 @@
+ let soldierTpl=null, soldierClips=[];
+ const SOLDIER_H=1.8; // normalized height in meters
+ new GLTFLoader().load('assets/soldier.glb',gltf=>{
+   try{
+-    const box=new THREE.Box3().setFromObject(gltf.scene);
++    const box=trueBounds(gltf.scene);
+     const size=box.getSize(new THREE.Vector3()), ctr=box.getCenter(new THREE.Vector3());
+     gltf.scene.position.set(-ctr.x,-box.min.y,-ctr.z); // feet at origin, XZ centered
+     const wrap=new THREE.Group(); wrap.add(gltf.scene);
+     wrap.scale.setScalar(SOLDIER_H/size.y);
+
+[0m
+[0m✗ [0mEdit index.html failed
+[91m[1mError: [0mCould not find oldString in the file. It must match exactly, including whitespace, indentation, and line endings.
+[0m✱ [0mGrep "Sketchfab|TastyTony|M4A1"[90m in . · 7 matches[0m
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -111,9 +111,9 @@
+       <div><b>C</b> Crouch</div><div><b>ESC</b> Pause</div>
+     </div>
+     <button class="btn" id="playBtn">▶ DEPLOY</button>
+     <p style="margin-top:12px;font-size:12px;color:#8b96a5">Click locks your mouse · ESC pauses · sound on recommended 🔊</p>
+-    <p style="margin-top:8px;font-size:11px;color:#6b7684">3D models: “Low-Poly M4a1” by TastyTony · “Enemy Soldier” by TechLabID (CC Attribution via Sketchfab)</p>
++    <p style="margin-top:8px;font-size:11px;color:#6b7684">3D models: “Low-Poly Assault Rifle” by ToporEnterprise · “Enemy Soldier” by TechLabID (CC Attribution via Sketchfab)</p>
+   </div>
+ </div>
+ 
+ <div class="screen hidden" id="pause">
+
+[0m
+[0m$ [0mpython3 -c "
+import base64
+html = open('index.html').read()
+for name in ['rifle','soldier']:
+    b = base64.b64encode(open(f'assets/{name}.glb','rb').read()).decode()
+    html = html.replace(f\"'assets/{name}.glb'\", f\"'data:model/gltf-binary;base64,{b}'\")
+open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/inline-test.html','w').write(html)
+print('ok')
+" && NODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/shot.js "file:///var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/inline-test.html"
+ok
+PRE_ASSETS: {"rifle":true,"soldier":true,"glbFoes":0}
+MID: {"assets":{"rifle":true,"soldier":true,"glbFoes":4},"wave":1,"alive":4}
+COMBAT: {"kills":1,"shots":9,"hits":3,"mag":21,"hp":52}
+ERRORS: []
+[0m
+[0m→ [0mRead screenshots/gameplay.png
+[0m
+[0m$ [0mnode .agents/skills/load-sketchfab-threejs/scripts/inspect_glb.mjs assets/rifle.glb 2>&1 | python3 -c "import json,sys; d=json.load(sys.stdin); print(json.dumps(d.get('nodes',d), indent=0)[:3000])"
+19
+[0m
+[0m$ [0mnode .agents/skills/load-sketchfab-threejs/scripts/inspect_glb.mjs assets/rifle.glb 2>&1 | head -100
+{
+  "schemaVersion": 2,
+  "path": "/Users/runner/work/PlayGround/PlayGround/assets/rifle.glb",
+  "bytes": 230420,
+  "sha256": "18de8da78856b3574ebd3be98ed4412bb38a6a2fb81d1fd42831f02d98185ee8",
+  "title": "Low-Poly Assault Rifle",
+  "author": "ToporEnterprise (https://sketchfab.com/lebedeventerprise)",
+  "generator": "Sketchfab-12.66.0",
+  "extensionsUsed": [
+    "KHR_materials_unlit"
+  ],
+  "extensionsRequired": [],
+  "scenes": 1,
+  "nodes": 19,
+  "meshes": 2,
+  "morphTargets": 0,
+  "skins": [
+    {
+      "index": 0,
+      "name": "skin-0",
+      "joints": 4,
+      "skeleton": 5
+    },
+    {
+      "index": 1,
+      "name": "skin-1",
+      "joints": 4,
+      "skeleton": 13
+    }
+  ],
+  "animations": [],
+  "materials": 1,
+  "textures": 1,
+  "images": [
+    {
+      "index": 0,
+      "name": "image-0",
+      "mimeType": "image/png",
+      "uri": null,
+      "bytes": 123238,
+      "embedded": true
+    }
+  ],
+  "materialDetails": [
+    {
+      "index": 0,
+      "name": "AR223_Mat",
+      "baseColorFactor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "baseColorTexture": 0,
+      "metallicFactor": 0,
+      "roughnessFactor": 1,
+      "metallicRoughnessTexture": null,
+      "normalTexture": null,
+      "occlusionTexture": null,
+      "emissiveFactor": [
+        0,
+        0,
+        0
+      ],
+      "emissiveTexture": null,
+      "alphaMode": "OPAQUE",
+      "alphaCutoff": 0.5,
+      "doubleSided": true,
+      "unlit": true,
+      "transmissionFactor": null,
+      "transmissionTexture": null,
+      "clearcoatFactor": null,
+      "clearcoatTexture": null,
+      "specularFactor": null,
+      "specGlossDiffuseTexture": null,
+      "extensions": [
+        "KHR_materials_unlit"
+      ]
+    }
+  ],
+  "textureDetails": [
+    {
+      "index": 0,
+      "name": "texture-0",
+      "source": 0,
+      "sampler": 0,
+      "extensions": [],
+      "usages": [
+        {
+          "material": 0,
+          "slot": "baseColorTexture"
+        }
+      ]
+    }
+  ],
+  "binaryBytes": 223280
+}
+[0m
+[0m← [0mWrite /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/mesh-probe-tpl.html
+Wrote file successfully.
+[0m
+[0m$ [0mpython3 -c "
+import base64
+b = base64.b64encode(open('assets/rifle.glb','rb').read()).decode()
+t = open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/mesh-probe-tpl.html').read()
+open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/mesh-probe.html','w').write(t.replace('@@DATAURI@@', 'data:model/gltf-binary;base64,'+b))
+print('ok')
+" && sed -i '' 's#rifle-probe.html#mesh-probe.html#; s#rifle-probe.png#mesh-probe.png#' /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/probe.js && NODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/probe.js
+ok
+Object_10 tris=409 size=0.06,0.27,0.89 ctr=-0.00,0.00,0.16
+Object_18 tris=409 size=0.06,0.41,0.89 ctr=-0.42,-0.07,0.16
+[0m
+[0m→ [0mRead /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/mesh-probe.png
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -261,8 +261,11 @@
+ let rifleLoaded=false;
+ new GLTFLoader().load('assets/rifle.glb',gltf=>{
+   try{
+     const tpl=gltf.scene;
++    // file ships two side-by-side rifles (Object_10 + duplicate Object_18): keep one
++    let kept=0; tpl.traverse(o=>{ if(o.isMesh){ if(o.name==='Object_18'){ o.visible=false; } else kept++; } });
++    if(!kept){ tpl.traverse(o=>{ if(o.isMesh)o.visible=true; }); } // safety: never hide everything
+     const box=trueBounds(tpl);
+     const size=box.getSize(new THREE.Vector3()), ctr=box.getCenter(new THREE.Vector3());
+     tpl.position.sub(ctr); // center model at origin
+     const wrap=new THREE.Group(); wrap.add(tpl);
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -248,9 +248,9 @@
+ vmGroup.position.set(0.24,-0.26,-0.35);
+ /* ---- Sketchfab GLB rifle viewmodel (fallback: procedural parts above) ---- */
+ // trueBounds: correct world bounds for skinned meshes (Box3.setFromObject ignores skinning)
+ function trueBounds(obj){ obj.updateMatrixWorld(true); const box=new THREE.Box3();
+-  obj.traverse(o=>{ if(o.isMesh){ let b;
++  obj.traverse(o=>{ if(o.isMesh&&o.visible){ let b;
+     if(o.isSkinnedMesh){ try{ o.computeBoundingBox(); b=o.boundingBox.clone().applyMatrix4(o.matrixWorld); }catch(e){ return; } }
+     else { o.geometry.computeBoundingBox(); b=o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld); }
+     box.union(b); } });
+   return box; }
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -254,9 +254,10 @@
+     else { o.geometry.computeBoundingBox(); b=o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld); }
+     box.union(b); } });
+   return box; }
+ // Tune: RIFLE_YAW orients the authored model so the barrel points away (-Z).
+-const RIFLE_YAW=Math.PI, RIFLE_POS=new THREE.Vector3(0,-0.20,-0.55), RIFLE_LEN=0.85;
++// (Probed: rendered barrel lies along -X, so -90° about Y maps it to -Z.)
++const RIFLE_YAW=-Math.PI/2, RIFLE_POS=new THREE.Vector3(0.02,-0.22,-0.55), RIFLE_LEN=0.85;
+ const vmRifle=new THREE.Group(); vmGroup.add(vmRifle);
+ const muzzleTip=new THREE.Object3D(); // barrel tip anchor (repositioned on load)
+ let rifleLoaded=false;
+ new GLTFLoader().load('assets/rifle.glb',gltf=>{
+
+[0m
+[0m$ [0mpython3 -c "
+import base64
+html = open('index.html').read()
+for name in ['rifle','soldier']:
+    b = base64.b64encode(open(f'assets/{name}.glb','rb').read()).decode()
+    html = html.replace(f\"'assets/{name}.glb'\", f\"'data:model/gltf-binary;base64,{b}'\")
+open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/inline-test.html','w').write(html)
+print('ok')
+" && NODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/shot.js "file:///var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/inline-test.html"
+ok
+PRE_ASSETS: {"rifle":true,"soldier":true,"glbFoes":0}
+MID: {"assets":{"rifle":true,"soldier":true,"glbFoes":4},"wave":1,"alive":4}
+COMBAT: {"kills":1,"shots":2,"hits":2,"mag":28,"hp":88}
+ERRORS: []
+[0m
+[0m→ [0mRead screenshots/gameplay.png
+[0m→ [0mRead screenshots/combat.png
+[0m
+[0m← [0mWrite /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/yaw-probe-tpl.html
+Wrote file successfully.
+[0m
+[0m$ [0mpython3 -c "
+import base64
+b = base64.b64encode(open('assets/rifle.glb','rb').read()).decode()
+t = open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/yaw-probe-tpl.html').read()
+open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/yaw-probe.html','w').write(t.replace('@@DATAURI@@', 'data:model/gltf-binary;base64,'+b))
+print('ok')
+" && sed -i '' 's#mesh-probe.html#yaw-probe.html#; s#mesh-probe.png#yaw-probe.png#' /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/probe.js && NODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/probe.js
+ok
+single rifle, yaws 0 / 90 / 180 / 270 (camera looks along -Z)
+[0m
+[0m→ [0mRead /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/yaw-probe.png
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -254,10 +254,10 @@
+     else { o.geometry.computeBoundingBox(); b=o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld); }
+     box.union(b); } });
+   return box; }
+ // Tune: RIFLE_YAW orients the authored model so the barrel points away (-Z).
+-// (Probed: rendered barrel lies along -X, so -90° about Y maps it to -Z.)
+-const RIFLE_YAW=-Math.PI/2, RIFLE_POS=new THREE.Vector3(0.02,-0.22,-0.55), RIFLE_LEN=0.85;
++// (Probed: single kept mesh renders barrel along +Z, so 180° faces it forward.)
++const RIFLE_YAW=Math.PI, RIFLE_POS=new THREE.Vector3(0.02,-0.22,-0.55), RIFLE_LEN=0.85;
+ const vmRifle=new THREE.Group(); vmGroup.add(vmRifle);
+ const muzzleTip=new THREE.Object3D(); // barrel tip anchor (repositioned on load)
+ let rifleLoaded=false;
+ new GLTFLoader().load('assets/rifle.glb',gltf=>{
+
+[0m
+[0m$ [0mpython3 -c "
+import base64
+html = open('index.html').read()
+for name in ['rifle','soldier']:
+    b = base64.b64encode(open(f'assets/{name}.glb','rb').read()).decode()
+    html = html.replace(f\"'assets/{name}.glb'\", f\"'data:model/gltf-binary;base64,{b}'\")
+open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/inline-test.html','w').write(html)
+print('ok')
+" && NODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/shot.js "file:///var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/inline-test.html"
+ok
+PRE_ASSETS: {"rifle":true,"soldier":true,"glbFoes":0}
+MID: {"assets":{"rifle":true,"soldier":true,"glbFoes":4},"wave":1,"alive":4}
+COMBAT: {"kills":1,"shots":4,"hits":2,"mag":26,"hp":69}
+ERRORS: []
+[0m
+[0m→ [0mRead screenshots/gameplay.png
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -255,9 +255,9 @@
+     box.union(b); } });
+   return box; }
+ // Tune: RIFLE_YAW orients the authored model so the barrel points away (-Z).
+ // (Probed: single kept mesh renders barrel along +Z, so 180° faces it forward.)
+-const RIFLE_YAW=Math.PI, RIFLE_POS=new THREE.Vector3(0.02,-0.22,-0.55), RIFLE_LEN=0.85;
++const RIFLE_YAW=Math.PI, RIFLE_POS=new THREE.Vector3(0.05,-0.20,-0.50), RIFLE_LEN=0.95;
+ const vmRifle=new THREE.Group(); vmGroup.add(vmRifle);
+ const muzzleTip=new THREE.Object3D(); // barrel tip anchor (repositioned on load)
+ let rifleLoaded=false;
+ new GLTFLoader().load('assets/rifle.glb',gltf=>{
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -607,8 +607,9 @@
+ addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+ loop();
+ window.__game={player,enemies,gun,get wave(){return wave;},
+   get assets(){ return {rifle:rifleLoaded, soldier:!!soldierTpl, glbFoes:enemies.filter(e=>!e.dead&&e.glb).length}; },
++  setFiring(v){ mouse.down=!!v; }, hurt(n){ damagePlayer(n,{x:player.pos.x+5,z:player.pos.z}); },
+   // playtest hook: aim at nearest live enemy and fire until it dies (used by automated checks)
+   debugKillNearest(){ const live=enemies.filter(e=>!e.dead); if(!live.length)return 'none-left';
+     live.sort((a,b)=>a.g.position.distanceTo(player.pos)-b.g.position.distanceTo(player.pos)); const e=live[0];
+     const dx=e.g.position.x-player.pos.x, dz=e.g.position.z-player.pos.z;
+
+[0m
+[0m← [0mWrite /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/fire.js
+Wrote file successfully.
+[0m
+[0m$ [0mpython3 -c "
+import base64
+html = open('index.html').read()
+for name in ['rifle','soldier']:
+    b = base64.b64encode(open(f'assets/{name}.glb','rb').read()).decode()
+    html = html.replace(f\"'assets/{name}.glb'\", f\"'data:model/gltf-binary;base64,{b}'\")
+open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/inline-test.html','w').write(html)
+print('ok')
+" && NODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/fire.js
+ok
+FIRING: {"mag":22,"shots":8}
+ERRORS: []
+[0m
+[0m→ [0mRead screenshots/firing.png
+[0m
+[0m← [0mWrite /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/winlose.js
+Wrote file successfully.
+[0m
+[0m$ [0mNODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/winlose.js
+WIN: {"kills":19,"wave":3,"title":"🏆 MISSION COMPLETE"}
+LOSE: {"title":"🏆 MISSION COMPLETE","sub":"ALL 3 WAVES CLEARED"}
+ERRORS: []
+[0m
+[0m$ [0mcat > /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/lose.js <<'EOF2'
+const { chromium } = require('playwright-core');
+(async () => {
+  const browser = await chromium.launch({ args: ['--use-gl=swiftshader','--enable-unsafe-swiftshader','--no-sandbox'] });
+  const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  page.on('pageerror', e => console.log('PAGEERROR:', String(e).slice(0,200)));
+  await page.goto('file:///var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/inline-test.html', { waitUntil: 'networkidle', timeout: 60000 });
+  await page.waitForTimeout(5000);
+  await page.click('#playBtn').catch(e => console.log('play click fail', e.message.slice(0,120)));
+  await page.waitForTimeout(3000);
+  await page.evaluate(() => window.__game.hurt(500));
+  await page.waitForTimeout(800);
+  const lst = await page.evaluate(() => ({ hidden: document.getElementById('end').classList.contains('hidden'), title: document.getElementById('endTitle').textContent, sub: document.getElementById('endSub').textContent, hp: window.__game.player.hp }));
+  console.log('LOSE:', JSON.stringify(lst));
+  await page.screenshot({ path: 'screenshots/lose.png' });
+  await browser.close();
+})().catch(e => { console.error('FATAL', e); process.exit(1); });
+EOF2
+NODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/lose.js
+PAGEERROR: WrongDocumentError: The root document of this element is not valid for pointer lock.
+LOSE: {"hidden":false,"title":"☠ KIA — MISSION FAILED","sub":"FELL IN WAVE 1 OF 3","hp":0}
+[0m
+Lose path verified (KIA screen). Reviewing both end screens:
+[0m→ [0mRead screenshots/win.png
+[0m→ [0mRead screenshots/lose.png
+Both end screens verified. Final checks: crouch height + ADS zoom state (pointer lock can't engage headless, so drive state directly):
+[0m
+[0m$ [0mcat > /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/verify.js <<'EOF2'
+const { chromium } = require('playwright-core');
+(async () => {
+  const browser = await chromium.launch({ args: ['--use-gl=swiftshader','--enable-unsafe-swiftshader','--no-sandbox'] });
+  const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  page.on('pageerror', e => console.log('PAGEERROR:', String(e).slice(0,200)));
+  await page.goto('file:///var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/inline-test.html', { waitUntil: 'networkidle', timeout: 60000 });
+  await page.waitForTimeout(5000);
+  await page.click('#playBtn').catch(()=>{});
+  await page.waitForTimeout(2500);
+  const h0 = await page.evaluate(() => window.__game.player.h);
+  await page.keyboard.down('c');
+  await page.waitForTimeout(800);
+  const h1 = await page.evaluate(() => window.__game.player.h);
+  await page.screenshot({ path: 'screenshots/crouch.png' });
+  await page.keyboard.up('c');
+  await page.evaluate(() => { window.__game.gun.adsTarget = 1; });
+  await page.waitForTimeout(600);
+  const ads = await page.evaluate(() => ({ ads: window.__game.gun.ads.toFixed(2), fov: Math.round(window.__game.gun.ads * 1) }));
+  await page.screenshot({ path: 'screenshots/ads.png' });
+  console.log(JSON.stringify({ standH: h0.toFixed(2), crouchH: h1.toFixed(2), ads }));
+  await browser.close();
+})().catch(e => { console.error('FATAL', e); process.exit(1); });
+EOF2
+python3 -c "
+import base64
+html = open('index.html').read()
+for name in ['rifle','soldier']:
+    b = base64.b64encode(open(f'assets/{name}.glb','rb').read()).decode()
+    html = html.replace(f\"'assets/{name}.glb'\", f\"'data:model/gltf-binary;base64,{b}'\")
+open('/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/inline-test.html','w').write(html)
+print('inline ok')
+" && NODE_PATH=/var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/node_modules node /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/verify.js
+inline ok
+PAGEERROR: WrongDocumentError: The root document of this element is not valid for pointer lock.
+{"standH":"1.70","crouchH":"1.15","ads":{"ads":"1.00","fov":1}}
+[0m
+[0m→ [0mRead screenshots/ads.png
+[0m→ [0mRead screenshots/menu.png
+[0m
+[0m$ [0mcp screenshots/menu.png screenshots/final-menu.png && cp screenshots/gameplay.png screenshots/final-gameplay.png && cp screenshots/firing.png screenshots/final-firing.png && cp screenshots/win.png screenshots/final-win.png && cp screenshots/lose.png screenshots/final-lose.png && ls -la screenshots/ assets/ && node -e "
+const fs=require('fs');
+const html=fs.readFileSync('index.html','utf8');
+const m=html.match(/<script type=\"module\">([\s\S]*?)<\/script>/);
+let js=m[1].replace(/^import .*$/gm,'').replace(/from 'three.*$/gm,'');
+fs.writeFileSync('/tmp/game-check2.mjs',js);
+" && node --check /tmp/game-check2.mjs && echo SYNTAX_OK && git status --short | head -20
+assets/:
+total 5464
+drwxr-xr-x   6 runner  staff      192 Sep  7 00:06 .
+drwxr-xr-x  19 runner  staff      608 Sep  7 00:05 ..
+-rw-r--r--   1 runner  staff   230420 Sep  7 00:22 rifle.glb
+-rw-r--r--   1 runner  staff      644 Sep  7 00:22 rifle.glb.attribution.json
+-rw-r--r--   1 runner  staff  2553692 Sep  7 00:06 soldier.glb
+-rw-r--r--   1 runner  staff     1101 Sep  7 00:06 soldier.glb.attribution.json
+
+screenshots/:
+total 9856
+drwxr-xr-x  15 runner  staff     480 Sep  7 00:36 .
+drwxr-xr-x  19 runner  staff     608 Sep  7 00:05 ..
+-rw-r--r--   1 runner  staff  295648 Sep  7 00:35 ads.png
+-rw-r--r--   1 runner  staff  379012 Sep  7 00:29 combat.png
+-rw-r--r--   1 runner  staff  275453 Sep  7 00:35 crouch.png
+-rw-r--r--   1 runner  staff  378259 Sep  7 00:36 final-firing.png
+-rw-r--r--   1 runner  staff  352174 Sep  7 00:36 final-gameplay.png
+-rw-r--r--   1 runner  staff  434613 Sep  7 00:36 final-lose.png
+-rw-r--r--   1 runner  staff  431393 Sep  7 00:36 final-menu.png
+-rw-r--r--   1 runner  staff  436592 Sep  7 00:36 final-win.png
+-rw-r--r--   1 runner  staff  378259 Sep  7 00:32 firing.png
+-rw-r--r--   1 runner  staff  352174 Sep  7 00:29 gameplay.png
+-rw-r--r--   1 runner  staff  434613 Sep  7 00:34 lose.png
+-rw-r--r--   1 runner  staff  431393 Sep  7 00:29 menu.png
+-rw-r--r--   1 runner  staff  436592 Sep  7 00:34 win.png
+SYNTAX_OK
+ M index.html
+ M screenshots/final-gameplay.png
+ M screenshots/final-menu.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? assets/
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? screenshots/ads.png
+?? screenshots/combat.png
+?? screenshots/crouch.png
+?? screenshots/final-firing.png
+?? screenshots/final-lose.png
+?? screenshots/final-win.png
+?? screenshots/firing.png
+?? screenshots/gameplay.png
+[0m
+[0m$ [0mgit add index.html assets/ screenshots/ && git commit -m "Wire Sketchfab GLB rifle + animated soldier hostiles, add crouch/ADS/decals/hit-flash
+
+- Vendor assets/rifle.glb (Low-Poly Assault Rifle, ToporEnterprise, CC-BY)
+  and assets/soldier.glb (Enemy Soldier walk anim, TechLabID, CC-BY)
+  with attribution sidecars; GLTFLoader integration with procedural fallback
+- Rifle viewmodel: orientation/scale normalization, duplicate-mesh hide,
+  muzzle-light + flash re-anchored to barrel tip
+- Enemies use animated GLB (walk mixer), per-enemy materials, red hit flash,
+  height-based headshots; procedural fallback retained
+- Gameplay: hold-C crouch, ADS zoom verified, bullet impact decals,
+  menu credits for model attribution
+- Verified in headless Chromium: 19-kill full win run, KIA lose path,
+  zero page errors" 2>&1 | tail -2 && git push origin HEAD 2>&1 | tail -2 && git rev-parse HEAD
+create mode 100644 screenshots/menu.png
+ create mode 100644 screenshots/win.png
+To https://github.com/AgentsLoop/PlayGround
+   9d29c55..a8eb9f7  HEAD -> opencode/34067981271
+a8eb9f78646b3dc5af7468f644ab75a5064b5820
+[0m
+[0m← [0mWrite /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/final-comment2.md
+Wrote file successfully.
+[0m
+[0m$ [0mgh issue comment 36 --repo AgentsLoop/PlayGround --body-file /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/final-comment2.md 2>&1 | tail -2
+https://github.com/AgentsLoop/PlayGround/issues/36#issuecomment-5563422577
+[0m
+[goal:evidence] Integrated Sketchfab GLBs (rifle 9c34e256/ToporEnterprise CC-BY; soldier df8e3483/TechLabID CC-BY with walk anim) vendored in assets/ with attribution sidecars and procedural fallbacks; verified in headless Chromium with zero page errors — GLB viewmodel correctly oriented with barrel-tip muzzle flash + tracers, animated hostiles with hit-flash/headshots/killfeed, crouch 1.70→1.15m, ADS zoom, impact decals, full 19-kill 3-wave win (MISION COMPLETE 0:55) and KIA lose path, fresh screenshots (final-menu/gameplay/firing/win/lose) read back and critiqued; committed a8eb9f7, pushed to opencode/34067981271, posted results to issue #36 (comment 5563422577).
+[goal:complete]

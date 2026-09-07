@@ -1,0 +1,1 @@
+Build a small playable browser first-person military shooter inspired by Call of Duty. Include responsive movement and aiming, a simple weapon with shooting feedback, enemy targets with basic behavior, health/ammo HUD, and a clear win/lose loop. Keep it self-contained and polished enough for a quick browser playtest.
