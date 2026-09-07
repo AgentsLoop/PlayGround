@@ -35,10 +35,12 @@ Proprietary references are informational only; shipped game is original.
 
 ## 6. Evidence (2026-09-07)
 - Research: 8 refs above with purposes; informational only, shipped assets original.
-- Smoke: token checks PASS (HUD ids, 3 screens, 7 mechanics fns, three@0.160.0, 41.9 kB).
-- Public URL 200 VERIFIED via fetch: https://agentsloop.github.io/PlayGround/branches/opencode-34093211292/305d842c0f9d578584c102a713543bd4d936be14/ — DOM contains: start briefing + 3 loadouts + controls, HUD (minimap/zone timer, compass+POI, HOSTILE/KILLS/TIME, objective banner, crosshair+hitmarker, HP+3 plates, weapon/ammo/UAV slots), pause + victory/defeat end screens with stats + redeploy.
+- Smoke: token checks PASS (HUD ids, 3 screens, 10 state fns, three@0.160.0 pinned, ~43 kB single file).
+- JS syntax: node --check PASS on extracted module script (27.6 k chars).
+- CDN: unpkg three@0.160.0 three.module.js reachable (r160, MIT header confirmed).
+- Repair (16e9f24): fixed cross-restart stale-timer leaks — runId generation guard on reload timeout + enemy-fire timeout, startMatch now resets reloading/lastHurt/ADS/inputs/zone-accumulator; verified 2 rid guards + 7 runId refs + syntax re-PASS.
+- Public URL 200 VERIFIED (Pages build 9ed0096 built): https://agentsloop.github.io/PlayGround/branches/opencode-34093211292/16e9f24690d7c9c58b5e4c918b8eedb3c81d104c/ — DOM contains: start briefing + 3 loadouts + controls, HUD (minimap/zone timer, compass+POI, HOSTILE/KILLS/TIME, objective banner, crosshair+hitmarker, HP+3 plates, weapon/ammo/UAV slots), pause + victory/defeat end screens with stats + redeploy.
 - States covered in code+DOM: start → deploy/infil → combat (fire/ADS/hitmarker/killfeed) → damage (vignette+direction arc) → reload → zone collapse → win (0 hostiles) / lose (HP 0) → restart.
-- Pages builds: 666403a `built` 07:06 UTC.
 
 ## 5. Gaps / next exact action
 - Next: capture real browser screenshots (start, combat, damage, win) and side-by-side vs HUD-guide ref; run pointer-lock playtest (WASD/fire/reload/plate/UAV/zone/win/lose/restart); fix top gap found; re-publish snapshot.
