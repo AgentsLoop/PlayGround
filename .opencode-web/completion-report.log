@@ -1,0 +1,101 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+[0m$ [0mgit branch --show-current; git status --short | head -20; echo "---"; ls -la screenshots/; echo "---"; curl -s -o /dev/null -w "public:%{http_code}\n" --max-time 10 https://wait-pilot-choosing-guns.trycloudflare.com/; curl -s --max-time 10 https://wait-pilot-choosing-guns.trycloudflare.com/ | head -c 150; echo
+opencode/34083149087
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? progress.html
+?? ref-dfh-day.jpg
+?? screenshots/
+?? shots/
+---
+total 3176
+drwxr-xr-x   6 runner  staff     192 Sep  7 04:40 .
+drwxr-xr-x  19 runner  staff     608 Sep  7 04:40 ..
+-rw-r--r--@  1 runner  staff  379653 Sep  7 04:40 final-boost.png
+-rw-r--r--@  1 runner  staff  427755 Sep  7 04:40 final-goal-blue.png
+-rw-r--r--@  1 runner  staff  430968 Sep  7 04:40 final-goal-orange.png
+-rw-r--r--@  1 runner  staff  376850 Sep  7 04:40 final-kickoff.png
+---
+public:200
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turbo Bal
+[0m
+Public URL is live and serving the game. Committing the game files and evidence (excluding secrets/runtime dirs).
+[0m$ [0mdu -sh shots screenshots ref-dfh-day.jpg; ls .gitignore 2>&1; git add index.html progress.html screenshots ref-dfh-day.jpg shots && git status --short | head -20
+2.3M	shots
+1.6M	screenshots
+ 48K	ref-dfh-day.jpg
+ls: .gitignore: No such file or directory
+A  index.html
+A  progress.html
+A  ref-dfh-day.jpg
+A  screenshots/final-boost.png
+A  screenshots/final-goal-blue.png
+A  screenshots/final-goal-orange.png
+A  screenshots/final-kickoff.png
+A  shots/v1-kickoff.png
+A  shots/v2-boost.png
+A  shots/v2-goal-blue.png
+A  shots/v2-kickoff.png
+A  shots/v3-kickoff.png
+A  shots/v4-goal-orange.png
+A  shots/v4-kickoff.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+[0m
+[0m$ [0mgit commit -m "Turbo Ball playable game: DFH-inspired arena, verified screenshots" 2>&1 | tail -3; git push -u origin opencode/34083149087 2>&1 | tail -5; git log --oneline -2; git rev-parse --short HEAD
+create mode 100644 shots/v3-kickoff.png
+ create mode 100644 shots/v4-goal-orange.png
+ create mode 100644 shots/v4-kickoff.png
+remote:      https://github.com/AgentsLoop/PlayGround/pull/new/opencode/34083149087        
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34083149087 -> opencode/34083149087
+branch 'opencode/34083149087' set up to track 'origin/opencode/34083149087'.
+729b349 Turbo Ball playable game: DFH-inspired arena, verified screenshots
+b4fe44a Grant reusable OpenCode workflow Pages permission
+729b349
+[0m
+Committed and pushed — posting the final completion comment with embedded screenshots.
+[0m$ [0mgh issue comment 52 --body "## Final completion — Turbo Ball playable and verified
+
+**Play now:** https://wait-pilot-choosing-guns.trycloudflare.com (also live progress page: \`/progress.html\`)
+
+**Final screenshots** (captured headless Chrome via the app server, committed under \`screenshots/final-*.png\`):
+
+![kickoff](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34083149087/screenshots/final-kickoff.png)
+![boost](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34083149087/screenshots/final-boost.png)
+![goal blue](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34083149087/screenshots/final-goal-blue.png)
+![goal orange](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34083149087/screenshots/final-goal-orange.png)
+
+**Final commit:** \`729b349\` on \`opencode/34083149087\` (pushed) — game (\`index.html\`), progress page, reference image, iteration shots.
+
+**Deployment status:** public Cloudflare URL returns 200 and serves the game; local tmux \`app-server\` on port 3000 verified serving \`index.html\` (entrypoint re-checked after every fix).
+
+**Test status:** JS syntax ok; gameplay hooks present (drive/boost/collide/goal/score/reset/AI); 4 rendered states verified visually — kickoff arena, boost flame + draining meter, GOAL! banners with scoreboard increments and ball-in-net. Fresh-context critics: gameplay 6/6 PASS, no load-bearing bugs; visual critic gaps fixed and re-verified (turf bands, crowd side-tint, team goal fills).
+
+**Known limitations:** 2D top-down interpretation (not 3D) — no aerials/jump, no day-sky backdrop (arena-bowl surround instead); AI always attacks and can own-goal; boost flame/GOAL juice deferred per critic triage; balance untested beyond scripted scenes." 2>&1
+https://github.com/AgentsLoop/PlayGround/issues/52#issuecomment-5565134194
+[0m
+Complete:
+
+- **Screenshots:** `screenshots/final-kickoff/boost/goal-blue/goal-orange.png` captured from the port-3000 server, visually verified, committed.
+- **Commit/push:** `729b349` on `opencode/34083149087` pushed (game, progress page, reference, iteration shots only — no secrets/runtime files).
+- **Final comment:** posted to #52 ([link](https://github.com/AgentsLoop/PlayGround/issues/52#issuecomment-5565134194)) with the public game URL, embedded screenshots via raw links, final commit, deployment/test status, and known limitations (2D top-down, no aerials, attack-only AI, deferred juice).
