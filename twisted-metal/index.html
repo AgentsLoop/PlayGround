@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TWISTED METAL: Rust Arena — Browser Vehicular Combat</title>
+<meta name="description" content="Fan-homage browser vehicular combat: arena deathmatch, weapon pickups, AI rivals, hazards. Free playable demo.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%23a30000'/><text x='2' y='12' font-size='10' fill='white'>TM</text></svg>">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
+</script>
+</head>
+<body>
+<div id="app">
+  <canvas id="game-canvas" aria-label="3D vehicular combat arena"></canvas>
+  <canvas id="minimap" width="160" height="160" aria-label="Minimap radar"></canvas>
+  <div id="vignette"></div>
+  <div id="dmg-flash"></div>
+  <div id="letterbox-top"></div><div id="letterbox-bottom"></div>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden" role="status" aria-label="Battle status: hull, turbo, weapons, timer">
+    <div id="hud-top">
+      <div id="timer" role="timer">3:00</div>
+      <div id="alive">ALIVE <b id="alive-count">6</b></div>
+      <div id="kills">KILLS <b id="kill-count">0</b></div>
+    </div>
+    <div id="crosshair">+</div>
+    <div id="hitmarker" class="hidden">✕</div>
+    <div id="hud-bottom-left">
+      <div id="hp-label">HULL</div>
+      <div id="hp-bar"><div id="hp-fill"></div><span id="hp-num">100</span></div>
+      <div id="turbo-bar"><div id="turbo-fill"></div><span>TURBO</span></div>
+      <div id="heat-bar"><div id="heat-fill"></div><span>MG HEAT</span></div>
+      <div id="vehicle-name">SWEET TOOTH</div>
+    </div>
+    <div id="hud-bottom-right">
+      <div id="weapon-list" aria-label="Weapon inventory"></div>
+      <div id="special-hint">E: SPECIAL</div>
+    </div>
+    <div id="killfeed" aria-live="polite"></div>
+    <div id="announce" aria-live="assertive"></div>
+    <div id="fps">60 fps</div>
+  </div>
+
+  <!-- Touch controls -->
+  <div id="touch" class="hidden">
+    <div class="t-left">
+      <button data-k="left" aria-label="Steer left">◀</button>
+      <button data-k="right" aria-label="Steer right">▶</button>
+    </div>
+    <div class="t-right">
+      <button data-k="pause" aria-label="Pause">II</button>
+      <button data-k="up" aria-label="Accelerate">▲</button>
+      <button data-k="down" aria-label="Brake">▼</button>
+      <button data-k="fire1" aria-label="Fire machine gun">MG</button>
+      <button data-k="fire2" aria-label="Fire missile">🚀</button>
+      <button data-k="special" aria-label="Fire special">★</button>
+    </div>
+  </div>
+
+  <!-- Screens -->
+  <div id="screen-title" class="screen">
+    <div class="grunge">CALYPSO'S INVITATION</div>
+    <h1>TWISTED<span>METAL</span></h1>
+    <h2>RUST ARENA <em>fan homage — playable browser demo</em></h2>
+    <p class="tag">Last driver alive wins. Grab weapons. Dodge the turret. Blow up the barrels.</p>
+    <button id="btn-start" class="big" autofocus>ENTER THE ARENA</button>
+    <button id="btn-how" class="ghost">HOW TO PLAY</button>
+    <div id="how" class="hidden">
+      <b>W/S or ↑/↓</b> gas &amp; brake · <b>A/D</b> steer · <b>SPACE</b> handbrake ·
+      <b>SHIFT</b> turbo · <b>J / click</b> machine gun · <b>K</b> missile ·
+      <b>1–4</b> select weapon · <b>E</b> special · <b>P / ESC</b> pause · <b>M</b> mute · <b>C</b> camera
+    </div>
+    <div class="foot">Best: <span id="best-line">—</span> · Not affiliated with Sony. All art/code original.</div>
+  </div>
+
+  <div id="screen-select" class="screen hidden">
+    <h1 class="small">CHOOSE YOUR KILLER</h1>
+    <div id="cards"></div>
+    <div class="row"><button id="btn-back" class="ghost">BACK</button><button id="btn-fight" class="big">FIGHT →</button></div>
+  </div>
+
+  <div id="screen-countdown" class="screen hidden pointer-none"><div id="count">3</div></div>
+
+  <div id="screen-pause" class="screen hidden">
+    <h1 class="small">PAUSED</h1>
+    <p>Take a breath, driver.</p>
+    <div class="row"><button id="btn-resume" class="big">RESUME</button><button id="btn-restart2" class="ghost">RESTART</button><button id="btn-quit" class="ghost">QUIT TO TITLE</button></div>
+    <label class="opt"><input type="checkbox" id="opt-shake" checked> Screen shake</label>
+    <label class="opt"><input type="checkbox" id="opt-reduced"> Reduce flashes (accessibility)</label>
+  </div>
+
+  <div id="screen-over" class="screen hidden">
+    <div class="grunge" id="over-kicker">CONTEST OVER</div>
+    <h1 id="over-title">YOU WIN</h1>
+    <p id="over-sub"></p>
+    <div id="over-stats"></div>
+    <div class="row"><button id="btn-again" class="big">PLAY AGAIN</button><button id="btn-title2" class="ghost">TITLE</button></div>
+  </div>
+
+  <div id="err" class="hidden" role="alert"></div>
+</div>
+<script>window.__TM_BOOT_T0=performance.now();</script>
+<script type="module" src="game.js"></script>
+</body>
+</html>
