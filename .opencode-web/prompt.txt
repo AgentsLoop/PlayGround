@@ -1,0 +1,1 @@
+Build a small polished playable browser game called Lantern Lanes. Make it immediately playable in the browser with keyboard controls, a clear objective, win/lose/restart states, a responsive HUD, and an original visual style. Keep the scope self-contained and verify it with the repository’s available validation.

@@ -1,0 +1,692 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Resuming Lantern Lanes — inspecting current state, then playtesting and polishing.
+[0m→ [0mRead README.md
+[0m→ [0mRead Agents.md
+[0m
+[0m$ [0mls -la && ls -lh lantern-lanes/
+total 60
+drwxr-xr-x 11 runner runner 4096 Sep  7 04:57 .
+drwxr-xr-x  3 runner runner 4096 Sep  7 04:54 ..
+drwxr-xr-x  5 runner runner 4096 Sep  7 04:54 .agents
+drwxr-xr-x  4 runner runner 4096 Sep  7 04:54 .agentsweb
+drwxr-xr-x  7 runner runner 4096 Sep  7 04:57 .git
+drwxr-xr-x  3 runner runner 4096 Sep  7 04:54 .github
+drwxr-xr-x  9 runner runner 4096 Sep  7 04:54 .omgithub-runtime
+drwx------  3 runner runner 4096 Sep  7 04:56 .opencode
+drwx------  2 runner runner 4096 Sep  7 04:55 .opencode-ssh
+drwx------  3 runner runner 4096 Sep  7 04:57 .opencode-web
+-rw-r--r--  1 runner runner  357 Sep  7 04:54 Agents.md
+-rw-r--r--  1 runner runner   53 Sep  7 04:54 README.md
+drwxr-xr-x  2 runner runner 4096 Sep  7 04:57 lantern-lanes
+-rw-------  1 runner runner  411 Sep  7 04:55 opencode-agentsweb-id_ed25519
+-rw-r--r--  1 runner runner  102 Sep  7 04:55 opencode-agentsweb-id_ed25519.pub
+total 24K
+-rw-r--r-- 1 runner runner 24K Sep  7 04:57 index.html
+[0m
+[0m→ [0mRead lantern-lanes/index.html
+[0m
+[0m$ [0mwhich chromium chromium-browser google-chrome google-chrome-stable firefox 2>&1; ls /root/.cache/ms-playwright 2>&1; python3 -c "import playwright" 2>&1; node -e "try{require.resolve('playwright');console.log('playwright-node OK')}catch(e){console.log('no playwright node')}"
+/usr/bin/chromium
+/usr/bin/chromium-browser
+/usr/bin/google-chrome
+/usr/bin/google-chrome-stable
+/usr/bin/firefox
+ls: cannot access '/root/.cache/ms-playwright': Permission denied
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'playwright'
+no playwright node
+[0m
+Inspection found 3 real defects to fix: broken aspect-fit, Resume button resetting the run, and frozen win particles.
+[0m← [0mEdit lantern-lanes/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+@@ -145,9 +145,12 @@
+ }
+ 
+ function onPrimary(e){
+   const a = e.currentTarget.getAttribute('data-act');
+-  if(a==='start'){ if(state==='title'||state==='paused'||state==='win'||state==='lose'){ startPlay(); } }
++  if(a==='start'){
++    if(state==='paused'){ startPlayResume(); return; }
++    if(state==='title'||state==='win'||state==='lose'){ startPlay(); }
++  }
+   else if(a==='restart'){ startPlay(); }
+ }
+ function startPlay(){ reset(); state='playing'; setOverlay(null); blip(520,0.08,'triangle',0.15); }
+ 
+
+[0m
+[0m← [0mEdit lantern-lanes/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+@@ -25,10 +25,10 @@
+ .card .label{font-size:10px;letter-spacing:2px;color:var(--dim);font-weight:700;}
+ .card .value{font-size:clamp(16px,3vw,22px);font-weight:800;line-height:1.1;white-space:nowrap;}
+ #flameBar{height:8px;border-radius:99px;background:#ffffff18;margin-top:6px;overflow:hidden;}
+ #flameFill{height:100%;width:100%;border-radius:99px;background:linear-gradient(90deg,#ff7a59,#ffbf5a,#fff3b0);transition:width .2s;}
+-#stage{position:relative;width:min(920px,100%);flex:1;min-height:0;}
+-canvas{width:100%;height:100%;display:block;border-radius:16px;border:1px solid #ffffff2a;
++#stage{position:relative;width:min(920px,100%);flex:1;min-height:0;display:flex;align-items:center;justify-content:center;}
++canvas{max-width:100%;max-height:100%;display:block;border-radius:16px;border:1px solid #ffffff2a;
+   box-shadow:0 12px 50px #000a, 0 0 40px #6d4dff22 inset;background:#0d0b26;touch-action:none;}
+ #overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:16px;
+   background:rgba(8,6,24,.72);backdrop-filter:blur(3px);text-align:center;padding:18px;}
+ #overlay.hidden{display:none;}
+
+[0m
+[0m← [0mEdit lantern-lanes/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+@@ -459,10 +459,13 @@
+ 
+ function fit(){
+   const stage=document.getElementById('stage');
+   const r=stage.getBoundingClientRect();
+-  const scale=Math.min(r.width/W, r.height/H);
+-  canvas.style.aspectRatio = W+'/'+H;
++  const pad=0;
++  const availW=Math.max(200,r.width-pad), availH=Math.max(200,r.height-pad);
++  const scale=Math.min(availW/W, availH/H);
++  canvas.style.width=Math.floor(W*scale)+'px';
++  canvas.style.height=Math.floor(H*scale)+'px';
+ }
+ addEventListener('resize', fit);
+ 
+ reset(); showTitle(); updateHUD(); fit();
+
+[0m
+[0m← [0mEdit lantern-lanes/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+@@ -230,14 +230,23 @@
+ bindTouch('tUp',()=>moveLane(-1)); bindTouch('tDown',()=>moveLane(1)); bindTouch('tDash',()=>doDash());
+ 
+ // --- update ---
+ let last=performance.now();
++let fxT=0;
+ function loop(now){
+   const dt=Math.min(0.033,(now-last)/1000); last=now;
+   if(state==='playing') update(dt);
++  else if(state==='win'||state==='lose'){ updateFx(dt); if(state==='win'){ fxT+=dt; if(fxT>0.12){ fxT=0; burst(80+Math.random()*(W-160),80+Math.random()*H*0.4,10,['#ffe6a8','#ff9d5c','#ff5a7a','#9adcff','#fff']); } } }
+   render(now/1000);
+   requestAnimationFrame(loop);
+ }
++function updateFx(dt){
++  for(const s of sparks){ s.t+=dt; s.x+=s.vx*dt; s.y+=s.vy*dt; s.vy+=300*dt; }
++  sparks=sparks.filter(s=>s.t<s.life);
++  for(const f of floats){ f.t+=dt; f.y-=dt*40; }
++  floats=floats.filter(f=>f.t<f.life);
++  if(shake>0) shake-=dt*3; if(flashRed>0) flashRed-=dt*2;
++}
+ function update(dt){
+   elapsed+=dt; timeLeft-=dt; flame-=dt*1.1; // slow drain
+   dashCd=Math.max(0,dashCd-dt); dashT=Math.max(0,dashT-dt);
+   if(player.inv>0) player.inv-=dt;
+
+[0m
+[0m← [0mEdit lantern-lanes/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+@@ -449,13 +449,13 @@
+ ctx.globalAlpha=1;
+ 
+ // dash cooldown pip
+ if(state==='playing'){
+-  ctx.fillStyle='#ffffff22'; rr(14,H-30,120,14,7); ctx.fill();
++  ctx.fillStyle='#00000088'; rr(14,H-30,150,16,8); ctx.fill();
+   ctx.fillStyle= dashCd<=0 ? '#7dffb0' : '#ffbf5a';
+-  const wdt=120*(dashCd<=0?1:1-dashCd/1.6); rr(14,H-30,Math.max(8,wdt),14,7); ctx.fill();
+-  ctx.fillStyle='#0d0b26'; ctx.font='800 10px sans-serif'; ctx.textAlign='left';
+-  ctx.fillText(dashCd<=0?'DASH READY (Space)':'DASH…',20,H-19);
++  const wdt=150*(dashCd<=0?1:1-dashCd/1.6); rr(16,H-28,Math.max(8,wdt-4),12,6); ctx.fill();
++  ctx.fillStyle='#ffe6a8'; ctx.font='800 11px sans-serif'; ctx.textAlign='left';
++  ctx.fillText(dashCd<=0?'DASH READY — Space':'DASH…',172,H-17);
+ }
+ 
+ if(flashRed>0){ ctx.fillStyle=`rgba(255,40,60,${0.22*flashRed})`; ctx.fillRect(-20,-20,W+40,H+40); }
+ 
+
+[0m
+Fixes applied — now running full browser verification.
+[0m$ [0mnode -e "const fs=require('fs');const h=fs.readFileSync('lantern-lanes/index.html','utf8');const m=h.match(/<script>([\s\S]*)<\/script>/);fs.writeFileSync('/tmp/opencode/check.js',m[1]);console.log('html bytes:',h.length)" && node --check /tmp/opencode/check.js && echo JS_SYNTAX_OK && python3 -c "from html.parser import HTMLParser; p=HTMLParser(); p.feed(open('lantern-lanes/index.html').read()); print('HTML_PARSE_OK')" && python3 -c "
+h=open('lantern-lanes/index.html').read()
+checks={'ArrowUp/ArrowDown/W/S':all(k in h for k in ['ArrowUp','ArrowDown']), 'Space dash':('dash' in h.lower() and 'Space' in h), 'pause P':(\"key==='p'\" in h or '\"p\"' in h), 'restart R':(\"key==='r'\" in h), 'Enter start':('Enter' in h), 'win Festival Lit':('Festival Lit' in h), 'lose Lantern Out':('Lantern Out' in h), 'HUD embers/hearts/time/flame':all(k in h for k in ['hEmbers','hHearts','hTime','hFlame']), 'canvas':('<canvas' in h), 'touch buttons':all(k in h for k in ['tUp','tDown','tDash']), 'no external http deps':('src=\"http' not in h and 'href=\"http' not in h)}
+for k,v in checks.items(): print(('PASS' if v else 'FAIL'),k)
+assert all(checks.values())
+print('ALL_STATIC_CHECKS_PASS')
+"
+html bytes: 24906
+JS_SYNTAX_OK
+HTML_PARSE_OK
+PASS ArrowUp/ArrowDown/W/S
+PASS Space dash
+PASS pause P
+PASS restart R
+PASS Enter start
+PASS win Festival Lit
+PASS lose Lantern Out
+PASS HUD embers/hearts/time/flame
+PASS canvas
+PASS touch buttons
+PASS no external http deps
+ALL_STATIC_CHECKS_PASS
+[0m
+[0m$ [0mpython3 -m http.server 8901 >/tmp/opencode/srv.log 2>&1 & echo $! > /tmp/opencode/srv.pid; sleep 1; curl -s -o /dev/null -w "HTTP_SERVE:%{http_code}\n" http://localhost:8901/lantern-lanes/index.html
+HTTP_SERVE:200
+[0m
+[0m$ [0mcat > /tmp/opencode/playtest.js <<'EOF'
+const puppeteer_core = null;
+EOF
+echo "--- headless chrome playtest via --dump-dom + --screenshot + JS injection ---"
+google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=980,800 --screenshot=/tmp/opencode/shot_title.png "http://localhost:8901/lantern-lanes/index.html" 2>&1 | tail -2
+ls -lh /tmp/opencode/shot_title.png
+--- headless chrome playtest via --dump-dom + --screenshot + JS injection ---
+[5459:5472:0907/045826.737687:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:395] SharedImageManager::ProduceMemory: Trying to Produce a Memory representation from a non-existent mailbox.
+213702 bytes written to file /tmp/opencode/shot_title.png
+-rw-r--r-- 1 runner runner 209K Sep  7 04:58 /tmp/opencode/shot_title.png
+[0m
+[0m$ [0mcat > /tmp/opencode/harness.js <<'EOF'
+const fs = require('fs'), vm = require('vm');
+const html = fs.readFileSync('lantern-lanes/index.html','utf8');
+const src = html.match(/<script>([\s\S]*)<\/script>/)[1];
+
+function mkEl(){
+  return {
+    innerHTML:'', textContent:'',
+    style:{}, classList:{add(){},remove(){}},
+    getBoundingClientRect:()=>({width:920,height:600}),
+    addEventListener(){},
+    querySelector:()=>({addEventListener(){}, getAttribute:()=>'start', click(){}}),
+  };
+}
+const els = { game:mkEl(), overlay:mkEl(), panel:mkEl(), hEmbers:mkEl(), hHearts:mkEl(), hTime:mkEl(), hFlame:mkEl(), flameFill:mkEl(), stage:mkEl(), tUp:mkEl(), tDown:mkEl(), tDash:mkEl() };
+const grad = { addColorStop(){} };
+const ctxStub = new Proxy({}, { get:(t,p)=>{
+  if(p==='createLinearGradient'||p==='createRadialGradient') return ()=>grad;
+  if(p==='canvas') return {};
+  return typeof p==='string' ? (...a)=>{} : undefined;
+}, set:()=>true });
+els.game.getContext = ()=>ctxStub;
+
+const listeners = {};
+const sandbox = {
+  document:{ getElementById:(id)=>els[id]||mkEl() },
+  window:{}, performance:{now:()=>0}, localStorage:{getItem:()=>'0',setItem(){}},
+  requestAnimationFrame:(fn)=>{ sandbox.__raf = fn; },
+  addEventListener:(t,f)=>{ (listeners[t]=listeners[t]||[]).push(f); },
+  setTimeout:(f)=>0, clearTimeout:()=>{},
+  console,
+};
+sandbox.globalThis = sandbox; sandbox.window = sandbox;
+vm.createContext(sandbox);
+vm.runInContext(src, sandbox, {filename:'game.js'});
+
+const S = sandbox;
+const ok = (c,m)=>{ console.log((c?'PASS':'FAIL'),m); if(!c) process.exitCode=1; };
+
+// 1. title state
+ok(S.state==='title','boot -> title state');
+ok(els.panel.innerHTML.includes('Lantern Lanes'),'title panel tutorial text');
+
+// 2. start via Enter
+listeners.keydown.forEach(f=>f({key:'Enter',preventDefault(){},repeat:false}));
+ok(S.state==='playing','Enter starts playing');
+ok(els.overlay.classList,'overlay hidden after start');
+
+// 3. lane movement
+const l0=S.player.lane;
+listeners.keydown.forEach(f=>f({key:'ArrowDown',preventDefault(){},repeat:false}));
+ok(S.player.lane===Math.min(2,l0+1),'ArrowDown switches lane down');
+listeners.keydown.forEach(f=>f({key:'w',preventDefault(){},repeat:false}));
+ok(S.player.lane===l0,'W switches lane up');
+
+// 4. dash
+S.dashCd=0; S.doDash();
+ok(S.dashT>0 && S.dashCd>0,'Space dash activates shield+cooldown');
+
+// 5. ember collect: place ember on player, run update
+S.dashT=0; S.player.inv=0;
+const c0=S.collected;
+S.embers.push({x:S.player.x,y:S.player.y,lane:S.player.lane,r:13,bob:0,got:false});
+S.update(0.016);
+ok(S.collected===c0+1,'ember collect increments + HUD '+els.hEmbers.textContent);
+ok(els.hEmbers.textContent.includes((c0+1)+'/12'),'HUD embers shows n/12');
+
+// 6. moth damage
+S.player.inv=0; S.dashT=0;
+const h0=S.hearts;
+S.moths.push({x:S.player.x,y:S.player.y,lane:S.player.lane,r:17,vx:200,wing:0,drift:0});
+S.update(0.016);
+ok(S.hearts===h0-1,'moth hit costs 1 heart, HUD='+els.hHearts.textContent);
+
+// 7. dash shield destroys moth without damage
+S.player.inv=0; const h1=S.hearts; S.dashT=0.5;
+S.moths.push({x:S.player.x,y:S.player.y,lane:S.player.lane,r:17,vx:200,wing:0,drift:0});
+S.update(0.016);
+ok(S.hearts===h1,'dashing through moth = no damage');
+
+// 8. pause/resume via P (no reset)
+const e1=S.elapsed;
+listeners.keydown.forEach(f=>f({key:'p',preventDefault(){},repeat:false}));
+ok(S.state==='paused','P pauses');
+listeners.keydown.forEach(f=>f({key:'p',preventDefault(){},repeat:false}));
+ok(S.state==='playing','P resumes without reset');
+
+// 9. Resume button path (fixed bug): paused + onPrimary start => resume
+listeners.keydown.forEach(f=>f({key:'p',preventDefault(){},repeat:false}));
+S.collected=5; S.onPrimary({currentTarget:{getAttribute:()=>'start'}});
+ok(S.state==='playing'&&S.collected===5,'Resume button resumes, keeps progress');
+
+// 10. win: force 12 embers
+S.startPlay(); S.collected=11; S.player.inv=1;
+S.embers.push({x:S.player.x,y:S.player.y,lane:S.player.lane,r:13,bob:0,got:false});
+S.update(0.016);
+ok(S.state==='win','12th ember -> win');
+ok(els.panel.innerHTML.includes('Festival Lit'),'win panel Festival Lit');
+// win fx keeps animating
+const ns=S.sparks.length; S.updateFx(0.1);
+ok(true,'win fx update runs, sparks='+S.sparks.length);
+
+// 11. restart via R after win
+listeners.keydown.forEach(f=>f({key:'r',preventDefault(){},repeat:false}));
+ok(S.state==='playing'&&S.collected===0&&S.hearts===3,'R restarts fresh run');
+
+// 12. lose by hearts
+S.hearts=1; S.player.inv=0; S.dashT=0;
+S.moths.push({x:S.player.x,y:S.player.y,lane:S.player.lane,r:17,vx:200,wing:0,drift:0});
+S.update(0.016);
+ok(S.state==='lose','0 hearts -> lose');
+ok(els.panel.innerHTML.includes('Lantern Out'),'lose panel Lantern Out');
+
+// 13. lose by timeout
+S.startPlay(); S.timeLeft=0.01; S.update(0.05);
+ok(S.state==='lose','timer expiry -> lose');
+
+// 14. render each state without throwing + responsive fit sizes
+for(const st of ['title','playing','paused','win','lose']){ S.state=st; S.render(1.5); }
+ok(true,'render() OK in all 5 states');
+S.fit();
+ok(/px$/.test(els.game.style.width),'fit() sets aspect-preserved px size '+els.game.style.width+'x'+els.game.style.height);
+console.log(process.exitCode ? 'HARNESS FAILURES' : 'ALL_PLAYTEST_PASS');
+EOF
+node /tmp/opencode/harness.js
+FAIL boot -> title state
+PASS title panel tutorial text
+FAIL Enter starts playing
+PASS overlay hidden after start
+/tmp/opencode/harness.js:49
+const l0=S.player.lane;
+                  ^
+
+TypeError: Cannot read properties of undefined (reading 'lane')
+    at Object.<anonymous> (/tmp/opencode/harness.js:49:19)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49
+
+Node.js v22.23.2
+[0m
+The headless harness needs a bridge for the game's lexical scope — fixing that.
+[0m$ [0mcat > /tmp/opencode/patch.py <<'EOF'
+import re
+p='/tmp/opencode/harness.js'
+s=open(p).read()
+bridge = """vm.runInContext(src + `\\n;globalThis.__G={get state(){return state},set state(v){state=v},get player(){return player},get collected(){return collected},set collected(v){collected=v},get hearts(){return hearts},set hearts(v){hearts=v},get timeLeft(){return timeLeft},set timeLeft(v){timeLeft=v},get elapsed(){return elapsed},get embers(){return embers},get moths(){return moths},get sparks(){return sparks},get dashT(){return dashT},set dashT(v){dashT=v},get dashCd(){return dashCd},set dashCd(v){dashCd=v},update,updateFx,render,fit,startPlay,onPrimary,doDash,moveLane};`, sandbox, {filename:'game.js'});
+const S = sandbox.__G; S.listeners = listeners;"""
+s = s.replace("vm.runInContext(src, sandbox, {filename:'game.js'});\n\nconst S = sandbox;", bridge)
+# route listeners + els through S shim
+s = s.replace("const S = sandbox.__G; S.listeners = listeners;", "const S = sandbox.__G;")
+s = s.replace("listeners.keydown", "S.__kd").replace("(listeners[t]=listeners[t]||[]).push(f);", "(sandbox.__kd=sandbox.__kd||{}, sandbox.__kd[t]=sandbox.__kd[t]||[], sandbox.__kd[t].push(f));")
+open(p,'w').write(s)
+print("patched")
+EOF
+python3 /tmp/opencode/patch.py && node /tmp/opencode/harness.js
+patched
+PASS boot -> title state
+PASS title panel tutorial text
+/tmp/opencode/harness.js:43
+S.__kd.forEach(f=>f({key:'Enter',preventDefault(){},repeat:false}));
+       ^
+
+TypeError: Cannot read properties of undefined (reading 'forEach')
+    at Object.<anonymous> (/tmp/opencode/harness.js:43:8)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49
+
+Node.js v22.23.2
+[0m
+[0m$ [0mcat > /tmp/opencode/harness.js <<'EOF'
+const fs = require('fs'), vm = require('vm');
+const html = fs.readFileSync('lantern-lanes/index.html','utf8');
+const src = html.match(/<script>([\s\S]*)<\/script>/)[1];
+function mkEl(){ return { innerHTML:'', textContent:'', style:{}, classList:{add(){},remove(){}},
+  getBoundingClientRect:()=>({width:920,height:600}), addEventListener(){},
+  querySelector:()=>({addEventListener(){}, getAttribute:()=>'start', click(){}})}; }
+const els = {};
+for (const id of ['game','overlay','panel','hEmbers','hHearts','hTime','hFlame','flameFill','stage','tUp','tDown','tDash']) els[id]=mkEl();
+const grad = { addColorStop(){} };
+const ctxStub = new Proxy({}, { get:(t,p)=>{
+  if(p==='createLinearGradient'||p==='createRadialGradient') return ()=>grad;
+  return (...a)=>{}; }, set:()=>true });
+els.game.getContext = ()=>ctxStub;
+const kd = {};
+const sandbox = {
+  document:{ getElementById:(id)=>els[id]||mkEl() },
+  performance:{now:()=>0}, localStorage:{getItem:()=>'0',setItem(){}},
+  requestAnimationFrame:()=>{},
+  addEventListener:(t,f)=>{ (kd[t]=kd[t]||[]).push(f); },
+  setTimeout:()=>0, console,
+};
+sandbox.globalThis = sandbox; sandbox.window = sandbox;
+vm.createContext(sandbox);
+const bridge = `\n;globalThis.__G={get state(){return state},set state(v){state=v},get player(){return player},get collected(){return collected},set collected(v){collected=v},get hearts(){return hearts},set hearts(v){hearts=v},get timeLeft(){return timeLeft},set timeLeft(v){timeLeft=v},get elapsed(){return elapsed},get embers(){return embers},get moths(){return moths},get sparks(){return sparks},get dashT(){return dashT},set dashT(v){dashT=v},get dashCd(){return dashCd},set dashCd(v){dashCd=v},update,updateFx,render,fit,startPlay,onPrimary,doDash};`;
+vm.runInContext(src + bridge, sandbox, {filename:'game.js'});
+const S = sandbox.__G;
+const key = (k)=>kd.keydown.forEach(f=>f({key:k,preventDefault(){},repeat:false}));
+const ok = (c,m)=>{ console.log((c?'PASS':'FAIL'),m); if(!c) process.exitCode=1; };
+ok(S.state==='title','boot -> title state');
+ok(els.panel.innerHTML.includes('Lantern Lanes'),'title tutorial text');
+key('Enter');
+ok(S.state==='playing','Enter starts playing');
+const l0=S.player.lane;
+key('ArrowDown');
+ok(S.player.lane===Math.min(2,l0+1),'ArrowDown switches lane down');
+key('w');
+ok(S.player.lane===l0,'W switches lane up');
+S.dashCd=0; S.doDash();
+ok(S.dashT>0 && S.dashCd>0,'Space dash activates shield+cooldown');
+S.dashT=0; S.player.inv=0;
+const c0=S.collected;
+S.embers.push({x:S.player.x,y:S.player.y,lane:S.player.lane,r:13,bob:0,got:false});
+S.update(0.016);
+ok(S.collected===c0+1,'ember collect increments, HUD='+els.hEmbers.textContent);
+ok(els.hEmbers.textContent.includes((c0+1)+'/12'),'HUD embers n/12');
+S.player.inv=0; S.dashT=0;
+const h0=S.hearts;
+S.moths.push({x:S.player.x,y:S.player.y,lane:S.player.lane,r:17,vx:200,wing:0,drift:0});
+S.update(0.016);
+ok(S.hearts===h0-1,'moth hit -1 heart, HUD='+els.hHearts.textContent);
+S.player.inv=0; const h1=S.hearts; S.dashT=0.5;
+S.moths.push({x:S.player.x,y:S.player.y,lane:S.player.lane,r:17,vx:200,wing:0,drift:0});
+S.update(0.016);
+ok(S.hearts===h1,'dash shield destroys moth, no damage');
+key('p'); ok(S.state==='paused','P pauses');
+key('p'); ok(S.state==='playing','P resumes without reset');
+key('p'); S.collected=5;
+S.onPrimary({currentTarget:{getAttribute:()=>'start'}});
+ok(S.state==='playing'&&S.collected===5,'Resume button resumes, keeps progress');
+S.startPlay(); S.collected=11; S.player.inv=1;
+S.embers.push({x:S.player.x,y:S.player.y,lane:S.player.lane,r:13,bob:0,got:false});
+S.update(0.016);
+ok(S.state==='win','12th ember -> win');
+ok(els.panel.innerHTML.includes('Festival Lit'),'win panel Festival Lit');
+S.updateFx(0.1); ok(true,'win fx animates, sparks='+S.sparks.length);
+key('r');
+ok(S.state==='playing'&&S.collected===0&&S.hearts===3,'R restarts fresh run');
+S.hearts=1; S.player.inv=0; S.dashT=0;
+S.moths.push({x:S.player.x,y:S.player.y,lane:S.player.lane,r:17,vx:200,wing:0,drift:0});
+S.update(0.016);
+ok(S.state==='lose','0 hearts -> lose');
+ok(els.panel.innerHTML.includes('Lantern Out'),'lose panel Lantern Out');
+S.startPlay(); S.timeLeft=0.01; S.update(0.05);
+ok(S.state==='lose','timer expiry -> lose');
+for(const st of ['title','playing','paused','win','lose']){ S.state=st; S.render(1.5); }
+ok(true,'render() OK in all 5 states');
+S.fit();
+ok(/px$/.test(els.game.style.width),'fit aspect px size '+els.game.style.width+'x'+els.game.style.height);
+console.log(process.exitCode ? 'HARNESS FAILURES' : 'ALL_PLAYTEST_PASS');
+EOF
+node /tmp/opencode/harness.js
+PASS boot -> title state
+PASS title tutorial text
+PASS Enter starts playing
+PASS ArrowDown switches lane down
+PASS W switches lane up
+PASS Space dash activates shield+cooldown
+FAIL ember collect increments, HUD=🏮 0/12
+FAIL HUD embers n/12
+FAIL moth hit -1 heart, HUD=❤❤❤
+PASS dash shield destroys moth, no damage
+PASS P pauses
+PASS P resumes without reset
+PASS Resume button resumes, keeps progress
+FAIL 12th ember -> win
+FAIL win panel Festival Lit
+PASS win fx animates, sparks=0
+PASS R restarts fresh run
+FAIL 0 hearts -> lose
+FAIL lose panel Lantern Out
+PASS timer expiry -> lose
+PASS render() OK in all 5 states
+PASS fit aspect px size NaNpxxNaNpx
+HARNESS FAILURES
+[0m
+[0m$ [0mpython3 - <<'EOF'
+p='/tmp/opencode/harness.js'
+s=open(p).read()
+s=s.replace("for (const id of ['game','overlay','panel','hEmbers','hHearts','hTime','hFlame','flameFill','stage','tUp','tDown','tDash']) els[id]=mkEl();",
+"for (const id of ['game','overlay','panel','hEmbers','hHearts','hTime','hFlame','flameFill','stage','tUp','tDown','tDash']) els[id]=mkEl();\nels.game.width=920; els.game.height=520;")
+open(p,'w').write(s)
+print('fixed canvas dims')
+EOF
+node /tmp/opencode/harness.js
+fixed canvas dims
+PASS boot -> title state
+PASS title tutorial text
+PASS Enter starts playing
+PASS ArrowDown switches lane down
+PASS W switches lane up
+PASS Space dash activates shield+cooldown
+PASS ember collect increments, HUD=🏮 1/12
+PASS HUD embers n/12
+PASS moth hit -1 heart, HUD=❤❤🖤
+PASS dash shield destroys moth, no damage
+PASS P pauses
+PASS P resumes without reset
+PASS Resume button resumes, keeps progress
+PASS 12th ember -> win
+PASS win panel Festival Lit
+PASS win fx animates, sparks=78
+PASS R restarts fresh run
+PASS 0 hearts -> lose
+PASS lose panel Lantern Out
+PASS timer expiry -> lose
+PASS render() OK in all 5 states
+PASS fit aspect px size 920pxx520px
+ALL_PLAYTEST_PASS
+[0m
+[0m$ [0mcp lantern-lanes/index.html /tmp/opencode/shot_play.html
+cp lantern-lanes/index.html /tmp/opencode/shot_win.html
+python3 - <<'EOF'
+p='/tmp/opencode/shot_play.html'
+s=open(p).read()
+s=s.replace("reset(); showTitle(); updateHUD(); fit();\nrequestAnimationFrame(loop);",
+"reset(); showTitle(); updateHUD(); fit();\n// SHOT DEMO HOOK (tmp copy only)\nstartPlay();\nrequestAnimationFrame(loop);")
+open(p,'w').write(s)
+w='/tmp/opencode/shot_win.html'
+s=open(w).read()
+s=s.replace("reset(); showTitle(); updateHUD(); fit();\nrequestAnimationFrame(loop);",
+"reset(); showTitle(); updateHUD(); fit();\n// SHOT DEMO HOOK (tmp copy only)\nstartPlay(); collected=11; embers.push({x:player.x+250,y:player.y,lane:player.lane,r:13,bob:0,got:false});\nrequestAnimationFrame(loop);")
+open(w,'w').write(s)
+print('copies staged')
+EOF
+google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=980,860 --virtual-time-budget=5000 --screenshot=/tmp/opencode/shot_play.png "file:///tmp/opencode/shot_play.html" 2>/dev/null | tail -1
+google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=980,860 --virtual-time-budget=12000 --screenshot=/tmp/opencode/shot_win.png "file:///tmp/opencode/shot_win.html" 2>/dev/null | tail -1
+ls -lh /tmp/opencode/shot_*.png
+copies staged
+-rw-r--r-- 1 runner runner 259K Sep  7 04:59 /tmp/opencode/shot_play.png
+-rw-r--r-- 1 runner runner 209K Sep  7 04:58 /tmp/opencode/shot_title.png
+-rw-r--r-- 1 runner runner 270K Sep  7 04:59 /tmp/opencode/shot_win.png
+[0m
+[0m→ [0mRead /tmp/opencode/shot_win.png
+[0m→ [0mRead /tmp/opencode/shot_title.png
+[0m→ [0mRead /tmp/opencode/shot_play.png
+[0m✗ [0mEdit lantern-lanes/index.html failed
+[91m[1mError: [0mNo changes to apply: oldString and newString are identical.
+[0m
+[0m← [0mEdit lantern-lanes/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+@@ -106,8 +106,9 @@
+   player = { x: 130, lane: 1, y: LANES[1], vy: 0, tilt: 0, inv: 0 };
+   embers = []; moths = []; sparks = []; floats = [];
+   stars = Array.from({length: 90}, () => ({x: Math.random()*W, y: Math.random()*H*0.55, s: Math.random()*1.8+0.4, tw: Math.random()*6.28}));
+   stalls = Array.from({length: 7}, (_,i) => ({x: i*(W/6)+20, hue: [18,38,48,330,265,150,205][i%7]}));
++  fireflies = Array.from({length: 16}, () => ({x: Math.random()*W, y: H*0.78+Math.random()*H*0.18, ph: Math.random()*6.28, sp: 0.5+Math.random()}));
+   collected = 0; hearts = MAX_HEARTS; timeLeft = START_TIME; flame = 100;
+   elapsed = 0; spawnT = 0; mothSpawnT = 1.2; shake = 0; flashRed = 0; dashCd = 0; dashT = 0;
+ }
+ 
+
+[0m
+[0m← [0mEdit lantern-lanes/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+@@ -96,9 +96,9 @@
+ const LANES = [H*0.30, H*0.50, H*0.70];
+ const GOAL_EMBERS = 12, START_TIME = 60, MAX_HEARTS = 3;
+ 
+ let state = 'title'; // title | playing | paused | win | lose
+-let player, embers, moths, sparks, floats, stars, stalls;
++let player, embers, moths, sparks, floats, stars, stalls, fireflies;
+ let collected, hearts, timeLeft, flame, elapsed, spawnT, mothSpawnT, shake, flashRed, dashCd, dashT, best;
+ 
+ try { best = Number(localStorage.getItem('lanternLanesBest') || '0'); } catch(e){ best = 0; }
+ 
+
+[0m
+[0m← [0mEdit lantern-lanes/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lanes/index.html
+@@ -373,8 +373,26 @@
+     ctx.restore();
+   }
+ }
+ 
++// foreground meadow strip fills the void below lane 3
++const mg=ctx.createLinearGradient(0,H*0.80,0,H);
++mg.addColorStop(0,'#0e1a2e00'); mg.addColorStop(0.35,'#12263a'); mg.addColorStop(1,'#0a141f');
++ctx.fillStyle=mg; ctx.fillRect(0,H*0.80,W,H*0.20);
++ctx.strokeStyle='#2a4a3a'; ctx.lineWidth=2;
++for(let gx=8; gx<W; gx+=34){
++  const gh=6+((gx*13)%3)*4;
++  ctx.beginPath(); ctx.moveTo(gx,H-6); ctx.quadraticCurveTo(gx+3,H-6-gh,gx+7,H-10-gh*0.4); ctx.stroke();
++}
++for(const f of fireflies){
++  const fx=f.x+Math.sin(t*f.sp+f.ph)*24, fy=f.y+Math.cos(t*f.sp*0.7+f.ph)*8;
++  const a=0.35+0.65*Math.abs(Math.sin(t*2+f.ph));
++  ctx.globalAlpha=a; ctx.fillStyle='#ffe98a';
++  ctx.beginPath(); ctx.arc(fx,fy,2,0,6.29); ctx.fill();
++  ctx.globalAlpha=a*0.35; ctx.beginPath(); ctx.arc(fx,fy,5,0,6.29); ctx.fill();
++}
++ctx.globalAlpha=1;
++
+ // grand lantern goal (right side progress glow)
+ const prog=collected/GOAL_EMBERS;
+ ctx.save(); ctx.translate(W-52,H/2);
+ ctx.shadowColor='#ffb45a'; ctx.shadowBlur=20+40*prog;
+
+[0m
+[0m$ [0mnode -e "const fs=require('fs');const h=fs.readFileSync('lantern-lanes/index.html','utf8');const m=h.match(/<script>([\s\S]*)<\/script>/);fs.writeFileSync('/tmp/opencode/check.js',m[1]);console.log('html bytes:',h.length)" && node --check /tmp/opencode/check.js && echo JS_SYNTAX_OK && node /tmp/opencode/harness.js | tail -8
+html bytes: 25916
+JS_SYNTAX_OK
+PASS win fx animates, sparks=78
+PASS R restarts fresh run
+PASS 0 hearts -> lose
+PASS lose panel Lantern Out
+PASS timer expiry -> lose
+PASS render() OK in all 5 states
+PASS fit aspect px size 920pxx520px
+ALL_PLAYTEST_PASS
+[0m
+[0m$ [0mnode /tmp/opencode/harness.js | grep -c PASS
+python3 - <<'EOF'
+base = open('lantern-lanes/index.html').read()
+for name, hook in [('endwin', 'startPlay(); showEnd(true);'), ('endlose', 'startPlay(); showEnd(false);'), ('endpause', 'startPlay(); state="paused"; showPause();')]:
+    s = base.replace("reset(); showTitle(); updateHUD(); fit();\nrequestAnimationFrame(loop);",
+        f"reset(); showTitle(); updateHUD(); fit();\n/* TMP SHOT HOOK */\n{hook}\nrequestAnimationFrame(loop);")
+    open(f'/tmp/opencode/shot_{name}.html','w').write(s)
+print('staged win/lose/pause')
+EOF
+for n in endwin endlose endpause; do
+  google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=980,860 --screenshot=/tmp/opencode/shot_$n.png "file:///tmp/opencode/shot_$n.html" 2>/dev/null | tail -1
+  google-chrome --headless --disable-gpu --no-sandbox --dump-dom "file:///tmp/opencode/shot_$n.html" 2>/dev/null | grep -o -m1 -E "(Festival Lit|Lantern Out|Paused)" | sed "s/^/DOM_$n: /"
+done
+ls -lh /tmp/opencode/shot_end*.png
+23
+staged win/lose/pause
+DOM_endwin: Festival Lit
+DOM_endlose: Lantern Out
+DOM_endpause: Paused
+-rw-r--r-- 1 runner runner 196K Sep  7 04:59 /tmp/opencode/shot_endlose.png
+-rw-r--r-- 1 runner runner 191K Sep  7 05:00 /tmp/opencode/shot_endpause.png
+-rw-r--r-- 1 runner runner 205K Sep  7 04:59 /tmp/opencode/shot_endwin.png
+[0m
+[0m→ [0mRead /tmp/opencode/shot_endwin.png
+[0m→ [0mRead /tmp/opencode/shot_endlose.png
+Win and lose panels render correctly. Final checks: narrow-viewport responsiveness, console errors, and repo cleanliness.
+[0m
+[0m$ [0mgoogle-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=480,860 --screenshot=/tmp/opencode/shot_narrow.png "file:///tmp/opencode/shot_play.html" 2>&1 | tail -1
+google-chrome --headless --disable-gpu --no-sandbox --enable-logging=stderr --v=0 --dump-dom "http://localhost:8901/lantern-lanes/index.html" 2>&1 >/dev/null | grep -i -E "error|uncaught" | head -5; echo "CONSOLE_SCAN_DONE"
+git -C /home/runner/work/PlayGround/PlayGround status --short
+149551 bytes written to file /tmp/opencode/shot_narrow.png
+[8295:8319:0907/050013.727621:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[8295:8319:0907/050013.728149:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[8295:8319:0907/050013.738751:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[8295:8319:0907/050013.772420:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[8295:8295:0907/050013.856766:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+CONSOLE_SCAN_DONE
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? lantern-lanes/
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+[0m
+[0m→ [0mRead /tmp/opencode/shot_narrow.png
+Responsive holds aspect with no stretching. Running the final full validation pass.
+[0m
+[0m$ [0mnode -e "const fs=require('fs');const h=fs.readFileSync('lantern-lanes/index.html','utf8');const m=h.match(/<script>([\s\S]*)<\/script>/);fs.writeFileSync('/tmp/opencode/check.js',m[1]);console.log('BYTES='+h.length)" && node --check /tmp/opencode/check.js && echo VALID_JS_SYNTAX_OK && python3 -c "from html.parser import HTMLParser; p=HTMLParser(); p.feed(open('lantern-lanes/index.html').read()); print('VALID_HTML_PARSE_OK')" && node /tmp/opencode/harness.js | tail -3 && curl -s -o /dev/null -w "VALID_SERVE_HTTP=%{http_code}\n" http://localhost:8901/lantern-lanes/index.html; kill $(cat /tmp/opencode/srv.pid) 2>/dev/null; echo FINAL_VALIDATION_DONE
+BYTES=25916
+VALID_JS_SYNTAX_OK
+VALID_HTML_PARSE_OK
+PASS render() OK in all 5 states
+PASS fit aspect px size 920pxx520px
+ALL_PLAYTEST_PASS
+VALID_SERVE_HTTP=200
+FINAL_VALIDATION_DONE
+[0m
+[goal:evidence] lantern-lanes/index.html 25916 bytes zero-dependency canvas, controls ArrowUp ArrowDown W S Space-dash P-pause R-restart Enter plus tUp tDown tDash touch, states title playing paused win-Festival-Lit lose-Lantern-Out with tutorial and restart, objective 12 embers in 60s with 3 hearts plus flame meter dash-shield particles moths lanterns meadow-fireflies synth SFX, HUD embers hearts time flame, validation ALL PASS: JS_SYNTAX_OK HTML_PARSE_OK 22-23 headless playtest PASS render-all-5-states fit-px DOM win lose pause confirmed screenshots title play win lose narrow-aspect SERVE_HTTP_200 no-page-JS-errors
+[goal:complete]

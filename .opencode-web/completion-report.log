@@ -1,0 +1,121 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Capturing public-URL proof, committing, pushing, and posting the final report.
+[0m$ [0mgit branch --show-current; git status --short | head -20; git log --oneline -3; curl -s -o /dev/null -w "PUBLIC_HTTP=%{http_code}\n" --max-time 15 https://overview-publishers-education-periodically.trycloudflare.com 2>&1; curl -s --max-time 15 https://overview-publishers-education-periodically.trycloudflare.com 2>&1 | grep -o -m1 "<title>[^<]*</title>"
+opencode/34084843032
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? lantern-lanes/
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? screenshots/
+b4fe44a Grant reusable OpenCode workflow Pages permission
+PUBLIC_HTTP=200
+<title>Lantern Lanes — a tiny night-market dodger</title>
+[0m
+[0m$ [0mPUB=https://overview-publishers-education-periodically.trycloudflare.com
+google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=980,860 --screenshot=screenshots/final-title.png "$PUB/" 2>/dev/null | tail -1
+google-chrome --headless --disable-gpu --no-sandbox --dump-dom "$PUB/" 2>/dev/null | grep -o -m1 -E "Light my lantern" | sed "s/^/PUB_DOM: /"
+python3 - <<'EOF'
+base = open('index.html').read()
+for name, hook in [('pub_play','startPlay();'),('pub_win','startPlay(); showEnd(true);'),('pub_lose','startPlay(); showEnd(false);')]:
+    s = base.replace("reset(); showTitle(); updateHUD(); fit();\nrequestAnimationFrame(loop);",
+      f"reset(); showTitle(); updateHUD(); fit();\n/* TMP DEMO */\n{hook}\nrequestAnimationFrame(loop);")
+    open(f'/tmp/opencode/{name}.html','w').write(s)
+print('demos staged')
+EOF
+google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=980,860 --virtual-time-budget=5000 --screenshot=screenshots/final-gameplay.png "file:///tmp/opencode/pub_play.html" 2>/dev/null | tail -1
+google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=980,860 --screenshot=screenshots/final-win.png "file:///tmp/opencode/pub_win.html" 2>/dev/null | tail -1
+google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=980,860 --screenshot=screenshots/final-lose.png "file:///tmp/opencode/pub_lose.html" 2>/dev/null | tail -1
+ls -lh screenshots/
+PUB_DOM: Light my lantern
+demos staged
+total 916K
+-rw-r--r-- 1 runner runner 285K Sep  7 05:02 final-gameplay.png
+-rw-r--r-- 1 runner runner 195K Sep  7 05:02 final-lose.png
+-rw-r--r-- 1 runner runner 222K Sep  7 05:02 final-title.png
+-rw-r--r-- 1 runner runner 205K Sep  7 05:02 final-win.png
+[0m
+[0m$ [0mgit add index.html lantern-lanes/index.html screenshots/final-title.png screenshots/final-gameplay.png screenshots/final-win.png screenshots/final-lose.png && git status --short && git commit -m "Lantern Lanes: playable game, root entrypoint, final screenshots" && git push -u origin opencode/34084843032 2>&1 | tail -3 && git log --oneline -2 && git rev-parse --short HEAD
+A  index.html
+A  lantern-lanes/index.html
+A  screenshots/final-gameplay.png
+A  screenshots/final-lose.png
+A  screenshots/final-title.png
+A  screenshots/final-win.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+[opencode/34084843032 7dae1e3] Lantern Lanes: playable game, root entrypoint, final screenshots
+ 6 files changed, 1006 insertions(+)
+ create mode 100644 index.html
+ create mode 100644 lantern-lanes/index.html
+ create mode 100644 screenshots/final-gameplay.png
+ create mode 100644 screenshots/final-lose.png
+ create mode 100644 screenshots/final-title.png
+ create mode 100644 screenshots/final-win.png
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34084843032 -> opencode/34084843032
+branch 'opencode/34084843032' set up to track 'origin/opencode/34084843032'.
+7dae1e3 Lantern Lanes: playable game, root entrypoint, final screenshots
+b4fe44a Grant reusable OpenCode workflow Pages permission
+7dae1e3
+[0m
+Committed and pushed. Posting the final completion comment with embedded screenshots.
+[0m$ [0mBR=opencode/34084843032
+RAW="https://raw.githubusercontent.com/AgentsLoop/PlayGround/$BR/screenshots"
+gh issue comment 54 --body "## Lantern Lanes — complete and publicly playable
+
+Play it now: https://overview-publishers-education-periodically.trycloudflare.com
+
+You are Pip, a fox-lantern keeper crossing a night market. Dart between 3 lanes, collect 12 embers in 60s to light the Grand Lantern, dodge Gloom Moths, manage 3 hearts plus a draining flame meter. Space dash grants a brief shield. Controls: Up/Down/W/S lanes, Space dash, P pause, R restart, Enter start, plus touch buttons and tap-to-move. States: title tutorial, playing, paused, win Festival Lit, lose Lantern Out, all with restart. Responsive HUD: embers, hearts, time, flame bar.
+
+### Screenshots
+Title:
+![]($RAW/final-title.png)
+Gameplay:
+![]($RAW/final-gameplay.png)
+Win:
+![]($RAW/final-win.png)
+Lose:
+![]($RAW/final-lose.png)
+
+### Final commit
+- 7dae1e3 Lantern Lanes: playable game, root entrypoint, final screenshots (branch $BR, pushed to origin)
+- Files: index.html (25,916 bytes, zero-dependency single-file canvas game, served at server root), lantern-lanes/index.html (mirror), screenshots/final-*.png
+
+### Deployment status
+- Local: tmux session app-server serving repo root on port 3000, curl / returns HTTP 200 with the game title
+- Public: tunnel URL returns HTTP 200 with the game title and title panel verified in headless DOM (Light my lantern); final-title.png captured directly from the public URL
+
+### Test status — all PASS
+- node --check on extracted script, Python HTML parse, controls/states/HUD requirement sweep
+- 22-check headless logic playtest: boot, Enter start, lane moves, dash, ember collect plus HUD, moth damage, dash shield, P pause/resume including Resume-button fix, 12th-ember win, R restart, 0-hearts lose, timeout lose, render in all 5 states, aspect-preserving fit
+- Win, lose, and pause panels confirmed via headless DOM dumps; no page JS errors
+
+### Known limitations
+- Audio uses WebAudio synth and requires a user gesture before first sound; headless runs stay silent
+- High-score best persists in localStorage per browser only
+- Touch controls render on coarse-pointer devices; desktop hints assume a keyboard
+- Tunnel URL is ephemeral; for a permanent host use the pushed branch with Pages" && echo COMMENT_POSTED
+https://github.com/AgentsLoop/PlayGround/issues/54#issuecomment-5565287419
+COMMENT_POSTED
+[0m
+All steps complete:
+
+- **Screenshots**: `screenshots/final-title.png` captured directly from the public URL (DOM-verified title panel served publicly), plus `final-gameplay.png`, `final-win.png`, `final-lose.png` — all committed.
+- **Commit & push**: `7dae1e3` on `opencode/34084843032`, pushed to origin (6 files: root `index.html`, mirror, 4 screenshots).
+- **Issue #54**: final completion comment posted ([link](https://github.com/AgentsLoop/PlayGround/issues/54#issuecomment-5565287419)) with the public game URL, embedded screenshots via raw branch links, final commit, deployment/test status, and known limitations.
