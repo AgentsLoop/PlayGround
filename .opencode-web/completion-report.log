@@ -1,0 +1,100 @@
+Capturing final screenshots against the public URL, then committing and posting the completion comment.
+[0m
+[0m$ [0mgit branch --show-current; git status --short | head -n 20; echo ---; curl -s -o /dev/null -w "public-index:%{http_code}\n" --max-time 15 https://expenditures-may-harris-applies.trycloudflare.com/index.html; curl -s --max-time 15 https://expenditures-may-harris-applies.trycloudflare.com/index.html | grep -o "<title>[^<]*</title>"
+opencode/34074303425
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? fps/
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? screenshots/
+---
+public-index:200
+<title>HOSTILE CLEARANCE — Final (original browser FPS)</title>
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+[0m$ [0mtimeout 55 chromium --headless --disable-gpu --no-sandbox --window-size=1280,720 --virtual-time-budget=8000 --screenshot=screenshots/final-public-menu.png https://expenditures-may-harris-applies.trycloudflare.com/index.html 2>&1 | tail -n 1; ls -la screenshots/
+129310 bytes written to file screenshots/final-public-menu.png
+total 444
+drwxr-xr-x  2 runner runner   4096 Sep  7 02:22 .
+drwxr-xr-x 12 runner runner   4096 Sep  7 02:19 ..
+-rw-r--r--  1 runner runner 130796 Sep  7 02:20 final-menu-3000.png
+-rw-r--r--  1 runner runner 129310 Sep  7 02:22 final-public-menu.png
+-rw-r--r--  1 runner runner 182560 Sep  7 02:21 final-wide-3000.png
+[0m
+[0m→ [0mRead screenshots/final-public-menu.png
+[0m
+[0m$ [0mgit add screenshots/ index.html fps/ && git status --short | head -n 20
+A  fps/COD_COMPARISON.md
+A  fps/index.html
+A  fps/models/rifle.glb
+A  fps/models/rifle.glb.attribution.json
+A  fps/piece-a.html
+A  fps/piece-b.html
+A  fps/piece-c.html
+A  fps/progress.html
+A  index.html
+A  screenshots/final-menu-3000.png
+A  screenshots/final-public-menu.png
+A  screenshots/final-wide-3000.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+[0m
+[0m$ [0mgit commit -m "Verify playable FPS on port 3000 with final screenshots" 2>&1 | tail -n 3 && git log --oneline -3 && git push origin opencode/34074303425 2>&1 | tail -n 5
+create mode 100644 screenshots/final-menu-3000.png
+ create mode 100644 screenshots/final-public-menu.png
+ create mode 100644 screenshots/final-wide-3000.png
+f7dfc3d Verify playable FPS on port 3000 with final screenshots
+b4fe44a Grant reusable OpenCode workflow Pages permission
+remote: Create a pull request for 'opencode/34074303425' on GitHub by visiting:        
+remote:      https://github.com/AgentsLoop/PlayGround/pull/new/opencode/34074303425        
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34074303425 -> opencode/34074303425
+[0m
+Screenshots committed and pushed — posting the final completion comment.
+[0m$ [0mgh issue comment 48 --body "## Complete — playable browser FPS verified
+
+**Play now (public):** https://expenditures-may-harris-applies.trycloudflare.com (serves root \`./index.html\`; also playable locally via tmux \`app-server\` on port 3000)
+
+**Final commit:** \`f7dfc3d\` on branch \`opencode/34074303425\` (pushed; no PR per instructions — workflow handles it)
+
+### Screenshots (from the verified builds)
+![menu 1280x720](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34074303425/screenshots/final-public-menu.png)
+![wide 1920x1080](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34074303425/screenshots/final-wide-3000.png)
+![menu port 3000](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34074303425/screenshots/final-menu-3000.png)
+
+### Deployment status
+- Public URL returns 200 for \`/index.html\` (title HOSTILE CLEARANCE) — screenshot above captured directly from it.
+- Local: tmux session \`app-server\` serving repo root on port 3000; \`/\`, \`/index.html\`, \`/fps/models/rifle.glb\` (411,408B) all 200.
+- Entrypoint: root \`./index.html\` (53,885B, from \`fps/index.html\` + one-line GLB path fix), \`node --check\` PASS.
+
+### Test status
+- Headless Chromium over HTTP: start menu (objective 8 hostiles/120s, controls, MISSION COMPLETE / KIA / TIMEOUT + restart), HUD (pills/compass/health/ammo), gunmetal M4 viewmodel with sights, readable compound — all render.
+- Console: zero JS/THREE/404 errors (only headless infra noise). Win/lose/restart + resetGame paths verified in code by fresh critics (16/16 flow checks PASS); pointer-lock play itself is manual.
+- Blind A/B vs baseline: map readable (was near-black), gun present (was absent).
+
+### Known limitations
+- Single procedural rifle + one 8-kill/120s mission loop; no per-gun tables, slide/mantle, minimap/killstreaks, or tactical cover AI (seek/strafe bots only) — deliberate scope cuts, documented in \`fps/COD_COMPARISON.md\`.
+- Weapon viewmodel: CC Attribution M4 by szaw (\`fps/models/rifle.glb\` + sidecar); everything else procedural/original, no CoD assets.
+- Headless FPS reads ~10 (SwiftShader); real-GPU browsers target 60." 2>&1 | tail -n 3
+https://github.com/AgentsLoop/PlayGround/issues/48#issuecomment-5564169840
+[0m
+Done:
+
+- **Screenshots:** captured `screenshots/final-public-menu.png` directly from the public URL (visually verified: menu, HUD, gunmetal M4, readable compound), alongside existing `final-menu-3000.png` / `final-wide-3000.png`. All use `final-*` filenames.
+- **Commit + push:** `f7dfc3d` ("Verify playable FPS on port 3000 with final screenshots") on branch `opencode/34074303425`, pushed to origin. Staged only `screenshots/`, `index.html`, `fps/` (left infra keys/junk untracked). No PR created.
+- **Completion comment:** posted to issue #48 — https://github.com/AgentsLoop/PlayGround/issues/48#issuecomment-5564169840 — with the public game URL, three embedded screenshots (raw branch links), final commit/branch, deployment + test status, and known limitations.
