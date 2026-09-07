@@ -1,0 +1,26 @@
+## Objective
+
+Deliver a production-quality browser game centered on the Call of Duty experience for players who want a polished, immediately playable military-shooter loop. Use Call of Duty as the fidelity target: preserve its recognizable visual language, responsive combat interaction model, mission-oriented pacing, readable HUD, weapon handling, enemy encounters, progression, and replayable gameplay while creating an original implementation and assets. Ship the real web experience with responsive input and presentation rather than a static mockup or a flattened demo.
+
+## Quality bar
+
+- Research authoritative and representative Call of Duty references before coding. Search official materials, gameplay footage, screenshots, and interface views; select at least six high-signal anchors, record their URLs and purpose, and use them to guide the work.
+- Inspect the actual running artifact with vision and direct browser interaction. Compare captures or blind A/B views against the selected anchors whenever practical.
+- Deliver complete gameplay states and workflows: onboarding, active combat, objectives, enemies, weapons, damage and recovery, pause/restart, success/failure, responsive HUD, audio or clear feedback equivalents, and persistent progression where appropriate.
+- Make the result polished, accessible, operable with supported keyboard/mouse and touch or controller-friendly alternatives, performant, and robust to error and recovery states.
+
+## Execution
+
+- Act as the orchestrator for continuous multi-day work. Own the complete outcome and keep delegating, integrating, implementing, verifying, and improving it; treat prototypes and demos as intermediate milestones.
+- Have the lead choose the route and split the project into independently judgeable pieces.
+- Give each important piece a separate builder and a fresh-context critic or verifier. Each verifier must inspect the actual artifact, compare it with the quality bar, identify the largest remaining gap, and send the work back for improvement.
+- Work across as many sessions as necessary to reach the complete requested outcome.
+
+## Verification
+
+- Fix the largest remaining gap and repeat the build, inspect, critique, and improvement loop until the acceptance bar is met or an explicit blocker requires the user.
+- Record concrete evidence for gameplay behavior, visual quality, responsive operation, recovery behavior, and delivery readiness.
+
+## Progress
+
+Maintain a resumable live progress page with research references, decisions, completed work, evidence, blockers, current gaps, and the next exact action so another agent can continue without losing context.

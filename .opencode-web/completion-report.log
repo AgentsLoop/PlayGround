@@ -1,0 +1,98 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+[0m$ [0mgit branch --show-current; git status --short | head -15; ls screenshots/; git log --oneline -3
+opencode/34092038605
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? PROGRESS.md
+?? game/
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? screenshots/
+final-briefing.png
+final-combat.png
+final-debrief.png
+final-pause.png
+final-spawn.png
+b4fe44a Grant reusable OpenCode workflow Pages permission
+[0m
+[0m← [0mWrite /var/folders/d8/hvxvltxn0fl4rmnd52sncbth0000gn/T/opencode/sp_test/pubcheck.js
+Wrote file successfully.
+[0m
+[0m$ [0mnode pubcheck.js 2>&1 | tail -2; ls -la /Users/runner/work/PlayGround/PlayGround/screenshots/
+{"title":"STRIKE PROTOCOL — Browser FPS (CoD-fidelity original)","st":{"mode":"play","foes":8,"score":0},"errs":[]}
+total 2976
+drwxr-xr-x  10 runner  staff     320 Sep  7 07:07 .
+drwxr-xr-x  18 runner  staff     576 Sep  7 07:03 ..
+-rw-r--r--   1 runner  staff  281187 Sep  7 07:05 final-briefing.png
+-rw-r--r--   1 runner  staff   90607 Sep  7 07:05 final-combat.png
+-rw-r--r--   1 runner  staff  238158 Sep  7 07:05 final-debrief.png
+-rw-r--r--   1 runner  staff  229056 Sep  7 07:05 final-pause.png
+-rw-r--r--   1 runner  staff  281187 Sep  7 07:07 final-public-briefing.png
+-rw-r--r--   1 runner  staff   76059 Sep  7 07:07 final-public-combat.png
+-rw-r--r--   1 runner  staff  229056 Sep  7 07:07 final-public-pause.png
+-rw-r--r--   1 runner  staff   81922 Sep  7 07:05 final-spawn.png
+[0m
+Public deployment verified playable. Confirming visuals, then committing.
+[0m→ [0mRead screenshots/final-public-combat.png
+[0m
+[0m$ [0mgit add index.html game/index.html PROGRESS.md screenshots/ Agents.md && git status --short | head -20 && git commit -m "Ship STRIKE PROTOCOL CoD-fidelity browser FPS with verified entrypoint and final screenshots" 2>&1 | tail -3
+A  Agents.md
+A  PROGRESS.md
+A  game/index.html
+A  index.html
+A  screenshots/final-briefing.png
+A  screenshots/final-combat.png
+A  screenshots/final-debrief.png
+A  screenshots/final-pause.png
+A  screenshots/final-public-briefing.png
+A  screenshots/final-public-combat.png
+A  screenshots/final-public-pause.png
+A  screenshots/final-spawn.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+ create mode 100644 screenshots/final-public-combat.png
+ create mode 100644 screenshots/final-public-pause.png
+ create mode 100644 screenshots/final-spawn.png
+[0m
+[0m$ [0mgit push -u origin opencode/34092038605 2>&1 | tail -3; git rev-parse HEAD
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34092038605 -> opencode/34092038605
+branch 'opencode/34092038605' set up to track 'origin/opencode/34092038605'.
+e04c11190adacf2d1170da155846a953cb61f2f9
+[0m
+[0m$ [0mgh issue comment 58 --body "## Final completion — STRIKE PROTOCOL is live and verified
+
+**Play now:** https://hostel-healthcare-cattle-hon.trycloudflare.com (verified serving \`index.html\`, title + gameplay confirmed in headless Chrome against the public URL, zero page errors)
+
+**Final commit:** \`e04c11190adacf2d1170da155846a953cb61f2f9\` on branch \`opencode/34092038605\` (pushed). Entrypoint \`./index.html\` (49KB zero-dep single file) + source \`game/index.html\` + \`PROGRESS.md\` + 8 screenshots under \`screenshots/\`.
+
+**Screenshots (from this commit):**
+![briefing](https://github.com/AgentsLoop/PlayGround/raw/e04c11190adacf2d1170da155846a953cb61f2f9/screenshots/final-public-briefing.png)
+![combat](https://github.com/AgentsLoop/PlayGround/raw/e04c11190adacf2d1170da155846a953cb61f2f9/screenshots/final-public-combat.png)
+![pause](https://github.com/AgentsLoop/PlayGround/raw/e04c11190adacf2d1170da155846a953cb61f2f9/screenshots/final-public-pause.png)
+
+**Deployment status:** tmux \`app-server\` on port 3000 serving the repo root; public Cloudflare tunnel verified end-to-end (deploy → 8 enemies → ADS fire → pause, all OK).
+
+**Test status:** puppeteer suites green — gun kill (+100), frag kill, enemy return fire (HP drop), pause/resume, MISSION COMPLETE (8 kills/score 2215), NEXT→mission 2 (3 intel), MISSION FAILED path, reload persistence (RANK 2 · 1522 XP · BEST 2215 · DMR unlocked), touch FIRE-tap. Full history in PROGRESS.md.
+
+**Known limitations:** billboard enemies lack walk animation; spawn view can face a wall; \~23fps under software rendering (GPU browsers faster); tunnel URL is ephemeral; CLI loopback blocked in sandbox so checks ran via real Chrome." 2>&1 | tail -2
+https://github.com/AgentsLoop/PlayGround/issues/58#issuecomment-5566484105
+[0m
+Done. All requested steps completed:
+
+- **Captured:** 3 new `final-public-*.png` screenshots driven against the public URL (briefing, combat, pause), plus the 5 existing `final-*` shots — 8 total under `screenshots/`.
+- **Committed:** `e04c111` ("Ship STRIKE PROTOCOL…") including `index.html`, `game/index.html`, `PROGRESS.md`, screenshots.
+- **Pushed:** branch `opencode/34092038605` to origin (new branch confirmed).
+- **Posted:** final completion comment to issue #58 (comment 5566484105) with the public game URL, 3 embedded screenshots via raw commit URLs, final commit hash, deployment/test status, and known limitations.
