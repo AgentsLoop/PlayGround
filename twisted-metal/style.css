@@ -1,0 +1,93 @@
+:root{
+  --bg:#0c0a08; --rust:#ff5a1f; --amber:#ffb300; --blood:#e0281e;
+  --steel:#8a8f98; --panel:rgba(14,12,10,.88); --line:#2b2320;
+  --hp:#46e07a; --turbo:#39d353; --heat:#ff7a1a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:#f5efe6;
+  font-family:"Arial Black",Arial,Helvetica,sans-serif;overflow:hidden}
+#app{position:fixed;inset:0}
+#game{position:absolute;inset:0;width:100%;height:100%;display:block;
+  background:#14100c;touch-action:none}
+#minimap{position:absolute;right:12px;bottom:12px;width:148px;height:148px;
+  border:2px solid #4a3a2e;border-radius:10px;background:rgba(0,0,0,.55);z-index:5}
+#vignette{position:absolute;inset:0;pointer-events:none;z-index:4;opacity:0;transition:opacity .15s;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(224,40,30,.55) 100%)}
+#flash{position:absolute;inset:0;pointer-events:none;z-index:4;opacity:0;background:#fff}
+.hidden{display:none!important}
+/* HUD */
+#hud{position:absolute;top:0;left:0;right:0;z-index:6;display:flex;gap:12px;
+  justify-content:space-between;align-items:flex-start;padding:10px 200px 0 10px;
+  pointer-events:none;text-shadow:0 2px 0 #000}
+.hud-left,.hud-right,.hud-center{background:var(--panel);border:1px solid var(--line);
+  border-radius:10px;padding:8px 10px}
+.hud-left{min-width:230px}
+.hud-label{font-size:11px;letter-spacing:2px;color:var(--amber)}
+.bar{height:14px;background:#241d18;border-radius:7px;overflow:hidden;margin-top:4px;border:1px solid #000}
+.bar>div{height:100%;width:100%;transition:width .12s}
+#hpFill{background:linear-gradient(90deg,#2ecc71,#a9ff6a)}
+.bar.turbo{height:8px}#turboFill{background:var(--turbo)}
+.bar.heat{height:8px}#heatFill{background:var(--heat);width:0%}
+.bar-sub{display:flex;justify-content:space-between;gap:10px;font-size:12px;margin-top:4px;color:#ffd9a0}
+.bar-sub #vehicleName{flex:1;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hud-center{text-align:center;min-width:170px}
+#weaponBox{font-size:18px}#weaponAmmo{color:var(--amber);margin-left:8px}
+#objective{font-size:15px;color:#fff;margin-top:2px}
+#timer{font-size:13px;color:var(--steel)}
+.hud-right{min-width:170px;max-width:240px}#enemies{color:#ff8a7a;font-size:14px}
+#killfeed{font-size:11px;font-family:Arial,sans-serif;max-height:64px;overflow:hidden;color:#ffe9c9}
+#killfeed div{margin-top:2px}
+/* buttons */
+#topBtns{position:absolute;top:10px;right:10px;z-index:8;display:flex;gap:6px}
+.icon-btn{width:38px;height:38px;border-radius:9px;border:1px solid #554134;
+  background:rgba(20,14,10,.85);color:#fff;font-size:17px;cursor:pointer}
+.icon-btn:hover{background:#3a2417}.icon-btn:focus-visible{outline:3px solid var(--amber)}
+.big{background:linear-gradient(180deg,#ff6a1f,#c22a12);border:2px solid #ffb300;color:#fff;
+  font-family:inherit;font-size:18px;padding:12px 22px;border-radius:12px;cursor:pointer;
+  box-shadow:0 4px 0 #5c1408}
+.big:hover{filter:brightness(1.12)}.big:focus-visible{outline:3px solid #fff}
+.ghost{background:#221a14;border:2px solid #6b5a48;color:#ffe9c9;font-family:inherit;
+  font-size:15px;padding:10px 18px;border-radius:12px;cursor:pointer}
+/* screens */
+.screen{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 30%,rgba(255,90,31,.16),transparent 60%),rgba(0,0,0,.72);padding:16px}
+.card{background:linear-gradient(180deg,#1c1410,#100c09);border:2px solid #5a3a24;border-radius:16px;
+  padding:26px 28px;max-width:560px;width:100%;text-align:center;box-shadow:0 20px 60px #000}
+.card.wide{max-width:760px}
+.kicker{color:var(--amber);font-size:11px;letter-spacing:2px}
+h1{font-size:56px;margin:6px 0;line-height:.95;color:#fff;text-shadow:0 4px 0 #5c1408,0 0 30px rgba(255,90,31,.5)}
+h1 span{color:var(--rust)}
+h2{letter-spacing:2px;color:var(--amber)}
+.tag{font-family:Arial,sans-serif;color:#ffd9a0}
+.row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.fine{font-family:Arial,sans-serif;font-size:12px;color:#c9bda9}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left;font-family:Arial,sans-serif}
+.cols h3{margin:8px 0 2px;color:var(--amber);font-family:"Arial Black",Arial} 
+.cols p{margin:0 0 6px;font-size:13px;color:#e8dcc6}
+#roster,#arenas{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+#arenas{grid-template-columns:repeat(2,1fr)}
+.pick{border:2px solid #4a3a2e;border-radius:12px;padding:10px;background:#181210;cursor:pointer;color:#fff}
+.pick[aria-checked="true"]{border-color:var(--amber);background:#2b1c10;box-shadow:0 0 0 2px var(--amber)}
+.pick b{display:block;font-size:15px}.pick small{font-family:Arial,sans-serif;color:#c9bda9;font-size:11px}
+.pick canvas{width:100%;height:54px}
+#toast{position:absolute;left:50%;bottom:170px;transform:translateX(-50%);z-index:9;
+  background:rgba(0,0,0,.8);border:1px solid var(--amber);padding:8px 16px;border-radius:10px;
+  font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+/* touch */
+#touch{position:absolute;inset:auto 0 0 0;z-index:7;display:flex;justify-content:space-between;
+  padding:0 16px 70px;pointer-events:none}
+#stick{width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08);
+  border:2px solid rgba(255,179,0,.5);position:relative;pointer-events:auto;touch-action:none}
+#nub{position:absolute;left:38px;top:38px;width:44px;height:44px;border-radius:50%;background:rgba(255,179,0,.7)}
+#touchBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;pointer-events:auto}
+#touchBtns button{width:64px;height:64px;border-radius:50%;border:2px solid var(--amber);
+  background:rgba(20,12,8,.8);color:#fff;font-family:inherit;font-size:13px}
+#err{position:absolute;left:10px;bottom:10px;z-index:20;max-width:70ch;background:#3a0d0d;color:#ffd9d9;
+  border:1px solid red;padding:8px 10px;border-radius:8px;font:12px Arial}
+@media (max-width:700px){
+  h1{font-size:40px}#minimap{width:104px;height:104px;bottom:auto;top:150px}
+  #hud{padding-right:12px;flex-wrap:wrap}.hud-left{min-width:170px}
+  #topBtns{top:auto;bottom:8px;right:8px}.cols{grid-template-columns:1fr}
+  #roster{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){#vignette,#flash{transition:none}}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>RUSTCARNAGE — Arena Vehicular Combat</title>
+<meta name="description" content="RUSTCARNAGE: fast, readable browser vehicular combat. Original top-down arena battler inspired by Twisted Metal.">
+<link rel="stylesheet" href="twisted-metal/style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="game" aria-label="Arena combat canvas. Drive with WASD or arrows, Space fires machine gun." role="img"></canvas>
+  <canvas id="minimap" width="148" height="148" aria-hidden="true"></canvas>
+  <div id="vignette" aria-hidden="true"></div>
+  <div id="flash" aria-hidden="true"></div>
+
+  <header id="hud" class="hidden" aria-live="off">
+    <div class="hud-left">
+      <div class="hp-wrap"><span class="hud-label">HULL</span><div class="bar hp"><div id="hpFill"></div></div></div>
+      <div class="bar-sub"><span id="lives">●●</span><span id="vehicleName">CHUCKLES</span></div>
+      <div class="bar turbo"><div id="turboFill"></div></div>
+      <div class="bar heat"><div id="heatFill"></div></div>
+    </div>
+    <div class="hud-center">
+      <div id="weaponBox"><span id="weaponName">MG</span><span id="weaponAmmo">∞</span></div>
+      <div id="objective">KILLS 0/6</div>
+      <div id="timer">5:00</div>
+    </div>
+    <div class="hud-right">
+      <div id="enemies">FOES 5</div>
+      <div id="killfeed" aria-live="polite"></div>
+    </div>
+  </header>
+
+  <div id="topBtns">
+    <button id="btnPause" class="icon-btn" aria-label="Pause or resume (P)">⏸</button>
+    <button id="btnMute" class="icon-btn" aria-label="Mute or unmute (M)">🔊</button>
+    <button id="btnHelp" class="icon-btn" aria-label="How to play (H)">?</button>
+    <button id="btnReset" class="icon-btn" aria-label="Restart match (R)">↻</button>
+  </div>
+
+  <div id="touch" class="hidden">
+    <div id="stick"><div id="nub"></div></div>
+    <div id="touchBtns">
+      <button id="tMg" aria-label="Fire machine gun">MG</button>
+      <button id="tWpn" aria-label="Fire pickup weapon">WPN</button>
+      <button id="tSpc" aria-label="Fire special weapon">SPC</button>
+      <button id="tTurbo" aria-label="Turbo boost">≫</button>
+    </div>
+  </div>
+
+  <section id="screen-title" class="screen">
+    <div class="card">
+      <p class="kicker">CALYPSO'S INVITATION · ORIGINAL FAN-MADE ARENA BATTLER</p>
+      <h1>RUST<span>CARNAGE</span></h1>
+      <p class="tag">Six drivers enter the Rustyard. One wish leaves. Wreck them all.</p>
+      <div class="row">
+        <button id="btnStart" class="big" autofocus>ENTER THE ARENA</button>
+        <button id="btnHow" class="ghost">HOW TO PLAY</button>
+      </div>
+      <p class="fine">WASD / arrows drive · SPACE machine gun · E weapon · Q cycle · SHIFT turbo · F special · P pause · M mute. Gamepad-free. Touch supported. Original code &amp; art — a tribute, not a clone.</p>
+      <p class="fine">Best: <span id="best">—</span></p>
+    </div>
+  </section>
+
+  <section id="screen-select" class="screen hidden">
+    <div class="card wide">
+      <h2>CHOOSE YOUR RIDE</h2>
+      <div id="roster" role="radiogroup" aria-label="Vehicle selection"></div>
+      <h2>ARENA</h2>
+      <div id="arenas" role="radiogroup" aria-label="Arena selection"></div>
+      <div class="row"><button id="btnFight" class="big">FIGHT!</button>
+      <button id="btnBack" class="ghost">BACK</button></div>
+    </div>
+  </section>
+
+  <section id="screen-pause" class="screen hidden">
+    <div class="card">
+      <h2>⏸ PAUSED</h2>
+      <p class="tag">The yard holds its breath. Foes are frozen.</p>
+      <div class="row"><button id="btnResume" class="big">RESUME (P)</button>
+      <button id="btnPauseRestart" class="ghost">RESTART (R)</button>
+      <button id="btnPauseHelp" class="ghost">MANUAL (H)</button></div>
+    </div>
+  </section>
+
+  <section id="screen-over" class="screen hidden">
+    <div class="card">
+      <h2 id="overTitle">WRECKED</h2>
+      <p id="overStats">—</p>
+      <div class="row"><button id="btnAgain" class="big">REMATCH (R)</button>
+      <button id="btnMenu" class="ghost">GARAGE</button></div>
+    </div>
+  </section>
+
+  <section id="screen-help" class="screen hidden">
+    <div class="card wide">
+      <h2>DRIVER'S MANUAL</h2>
+      <div class="cols">
+        <div><h3>DRIVE</h3><p>WASD / arrows: throttle + steer. SHIFT: turbo (drains green bar). Ramming deals damage at speed.</p>
+        <h3>SHOOT</h3><p>SPACE (hold): machine gun — infinite but overheats (orange bar). E / J: fire pickup weapon. Q: cycle. F / K: vehicle special (recharges).</p></div>
+        <div><h3>SURVIVE</h3><p>Grab glowing pickups: <b>Homing</b> 🔒, <b>Power</b> ➤, <b>Fire</b> 🔥, <b>Napalm</b> ☢, <b>Mines</b> ●. Green-cross pads repair hull (2 uses). You have 3 hulls; foes respawn until you score 6 kills.</p>
+        <h3>FOES</h3><p>5 AI drivers hunt, steal pickups, and flee to repair when burning. Watch the radar (top-right of canvas, minimap). Red flash = incoming.</p></div>
+      </div>
+      <div class="row"><button id="btnCloseHelp" class="big">GOT IT</button></div>
+    </div>
+  </section>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="err" class="hidden"></div>
+</div>
+<script src="twisted-metal/game.js"></script>
+</body>
+</html>
