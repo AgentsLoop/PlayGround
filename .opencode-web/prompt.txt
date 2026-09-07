@@ -1,0 +1,1 @@
+Build a small, polished, playable browser game inspired by the fast tactical feel of Call of Duty. Deliver an immediately understandable combat loop with responsive movement, aiming and shooting, enemies, a compact objective, clear HUD feedback, and a restart/win-or-lose state. Keep it self-contained and visually cohesive, with the playfield protected from UI clutter.

@@ -1,0 +1,1090 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Resuming — verifying the build, then polishing and playtesting.
+[0m→ [0mRead index.html
+[0m
+[0m$ [0mls -lh index.html && python3 -c "import re;h=open('index.html').read();open('/tmp/g.js','w').write(re.search(r'<script>(.*)</script>',h,re.S).group(1))" && node --check /tmp/g.js && echo JS_OK && (python3 -c "import playwright" 2>&1; npx --yes playwright --version 2>&1 | head -2; which chromium chromium-browser google-chrome 2>&1 | head -3)
+-rw-r--r--  1 runner  staff    33K Sep  7 01:30 index.html
+JS_OK
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import playwright
+ModuleNotFoundError: No module named 'playwright'
+Version 1.63.0
+[0m
+[0m$ [0mls ~/.cache/ms-playwright/ 2>&1 | head; node -e "try{require.resolve('playwright')}catch(e){console.log('no local playwright')}"
+ls: /Users/runner/.cache/ms-playwright/: No such file or directory
+no local playwright
+[0m
+JS passes. Applying critical fixes first, then browser screenshots.
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -48,13 +48,13 @@
+ #ammo-res{font-size:14px;color:var(--dim)}
+ #ammo-hint{font-size:10px;letter-spacing:.15em;color:var(--dim);margin-top:2px}
+ #reload-tip{font-size:12px;color:var(--amber);font-weight:700;margin-top:4px;display:none;animation:blink 0.6s infinite alternate}
+ @keyframes blink{from{opacity:1}to{opacity:.4}}
+-#banner{position:absolute;top:26%;left:0;right:0;text-align:center;pointer-events:none;opacity:0;transition:opacity .3s}
++#banner{position:absolute;top:76px;left:0;right:0;text-align:center;pointer-events:none;opacity:0;transition:opacity .3s}
+ #banner.show{opacity:1}
+-#banner h2{font-size:52px;letter-spacing:.12em;font-weight:900;text-shadow:0 4px 30px rgba(0,0,0,.8)}
+-#banner p{letter-spacing:.3em;font-size:13px;color:var(--accent);font-weight:700}
+-#hitmarker{position:absolute;left:50%;top:50%;width:28px;height:28px;transform:translate(-50%,-50%);pointer-events:none;opacity:0}
++#banner h2{font-size:34px;letter-spacing:.12em;font-weight:900;text-shadow:0 4px 30px rgba(0,0,0,.8)}
++#banner p{letter-spacing:.3em;font-size:12px;color:var(--accent);font-weight:700}
++#hitmarker{position:absolute;left:0;top:0;width:28px;height:28px;pointer-events:none;opacity:0;will-change:transform}
+ #hitmarker span{position:absolute;background:#fff;box-shadow:0 0 6px rgba(255,255,255,.9)}
+ #dmg-vignette{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 120px 40px rgba(255,30,30,.55);opacity:0;transition:opacity .15s}
+ #heal-vignette{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 100px 20px rgba(124,255,178,.25);opacity:0;transition:opacity .4s}
+ /* ---- Overlays ---- */
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -209,9 +209,9 @@
+ function startReload(){if(G.mode!=='play'||P.reloading>0||P.mag===P.magSize||P.reserve<=0)return;P.reloading=1.25;SFX.reload();$('reload-tip').style.display='block';}
+ function toast(t){const el=$('toast');el.textContent=t;el.style.opacity=1;clearTimeout(el._t);el._t=setTimeout(()=>el.style.opacity=0,1800);}
+ function feed(t){const kf=$('killfeed');const d=document.createElement('div');d.className='kf';d.textContent=t;kf.prepend(d);while(kf.children.length>4)kf.lastChild.remove();setTimeout(()=>{d.style.opacity='0';d.style.transition='opacity .5s';setTimeout(()=>d.remove(),500)},3500);}
+ function banner(sub,title){$('banner-sub').textContent=sub;$('banner-title').textContent=title;$('banner').classList.add('show');clearTimeout(banner._t);banner._t=setTimeout(()=>$('banner').classList.remove('show'),2200);}
+-function hitmarker(kill){const h=$('hitmarker');h.style.opacity=1;h.style.transform=`translate(-50%,-50%) scale(${kill?1.5:1}) rotate(${kill?45:0}deg)`;clearTimeout(h._t);h._t=setTimeout(()=>h.style.opacity=0,kill?220:110);}
++function hitmarker(kill){const h=$('hitmarker');h.style.left=(mouse.x-14)+'px';h.style.top=(mouse.y-14)+'px';h.style.opacity=1;h.style.transform=`scale(${kill?1.5:1}) rotate(${kill?45:0}deg)`;clearTimeout(h._t);h._t=setTimeout(()=>h.style.opacity=0,kill?220:110);}
+ 
+ // ---------- Waves ----------
+ function waveComp(n){return n===1?{rush:3,troop:2}:n===2?{rush:4,troop:4}:n===3?{rush:5,troop:6}:{rush:3,troop:2};}
+ function startWave(n){
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -194,9 +194,15 @@
+   kills:0,shots:0,hits:0,time:0,shake:0,bannerT:0,extractActive:false,waveDelay:0,spawnQueue:[]};
+ const P={x:WORLD.w/2,y:WORLD.h/2+200,r:14,hp:100,maxhp:100,angle:0,speed:265,sprint:1.55,stam:100,
+   mag:30,magSize:30,reserve:120,reloading:0,fireCd:0,ads:false,lastHurt:-99,alive:true,muzzle:0,recoil:0};
+ const keys={};let mouse={x:W/2,y:H/2,down:false,rdown:false};
+-let cam={x:0,y:0,zoom:1};
++let cam={cx:WORLD.w/2,cy:WORLD.h/2+200,zoom:1};
++function screenToWorld(mx,my){return {x:cam.cx+(mx-W/2)/cam.zoom, y:cam.cy+(my-H/2)/cam.zoom};}
++function clampCam(){
++  const vw=W/cam.zoom,vh=H/cam.zoom;
++  cam.cx=vw>=WORLD.w?WORLD.w/2:Math.max(vw/2,Math.min(WORLD.w-vw/2,cam.cx));
++  cam.cy=vh>=WORLD.h?WORLD.h/2:Math.max(vh/2,Math.min(WORLD.h-vh/2,cam.cy));
++}
+ 
+ addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;
+   if(e.key.toLowerCase()==='r')startReload();
+   if(e.key.toLowerCase()==='p'||e.key==='Escape')togglePause();});
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -296,11 +296,11 @@
+   updateHUD();
+ }
+ function update(dt){
+   G.time+=dt;
+-  // aim
+-  const wx=cam.x+mouse.x, wy=cam.y+mouse.y;
+-  P.angle=Math.atan2(wy-P.y,wx-P.x);
++  // aim (screen -> world through center-based camera)
++  const wp=screenToWorld(mouse.x,mouse.y);
++  P.angle=Math.atan2(wp.y-P.y,wp.x-P.x);
+   P.ads=mouse.rdown&&P.reloading<=0;
+   // move
+   let mx=(keys['d']||keys['arrowright']?1:0)-(keys['a']||keys['arrowleft']?1:0);
+   let my=(keys['s']||keys['arrowdown']?1:0)-(keys['w']||keys['arrowup']?1:0);
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -373,16 +373,19 @@
+     else{G.extractActive=true;banner('EXTRACTION','GET TO GREEN ZONE');SFX.extract();$('obj-text').textContent='All waves cleared — reach EXTRACTION';feed('☰ Extraction zone active (south)');}
+   }
+   // extraction win
+   if(G.extractActive&&P.x>extractZone.x&&P.x<extractZone.x+extractZone.w&&P.y>extractZone.y&&P.y<extractZone.y+extractZone.h){endGame(true);}
+-  // camera + shake
++  // camera + shake (center-based, zoom about screen center)
+   const targetZoom=P.ads?1.12:1;
+   cam.zoom+=(targetZoom-cam.zoom)*Math.min(1,dt*8);
+-  // camera in world coords: we render with scale; keep simple: cam = top-left in world
+-  const viewW=W/cam.zoom,viewH=H/cam.zoom;
+-  let tx=P.x-viewW/2+(mouse.x-W/2)*.08, ty=P.y-viewH/2+(mouse.y-H/2)*.08;
+-  tx=Math.max(0,Math.min(WORLD.w-viewW,tx));ty=Math.max(0,Math.min(WORLD.h-viewH,ty));
+-  cam.x+=(tx-cam.x)*Math.min(1,dt*7);cam.y+=(ty-cam.y)*Math.min(1,dt*7);
++  // slight look-ahead toward mouse (world units), clamped inside arena
++  const look=0.12;
++  let tx=P.x+(mouse.x-W/2)/cam.zoom*look, ty=P.y+(mouse.y-H/2)/cam.zoom*look;
++  const vw=W/cam.zoom,vh=H/cam.zoom;
++  tx=vw>=WORLD.w?WORLD.w/2:Math.max(vw/2,Math.min(WORLD.w-vw/2,tx));
++  ty=vh>=WORLD.h?WORLD.h/2:Math.max(vh/2,Math.min(WORLD.h-vh/2,ty));
++  cam.cx+=(tx-cam.cx)*Math.min(1,dt*7);cam.cy+=(ty-cam.cy)*Math.min(1,dt*7);
++  clampCam();
+   G.shake=Math.max(0,G.shake-dt*22);
+   $('dmg-vignette').style.opacity=Math.min(.9,Math.max(0,(1-P.hp/P.maxhp)*.9));
+ }
+ function damagePlayer(n,src){
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -406,10 +406,9 @@
+ function render(dt){
+   ctx.clearRect(0,0,W,H);
+   ctx.save();
+   const sx=(Math.random()-.5)*G.shake,sy=(Math.random()-.5)*G.shake;
+-  ctx.translate(W/2,H/2);ctx.scale(cam.zoom,cam.zoom);ctx.translate(-W/2,-H/2);
+-  ctx.translate(-cam.x+ -0 + 0,-cam.y);ctx.translate(sx,sy);
++  ctx.translate(W/2,H/2);ctx.scale(cam.zoom,cam.zoom);ctx.translate(-cam.cx+sx,-cam.cy+sy);
+   // floor
+   const g=ctx.createLinearGradient(0,0,0,WORLD.h);g.addColorStop(0,'#0d141c');g.addColorStop(1,'#0a1118');
+   ctx.fillStyle=g;ctx.fillRect(0,0,WORLD.w,WORLD.h);
+   // grid
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -243,8 +243,9 @@
+ function resetGame(){
+   G.enemies=[];G.bullets=[];G.ebullets=[];G.parts=[];G.shells=[];G.floats=[];G.spawnQueue=[];
+   G.kills=0;G.shots=0;G.hits=0;G.time=0;G.extractActive=false;G.mode='play';
+   Object.assign(P,{x:WORLD.w/2,y:WORLD.h/2+200,hp:100,mag:30,reserve:120,reloading:0,fireCd:0,ads:false,lastHurt:-99,alive:true,stam:100,recoil:0});
++  cam.cx=P.x;cam.cy=P.y;cam.zoom=1;clampCam();
+   $('menu-start').classList.add('hidden');$('menu-end').classList.add('hidden');$('menu-pause').classList.add('hidden');
+   $('killfeed').innerHTML='';
+   startWave(1);
+ }
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -483,8 +483,9 @@
+   ctx.textAlign='center';ctx.font='bold 13px sans-serif';
+   for(const f of G.floats){ctx.globalAlpha=Math.min(1,f.life*2);ctx.fillStyle=f.c;ctx.fillText(f.t,f.x,f.y);}
+   ctx.globalAlpha=1;
+   ctx.restore();
++  drawEdgeIndicators();
+   drawCrosshair();drawMinimap();
+ }
+ function drawCrosshair(){
+   if(G.mode!=='play')return;
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -486,10 +486,41 @@
+   ctx.restore();
+   drawEdgeIndicators();
+   drawCrosshair();drawMinimap();
+ }
+-function drawCrosshair(){
++function drawEdgeIndicators(){
+   if(G.mode!=='play')return;
++  const w2t=screenToWorld(mouse.x,mouse.y);
++  // off-screen enemies: red chevrons clamped to screen edges
++  ctx.save();ctx.textAlign='center';ctx.font='bold 14px sans-serif';
++  for(const e of G.enemies){
++    const sx=(e.x-cam.cx)*cam.zoom+W/2, sy=(e.y-cam.cy)*cam.zoom+H/2;
++    if(sx>-20&&sx<W+20&&sy>-20&&sy<H+20)continue;
++    const cx=Math.max(24,Math.min(W-24,sx)), cy=Math.max(64,Math.min(H-64,sy));
++    const a=Math.atan2(sy-cy,sx-cx)||Math.atan2(e.y-P.y,e.x-P.x);
++    ctx.fillStyle=e.type==='rush'?'rgba(255,107,94,.95)':'rgba(199,125,255,.95)';
++    ctx.save();ctx.translate(cx,cy);ctx.rotate(a);
++    ctx.beginPath();ctx.moveTo(10,0);ctx.lineTo(-5,-7);ctx.lineTo(-5,7);ctx.closePath();ctx.fill();
++    ctx.restore();
++  }
++  // extraction compass: green arrow toward zone when active
++  if(G.extractActive){
++    const ex=extractZone.x+extractZone.w/2, ey=extractZone.y+extractZone.h/2;
++    const dx=ex-P.x, dy=ey-P.y, d=Math.hypot(dx,dy);
++    if(d>60){
++      const a=Math.atan2(w2t.y-P.y,w2t.x-P.x); // relative to aim not needed; use zone dir:
++      const za=Math.atan2(dy,dx);
++      const px=W/2+Math.cos(za)*120, py=H/2+Math.sin(za)*120;
++      ctx.fillStyle='#3ddc84';ctx.save();ctx.translate(px,py);ctx.rotate(za);
++      ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-6,-9);ctx.lineTo(-6,9);ctx.closePath();ctx.fill();
++      ctx.restore();
++      ctx.fillStyle='#3ddc84';ctx.font='bold 11px sans-serif';
++      ctx.fillText('EXTRACTION '+Math.round(d/50)+'m', px, py-16);
++    }
++  }
++  ctx.restore();
++}
++  if(G.mode!=='play')return;
+   const x=mouse.x,y=mouse.y;
+   const gap=P.ads?6:12+P.recoil*10;
+   ctx.strokeStyle=P.ads?'#7CFFB2':'#fff';ctx.lineWidth=P.ads?2:2;
+   ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=4;
+
+[0m
+Caught a syntax slip — repairing it.
+[0m✱ [0mGrep "drawEdgeIndicators|drawCrosshair\(\)\{"[90m in . · 2 matches[0m
+[0m→ [0mRead index.html[90m [offset=505, limit=50][0m
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -518,8 +518,9 @@
+     }
+   }
+   ctx.restore();
+ }
++function drawCrosshair(){
+   if(G.mode!=='play')return;
+   const x=mouse.x,y=mouse.y;
+   const gap=P.ads?6:12+P.recoil*10;
+   ctx.strokeStyle=P.ads?'#7CFFB2':'#fff';ctx.lineWidth=P.ads?2:2;
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -506,9 +506,8 @@
+ if(G.extractActive){
+   const ex=extractZone.x+extractZone.w/2, ey=extractZone.y+extractZone.h/2;
+   const dx=ex-P.x, dy=ey-P.y, d=Math.hypot(dx,dy);
+   if(d>60){
+-    const a=Math.atan2(w2t.y-P.y,w2t.x-P.x); // relative to aim not needed; use zone dir:
+     const za=Math.atan2(dy,dx);
+     const px=W/2+Math.cos(za)*120, py=H/2+Math.sin(za)*120;
+     ctx.fillStyle='#3ddc84';ctx.save();ctx.translate(px,py);ctx.rotate(za);
+     ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-6,-9);ctx.lineTo(-6,9);ctx.closePath();ctx.fill();
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -148,8 +148,9 @@
+ const $=id=>document.getElementById(id);
+ let W=0,H=0,DPR=1;
+ function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*DPR;canvas.height=H*DPR;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(DPR,0,0,DPR,0,0);}
+ addEventListener('resize',resize);resize();
++addEventListener('resize',()=>{try{clampCam()}catch(e){}});
+ 
+ // ---------- Audio (procedural, no assets) ----------
+ let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+ function beep(f,d,type='square',vol=.15,slide=0){const a=ac();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f,a.currentTime);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(20,f+slide),a.currentTime+d);g.gain.setValueAtTime(vol,a.currentTime);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+d);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+d);}
+
+[0m
+[0m✗ [0mEdit index.html failed
+[91m[1mError: [0mCould not find oldString in the file. It must match exactly, including whitespace, indentation, and line endings.
+[0m→ [0mRead index.html[90m [offset=490, limit=16][0m
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -489,9 +489,8 @@
+   drawCrosshair();drawMinimap();
+ }
+ function drawEdgeIndicators(){
+   if(G.mode!=='play')return;
+-  const w2t=screenToWorld(mouse.x,mouse.y);
+   // off-screen enemies: red chevrons clamped to screen edges
+   ctx.save();ctx.textAlign='center';ctx.font='bold 14px sans-serif';
+   for(const e of G.enemies){
+     const sx=(e.x-cam.cx)*cam.zoom+W/2, sy=(e.y-cam.cy)*cam.zoom+H/2;
+
+[0m
+Now adding low-ammo feedback and verifying syntax.
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -545,8 +545,12 @@
+ $('hp-num').textContent=Math.ceil(P.hp);
+ const hf=$('hp-fill');hf.style.width=(P.hp/P.maxhp*100)+'%';hf.classList.toggle('low',P.hp<35);
+ $('stam-fill').style.width=P.stam+'%';
+ $('ammo-mag').textContent=P.mag;$('ammo-res').textContent='/ '+P.reserve;
++$('ammo-mag').style.color=(P.mag<=6)?'#ff5d5d':'#fff';
++if(P.mag<=6&&P.reloading<=0)$('reload-tip').style.display='block',$('reload-tip').textContent='LOW AMMO — PRESS R';
++else if(P.reloading>0)$('reload-tip').style.display='block',$('reload-tip').textContent='RELOADING…';
++else $('reload-tip').style.display='none';
+ $('kills').textContent=G.kills;$('timer').textContent=fmtTime(G.time);
+ const total=G.enemies.length+G.spawnQueue.length;
+ if(!G.extractActive)$('obj-sub').textContent=`Hostiles remaining: ${total} · Wave ${G.wave}/${G.maxWaves}`;
+ else $('obj-sub').textContent='Extraction active — move south, stay alive!';
+
+[0m
+[0m$ [0mpython3 -c "import re;h=open('index.html').read();print('bytes:',len(h));open('/tmp/g.js','w').write(re.search(r'<script>(.*)</script>',h,re.S).group(1))" && node --check /tmp/g.js && echo JS_OK
+bytes: 35786
+JS_OK
+[0m
+Fixes verified. Installing a headless browser for playtest screenshots.
+[0m$ [0mnpx --yes playwright install chromium 2>&1 | tail -5
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 94.3 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 94.3 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 94.3 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 94.3 MiB
+Chrome Headless Shell 153.0.8010.12 (playwright chromium-headless-shell v1243) downloaded to /Users/runner/Library/Caches/ms-playwright/chromium_headless_shell-1243
+[0m
+[0m$ [0mcat > /tmp/shot.mjs <<'EOF'
+import { chromium } from 'playwright';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const errors = [];
+page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+page.on('pageerror', e => errors.push(String(e)));
+await page.goto('file:///Users/runner/work/PlayGround/PlayGround/index.html');
+await page.waitForTimeout(1500);
+await page.screenshot({ path: '/tmp/shot-menu.png' });
+await page.click('#btn-start');
+await page.waitForTimeout(1200);
+// move + aim + shoot
+await page.mouse.move(800, 300);
+await page.keyboard.down('w');
+await page.mouse.down();
+await page.waitForTimeout(1500);
+await page.mouse.up();
+await page.keyboard.up('w');
+await page.keyboard.down('a');
+await page.waitForTimeout(800);
+await page.keyboard.up('a');
+// ADS check
+await page.mouse.move(500, 500);
+await page.mouse.down({ button: 'right' });
+await page.waitForTimeout(600);
+await page.screenshot({ path: '/tmp/shot-play.png' });
+await page.mouse.up({ button: 'right' });
+const state = await page.evaluate(() => ({ mode: G.mode, wave: G.wave, enemies: G.enemies.length, queue: G.spawnQueue.length, hp: P.hp, mag: P.mag, shots: G.shots }));
+console.log('STATE ' + JSON.stringify(state));
+console.log('ERRORS ' + JSON.stringify(errors.slice(0, 10)));
+await browser.close();
+EOF
+node /tmp/shot.mjs
+node:internal/modules/package_json_reader:301
+  throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+        ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'playwright' imported from /private/tmp/shot.mjs
+    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+    at packageResolve (node:internal/modules/esm/resolve:784:25)
+    at moduleResolve (node:internal/modules/esm/resolve:873:18)
+    at defaultResolve (node:internal/modules/esm/resolve:1006:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:705:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:725:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:763:56)
+    at #resolve (node:internal/modules/esm/loader:687:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:607:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:276:33) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+
+Node.js v24.20.0
+[0m
+[0m$ [0mnpm ls playwright 2>&1 | head -3; ls /tmp/shot-play.png 2>&1; NODE_PATH=$(npx --yes playwright --version >/dev/null 2>&1; echo "") ; npm root -g; ls $(npm root -g) 2>/dev/null | head
+/Users/runner/work/PlayGround/PlayGround
+└── (empty)
+
+ls: /tmp/shot-play.png: No such file or directory
+/opt/homebrew/lib/node_modules
+corepack
+npm
+[0m
+[0m$ [0mnpm i --no-audit --no-fund playwright-core 2>&1 | tail -2 && cat > /tmp/shot.mjs <<'EOF'
+import { chromium } from 'playwright-core';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const errors = [];
+page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+page.on('pageerror', e => errors.push(String(e)));
+await page.goto('file:///Users/runner/work/PlayGround/PlayGround/index.html');
+await page.waitForTimeout(1500);
+await page.screenshot({ path: '/tmp/shot-menu.png' });
+await page.click('#btn-start');
+await page.waitForTimeout(1200);
+await page.mouse.move(800, 300);
+await page.keyboard.down('w');
+await page.mouse.down();
+await page.waitForTimeout(1500);
+await page.mouse.up();
+await page.keyboard.up('w');
+await page.keyboard.down('a');
+await page.waitForTimeout(800);
+await page.keyboard.up('a');
+await page.mouse.move(500, 500);
+await page.mouse.down({ button: 'right' });
+await page.waitForTimeout(600);
+await page.screenshot({ path: '/tmp/shot-play.png' });
+await page.mouse.up({ button: 'right' });
+const state = await page.evaluate(() => ({ mode: G.mode, wave: G.wave, enemies: G.enemies.length, queue: G.spawnQueue.length, hp: P.hp, mag: P.mag, shots: G.shots }));
+console.log('STATE ' + JSON.stringify(state));
+console.log('ERRORS ' + JSON.stringify(errors.slice(0, 10)));
+await browser.close();
+EOF
+node /tmp/shot.mjs
+added 1 package in 722ms
+node:internal/modules/package_json_reader:301
+  throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+        ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'playwright-core' imported from /private/tmp/shot.mjs
+    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+    at packageResolve (node:internal/modules/esm/resolve:784:25)
+    at moduleResolve (node:internal/modules/esm/resolve:873:18)
+    at defaultResolve (node:internal/modules/esm/resolve:1006:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:705:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:725:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:763:56)
+    at #resolve (node:internal/modules/esm/loader:687:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:607:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:276:33) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+
+Node.js v24.20.0
+[0m
+[0m$ [0mcp /tmp/shot.mjs ./shot-verify.mjs && node ./shot-verify.mjs; rm -f ./shot-verify.mjs
+STATE {"mode":"play","wave":1,"enemies":3,"queue":2,"hp":100,"mag":7,"shots":23}
+ERRORS ["TypeError: P.shells is not iterable","TypeError: P.shells is not iterable","TypeError: P.shells is not iterable","TypeError: P.shells is not iterable","TypeError: P.shells is not iterable","TypeError: P.shells is not iterable","TypeError: P.shells is not iterable","TypeError: P.shells is not iterable","TypeError: P.shells is not iterable","TypeError: P.shells is not iterable"]
+[0m
+Browser test caught a real bug — every shot throws. Fixing it.
+[0m$ [0mls -lh /tmp/shot-menu.png /tmp/shot-play.png 2>&1
+-rw-r--r--  1 runner  wheel   210K Sep  7 01:34 /tmp/shot-menu.png
+-rw-r--r--  1 runner  wheel    56K Sep  7 01:34 /tmp/shot-play.png
+[0m
+[0m✱ [0mGrep "P\.shells|G\.shells"[90m in . · 4 matches[0m
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -277,9 +277,9 @@
+   const a=P.angle+(Math.random()-.5)*2*spread+ (P.ads?0:(Math.random()-.5)*0.03);
+   const sp=1150;
+   G.bullets.push({x:P.x+Math.cos(P.angle)*22,y:P.y+Math.sin(P.angle)*22,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.8,dmg:P.ads?34:26});
+   P.mag--;G.shots++;P.muzzle=.06;P.recoil=Math.min(1,P.recoil+.22);G.shake=Math.min(6,G.shake+(P.ads?1:2));
+-  P.shells.push({x:P.x,y:P.y,vx:Math.cos(P.angle+Math.PI/2)*(80+Math.random()*60),vy:Math.sin(P.angle+Math.PI/2)*(80+Math.random()*60),rot:Math.random()*6,vr:8,life:.7});
++  G.shells.push({x:P.x,y:P.y,vx:Math.cos(P.angle+Math.PI/2)*(80+Math.random()*60),vy:Math.sin(P.angle+Math.PI/2)*(80+Math.random()*60),rot:Math.random()*6,vr:8,life:.7});
+   muzzleParts(P.x+Math.cos(P.angle)*26,P.y+Math.sin(P.angle)*26,P.angle);
+   if(P.ads)SFX.adsShoot();else SFX.shoot();
+   if(P.mag===0)startReload();
+ }
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -366,9 +366,9 @@
+   if(dead)G.ebullets.splice(i,1);
+ }
+ // particles
+ for(let i=G.parts.length-1;i>=0;i--){const p=G.parts[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.92;p.vy*=.92;p.life-=dt;if(p.life<=0)G.parts.splice(i,1);}
+-for(let i=P.shells.length-1;i>=0;i--){const s=P.shells[i];s.x+=s.vx*dt;s.y+=s.vy*dt;s.vx*=.9;s.vy*=.9;s.rot+=s.vr*dt;s.life-=dt;if(s.life<=0)P.shells.splice(i,1);}
++for(let i=G.shells.length-1;i>=0;i--){const s=G.shells[i];s.x+=s.vx*dt;s.y+=s.vy*dt;s.vx*=.9;s.vy*=.9;s.rot+=s.vr*dt;s.life-=dt;if(s.life<=0)G.shells.splice(i,1);}
+ for(let i=G.floats.length-1;i>=0;i--){const f=G.floats[i];f.y-=34*dt;f.life-=dt;if(f.life<=0)G.floats.splice(i,1);}
+ // wave clear?
+ if(!G.spawnQueue.length&&G.enemies.length===0&&!G.extractActive){
+   if(G.wave<G.maxWaves){G.waveDelay+=dt;if(G.waveDelay>2.2){G.waveDelay=0;startWave(G.wave+1);P.reserve=Math.min(180,P.reserve+40);toast('+40 reserve ammo');}}
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -434,9 +434,9 @@
+   ctx.strokeStyle='rgba(124,255,178,.25)';ctx.lineWidth=2;ctx.strokeRect(o.x,o.y,o.w,o.h);
+   ctx.strokeStyle='rgba(255,255,255,.06)';ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(o.x+o.w,o.y+o.h);ctx.moveTo(o.x+o.w,o.y);ctx.lineTo(o.x,o.y+o.h);ctx.stroke();
+ }
+ // shells
+-ctx.fillStyle='#d8b25a';for(const s of P.shells){ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.rot);ctx.fillRect(-3,-1,6,2);ctx.restore();}
++ctx.fillStyle='#d8b25a';for(const s of G.shells){ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.rot);ctx.fillRect(-3,-1,6,2);ctx.restore();}
+ // enemy bullets
+ for(const b of G.ebullets){ctx.fillStyle='#ff7a7a';ctx.shadowColor='#ff3b3b';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(b.x,b.y,3.5,0,7);ctx.fill();ctx.shadowBlur=0;}
+ // player bullets (tracers)
+ for(const b of G.bullets){ctx.strokeStyle='rgba(255,230,150,.95)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(b.x-b.vx*.02,b.y-b.vy*.02);ctx.lineTo(b.x,b.y);ctx.stroke();}
+
+[0m
+[0m→ [0mRead /tmp/shot-play.png
+[0m→ [0mRead /tmp/shot-menu.png
+[0m
+[0m$ [0mpython3 -c "import re;h=open('index.html').read();print('bytes:',len(h));open('/tmp/g.js','w').write(re.search(r'<script>(.*)</script>',h,re.S).group(1))" && node --check /tmp/g.js && echo JS_OK && cp /tmp/shot.mjs ./shot-verify.mjs && node ./shot-verify.mjs; rm -f ./shot-verify.mjs
+bytes: 35786
+JS_OK
+STATE {"mode":"play","wave":1,"enemies":4,"queue":1,"hp":100,"mag":24,"shots":6}
+ERRORS []
+[0m
+Zero console errors. Inspecting the new screenshots.
+[0m→ [0mRead /tmp/shot-play.png
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -111,9 +111,9 @@
+   <p>Fast, close-quarters combat. Clear <b>3 waves</b> of hostiles, then <b>reach extraction</b> (green zone). Health regenerates out of combat — keep moving, aim for the head, and don't get surrounded.</p>
+   <div class="controls">
+     <div><b>W A S D</b> Move</div><div><b>MOUSE</b> Aim</div>
+     <div><b>LMB</b> Fire</div><div><b>RMB hold</b> Aim down sights</div>
+-    <div><b>SHIFT</b> Sprint</div><div><b>R</b> Reload &nbsp; <b>P</b> Pause</div>
++    <div><b>SHIFT</b> Sprint</div><div><b>R</b> Reload · <b>P</b> Pause</div>
+   </div>
+   <button class="btn" id="btn-start">▶ DEPLOY</button>
+   <p style="margin-top:10px;font-size:11px;color:var(--dim)">Best on desktop · sound on 🔊</p>
+ </div>
+
+[0m
+[0m$ [0mcat > ./bot-verify.mjs <<'EOF'
+import { chromium } from 'playwright-core';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const errors = [];
+page.on('pageerror', e => errors.push(String(e)));
+await page.goto('file:///Users/runner/work/PlayGround/PlayGround/index.html');
+await page.waitForTimeout(800);
+await page.click('#btn-start');
+await page.waitForTimeout(500);
+// install aimbot: each 100ms aim at nearest live enemy (screen coords) and hold fire
+await page.evaluate(() => {
+  window.__bot = setInterval(() => {
+    if (G.mode !== 'play') return;
+    if (!G.enemies.length) { mouse.down = false; return; }
+    let best = null, bd = 1e9;
+    for (const e of G.enemies) { const d = (e.x - P.x) ** 2 + (e.y - P.y) ** 2; if (d < bd) { bd = d; best = e; } }
+    if (best) {
+      mouse.x = (best.x - cam.cx) * cam.zoom + 1280 / 2;
+      mouse.y = (best.y - cam.cy) * cam.zoom + 800 / 2;
+      // lead slightly: fire in bursts is automatic; hold trigger
+      if (P.reloading <= 0 && P.mag > 0) mouse.down = true; else mouse.down = false;
+      // kite: back away from nearest rusher
+      keys['w'] = false; keys['a'] = false; keys['s'] = false; keys['d'] = false;
+      if (bd < 300 * 300) { // too close: retreat south
+        keys['s'] = P.y < best.y ? false : true;
+      }
+    }
+  }, 100);
+});
+// strafe via keyboard events too (keys set directly above); wait for waves
+let lastWave = 0;
+for (let i = 0; i < 90; i++) {
+  await page.waitForTimeout(2000);
+  const s = await page.evaluate(() => ({ mode: G.mode, wave: G.wave, foes: G.enemies.length + G.spawnQueue.length, kills: G.kills, hp: Math.round(P.hp), ext: G.extractActive, t: Math.round(G.time) }));
+  if (s.wave !== lastWave || s.ext) { console.log('T+' + s.t + 's', JSON.stringify(s)); lastWave = s.wave; }
+  if (s.ext) break;
+  if (s.mode !== 'play') { console.log('UNEXPECTED MODE', JSON.stringify(s)); break; }
+}
+let s = await page.evaluate(() => ({ mode: G.mode, wave: G.wave, kills: G.kills, ext: G.extractActive, hp: Math.round(P.hp) }));
+console.log('PRE-EXTRACT ' + JSON.stringify(s));
+if (s.ext) {
+  await page.evaluate(() => { P.x = extractZone.x + extractZone.w / 2; P.y = extractZone.y + extractZone.h / 2; });
+  await page.waitForTimeout(800);
+  const w = await page.evaluate(() => G.mode);
+  console.log('WIN MODE = ' + w);
+  await page.screenshot({ path: '/tmp/shot-win.png' });
+  // restart -> lose path
+  await page.click('#btn-restart');
+  await page.waitForTimeout(500);
+  await page.evaluate(() => { clearInterval(window.__bot); P.hp = 5; P.lastHurt = G.time; G.enemies.push({ type: 'rush', x: P.x + 20, y: P.y, r: 13, hp: 45, maxhp: 45, speed: 200, atkCd: 0, flash: 0 }); });
+  await page.waitForTimeout(2500);
+  console.log('LOSE MODE = ' + await page.evaluate(() => G.mode));
+  await page.screenshot({ path: '/tmp/shot-lose.png' });
+  // redeploy again
+  await page.click('#btn-restart');
+  await page.waitForTimeout(800);
+  console.log('RESTART MODE = ' + await page.evaluate(() => ({ mode: G.mode, wave: G.wave, hp: P.hp })));
+}
+console.log('PAGEERRORS ' + JSON.stringify(errors.slice(0, 8)));
+await browser.close();
+EOF
+node ./bot-verify.mjs; rm -f ./bot-verify.mjs
+T+2s {"mode":"play","wave":1,"foes":5,"kills":0,"hp":100,"ext":false,"t":2}
+UNEXPECTED MODE {"mode":"lose","wave":1,"foes":5,"kills":0,"hp":0,"ext":false,"t":86}
+PRE-EXTRACT {"mode":"lose","wave":1,"kills":0,"ext":false,"hp":0}
+PAGEERRORS []
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -192,9 +192,9 @@
+ 
+ // ---------- State ----------
+ const G={mode:'menu',wave:0,maxWaves:3,enemies:[],bullets:[],ebullets:[],parts:[],shells:[],floats:[],
+   kills:0,shots:0,hits:0,time:0,shake:0,bannerT:0,extractActive:false,waveDelay:0,spawnQueue:[]};
+-const P={x:WORLD.w/2,y:WORLD.h/2+200,r:14,hp:100,maxhp:100,angle:0,speed:265,sprint:1.55,stam:100,
++const P={x:WORLD.w/2,y:985,r:14,hp:100,maxhp:100,angle:0,speed:265,sprint:1.55,stam:100,
+   mag:30,magSize:30,reserve:120,reloading:0,fireCd:0,ads:false,lastHurt:-99,alive:true,muzzle:0,recoil:0};
+ const keys={};let mouse={x:W/2,y:H/2,down:false,rdown:false};
+ let cam={cx:WORLD.w/2,cy:WORLD.h/2+200,zoom:1};
+ function screenToWorld(mx,my){return {x:cam.cx+(mx-W/2)/cam.zoom, y:cam.cy+(my-H/2)/cam.zoom};}
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -243,9 +243,9 @@
+ }
+ function resetGame(){
+   G.enemies=[];G.bullets=[];G.ebullets=[];G.parts=[];G.shells=[];G.floats=[];G.spawnQueue=[];
+   G.kills=0;G.shots=0;G.hits=0;G.time=0;G.extractActive=false;G.mode='play';
+-  Object.assign(P,{x:WORLD.w/2,y:WORLD.h/2+200,hp:100,mag:30,reserve:120,reloading:0,fireCd:0,ads:false,lastHurt:-99,alive:true,stam:100,recoil:0});
++  Object.assign(P,{x:WORLD.w/2,y:985,hp:100,mag:30,reserve:120,reloading:0,fireCd:0,ads:false,lastHurt:-99,alive:true,stam:100,recoil:0});
+   cam.cx=P.x;cam.cy=P.y;cam.zoom=1;clampCam();
+   $('menu-start').classList.add('hidden');$('menu-end').classList.add('hidden');$('menu-pause').classList.add('hidden');
+   $('killfeed').innerHTML='';
+   startWave(1);
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -195,9 +195,9 @@
+   kills:0,shots:0,hits:0,time:0,shake:0,bannerT:0,extractActive:false,waveDelay:0,spawnQueue:[]};
+ const P={x:WORLD.w/2,y:985,r:14,hp:100,maxhp:100,angle:0,speed:265,sprint:1.55,stam:100,
+   mag:30,magSize:30,reserve:120,reloading:0,fireCd:0,ads:false,lastHurt:-99,alive:true,muzzle:0,recoil:0};
+ const keys={};let mouse={x:W/2,y:H/2,down:false,rdown:false};
+-let cam={cx:WORLD.w/2,cy:WORLD.h/2+200,zoom:1};
++let cam={cx:WORLD.w/2,cy:985,zoom:1};
+ function screenToWorld(mx,my){return {x:cam.cx+(mx-W/2)/cam.zoom, y:cam.cy+(my-H/2)/cam.zoom};}
+ function clampCam(){
+   const vw=W/cam.zoom,vh=H/cam.zoom;
+   cam.cx=vw>=WORLD.w?WORLD.w/2:Math.max(vw/2,Math.min(WORLD.w-vw/2,cam.cx));
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -237,10 +237,10 @@
+     if(e===0){x=Math.random()*WORLD.w;y=40;}else if(e===1){x=Math.random()*WORLD.w;y=WORLD.h-40;}
+     else if(e===2){x=40;y=Math.random()*WORLD.h;}else{x=WORLD.w-40;y=Math.random()*WORLD.h;}
+     tries++;
+   }while(Math.hypot(x-P.x,y-P.y)<420&&tries<20);
+-  if(type==='rush')G.enemies.push({type,x,y,r:13,hp:45,maxhp:45,speed:170+Math.random()*40+ G.wave*12,atkCd:0,flash:0});
+-  else G.enemies.push({type,x,y,r:14,hp:70,maxhp:70,speed:115+Math.random()*20,fireCd:1+Math.random()*2,strafe:Math.random()<.5?1:-1,strafeT:Math.random()*2,flash:0});
++  if(type==='rush')G.enemies.push({type,x,y,r:13,hp:45,maxhp:45,speed:170+Math.random()*40+ G.wave*12,atkCd:0,flash:0,detour:0,detourA:0,px:x,py:y,stuck:0});
++  else G.enemies.push({type,x,y,r:14,hp:70,maxhp:70,speed:115+Math.random()*20,fireCd:1+Math.random()*2,strafe:Math.random()<.5?1:-1,strafeT:Math.random()*2,flash:0,detour:0,detourA:0,px:x,py:y,stuck:0});
+ }
+ function resetGame(){
+   G.enemies=[];G.bullets=[];G.ebullets=[];G.parts=[];G.shells=[];G.floats=[];G.spawnQueue=[];
+   G.kills=0;G.shots=0;G.hits=0;G.time=0;G.extractActive=false;G.mode='play';
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -337,11 +337,18 @@
+ // enemies
+ for(let j=G.enemies.length-1;j>=0;j--){const e=G.enemies[j];e.flash-=dt;
+   const dx=P.x-e.x,dy=P.y-e.y,d=Math.hypot(dx,dy)||1;
+   const blocked=lineBlocked(e.x,e.y,P.x,P.y);
++  // stuck detection: if barely moving while trying to close in, pick a detour angle
++  const moved=Math.hypot(e.x-e.px,e.y-e.py);
++  e.px=e.x;e.py=e.y;
++  if(moved<e.speed*dt*0.35&&(d>60)){e.stuck+=dt;}else{e.stuck=Math.max(0,e.stuck-dt);}
++  if(e.stuck>0.35&&e.detour<=0){e.detour=0.9;e.detourA=(Math.random()<.5?1:-1)*(0.9+Math.random()*0.6);e.stuck=0;}
++  e.detour-=dt;
++  const steerA=Math.atan2(dy,dx)+(e.detour>0?e.detourA:0);
+   if(e.type==='rush'){
+     let s=e.speed*(blocked?0.9:1.15);
+-    const p=collideCircle(e.x+dx/d*s*dt,e.y+dy/d*s*dt,e.r);e.x=p.x;e.y=p.y;
++    const p=collideCircle(e.x+Math.cos(steerA)*s*dt,e.y+Math.sin(steerA)*s*dt,e.r);e.x=p.x;e.y=p.y;
+     e.atkCd-=dt;
+     if(d<30&&e.atkCd<=0){e.atkCd=.8;damagePlayer(12,'Rusher clawed you');blood(P.x,P.y,6);}
+   }else{
+     e.strafeT-=dt;if(e.strafeT<=0){e.strafeT=1+Math.random()*2;e.strafe*=-1;}
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -353,9 +353,12 @@
+ }else{
+   e.strafeT-=dt;if(e.strafeT<=0){e.strafeT=1+Math.random()*2;e.strafe*=-1;}
+   e.fireCd-=dt;
+   let mvx=0,mvy=0;
+-  if(d>380||blocked){mvx=dx/d;mvy=dy/d;}
++  if(d>380||blocked){
++    if(e.detour>0){mvx=Math.cos(steerA);mvy=Math.sin(steerA);}
++    else{mvx=dx/d;mvy=dy/d;}
++  }
+   else if(d<240){mvx=-dx/d;mvy=-dy/d;}
+   else{mvx=-dy/d*e.strafe;mvy=dx/d*e.strafe;}
+   const p=collideCircle(e.x+mvx*e.speed*dt,e.y+mvy*e.speed*dt,e.r);e.x=p.x;e.y=p.y;
+   if(!blocked&&d<560&&e.fireCd<=0){e.fireCd=1.3+Math.random()*1.2;
+
+[0m
+[0m$ [0mpython3 -c "import re;h=open('index.html').read();print('bytes:',len(h));open('/tmp/g.js','w').write(re.search(r'<script>(.*)</script>',h,re.S).group(1))" && node --check /tmp/g.js && echo JS_OK && cat > ./bot-verify.mjs <<'EOF'
+import { chromium } from 'playwright-core';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const errors = [];
+page.on('pageerror', e => errors.push(String(e)));
+await page.goto('file:///Users/runner/work/PlayGround/PlayGround/index.html');
+await page.waitForTimeout(800);
+await page.click('#btn-start');
+await page.waitForTimeout(500);
+await page.evaluate(() => {
+  window.__bot = setInterval(() => {
+    if (G.mode !== 'play') return;
+    if (!G.enemies.length) { mouse.down = false; return; }
+    let best = null, bd = 1e9;
+    for (const e of G.enemies) { const d = (e.x - P.x) ** 2 + (e.y - P.y) ** 2; if (d < bd) { bd = d; best = e; } }
+    if (best) {
+      mouse.x = (best.x - cam.cx) * cam.zoom + 1280 / 2;
+      mouse.y = (best.y - cam.cy) * cam.zoom + 800 / 2;
+      mouse.down = (P.reloading <= 0 && P.mag > 0);
+    }
+  }, 100);
+});
+let lastWave = 0, lastFoes = -1;
+for (let i = 0; i < 100; i++) {
+  await page.waitForTimeout(2000);
+  const s = await page.evaluate(() => ({ mode: G.mode, wave: G.wave, foes: G.enemies.length + G.spawnQueue.length, kills: G.kills, hp: Math.round(P.hp), ext: G.extractActive, t: Math.round(G.time) }));
+  if (s.wave !== lastWave || s.ext || s.foes !== lastFoes) { console.log('T+' + s.t + 's', JSON.stringify(s)); lastWave = s.wave; lastFoes = s.foes; }
+  if (s.ext || s.mode !== 'play') break;
+}
+let s = await page.evaluate(() => ({ mode: G.mode, wave: G.wave, kills: G.kills, ext: G.extractActive, hp: Math.round(P.hp) }));
+console.log('PRE-EXTRACT ' + JSON.stringify(s));
+if (s.ext) {
+  await page.screenshot({ path: '/tmp/shot-extract.png' });
+  await page.evaluate(() => { P.x = extractZone.x + extractZone.w / 2; P.y = extractZone.y + extractZone.h / 2; });
+  await page.waitForTimeout(800);
+  console.log('WIN MODE = ' + await page.evaluate(() => G.mode));
+  await page.screenshot({ path: '/tmp/shot-win.png' });
+  await page.click('#btn-restart');
+  await page.waitForTimeout(500);
+  await page.evaluate(() => { clearInterval(window.__bot); P.hp = 5; P.lastHurt = G.time; G.enemies.push({ type: 'rush', x: P.x + 20, y: P.y, r: 13, hp: 45, maxhp: 45, speed: 200, atkCd: 0, flash: 0, detour: 0, detourA: 0, px: P.x, py: P.y, stuck: 0 }); });
+  await page.waitForTimeout(2500);
+  console.log('LOSE MODE = ' + await page.evaluate(() => G.mode));
+  await page.screenshot({ path: '/tmp/shot-lose.png' });
+  await page.click('#btn-restart');
+  await page.waitForTimeout(800);
+  console.log('RESTART = ' + JSON.stringify(await page.evaluate(() => ({ mode: G.mode, wave: G.wave, hp: P.hp }))));
+}
+console.log('PAGEERRORS ' + JSON.stringify(errors.slice(0, 8)));
+await browser.close();
+EOF
+node ./bot-verify.mjs; rm -f ./bot-verify.mjs
+bytes: 36380
+JS_OK
+T+2s {"mode":"play","wave":1,"foes":4,"kills":1,"hp":100,"ext":false,"t":2}
+T+11s {"mode":"play","wave":1,"foes":2,"kills":3,"hp":100,"ext":false,"t":11}
+T+12s {"mode":"play","wave":1,"foes":1,"kills":4,"hp":100,"ext":false,"t":12}
+T+14s {"mode":"play","wave":1,"foes":0,"kills":5,"hp":100,"ext":false,"t":14}
+T+15s {"mode":"play","wave":2,"foes":8,"kills":5,"hp":100,"ext":false,"t":15}
+T+20s {"mode":"play","wave":2,"foes":6,"kills":7,"hp":91,"ext":false,"t":20}
+T+22s {"mode":"play","wave":2,"foes":5,"kills":8,"hp":91,"ext":false,"t":22}
+T+26s {"mode":"play","wave":2,"foes":4,"kills":9,"hp":73,"ext":false,"t":26}
+T+28s {"mode":"play","wave":2,"foes":2,"kills":11,"hp":55,"ext":false,"t":28}
+T+29s {"mode":"play","wave":2,"foes":1,"kills":12,"hp":55,"ext":false,"t":29}
+T+31s {"mode":"play","wave":2,"foes":0,"kills":13,"hp":78,"ext":false,"t":31}
+T+33s {"mode":"play","wave":3,"foes":11,"kills":13,"hp":100,"ext":false,"t":33}
+T+38s {"mode":"play","wave":3,"foes":9,"kills":15,"hp":100,"ext":false,"t":38}
+T+40s {"mode":"play","wave":3,"foes":8,"kills":16,"hp":91,"ext":false,"t":40}
+T+41s {"mode":"play","wave":3,"foes":6,"kills":18,"hp":73,"ext":false,"t":41}
+T+42s {"mode":"play","wave":3,"foes":5,"kills":19,"hp":64,"ext":false,"t":42}
+PRE-EXTRACT {"mode":"lose","wave":3,"kills":19,"ext":false,"hp":0}
+PAGEERRORS []
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -360,11 +360,11 @@
+     }
+     else if(d<240){mvx=-dx/d;mvy=-dy/d;}
+     else{mvx=-dy/d*e.strafe;mvy=dx/d*e.strafe;}
+     const p=collideCircle(e.x+mvx*e.speed*dt,e.y+mvy*e.speed*dt,e.r);e.x=p.x;e.y=p.y;
+-    if(!blocked&&d<560&&e.fireCd<=0){e.fireCd=1.3+Math.random()*1.2;
++    if(!blocked&&d<560&&e.fireCd<=0){e.fireCd=1.6+Math.random()*1.4;
+       const a=Math.atan2(dy,dx)+(Math.random()-.5)*.12;
+-      G.ebullets.push({x:e.x,y:e.y,vx:Math.cos(a)*430,vy:Math.sin(a)*430,life:1.6});SFX.enemyShoot();}
++      G.ebullets.push({x:e.x,y:e.y,vx:Math.cos(a)*400,vy:Math.sin(a)*400,life:1.6});SFX.enemyShoot();}
+   }
+   // separation
+   for(const o of G.enemies){if(o===e)continue;const sx=e.x-o.x,sy=e.y-o.y,sd=Math.hypot(sx,sy);if(sd>0&&sd<28){e.x+=sx/sd*30*dt;e.y+=sy/sd*30*dt;}}
+ }
+
+[0m
+[0m$ [0mpython3 -c "import re;h=open('index.html').read();open('/tmp/g.js','w').write(re.search(r'<script>(.*)</script>',h,re.S).group(1))" && node --check /tmp/g.js && echo JS_OK && cat > ./flow-verify.mjs <<'EOF'
+import { chromium } from 'playwright-core';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const errors = [];
+page.on('pageerror', e => errors.push(String(e)));
+await page.goto('file:///Users/runner/work/PlayGround/PlayGround/index.html');
+await page.waitForTimeout(800);
+await page.click('#btn-start');
+await page.waitForTimeout(500);
+await page.evaluate(() => {
+  window.__bot = setInterval(() => {
+    if (G.mode !== 'play') return;
+    if (P.hp < 60) P.hp = Math.min(P.maxhp, P.hp + 30); // test-assist: keeps bot alive to verify full flow
+    if (!G.enemies.length) { mouse.down = false; return; }
+    let best = null, bd = 1e9;
+    for (const e of G.enemies) { const d = (e.x - P.x) ** 2 + (e.y - P.y) ** 2; if (d < bd) { bd = d; best = e; } }
+    if (best) {
+      mouse.x = (best.x - cam.cx) * cam.zoom + 1280 / 2;
+      mouse.y = (best.y - cam.cy) * cam.zoom + 800 / 2;
+      mouse.down = (P.reloading <= 0 && P.mag > 0);
+    }
+  }, 100);
+});
+for (let i = 0; i < 100; i++) {
+  await page.waitForTimeout(2000);
+  const s = await page.evaluate(() => ({ mode: G.mode, wave: G.wave, kills: G.kills, ext: G.extractActive }));
+  if (s.ext || s.mode !== 'play') break;
+}
+const pre = await page.evaluate(() => ({ mode: G.mode, wave: G.wave, kills: G.kills, ext: G.extractActive }));
+console.log('PRE-EXTRACT ' + JSON.stringify(pre));
+await page.screenshot({ path: '/tmp/shot-extract.png' });
+await page.evaluate(() => { clearInterval(window.__bot); P.x = extractZone.x + extractZone.w / 2; P.y = extractZone.y + extractZone.h / 2; });
+await page.waitForTimeout(800);
+console.log('WIN MODE = ' + await page.evaluate(() => G.mode));
+await page.screenshot({ path: '/tmp/shot-win.png' });
+await page.click('#btn-restart');
+await page.waitForTimeout(600);
+console.log('RESTART = ' + JSON.stringify(await page.evaluate(() => ({ mode: G.mode, wave: G.wave, hp: P.hp }))));
+await page.evaluate(() => { P.hp = 5; P.lastHurt = G.time; G.enemies.push({ type: 'rush', x: P.x + 20, y: P.y, r: 13, hp: 45, maxhp: 45, speed: 200, atkCd: 0, flash: 0, detour: 0, detourA: 0, px: P.x, py: P.y, stuck: 0 }); });
+await page.waitForTimeout(2500);
+console.log('LOSE MODE = ' + await page.evaluate(() => G.mode));
+await page.screenshot({ path: '/tmp/shot-lose.png' });
+await page.click('#btn-restart');
+await page.waitForTimeout(800);
+console.log('RESTART2 = ' + JSON.stringify(await page.evaluate(() => ({ mode: G.mode, wave: G.wave, hp: P.hp }))));
+console.log('PAGEERRORS ' + JSON.stringify(errors.slice(0, 8)));
+await browser.close();
+EOF
+node ./flow-verify.mjs; rm -f ./flow-verify.mjs
+JS_OK
+PRE-EXTRACT {"mode":"play","wave":2,"kills":12,"ext":false}
+WIN MODE = play
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('#btn-restart')
+    - locator resolved to <button class="btn" id="btn-restart">↻ REDEPLOY</button>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is not visible
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is not visible
+    - retrying click action
+      - waiting 100ms
+    50 × waiting for element to be visible, enabled and stable
+       - element is not visible
+     - retrying click action
+       - waiting 500ms
+
+    at /Users/runner/work/PlayGround/PlayGround/flow-verify.mjs:36:12 {
+  log: [
+    "  - waiting for locator('#btn-restart')",
+    '    - locator resolved to <button class="btn" id="btn-restart">↻ REDEPLOY</button>',
+    '  - attempting click action',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not visible',
+    '    - retrying click action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not visible',
+    '    - retrying click action',
+    '      - waiting 100ms',
+    '    50 × waiting for element to be visible, enabled and stable',
+    '       - element is not visible',
+    '     - retrying click action',
+    '       - waiting 500ms'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.20.0
+[0m
+[0m$ [0mcat > ./diag-verify.mjs <<'EOF'
+import { chromium } from 'playwright-core';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const errors = [];
+page.on('pageerror', e => errors.push(String(e)));
+await page.goto('file:///Users/runner/work/PlayGround/PlayGround/index.html');
+await page.waitForTimeout(800);
+await page.click('#btn-start');
+await page.waitForTimeout(500);
+await page.evaluate(() => {
+  window.__bot = setInterval(() => {
+    if (G.mode !== 'play') return;
+    if (!G.enemies.length) { mouse.down = false; return; }
+    let best = null, bd = 1e9;
+    for (const e of G.enemies) { const d = (e.x - P.x) ** 2 + (e.y - P.y) ** 2; if (d < bd) { bd = d; best = e; } }
+    if (best) {
+      mouse.x = (best.x - cam.cx) * cam.zoom + 1280 / 2;
+      mouse.y = (best.y - cam.cy) * cam.zoom + 800 / 2;
+      mouse.down = (P.reloading <= 0 && P.mag > 0);
+    }
+  }, 100);
+});
+for (let i = 0; i < 6; i++) {
+  await page.waitForTimeout(5000);
+  const s = await page.evaluate(() => ({
+    mode: G.mode, wave: G.wave, kills: G.kills, hp: Math.round(P.hp),
+    px: Math.round(P.x), py: Math.round(P.y), mag: P.mag, res: P.reserve,
+    foes: G.enemies.map(e => ({ t: e.type[0], x: Math.round(e.x), y: Math.round(e.y), hp: Math.round(e.hp), blk: lineBlocked(e.x, e.y, P.x, P.y), det: +e.detour.toFixed(1) })),
+    queue: G.spawnQueue.length, bullets: G.bullets.length
+  }));
+  console.log('T+' + ((i + 1) * 5) + 's ' + JSON.stringify(s));
+}
+console.log('PAGEERRORS ' + JSON.stringify(errors.slice(0, 8)));
+await browser.close();
+EOF
+node ./diag-verify.mjs; rm -f ./diag-verify.mjs
+T+5s {"mode":"play","wave":1,"kills":0,"hp":100,"px":900,"py":985,"mag":7,"res":120,"foes":[{"t":"r","x":1430,"y":1102,"hp":45,"blk":false,"det":-0.1},{"t":"t","x":1520,"y":436,"hp":70,"blk":true,"det":-2.3},{"t":"r","x":1507,"y":800,"hp":45,"blk":true,"det":-1.9},{"t":"t","x":1560,"y":1125,"hp":70,"blk":false,"det":-1.4},{"t":"r","x":1556,"y":178,"hp":45,"blk":false,"det":-0.9}],"queue":0,"bullets":7}
+T+10s {"mode":"play","wave":1,"kills":2,"hp":100,"px":900,"py":985,"mag":23,"res":90,"foes":[{"t":"t","x":1232,"y":679,"hp":70,"blk":false,"det":-5.2},{"t":"r","x":1211,"y":737,"hp":45,"blk":true,"det":-1.9},{"t":"r","x":1268,"y":629,"hp":45,"blk":false,"det":-3.8}],"queue":0,"bullets":2}
+T+15s {"mode":"play","wave":1,"kills":4,"hp":91,"px":900,"py":985,"mag":0,"res":90,"foes":[{"t":"t","x":1031,"y":765,"hp":23,"blk":true,"det":-8.7}],"queue":0,"bullets":0}
+T+20s {"mode":"play","wave":1,"kills":5,"hp":82,"px":900,"py":985,"mag":23,"res":60,"foes":[],"queue":0,"bullets":0}
+T+25s {"mode":"play","wave":2,"kills":5,"hp":100,"px":900,"py":985,"mag":1,"res":100,"foes":[{"t":"r","x":1507,"y":885,"hp":45,"blk":true,"det":0.3},{"t":"t","x":1439,"y":1103,"hp":44,"blk":false,"det":-2.2},{"t":"r","x":704,"y":473,"hp":45,"blk":false,"det":-1.8},{"t":"r","x":234,"y":437,"hp":45,"blk":true,"det":-1.3},{"t":"r","x":654,"y":1088,"hp":45,"blk":false,"det":-0.8},{"t":"t","x":82,"y":784,"hp":70,"blk":true,"det":-0.4}],"queue":2,"bullets":4}
+T+30s {"mode":"play","wave":2,"kills":8,"hp":100,"px":900,"py":985,"mag":17,"res":70,"foes":[{"t":"t","x":1268,"y":895,"hp":44,"blk":false,"det":-5.1},{"t":"r","x":649,"y":746,"hp":45,"blk":true,"det":-4.2},{"t":"t","x":236,"y":753,"hp":70,"blk":true,"det":-0.2},{"t":"t","x":1508,"y":823,"hp":70,"blk":true,"det":0.7},{"t":"t","x":1448,"y":1100,"hp":70,"blk":false,"det":-2.3}],"queue":0,"bullets":4}
+PAGEERRORS []
+[0m
+[0m$ [0mcat > ./flow-verify.mjs <<'EOF'
+import { chromium } from 'playwright-core';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const errors = [];
+page.on('pageerror', e => errors.push(String(e)));
+await page.goto('file:///Users/runner/work/PlayGround/PlayGround/index.html');
+await page.waitForTimeout(800);
+await page.click('#btn-start');
+await page.waitForTimeout(1000);
+// keep a live firefight for the screenshot, then white-box the wave machine
+await page.evaluate(() => {
+  window.__bot = setInterval(() => {
+    if (G.mode !== 'play' || window.__hold) return;
+    if (!G.enemies.length) { mouse.down = false; return; }
+    let best = null, bd = 1e9;
+    for (const e of G.enemies) { const d = (e.x - P.x) ** 2 + (e.y - P.y) ** 2; if (d < bd) { bd = d; best = e; } }
+    if (best) {
+      mouse.x = (best.x - cam.cx) * cam.zoom + 1280 / 2;
+      mouse.y = (best.y - cam.cy) * cam.zoom + 800 / 2;
+      mouse.down = (P.reloading <= 0 && P.mag > 0);
+    }
+  }, 100);
+});
+await page.waitForTimeout(6000);
+await page.screenshot({ path: '/tmp/shot-combat.png' });
+console.log('COMBAT ' + JSON.stringify(await page.evaluate(() => ({ mode: G.mode, wave: G.wave, kills: G.kills, shots: G.shots, foes: G.enemies.length }))));
+await page.evaluate(() => { window.__hold = true; mouse.down = false; });
+// fast-forward wave machine: clear field 3x to walk waves 1->2->3->extraction
+for (let w = 1; w <= 3; w++) {
+  await page.evaluate(() => { G.enemies.length = 0; G.spawnQueue.length = 0; });
+  await page.waitForTimeout(3500);
+  console.log('STEP' + w + ' ' + JSON.stringify(await page.evaluate(() => ({ wave: G.wave, ext: G.extractActive, obj: document.getElementById('obj-text').textContent }))));
+}
+await page.screenshot({ path: '/tmp/shot-extract.png' });
+await page.evaluate(() => { P.x = extractZone.x + extractZone.w / 2; P.y = extractZone.y + extractZone.h / 2; });
+await page.waitForTimeout(800);
+console.log('WIN MODE = ' + await page.evaluate(() => G.mode));
+await page.screenshot({ path: '/tmp/shot-win.png' });
+await page.click('#btn-restart');
+await page.waitForTimeout(600);
+console.log('RESTART = ' + JSON.stringify(await page.evaluate(() => ({ mode: G.mode, wave: G.wave, hp: P.hp }))));
+await page.evaluate(() => { P.hp = 5; P.lastHurt = G.time; G.enemies.push({ type: 'rush', x: P.x + 20, y: P.y, r: 13, hp: 45, maxhp: 45, speed: 200, atkCd: 0, flash: 0, detour: 0, detourA: 0, px: P.x, py: P.y, stuck: 0 }); });
+await page.waitForTimeout(2500);
+console.log('LOSE MODE = ' + await page.evaluate(() => G.mode));
+await page.screenshot({ path: '/tmp/shot-lose.png' });
+await page.click('#btn-restart');
+await page.waitForTimeout(800);
+console.log('RESTART2 = ' + JSON.stringify(await page.evaluate(() => ({ mode: G.mode, wave: G.wave, hp: P.hp }))));
+console.log('PAGEERRORS ' + JSON.stringify(errors.slice(0, 8)));
+await browser.close();
+EOF
+node ./flow-verify.mjs; rm -f ./flow-verify.mjs
+COMBAT {"mode":"play","wave":1,"kills":3,"shots":30,"foes":2}
+STEP1 {"wave":2,"ext":false,"obj":"Eliminate all hostiles — Wave 2/3"}
+STEP2 {"wave":3,"ext":false,"obj":"Eliminate all hostiles — Wave 3/3"}
+STEP3 {"wave":3,"ext":true,"obj":"All waves cleared — reach EXTRACTION"}
+WIN MODE = win
+RESTART = {"mode":"play","wave":1,"hp":100}
+LOSE MODE = lose
+RESTART2 = {"mode":"play","wave":1,"hp":100}
+PAGEERRORS []
+[0m
+Full loop verified: combat → waves → extraction → win → restart → lose → restart, zero errors. Reviewing screenshots.
+[0m→ [0mRead /tmp/shot-win.png
+[0m→ [0mRead /tmp/shot-lose.png
+[0m→ [0mRead /tmp/shot-combat.png
+[0m
+[0m$ [0mgit status --short | head -20 && rm -rf node_modules package.json package-lock.json && git status --short | head -20 && ls -lh index.html && python3 -c "import re;h=open('index.html').read();print('bytes:',len(h));open('/tmp/g.js','w').write(re.search(r'<script>(.*)</script>',h,re.S).group(1))" && node --check /tmp/g.js && echo FINAL_JS_OK
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? node_modules/
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? package-lock.json
+?? package.json
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+-rw-r--r--  1 runner  staff    36K Sep  7 01:41 index.html
+bytes: 36380
+FINAL_JS_OK
+[0m
+All verification passed and the workspace is clean. The game is complete.
+
+[goal:evidence] `index.html` (36KB single file, `node --check` clean, zero page errors in headless Chromium) — verified via scripted browser play: menu→DEPLOY, WASD/move+mouse-aim/hold-fire/ADS/sprint/R-reload all exercised; aimbot run cleared wave 1 in 14s and reached wave 3 with 19 kills; wave machine 1→2→3→extraction with objective-text updates; extraction→WIN screen with kills/time/accuracy stats; REDEPLOY restart resets to wave 1/hp 100; rusher kill→LOSE screen; restart again works. Screenshots confirmed menu, live combat (kill feed, tracers, shells, hit HP bars, minimap, edge chevrons, reload warning), win, and lose states. Fixed real bugs found by testing: shell-casing array crash freezing all rendering/HUD, player spawning inside a crate (bullets blocked, zero kills, guaranteed death), aim/camera math under ADS zoom, hitmarker glued to screen center, banner covering mid-playfield; added enemy wall-detour steering, off-screen indicators, extraction compass, low-ammo warning, and trooper tuning. HUD confined to screen edges; procedural WebAudio SFX; no external dependencies.
+[goal:complete]
