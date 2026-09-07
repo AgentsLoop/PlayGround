@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Supersonic Soccar — Rocket League tribute</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0a1420;font-family:Arial,Helvetica,sans-serif}
+  #c{position:fixed;inset:0;display:block}
+  #hud{position:fixed;inset:0;pointer-events:none;color:#fff;user-select:none}
+  #scoreboard{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:flex;align-items:stretch;gap:0;background:rgba(5,15,30,.72);border:1px solid rgba(255,255,255,.25);border-radius:10px;overflow:hidden;font-weight:900}
+  #scoreboard .team{padding:8px 16px;font-size:20px;letter-spacing:1px}
+  #scoreboard .blue{background:#1c6de0}#scoreboard .orange{background:#e07010}
+  #scoreboard .mid{padding:6px 14px;text-align:center;background:#0b1c33}
+  #scoreboard .mid .time{font-size:20px}#scoreboard .mid .lbl{font-size:10px;opacity:.7;font-weight:400}
+  #boostWrap{position:absolute;right:18px;bottom:16px;width:170px;text-align:right}
+  #boostNum{font-size:44px;font-weight:900;text-shadow:0 2px 8px #000}
+  #boostBar{height:12px;background:rgba(255,255,255,.18);border-radius:8px;overflow:hidden;border:1px solid #fff3}
+  #boostFill{height:100%;width:33%;background:linear-gradient(90deg,#ffd23f,#ff9d00);transition:width .08s}
+  #speed{font-size:13px;opacity:.85;margin-top:4px}
+  #help{position:absolute;left:14px;bottom:12px;font-size:12.5px;line-height:1.55;background:rgba(0,0,0,.55);padding:10px 12px;border-radius:10px;border:1px solid #ffffff2a;max-width:300px;transition:opacity .4s}
+  #help b{color:#ffd23f}
+  #banner{position:absolute;left:50%;top:32%;transform:translate(-50%,-50%) scale(.8);font-size:84px;font-weight:900;letter-spacing:2px;opacity:0;transition:all .25s;text-shadow:0 0 30px #ffae00,0 4px 0 #7a2e00,0 6px 24px #000}
+  #banner.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  #subbanner{position:absolute;left:50%;top:calc(32% + 70px);transform:translateX(-50%);font-size:20px;font-weight:700;opacity:0;text-shadow:0 2px 6px #000}
+  #subbanner.show{opacity:1}
+  #menu{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(10,30,60,.55),rgba(2,6,14,.88));pointer-events:auto}
+  #card{background:rgba(8,18,36,.92);border:1px solid #ffffff33;border-radius:16px;padding:28px 34px;text-align:center;max-width:560px;box-shadow:0 20px 80px #000}
+  #card h1{margin:0 0 4px;font-size:34px;letter-spacing:1px}#card h1 span{color:#2f9bff}#card h1 em{color:#ff8c1a;font-style:normal}
+  #card p{opacity:.85;font-size:14px}#card button{pointer-events:auto;cursor:pointer;font-size:18px;font-weight:800;padding:12px 26px;border-radius:10px;border:0;background:linear-gradient(180deg,#ffd23f,#ff8c1a);color:#231300}
+  #end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,14,.55)}
+  #endCard{background:#0b1a30;border:1px solid #fff4;border-radius:14px;padding:26px 38px;text-align:center}
+  #endCard h2{font-size:40px;margin:0}#endCard button{margin-top:12px;font-size:17px;font-weight:800;padding:10px 22px;border-radius:10px;border:0;background:#2f9bff;color:#fff;cursor:pointer}
+  #toast{position:absolute;top:74px;left:50%;transform:translateX(-50%);background:#000a;border-radius:8px;padding:6px 12px;font-size:13px;display:none}
+  #ballcam{position:absolute;left:18px;top:12px;background:#000a;border:1px solid #fff3;padding:6px 10px;border-radius:8px;font-size:13px}
+  #count{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font-size:110px;font-weight:900;display:none;text-shadow:0 6px 30px #000}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div id="ballcam">BALL CAM <b id="camState">ON</b> (C)</div>
+  <div id="scoreboard"><div class="team blue">BLUE <span id="sB">0</span></div><div class="mid"><div class="time" id="clock">5:00</div><div class="lbl">1V1 SOCCAR</div></div><div class="team orange"><span id="sO">0</span> ORANGE</div></div>
+  <div id="boostWrap"><div id="boostNum"><span id="boostVal">33</span></div><div id="boostBar"><div id="boostFill"></div></div><div id="speed">0 mph • R restart • Space jump • Shift boost</div></div>
+  <div id="help"><b>WASD / Arrows</b> drive & steer • <b>Shift</b> boost rocket • <b>Space</b> jump / double-jump • <b>C</b> ball-cam • <b>R</b> restart match<br/>Hit the big ball into the <b style="color:#ff9d2e">ORANGE goal</b>. First to 5 or best at 5:00 wins.</div>
+  <div id="banner">GOAL!</div><div id="subbanner"></div><div id="toast"></div><div id="count">3</div>
+  <div id="menu"><div id="card"><h1><span>ROCKET</span> <em>SOCCAR</em> TRIBUTE</h1><p>Third-person 3D car-soccer: chase camera, enclosed neon arena, rocket boost with flame + trail, jumps, wall bounces, boost pads, goal explosion and live scoreboard.<br/>Controls: <b>W/S</b> throttle • <b>A/D</b> steer • <b>Shift</b> boost • <b>Space</b> jump • <b>C</b> camera • <b>R</b> restart</p><button id="play">KICK OFF ⚽</button><p style="font-size:12px;opacity:.7">Progress / references: <a style="color:#7cc4ff" href="./progress.html">progress.html</a></p></div></div>
+  <div id="end"><div id="endCard"><h2 id="endTitle">BLUE WINS!</h2><p id="endSub"></p><button id="again">REMATCH (R)</button></div></div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.28;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x0a1626);scene.fog=new THREE.Fog(0x0a1626,110,260);
+const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,0.1,600);
+// Lights
+scene.add(new THREE.HemisphereLight(0xcfe4ff,0x2a4423,1.15));
+const sun=new THREE.DirectionalLight(0xffffff,2.2);sun.position.set(30,60,20);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-70;sun.shadow.camera.right=70;sun.shadow.camera.top=70;sun.shadow.camera.bottom=-70;scene.add(sun);
+const stad1=new THREE.PointLight(0x88bbff,1400,200);stad1.position.set(0,38,0);scene.add(stad1);
+const goalBlueLight=new THREE.PointLight(0x2288ff,400,60);const goalOrangeLight=new THREE.PointLight(0xff7722,400,60);
+// Arena dims (RL-like proportions)
+const W=56,H=34,LEN=92,wallH=14,goalW=16,goalH=7,goalD=8;
+const groundMat=new THREE.MeshStandardMaterial({color:0x2fae4e,roughness:.9});
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(LEN,W),groundMat);ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+// field markings: halfway line across width + centre circle + goal boxes
+function line(w,l,x,z,c=0xffffff){const m=new THREE.Mesh(new THREE.PlaneGeometry(l,w),new THREE.MeshBasicMaterial({color:c}));m.rotation.x=-Math.PI/2;m.position.set(x,0.02,z);scene.add(m);}
+line(W,0.5,0,0);
+function goalBox(dir){const x0=dir*LEN/2,xc=x0-dir*6,xf=x0-dir*12;line(t0,12,xc,-10);line(t0,12,xc,10);line(20,t0,xf,0);}
+const t0=0.35;goalBox(-1);goalBox(1);
+{const ring=new THREE.Mesh(new THREE.RingGeometry(6.4,7,48),new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=0.02;scene.add(ring);}
+for(let s=-1;s<=1;s+=2){for(let e=-1;e<=1;e+=2){const box=new THREE.Mesh(new THREE.BoxGeometry(10,0.02,10),new THREE.MeshStandardMaterial({color:0x2a9c46,roughness:1}));box.position.set(e*LEN/4,0.015,s*W/4);scene.add(box);}}
+// turf stripes
+for(let i=0;i<8;i++){const s=new THREE.Mesh(new THREE.PlaneGeometry(LEN/8,W),new THREE.MeshStandardMaterial({color:i%2?0x33b455:0x2da34c,roughness:1}));s.rotation.x=-Math.PI/2;s.position.set(-LEN/2+LEN/16+i*LEN/8,0.005,0);scene.add(s);}
+// walls (transparent like RL)
+const wallMat=new THREE.MeshPhysicalMaterial({color:0x9fd0ff,transparent:true,opacity:0.24,roughness:.1,metalness:0,side:THREE.DoubleSide});
+function wall(w,h,x,y,z,ry){const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),wallMat);m.position.set(x,y,z);m.rotation.y=ry;scene.add(m);
+ const f=new THREE.Mesh(new THREE.BoxGeometry(ry?0.4:w,0.5,ry?w:0.4),new THREE.MeshStandardMaterial({color:0x9fd0ff,emissive:0x2266aa,emissiveIntensity:1}));f.position.set(x,h+0.2,z);scene.add(f);return m;}
+wall(LEN,wallH,0,wallH/2,-W/2,0);wall(LEN,wallH,0,wallH/2,W/2,0);
+// end walls with goal gaps: two segments each
+for(const s of [-1,1]){const segW=(W-goalW)/2;const cx=goalW/2+segW/2;for(const sd of [-1,1]){const m=new THREE.Mesh(new THREE.PlaneGeometry(segW,wallH),wallMat);m.position.set(s*LEN/2,wallH/2,sd*cx);m.rotation.y=Math.PI/2;scene.add(m);}}
+// ceiling grid glow (RL arena roof feel)
+{const g=new THREE.GridHelper(140,28,0x2a6cff,0x12315e);g.position.y=wallH+6;g.material.transparent=true;g.material.opacity=.35;scene.add(g);}
+// goals
+const goalLights=[];
+function makeGoal(s,color){const grp=new THREE.Group();const mat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.4,metalness:.1,emissive:color,emissiveIntensity:.25});
+ const post=new THREE.CylinderGeometry(0.35,0.35,goalH,12);const cross=new THREE.CylinderGeometry(0.35,0.35,goalW,12);
+ for(const sd of [-1,1]){const p=new THREE.Mesh(post,mat);p.position.set(s*(LEN/2),goalH/2,sd*goalW/2);p.castShadow=true;grp.add(p);}
+ const cr=new THREE.Mesh(cross,mat);cr.rotation.x=Math.PI/2;cr.position.set(s*LEN/2,goalH,0);grp.add(cr);
+ const net=new THREE.Mesh(new THREE.BoxGeometry(goalD,goalH,goalW),new THREE.MeshBasicMaterial({color:color,wireframe:true,transparent:true,opacity:.5}));net.position.set(s*(LEN/2+goalD/2),goalH/2,0);grp.add(net);
+ const glow=new THREE.PointLight(color,350,50);glow.position.set(s*(LEN/2-4),4,0);grp.add(glow);goalLights.push(glow);scene.add(grp);}
+makeGoal(-1,0x2288ff);makeGoal(1,0xff7722);
+// stadium: stands ring + lights + jumbotron
+{const standMat=new THREE.MeshStandardMaterial({color:0x22345a,roughness:.9});
+ for(const sd of [-1,1]){const st=new THREE.Mesh(new THREE.BoxGeometry(LEN+40,18,14),standMat);st.position.set(0,9,sd*(W/2+14));scene.add(st);
+  for(let i=0;i<300;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(.7,.9,.4),new THREE.MeshBasicMaterial({color:new THREE.Color().setHSL(Math.random(),.8,.6)}));c.position.set((Math.random()-.5)*(LEN+30),10+Math.random()*9,sd*(W/2+8+Math.random()*11));scene.add(c);}}
+ for(const e of [-1,1]){const st=new THREE.Mesh(new THREE.BoxGeometry(14,18,W+40),standMat);st.position.set(e*(LEN/2+14),9,0);scene.add(st);}
+ for(let i=0;i<4;i++){const p=new THREE.Mesh(new THREE.CylinderGeometry(.5,.7,44,8),new THREE.MeshStandardMaterial({color:0x222}));const sx=i<2?-1:1,sz=i%2?-1:1;p.position.set(sx*(LEN/2+6),22,sz*(W/2+6));scene.add(p);
+  const lamp=new THREE.Mesh(new THREE.BoxGeometry(6,3,1),new THREE.MeshStandardMaterial({color:0xfff,emissive:0xffffff,emissiveIntensity:3}));lamp.position.set(sx*(LEN/2+6),44,sz*(W/2+6));lamp.lookAt(0,0,0);scene.add(lamp);
+  const pl=new THREE.PointLight(0xffffff,500,120);pl.position.copy(lamp.position);scene.add(pl);}
+ const jb=document.createElement('canvas');jb.width=512;jb.height=128;const jx=jb.getContext('2d');jx.fillStyle='#04122b';jx.fillRect(0,0,512,128);jx.fillStyle='#fff';jx.font='900 64px Arial';jx.textAlign='center';jx.fillText('ROCKET SOCCAR',256,84);
+ const jt=new THREE.CanvasTexture(jb);const jm=new THREE.Mesh(new THREE.PlaneGeometry(30,7.5),new THREE.MeshBasicMaterial({map:jt}));jm.position.set(0,26,-W/2-8);scene.add(jm);
+ const jm2=jm.clone();jm2.position.z=W/2+8;jm2.rotation.y=Math.PI;scene.add(jm2);}
+// boost pads
+const pads=[];const padGeo=new THREE.CylinderGeometry(1.1,1.1,0.18,20);
+const padPositions=[[0,0],[-20,-10],[20,10],[-20,10],[20,-10],[-36,0],[36,0],[0,-14],[0,14],[-12,-14],[12,14],[-12,14],[12,-14]];
+for(const [x,z] of padPositions){const big=Math.abs(x)===36;const m=new THREE.Mesh(padGeo,new THREE.MeshStandardMaterial({color:0xffc233,emissive:0xff9d00,emissiveIntensity:1.6}));m.scale.setScalar(big?1.4:0.9);m.position.set(x,0.12,z);scene.add(m);pads.push({mesh:m,x,z,big,active:true,t:0});}
+// car builder (Octane-inspired wedge: bumper, slanted glass, roof, wing spoiler, light bars)
+function buildCar(color,glow){const g=new THREE.Group();
+ const bodyMat=new THREE.MeshStandardMaterial({color,roughness:.32,metalness:.6});
+ const darkMat=new THREE.MeshStandardMaterial({color:0x0b1526,roughness:.12,metalness:.85});
+ const trimMat=new THREE.MeshStandardMaterial({color:0x141414,roughness:.5,emissive:glow,emissiveIntensity:.9});
+ const body=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.9,1.9),bodyMat);body.position.y=0.95;body.castShadow=true;g.add(body);
+ const nose=new THREE.Mesh(new THREE.BoxGeometry(1.1,0.6,1.7),bodyMat);nose.position.set(2.1,0.8,0);nose.castShadow=true;g.add(nose);
+ const hood=new THREE.Mesh(new THREE.BoxGeometry(1.15,0.32,1.6),bodyMat);hood.position.set(1.35,1.28,0);hood.rotation.z=-0.22;hood.castShadow=true;g.add(hood);
+ const bumper=new THREE.Mesh(new THREE.BoxGeometry(0.35,0.45,1.85),trimMat);bumper.position.set(2.65,0.55,0);g.add(bumper);
+ const shield=new THREE.Mesh(new THREE.BoxGeometry(0.95,0.55,1.45),darkMat);shield.position.set(0.55,1.5,0);shield.rotation.z=-0.32;shield.castShadow=true;g.add(shield);
+ const roof=new THREE.Mesh(new THREE.BoxGeometry(1.15,0.14,1.35),bodyMat);roof.position.set(-0.45,1.82,0);roof.castShadow=true;g.add(roof);
+ const wing=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.12,2.05),bodyMat);wing.position.set(-1.85,2.05,0);wing.castShadow=true;g.add(wing);
+ for(const sz of [-0.7,0.7]){const strut=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.55,0.16),trimMat);strut.position.set(-1.85,1.72,sz);g.add(strut);}
+ const skirtL=new THREE.Mesh(new THREE.BoxGeometry(2.9,0.22,0.12),trimMat);skirtL.position.set(0,0.55,1.0);g.add(skirtL);
+ const skirtR=skirtL.clone();skirtR.position.z=-1.0;g.add(skirtR);
+ const head=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.22,1.4),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:2.2}));head.position.set(2.66,0.85,0);g.add(head);
+ const tail=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.2,1.5),new THREE.MeshStandardMaterial({color:0xff2222,emissive:0xff2222,emissiveIntensity:2}));tail.position.set(-1.76,1.0,0);g.add(tail);
+ const wheelGeo=new THREE.CylinderGeometry(0.5,0.5,0.45,18);const wheelMat=new THREE.MeshStandardMaterial({color:0x111111,roughness:.9});
+ const hubMat=new THREE.MeshStandardMaterial({color:0xcc9933,roughness:.35,metalness:.8});
+ const wheels=[];for(const [wx,wz] of [[1.25,0.88],[1.25,-0.88],[-1.25,0.88],[-1.25,-0.88]]){
+  const fen=new THREE.Mesh(new THREE.BoxGeometry(1.35,0.32,0.34),bodyMat);fen.position.set(wx,1.02,wz>0?0.92:-0.92);fen.castShadow=true;g.add(fen);
+  const pivot=new THREE.Group();pivot.position.set(wx,0.5,wz);
+  const w=new THREE.Mesh(wheelGeo,wheelMat);w.rotation.x=Math.PI/2;w.castShadow=true;pivot.add(w);
+  const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,0.47,6),hubMat);hub.rotation.x=Math.PI/2;pivot.add(hub);
+  g.add(pivot);wheels.push({pivot,front:wx>0});}
+ const under=new THREE.PointLight(glow,35,11);under.position.set(0,0.4,0);g.add(under);
+ const flame=new THREE.Mesh(new THREE.ConeGeometry(0.55,2.6,12),new THREE.MeshBasicMaterial({color:0xff9d1f,transparent:true,opacity:0}));flame.rotation.z=Math.PI/2;flame.position.set(-2.8,0.95,0);g.add(flame);
+ const core=new THREE.Mesh(new THREE.ConeGeometry(0.28,1.5,10),new THREE.MeshBasicMaterial({color:0xfff2b0,transparent:true,opacity:0}));core.rotation.z=Math.PI/2;core.position.set(-2.5,0.95,0);g.add(core);
+ scene.add(g);return {g,wheels,flame,core,color,glow,lastSteer:0};}
+const player=buildCar(0x1c6de0,0x3388ff);const enemy=buildCar(0xe07010,0xff8830);
+// ball (big, RL-style: light shell, dark pentagon patches in offset rows + seam shading)
+function ballTexture(){const cv=document.createElement('canvas');cv.width=cv.height=256;const x=cv.getContext('2d');
+ x.fillStyle='#eef1f4';x.fillRect(0,0,256,256);
+ x.strokeStyle='rgba(120,140,160,.4)';x.lineWidth=2;
+ for(let i=0;i<=256;i+=32){x.beginPath();x.moveTo(i,0);x.lineTo(i,256);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(256,i);x.stroke();}
+ function pent(cx,cy,r){x.beginPath();for(let i=0;i<5;i++){const a=-Math.PI/2+i*2*Math.PI/5;const px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r;i?x.lineTo(px,py):x.moveTo(px,py);}x.closePath();x.fill();}
+ x.fillStyle='#16233c';
+ const rows=[[24,0],[72,24],[120,0],[168,24],[216,0]];
+ for(const [yy,off] of rows){for(let xx=off;xx<256;xx+=48){pent(xx+12,yy,15);}}
+ const t=new THREE.CanvasTexture(cv);return t;}
+const ballR=2.2;const ball=new THREE.Mesh(new THREE.SphereGeometry(ballR,32,24),new THREE.MeshStandardMaterial({map:ballTexture(),roughness:.5,metalness:.15}));ball.castShadow=true;scene.add(ball);
+const ballShadow=new THREE.Mesh(new THREE.RingGeometry(ballR*0.7,ballR*1.05,32),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.35,side:THREE.DoubleSide}));ballShadow.rotation.x=-Math.PI/2;scene.add(ballShadow);
+// particles
+const parts=[];function burst(p,color,n=24,speed=12,life=0.7,size=0.35){for(let i=0;i<n;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(size,size,size),new THREE.MeshBasicMaterial({color,transparent:true}));m.position.copy(p);const v=new THREE.Vector3((Math.random()-.5)*speed,Math.random()*speed*0.9,(Math.random()-.5)*speed);parts.push({m,v,life,max:life});scene.add(m);}}
+function updateParts(dt){for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.life-=dt;p.v.y-=18*dt;p.m.position.addScaledVector(p.v,dt);p.m.material.opacity=Math.max(p.life/p.max,0);p.m.rotation.x+=4*dt;p.m.rotation.y+=3*dt;if(p.life<=0){scene.remove(p.m);p.m.geometry.dispose();p.m.material.dispose();parts.splice(i,1);}}}
+// state
+const S={p:{pos:new THREE.Vector3(-18,0.6,0),vel:new THREE.Vector3(),yaw:0,vy:0,grounded:true,boost:33,jumps:0,airTime:0,lastSteer:0},
+ e:{pos:new THREE.Vector3(18,0.6,0),vel:new THREE.Vector3(),yaw:Math.PI,vy:0,grounded:true,boost:60,lastSteer:0},
+ ball:{pos:new THREE.Vector3(0,ballR+3,0),vel:new THREE.Vector3()},
+ scoreB:0,scoreO:0,time:300,playing:false,over:false,countdown:0,ballcam:true,lastTouch:0};
+const keys={};const DEMO=new URLSearchParams(location.search).has('demo');
+addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyC'){S.ballcam=!S.ballcam;document.getElementById('camState').textContent=S.ballcam?'ON':'OFF';}if(e.code==='KeyR')restart(true);if(e.code==='Space')e.preventDefault();});
+addEventListener('keyup',e=>keys[e.code]=false);
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',1800);}
+function showBanner(txt,sub){const b=document.getElementById('banner');b.textContent=txt;b.classList.add('show');const s=document.getElementById('subbanner');s.textContent=sub||'';s.classList.add('show');setTimeout(()=>{b.classList.remove('show');s.classList.remove('show');},1900);}
+function resetKickoff(){S.p.pos.set(-18,0.6,0);S.p.vel.set(0,0,0);S.p.yaw=0;S.p.vy=0;S.p.boost=Math.max(S.p.boost,33);S.e.pos.set(18,0.6,0);S.e.vel.set(0,0,0);S.e.yaw=Math.PI;S.e.vy=0;jumpQueued=false;S.ball.pos.set(0,ballR+4,0);S.ball.vel.set(0,0,0);syncMeshes(0);}
+function restart(full){S.scoreB=0;S.scoreO=0;S.time=300;S.over=false;document.getElementById('end').style.display='none';document.getElementById('sB').textContent='0';document.getElementById('sO').textContent='0';resetKickoff();startCountdown();if(full)toast('Match restarted');}
+document.getElementById('play').onclick=()=>{initAudio();document.getElementById('menu').style.display='none';S.playing=true;restart(false);};
+document.getElementById('again').onclick=()=>restart(true);
+function startCountdown(){S.countdown=3.6;S.lastCount=-1;S.playing=false;const c=document.getElementById('count');c.style.display='block';}
+function driveCar(C,dt,throttle,steer,boosting,jumpPressed){
+ const accel=boosting?46:26, maxSp=boosting?34:23;
+ const fwd=new THREE.Vector3(Math.cos(C.yaw),0,-Math.sin(C.yaw));
+ // steering scales with speed
+  const sp=C.vel.length();const grip=THREE.MathUtils.clamp(sp/10,0.25,1);
+  C.lastSteer=steer;C.yaw+=steer*2.6*dt*(throttle<0?-1:1)*grip*(sp>0.5?1:0.4);
+ const nFwd=new THREE.Vector3(Math.cos(C.yaw),0,-Math.sin(C.yaw));
+ if(throttle!==0){C.vel.addScaledVector(nFwd,throttle*accel*dt);}
+ if(boosting&&C.boost>0){C.vel.addScaledVector(nFwd,30*dt);C.boost=Math.max(0,C.boost-33*dt);}
+ // drift/friction
+ const fSp=C.vel.dot(nFwd);const lat=C.vel.clone().addScaledVector(nFwd,-fSp);C.vel.addScaledVector(lat,-Math.min(1,6*dt));
+ C.vel.multiplyScalar(1-Math.min(0.6,0.55*dt));
+ if(C.vel.length()>maxSp+8)C.vel.setLength(maxSp+8);
+ C.pos.addScaledVector(C.vel,dt);
+ // walls (allow driving into goal recess like the ball)
+ const inMouthC=Math.abs(C.pos.z)<goalW/2&&C.pos.y<goalH;
+ const mx=inMouthC?LEN/2+goalD-1.6:LEN/2-1.6,mz=W/2-1.4;
+ if(C.pos.x>mx){C.pos.x=mx;C.vel.x*=-0.55;burst(C.pos,0x9fd0ff,6,6,.4,.25);}
+ if(C.pos.x<-mx){C.pos.x=-mx;C.vel.x*=-0.55;burst(C.pos,0x9fd0ff,6,6,.4,.25);}
+ if(C.pos.z>mz){C.pos.z=mz;C.vel.z*=-0.55;burst(C.pos,0x9fd0ff,6,6,.4,.25);}
+ if(C.pos.z<-mz){C.pos.z=-mz;C.vel.z*=-0.55;burst(C.pos,0x9fd0ff,6,6,.4,.25);}
+ // goals recess allow entry
+ // jump/gravity
+ if(jumpPressed){if(C.grounded){C.vy=11;C.grounded=false;C.jumps=1;}else if(C.jumps<2){C.vy=10;C.jumps=2;burst(C.pos,0xffffff,10,7,.4,.25);}}
+ C.vy-=26*dt;C.pos.y+=C.vy*dt;if(C.pos.y<=0.6){C.pos.y=0.6;C.vy=0;C.grounded=true;C.jumps=0;}else C.grounded=false;
+ return boosting&&C.boost>0;
+}
+function syncMeshes(dt){
+ player.g.position.copy(S.p.pos);player.g.rotation.y=S.p.yaw;player.g.position.y=S.p.pos.y;
+ // pitch on jump
+ player.g.rotation.z=THREE.MathUtils.clamp(-S.p.vy*0.02,-0.4,0.4);
+ enemy.g.position.copy(S.e.pos);enemy.g.rotation.y=S.e.yaw;enemy.g.position.y=S.e.pos.y;
+ enemy.g.rotation.z=THREE.MathUtils.clamp(-S.e.vy*0.02,-0.4,0.4);
+ ball.position.copy(S.ball.pos);ball.rotation.x+=S.ball.vel.length()*dt*0.25;ball.rotation.z+=S.ball.vel.x*dt*0.1;
+ ballShadow.position.set(S.ball.pos.x,0.03,S.ball.pos.z);const h=THREE.MathUtils.clamp(S.ball.pos.y/12,0,1);ballShadow.material.opacity=0.38*(1-h);ballShadow.scale.setScalar(1+h*0.6);
+ spinWheels(player,S.p,dt);spinWheels(enemy,S.e,dt);
+}
+function spinWheels(V,C,dt){const w=THREE.MathUtils.clamp(C.vel.length()/0.5,0,40);for(const o of V.wheels){o.pivot.rotation.z-=w*dt;o.pivot.rotation.y=o.front?C.lastSteer*0.35:0;}}
+function carBall(C,power=1){const d=S.ball.pos.clone().sub(C.pos);d.y-=1;const dist=d.length();const rr=ballR+1.6;
+ if(dist<rr){const n=d.normalize();const relV=C.vel.clone().sub(S.ball.vel);const imp=Math.max(6,relV.dot(n)*1.6+ C.vel.length()*0.9+6)*power;
+  S.ball.vel.addScaledVector(n,imp);S.ball.vel.y+=Math.max(2,C.vy*0.6+3);S.ball.pos.copy(C.pos).addScaledVector(n,rr+0.05);S.ball.pos.y=Math.max(S.ball.pos.y,ballR);
+  burst(S.ball.pos,0xffffff,14,10,.5,.3);blip(260+Math.min(400,C.vel.length()*10),0.15,'triangle',0.22);S.lastTouch=performance.now();return true;}return false;}
+function updateBall(dt){
+ S.ball.vel.y-=22*dt;
+ S.ball.vel.multiplyScalar(1-0.25*dt);
+ S.ball.pos.addScaledVector(S.ball.vel,dt);
+ // ground
+ if(S.ball.pos.y<ballR){S.ball.pos.y=ballR;if(S.ball.vel.y<-3){burst(S.ball.pos,0x88ff88,5,5,.3,.2);blip(120,0.12,'sine',0.2);}S.ball.vel.y*=-0.62;S.ball.vel.x*=0.985;S.ball.vel.z*=0.985;}
+ // spin drag cap
+ if(S.ball.vel.length()>46)S.ball.vel.setLength(46);
+ // side walls
+ if(S.ball.pos.z>W/2-ballR){S.ball.pos.z=W/2-ballR;S.ball.vel.z*=-0.75;burst(S.ball.pos,0x9fd0ff,8,8,.4,.25);blip(180,0.1,'sine',0.15);}
+ if(S.ball.pos.z<-(W/2-ballR)){S.ball.pos.z=-(W/2-ballR);S.ball.vel.z*=-0.75;burst(S.ball.pos,0x9fd0ff,8,8,.4,.25);blip(180,0.1,'sine',0.15);}
+ // end walls / goals
+ const inMouth=Math.abs(S.ball.pos.z)<goalW/2&&S.ball.pos.y<goalH;
+ for(const s of [-1,1]){
+  if(s*S.ball.pos.x>LEN/2-ballR){
+   if(inMouth){ // let it travel into net
+    if(s*S.ball.pos.x>LEN/2+goalD-1){goalScored(s>0?'B':'O');return;}
+   }else{S.ball.pos.x=s*(LEN/2-ballR);S.ball.vel.x*=-0.75;burst(S.ball.pos,0x9fd0ff,8,8,.4,.25);}
+  }
+ }
+ // net backstop
+ for(const s of [-1,1]){if(s*S.ball.pos.x>LEN/2+goalD-0.6){S.ball.vel.x*=-0.4;S.ball.pos.x=s*(LEN/2+goalD-0.6);}}
+ // ceiling-ish
+ if(S.ball.pos.y>24){S.ball.pos.y=24;S.ball.vel.y*=-0.5;}
+}
+function goalScored(side){
+ S.goalPulse=1;horn();
+ if(side==='B'){S.scoreB++;document.getElementById('sB').textContent=S.scoreB;showBanner('GOAL!','Blue scores on Orange');burst(new THREE.Vector3(LEN/2-3,4,0),0x2288ff,80,22,1.2,.5);burst(S.ball.pos,0xffd23f,40,16,1,.4);}
+ else{S.scoreO++;document.getElementById('sO').textContent=S.scoreO;showBanner('GOAL!','Orange scores — defend your net!');burst(new THREE.Vector3(-LEN/2+3,4,0),0xff7722,80,22,1.2,.5);}
+ resetKickoff();if(S.scoreB>=5||S.scoreO>=5){endMatch();return;}startCountdown();
+}
+function endMatch(){S.over=true;S.playing=false;S.countdown=0;document.getElementById('count').style.display='none';const e=document.getElementById('end');e.style.display='flex';
+ const win=S.scoreB>S.scoreO?'BLUE WINS!':S.scoreO>S.scoreB?'ORANGE WINS!':'DRAW!';
+ document.getElementById('endTitle').textContent=win;document.getElementById('endTitle').style.color=S.scoreB>=S.scoreO?'#5eb0ff':'#ff9d2e';
+ document.getElementById('endSub').textContent=`Final ${S.scoreB} – ${S.scoreO}. Press R or click Rematch.`;}
+let jumpQueued=false;addEventListener('keydown',e=>{if(e.code==='Space'&&!e.repeat)jumpQueued=true;});
+// WebAudio: engine hum + boost noise + event blips + goal horn (created on first click)
+let AC=null,engineOsc=null,engineGain=null,boostGain=null;
+function initAudio(){if(AC){AC.resume&&AC.resume();return;}try{
+ AC=new (window.AudioContext||window.webkitAudioContext)();
+ engineOsc=AC.createOscillator();engineOsc.type='sawtooth';engineOsc.frequency.value=55;
+ const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=380;
+ engineGain=AC.createGain();engineGain.gain.value=0;
+ engineOsc.connect(f);f.connect(engineGain);engineGain.connect(AC.destination);engineOsc.start();
+ const nb=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const ch=nb.getChannelData(0);
+ for(let i=0;i<ch.length;i++)ch[i]=Math.random()*2-1;
+ const ns=AC.createBufferSource();ns.buffer=nb;ns.loop=true;
+ const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=900;bp.Q.value=0.7;
+ boostGain=AC.createGain();boostGain.gain.value=0;
+ ns.connect(bp);bp.connect(boostGain);boostGain.connect(AC.destination);ns.start();
+}catch(e){AC=null;}}
+function blip(freq,dur,type,vol,slide){if(!AC)return;try{
+ const o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';
+ o.frequency.setValueAtTime(freq,AC.currentTime);
+ if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,freq+slide),AC.currentTime+dur);
+ g.gain.setValueAtTime(vol||0.18,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+dur);
+ o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+dur+0.03);}catch(e){}}
+function horn(){if(!AC)return;[220,277,330,440].forEach((f,i)=>setTimeout(()=>blip(f,0.35,'square',0.15),i*140));}
+// AI: chase ball, aim at player goal (-x), grab pads loosely
+function aiControl(dt){const E=S.e;const toBall=S.ball.pos.clone().sub(E.pos);toBall.y=0;
+ const targetYaw=Math.atan2(-toBall.z,toBall.x);let dy=targetYaw-E.yaw;while(dy>Math.PI)dy-=2*Math.PI;while(dy<-Math.PI)dy+=2*Math.PI;
+ const steer=THREE.MathUtils.clamp(dy*2,-1,1);const throttle=0.9;const boosting=E.boost>25&&toBall.length()>14;
+ // AI jump if ball high & close
+ let j=false;if(S.ball.pos.y>3.4&&toBall.length()<7&&E.grounded&&Math.random()<0.03)j=true;
+ // slight aim offset toward goal
+ return {throttle,steer,boosting,jump:j};}
+const clockEl=document.getElementById('clock');
+const helpEl=document.getElementById('help');
+let last=performance.now();
+function loop(now){requestAnimationFrame(loop);let dt=Math.min((now-last)/1000,0.033);last=now;
+ // countdown
+  if(S.countdown>0){S.countdown-=dt;const c=document.getElementById('count');const n=Math.ceil(S.countdown-0.6);c.textContent=S.countdown<=0.6?'GO!':String(Math.max(n,1));
+   const ci=S.countdown<=0.6?0:Math.max(n,1);if(ci!==S.lastCount){S.lastCount=ci;blip(ci===0?880:440,ci===0?0.4:0.15,'square',0.14);}
+   if(S.countdown<=0){c.style.display='none';jumpQueued=false;if(!S.over)S.playing=true;if(!S.over)toast('Kickoff!');}syncMeshes(dt);updateCamera(dt);renderer.render(scene,camera);return;}
+ if(!S.playing||S.over){ // idle attract: slow orbit
+  if(document.getElementById('menu').style.display!=='none'){const t=now*0.0002;camera.position.set(Math.cos(t)*60,26,Math.sin(t)*60);camera.lookAt(0,2,0);renderer.render(scene,camera);}else{updateParts(dt);syncMeshes(dt);updateCamera(dt);renderer.render(scene,camera);}return;}
+ S.time-=dt;if(S.time<=0){S.time=0;endMatch();}
+ const m=Math.floor(S.time/60),s=Math.floor(S.time%60);clockEl.textContent=`${m}:${String(s).padStart(2,'0')}`;
+ // player input (or demo autopilot chasing the ball for captures/attract mode)
+ let th=(keys.KeyW||keys.ArrowUp?1:0)+(keys.KeyS||keys.ArrowDown?-0.7:0);
+ let st=(keys.KeyA||keys.ArrowLeft?1:0)+(keys.KeyD||keys.ArrowRight?-1:0);
+ let boosting=(keys.ShiftLeft||keys.ShiftRight)&&S.p.boost>0&&th!==0;
+ let pJump=jumpQueued;
+ if(DEMO){const tb=S.ball.pos.clone().sub(S.p.pos);tb.y=0;const ty=Math.atan2(-tb.z,tb.x);
+  let dyy=ty-S.p.yaw;while(dyy>Math.PI)dyy-=2*Math.PI;while(dyy<-Math.PI)dyy+=2*Math.PI;
+  st=THREE.MathUtils.clamp(dyy*2,-1,1);th=1;boosting=S.p.boost>20&&tb.length()>12;
+  pJump=S.ball.pos.y>3&&tb.length()<7&&S.p.grounded;}
+ const pb=driveCar(S.p,dt,th,st,boosting,pJump);
+ carBall(S.p,1);
+ // AI
+ const ai=aiControl(dt);const eb=driveCar(S.e,dt,ai.throttle,ai.steer,ai.boosting,ai.jump);carBall(S.e,0.95);
+ // enemy boost regen slow
+ S.e.boost=Math.min(100,S.e.boost+6*dt);
+ updateBall(dt);
+ // pads pickup
+ for(const p of pads){if(!p.active){p.t-=dt;if(p.t<=0){p.active=true;p.mesh.visible=true;}}
+  else{const dP=Math.hypot(S.p.pos.x-p.x,S.p.pos.z-p.z);const dE=Math.hypot(S.e.pos.x-p.x,S.e.pos.z-p.z);
+   if(dP<2.2){S.p.boost=Math.min(100,S.p.boost+(p.big?100:25));p.active=false;p.t=8;p.mesh.visible=false;burst(new THREE.Vector3(p.x,1,p.z),0xffc233,12,8,.5,.3);blip(880,0.12,'sine',0.18);toast('+BOOST');}
+   else if(dE<2.2){S.e.boost=Math.min(100,S.e.boost+(p.big?100:25));p.active=false;p.t=8;p.mesh.visible=false;}}}
+ jumpQueued=false;
+ // boost flame + trail
+ player.flame.material.opacity+=(((pb)?0.85:0)-player.flame.material.opacity)*Math.min(1,12*dt);
+ player.core.material.opacity=player.flame.material.opacity;
+ player.flame.scale.set(1+Math.random()*0.4,1+Math.random()*0.5,1);
+ enemy.flame.material.opacity+=(((eb)?0.85:0)-enemy.flame.material.opacity)*Math.min(1,12*dt);
+ enemy.core.material.opacity=enemy.flame.material.opacity;
+ if(pb){burst(player.g.position.clone().add(new THREE.Vector3(-Math.cos(S.p.yaw)*2.4,1,Math.sin(S.p.yaw)*2.4)),0xff9d00,2,4,.4,.3);}
+ if(eb){burst(enemy.g.position.clone(),0x66aaff,1,3,.3,.25);}
+ // engine hum + boost noise follow speed
+ if(AC&&engineGain){const spd=S.p.vel.length();const tgt=(S.playing&&!S.over)?0.035+spd*0.0016:0;
+  engineGain.gain.setTargetAtTime(tgt,AC.currentTime,0.08);engineOsc.frequency.setTargetAtTime(50+spd*3.2+(pb?40:0),AC.currentTime,0.06);
+  boostGain.gain.setTargetAtTime(pb?0.11:0,AC.currentTime,0.05);}
+ // supersonic trail + FOV kick at high speed
+ const pSpd=S.p.vel.length();
+ if(S.playing&&pSpd>26){burst(player.g.position.clone().add(new THREE.Vector3(-Math.cos(S.p.yaw)*2.6,1.1,Math.sin(S.p.yaw)*2.6)),0xbfe6ff,1,3,.35,.28);}
+ const wantFov=(pb||pSpd>27)?70:62;
+ if(Math.abs(camera.fov-wantFov)>0.05){camera.fov+=(wantFov-camera.fov)*Math.min(1,4*dt);camera.updateProjectionMatrix();}
+ // goal light pulse decay
+ if(S.goalPulse>0){S.goalPulse=Math.max(0,S.goalPulse-dt*0.7);for(const gl of goalLights)gl.intensity=350+S.goalPulse*1400;}
+ updateParts(dt);syncMeshes(dt);updateCamera(dt);
+ // HUD
+ document.getElementById('boostVal').textContent=Math.round(S.p.boost);
+ document.getElementById('boostFill').style.width=S.p.boost+'%';
+ document.getElementById('speed').textContent=`${Math.round(S.p.vel.length()*4)} mph • R restart • Space jump • Shift boost`;
+ helpEl.style.opacity=(S.playing&&!S.over)?0:1;
+ renderer.render(scene,camera);
+}
+const camPos=new THREE.Vector3(-30,12,20);
+function updateCamera(dt){
+ const yaw=S.p.yaw;const back=new THREE.Vector3(-Math.cos(yaw),0,Math.sin(yaw));
+ let desired,look;
+ if(S.ballcam){desired=S.p.pos.clone().addScaledVector(back,10).add(new THREE.Vector3(0,5,0));
+  look=S.ball.pos.clone().lerp(S.p.pos,0.35);
+  // clamp look elevation so the car never leaves the frame (RL-style pitch limit)
+  const dx=look.x-desired.x,dy=look.y-desired.y,dz=look.z-desired.z;
+  const horiz=Math.hypot(dx,dz),maxDy=Math.tan(0.5)*horiz;
+  if(dy>maxDy)look.y=desired.y+maxDy;}
+ else{desired=S.p.pos.clone().addScaledVector(back,10.5).add(new THREE.Vector3(0,4.2,0));look=S.p.pos.clone().add(new THREE.Vector3(Math.cos(yaw)*10,2,-Math.sin(yaw)*10));}
+ // keep camera inside arena & above ground
+ desired.x=THREE.MathUtils.clamp(desired.x,-LEN/2-6,LEN/2+6);desired.z=THREE.MathUtils.clamp(desired.z,-W/2-8,W/2+8);desired.y=Math.max(desired.y,2.2);
+ camPos.lerp(desired,1-Math.pow(0.0001,dt));camera.position.copy(camPos);camera.lookAt(look);
+}
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+resetKickoff();requestAnimationFrame(loop);
+// ?autostart=1 skips the menu for automated screenshots/tests
+if(new URLSearchParams(location.search).has('autostart')){document.getElementById('menu').style.display='none';restart(false);}
+</script>
+</body>
+</html>
