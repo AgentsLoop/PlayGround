@@ -1,0 +1,30 @@
+# Lantern Drift: Rooftop Courier
+
+## Objective
+
+Deliver a polished small browser game for casual players: a one-screen rooftop courier game in which the player guides a glowing paper lantern across shifting rooftops, collects signal sparks, avoids sweeping searchlights, and reaches the safehouse. Make it a real playable web artifact with responsive controls, readable HUD, restart/recovery behavior, and a complete win/lose loop.
+
+## Quality bar
+
+- Treat the visual language of *Alto's Odyssey* and *Mini Metro* as reference targets for calm silhouettes, restrained color, clear spatial rhythm, and purposeful motion; preserve a distinct original identity rather than copying assets.
+- Research authoritative or high-signal screenshots, footage, interface views, and browser-game references before coding. Record at least six URLs and explain the visual or interaction anchor taken from each.
+- Inspect the running game directly with browser tools and compare fresh captures side by side or with blind A/B review against the selected references.
+- After each visual attempt, use a fresh-context critic who writes no code and acts as a brutal AAA art director. Require several viewpoints and zoom levels, scores from 0 to 10 for agreed design and aesthetics criteria, and a ranked defect list. Scores above 8.5 are AAA quality, 7 is good indie quality, and 5 is programmer art. Pass only at 28.5 or higher with zero blocking errors; otherwise send the piece back for another attempt.
+
+## Execution
+
+- Act as the CTO of the game studio and orchestrator for continuous multi-day work. Own the product and technical vision, roadmap, delegation, quality, risks, decisions, and delivery.
+- Choose the route and divide the project into independently judgeable pieces such as movement, rooftop generation, hazards, lantern/spark feedback, HUD, audio or motion polish, and delivery.
+- Give every important piece a builder and a fresh-context critic or verifier. Make the verifier inspect the actual artifact, identify the largest remaining gap, and send it back for iteration.
+- Continue delegating, integrating, implementing, verifying, and improving until the complete requested outcome meets the acceptance bar. Treat prototypes, demos, and smoke tests as intermediate milestones.
+
+## Verification
+
+- Verify responsive keyboard and touch or pointer controls, collision and hazard behavior, scoring, win and loss states, restart flow, accessibility, loading and error recovery, and production delivery.
+- Fix the largest remaining gap and repeat the build/verify/improve loop until the acceptance bar is met or an explicit blocker requires the user.
+- Do not accept a visual piece until its critic records at least 28.5 total points across the agreed criteria and zero blocking errors.
+- Record concrete evidence for behavior, visual quality, and delivery, including fresh screenshots or recordings and the commands or URLs used.
+
+## Progress
+
+Maintain a canonical resumable live progress page with research links, references, decisions, completed work, evidence, blockers, current gaps, and the next exact action so another agent can continue without losing context.

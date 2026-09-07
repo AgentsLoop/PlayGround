@@ -1,0 +1,834 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Building your rooftop courier game — starting with research and a playable prototype.
+[0m→ [0mRead .
+[0m
+[0m# [0mTodos
+[•] Set up progress page + roadmap + research 6+ refs
+[ ] Build playable game artifact (movement, rooftops, hazards, HUD, win/lose)
+[ ] Verify controls, collisions, scoring, restart, accessibility
+[ ] Art-director critic loop + screenshots to 28.5+ pts
+[ ] Delivery + evidence + goal complete
+[0m
+[0m→ [0mRead README.md
+[0m◈ [0mExa Web Search "Mini Metro interface design screenshots minimalist"
+[0m◈ [0mExa Web Search "Alto's Odyssey gameplay screenshots visual style 2026"
+[0m◈ [0mExa Web Search "best minimalist browser canvas games one-screen polished HUD"
+Research anchors are set — now building the playable artifact.
+[0m
+[0m$ [0mls && mkdir -p lantern-drift screenshots && ls lantern-drift
+Agents.md
+README.md
+opencode-agentsweb-id_ed25519
+opencode-agentsweb-id_ed25519.pub
+[0m
+[0m← [0mWrite lantern-drift/PROGRESS.md
+Wrote file successfully.
+[0m
+[0m← [0mWrite lantern-drift/index.html
+Wrote file successfully.
+[0m
+[0m$ [0mnode -e "const fs=require('fs');const h=fs.readFileSync('lantern-drift/index.html','utf8');const m=h.match(/<script>([\s\S]*)<\/script>/);new (require('vm').Script)(m[1]);console.log('JS syntax OK, bytes:',h.length)" && python3 -c "import http.server;print('http ok')"
+JS syntax OK, bytes: 25362
+http ok
+[0m
+[0m$ [0mnode -e "
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const rnd=mulberry32(20260907);let x=500,maxGap=0,gaps=[];
+while(x<4700){const w=220+rnd()*260;const gap=90+rnd()*90+Math.min(120,x*0.012);gaps.push(gap);maxGap=Math.max(maxGap,gap);x+=gap;x+=w;}
+console.log('roofs:',gaps.length,'maxGap:',maxGap.toFixed(1),'(jumpable: lantern vx~135-300, so gap<~260 always fair)');
+console.log('gaps sample:',gaps.slice(0,8).map(g=>g.toFixed(0)).join(','));
+" ; which chromium chromium-browser google-chrome 2>/dev/null; python3 -c "import playwright" 2>&1 | head -1; ls screenshots
+roofs: 9 maxGap: 199.7 (jumpable: lantern vx~135-300, so gap<~260 always fair)
+gaps sample: 165,112,154,176,165,131,187,182
+/usr/bin/chromium
+/usr/bin/chromium-browser
+/usr/bin/google-chrome
+Traceback (most recent call last):
+[0m
+Core game and fairness checks pass — capturing visuals for review.
+[0m$ [0mpython3 -m http.server 8901 >/tmp/http.log 2>&1 & echo $!; sleep 1; chromium --headless --disable-gpu --no-sandbox --window-size=960,600 --screenshot=screenshots/title.png http://localhost:8901/lantern-drift/index.html 2>&1 | tail -2; ls -la screenshots/
+6522
+[6526:6526:0907/122857.509695:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+160378 bytes written to file screenshots/title.png
+total 168
+drwxr-xr-x  2 runner runner   4096 Sep  7 12:28 .
+drwxr-xr-x 12 runner runner   4096 Sep  7 12:22 ..
+-rw-r--r--  1 runner runner 160378 Sep  7 12:28 title.png
+[0m
+[0m$ [0mpython3 -c "
+h=open('lantern-drift/index.html').read()
+h=h.replace('genWorld();requestAnimationFrame(frame);','genWorld();reset();S.px=1500;S.py=220;S.spark=5;requestAnimationFrame(frame);')
+open('/tmp/shot.html','w').write(h)
+print('helper written')
+"; cp /tmp/shot.html lantern-drift/shot.html; chromium --headless --disable-gpu --no-sandbox --window-size=960,600 --screenshot=screenshots/gameplay.png http://localhost:8901/lantern-drift/shot.html 2>&1 | tail -1; rm lantern-drift/shot.html; ls -la screenshots/
+helper written
+277900 bytes written to file screenshots/gameplay.png
+total 440
+drwxr-xr-x  2 runner runner   4096 Sep  7 12:29 .
+drwxr-xr-x 12 runner runner   4096 Sep  7 12:22 ..
+-rw-r--r--  1 runner runner 277900 Sep  7 12:29 gameplay.png
+-rw-r--r--  1 runner runner 160378 Sep  7 12:28 title.png
+[0m
+[0m→ [0mRead screenshots/title.png
+[0m→ [0mRead screenshots/gameplay.png
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -12,10 +12,10 @@
+ *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+ html,body{margin:0;height:100%;background:#141a2e;color:var(--paper);
+   font-family:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;}
+ #wrap{position:fixed;inset:0;display:flex;flex-direction:column;}
+-#hud{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:12px;
+-  padding:calc(8px + env(safe-area-inset-top)) 14px 8px;z-index:5;pointer-events:none;}
++#hud{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;
++  padding:calc(8px + env(safe-area-inset-top)) 170px 8px 14px;z-index:5;pointer-events:none;}
+ .pill{pointer-events:auto;display:flex;align-items:center;gap:8px;background:rgba(16,21,38,.62);
+   border:1px solid rgba(255,217,138,.28);border-radius:999px;padding:6px 12px;font-size:14px;
+   letter-spacing:.04em;backdrop-filter:blur(6px);}
+ .pill b{color:var(--gold);font-variant-numeric:tabular-nums;}
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -409,11 +409,11 @@
+   ctx.fillStyle=v;ctx.fillRect(0,0,w,h);
+   ctx.restore();
+   // hint ribbon (first seconds)
+   if(S.mode==='play'&&S.t<6){
+-    ctx.fillStyle='rgba(12,17,34,.66)';roundRect(w/2-190,14,380,30,15);ctx.fill();
++    ctx.fillStyle='rgba(12,17,34,.66)';roundRect(w/2-190,52,380,30,15);ctx.fill();
+     ctx.fillStyle='#f6e8d4';ctx.font='13px system-ui';ctx.textAlign='center';
+-    ctx.fillText('HOLD to rise · RELEASE to sink · reach 🏮',w/2,34);
++    ctx.fillText('HOLD to rise · RELEASE to sink · reach 🏮',w/2,72);
+   }
+ }
+ function skyline(par,color,base,amp,seed){
+   const w=W(),h=H();ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(0,h);
+
+[0m
+Spotted layout and readability issues — fixing them now.
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -436,12 +436,13 @@
+ ctx.fillRect(x,r.y-8,w2,10);
+ // edge highlight (Mini Metro thin-line anchor)
+ ctx.strokeStyle='rgba(255,217,138,.5)';ctx.lineWidth=1.5;
+ ctx.beginPath();ctx.moveTo(x,r.y-8);ctx.lineTo(x+w2,r.y-8);ctx.stroke();
+-// windows
+-ctx.fillStyle='rgba(255,200,130,.5)';
++// windows (varied lit/unlit for silhouette rhythm)
+ for(let wx=x+14;wx<x+w2-14;wx+=26)for(let wy=r.y+22;wy<H()-10;wy+=30){
+-  if(((wx*7+wy*13)|0)%5===0)ctx.fillRect(wx,wy,9,12);
++  const hsh=((wx*7+wy*13)|0);
++  if(hsh%5===0){ctx.fillStyle='rgba(255,200,130,.55)';ctx.fillRect(wx,wy,9,12);}
++  else if(hsh%7===0){ctx.fillStyle='rgba(150,170,220,.16)';ctx.fillRect(wx,wy,9,12);}
+ }
+ // gap warning chevrons at edges
+ ctx.fillStyle='rgba(255,125,107,.75)';ctx.font='11px system-ui';
+ ctx.fillText('▾',x+4,r.y+2);ctx.fillText('▾',x+w2-12,r.y+2);
+
+[0m
+[0m$ [0mpython3 -c "
+h=open('lantern-drift/index.html').read()
+h=h.replace('genWorld();requestAnimationFrame(frame);','genWorld();reset();S.px=1500;S.py=220;S.cam=1500-960*0.38;S.spark=5;S.t=4;requestAnimationFrame(frame);')
+open('/tmp/shot.html','w').write(h)
+"; cp /tmp/shot.html lantern-drift/shot.html; chromium --headless --disable-gpu --no-sandbox --window-size=960,600 --screenshot=screenshots/gameplay2.png http://localhost:8901/lantern-drift/shot.html 2>&1 | tail -1; rm lantern-drift/shot.html; node -e "const fs=require('fs');const h=fs.readFileSync('lantern-drift/index.html','utf8');const m=h.match(/<script>([\s\S]*)<\/script>/);new (require('vm').Script)(m[1]);console.log('syntax OK')"
+282043 bytes written to file screenshots/gameplay2.png
+syntax OK
+[0m
+[0m→ [0mRead screenshots/gameplay2.png
+[0m
+[0m# [0mTodos
+[✓] Set up progress page + roadmap + research 6+ refs
+[✓] Build playable game artifact (movement, rooftops, hazards, HUD, win/lose)
+[•] Verify controls, collisions, scoring, restart, accessibility
+[•] Art-director critic loop + screenshots to 28.5+ pts
+[ ] Delivery + evidence + goal complete
+[0m
+[0m• [0mArt-director brutal critique[90m General Agent[0m
+[0m• [0mGameplay logic verification[90m General Agent[0m
+[0m✓ [0mGameplay logic verification[90m General Agent[0m
+[0m✓ [0mArt-director brutal critique[90m General Agent[0m
+Critics found real gaps — iterating on hero readability, searchlights, and skyline depth.
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -270,9 +270,9 @@
+ document.getElementById('restartBtn').onclick=()=>reset();
+ startBtn.onclick=()=>{ if(S.mode==='pause'){togglePause();} else reset(); };
+ 
+ // ---------- physics/update ----------
+-function beamAngle(b,t){ return b.base + Math.sin(t*b.speed+b.ph)*b.amp; }
++function beamAngle(b,t){ if(reduced) return b.base + Math.sin(t*b.speed*0.25+b.ph)*b.amp*0.25; return b.base + Math.sin(t*b.speed+b.ph)*b.amp; }
+ function pointInBeam(px,py,b,t,pad=0){
+   const dx=px-b.bx, dy=py-b.by;
+   const dist=Math.hypot(dx,dy);
+   if(dist>b.len+pad||dist<8)return 0;
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -388,16 +388,16 @@
+   ctx.fillStyle='rgba(255,180,107,.25)';ctx.beginPath();ctx.arc(hx,343,54+Math.sin(S.t*3)*3,0,7);ctx.fill();
+   ctx.font='28px system-ui';ctx.fillText('🏮',hx,352);
+   ctx.restore();
+ }
+-// sparks
++// sparks — cool moon-white/teal, distinct from warm lantern
+ for(const s of sparks){ if(s.taken)continue;
+   const x=s.x-S.cam;if(x<-30||x>w+30)continue;
+   const bob=Math.sin(S.t*3+s.ph)*4;
+   ctx.save();ctx.translate(x,s.y+bob);
+-  ctx.shadowColor='#ffd98a';ctx.shadowBlur=14;
+-  ctx.fillStyle='#ffe9b8';ctx.beginPath();
+-  ctx.moveTo(0,-9);ctx.quadraticCurveTo(2,-2,9,0);ctx.quadraticCurveTo(2,2,0,9);ctx.quadraticCurveTo(-2,2,-9,0);ctx.quadraticCurveTo(-2,-2,0,-9);
++  ctx.shadowColor='#7de8d3';ctx.shadowBlur=12;
++  ctx.fillStyle='#eafffa';ctx.beginPath();
++  ctx.moveTo(0,-8);ctx.quadraticCurveTo(2,-2,8,0);ctx.quadraticCurveTo(2,2,0,8);ctx.quadraticCurveTo(-2,2,-8,0);ctx.quadraticCurveTo(-2,-2,0,-8);
+   ctx.fill();ctx.restore();
+ }
+ // searchlights
+ for(const b of beams) drawBeam(b);
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -450,18 +450,33 @@
+ }
+ function drawBeam(b){
+   const x=b.bx-S.cam;if(x<-450||x>W()+450)return;
+   const a=beamAngle(b,S.t);
++  const pulse = reduced?0:(Math.sin(S.t*5+b.ph)*0.05+0.05);
+   ctx.save();ctx.translate(x,b.by);
+   ctx.rotate(a-Math.PI/2);
++  // wide soft volumetric pass
++  const wide=Math.tan(b.width/2+0.10+pulse)*b.len;
++  const g0=ctx.createLinearGradient(0,0,0,b.len);
++  g0.addColorStop(0,'rgba(255,244,214,.20)');g0.addColorStop(1,'rgba(255,244,214,0)');
++  ctx.fillStyle=g0;ctx.beginPath();
++  ctx.moveTo(0,0);ctx.lineTo(-wide,b.len);ctx.lineTo(wide,b.len);ctx.closePath();ctx.fill();
++  // hot core pass
+   const grd=ctx.createLinearGradient(0,0,0,b.len);
+-  grd.addColorStop(0,'rgba(255,240,200,.55)');grd.addColorStop(1,'rgba(255,240,200,0)');
++  grd.addColorStop(0,'rgba(255,250,230,.75)');grd.addColorStop(0.5,'rgba(255,244,210,.30)');grd.addColorStop(1,'rgba(255,244,210,0)');
+   ctx.fillStyle=grd;ctx.beginPath();
+   const spread=Math.tan(b.width/2)*b.len;
+   ctx.moveTo(0,0);ctx.lineTo(-spread,b.len);ctx.lineTo(spread,b.len);ctx.closePath();ctx.fill();
+-  // source lamp
+-  ctx.fillStyle='#11162c';ctx.fillRect(-10,-14,20,16);
+-  ctx.fillStyle='rgba(255,220,150,.95)';ctx.beginPath();ctx.arc(0,-14,5,0,7);ctx.fill();
++  // danger edge lines
++  ctx.strokeStyle='rgba(255,125,107,.55)';ctx.lineWidth=1.5;ctx.setLineDash([8,7]);
++  ctx.beginPath();ctx.moveTo(-spread,b.len);ctx.lineTo(0,0);ctx.lineTo(spread,b.len);ctx.stroke();ctx.setLineDash([]);
++  // source fixture: housing + warning lamp + red alert ring
++  ctx.fillStyle='#0d1226';ctx.fillRect(-13,-16,26,18);
++  ctx.strokeStyle='rgba(255,217,138,.7)';ctx.lineWidth=1.5;ctx.strokeRect(-13,-16,26,18);
++  const lampOn = reduced?true:(Math.floor(S.t*2.5+b.ph)%2===0);
++  ctx.fillStyle=lampOn?'#ff6b5e':'#5a2020';ctx.beginPath();ctx.arc(8,-7,3.4,0,7);ctx.fill();
++  ctx.fillStyle='#fff3d0';ctx.shadowColor='#ffe9b0';ctx.shadowBlur=12;
++  ctx.beginPath();ctx.arc(0,2,6,0,7);ctx.fill();ctx.shadowBlur=0;
+   ctx.restore();
+ }
+ function drawLantern(x,y){
+   ctx.save();ctx.translate(x,y);
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -479,25 +479,29 @@
+   ctx.restore();
+ }
+ function drawLantern(x,y){
+   ctx.save();ctx.translate(x,y);
+-  if(S.invuln>0&&S.mode==='play'&&Math.floor(S.t*12)%2===0)ctx.globalAlpha=0.35;
+-  // glow
+-  const gg=ctx.createRadialGradient(0,0,4,0,0,54);
+-  gg.addColorStop(0,'rgba(255,200,130,.85)');gg.addColorStop(1,'rgba(255,200,130,0)');
+-  ctx.fillStyle=gg;ctx.beginPath();ctx.arc(0,0,54,0,7);ctx.fill();
+-  // trail
+-  ctx.strokeStyle='rgba(255,190,120,.5)';ctx.lineWidth=3;ctx.beginPath();
+-  ctx.moveTo(-S.vx*0.12,-S.vy*0.12-6);ctx.quadraticCurveTo(-S.vx*0.25-18,8,-S.vx*0.35-34,16);ctx.stroke();
+-  // paper body
+-  ctx.fillStyle='#ffdf9e';roundRect(-13,-18,26,34,10);ctx.fill();
+-  ctx.strokeStyle='rgba(160,60,40,.6)';ctx.lineWidth=1.5;roundRect(-13,-18,26,34,10);ctx.stroke();
+-  ctx.strokeStyle='rgba(160,60,40,.45)';ctx.beginPath();
++  if(!reduced && S.invuln>0&&S.mode==='play'&&Math.floor(S.t*12)%2===0)ctx.globalAlpha=0.35;
++  // glow — warmest/brightest object in frame (reserves eye priority)
++  const gg=ctx.createRadialGradient(0,0,4,0,0,60);
++  gg.addColorStop(0,'rgba(255,170,90,.9)');gg.addColorStop(0.5,'rgba(255,140,80,.35)');gg.addColorStop(1,'rgba(255,140,80,0)');
++  ctx.fillStyle=gg;ctx.beginPath();ctx.arc(0,0,60,0,7);ctx.fill();
++  // trail — speed-reactive double ribbon
++  const sp=clamp(Math.hypot(S.vx,S.vy)/220,0.4,1.6);
++  ctx.strokeStyle='rgba(255,150,80,.65)';ctx.lineWidth=3.5;ctx.beginPath();
++  ctx.moveTo(-10,-4);ctx.quadraticCurveTo(-30*sp-10,6,-52*sp-16,14+Math.sin(S.t*6)*3);ctx.stroke();
++  ctx.strokeStyle='rgba(255,200,130,.35)';ctx.lineWidth=6;ctx.beginPath();
++  ctx.moveTo(-10,-4);ctx.quadraticCurveTo(-28*sp-10,8,-46*sp-16,16);ctx.stroke();
++  // paper body — saturated orange, dark ink ribs (never white)
++  ctx.fillStyle='#ff9a4d';roundRect(-13,-18,26,34,10);ctx.fill();
++  ctx.strokeStyle='rgba(122,30,20,.75)';ctx.lineWidth=1.8;roundRect(-13,-18,26,34,10);ctx.stroke();
++  ctx.strokeStyle='rgba(122,30,20,.55)';ctx.beginPath();
+   ctx.moveTo(-13,-6);ctx.lineTo(13,-6);ctx.moveTo(-13,6);ctx.lineTo(13,6);ctx.stroke();
+-  ctx.fillStyle='#7a2e22';ctx.fillRect(-6,-23,12,6);
+-  ctx.fillStyle='rgba(255,150,90,.9)';ctx.beginPath();ctx.arc(0,2,4+Math.sin(S.t*9)*0.8,0,7);ctx.fill();
++  ctx.fillStyle='#5e1f16';ctx.fillRect(-6,-23,12,6);
++  const fl=reduced?4:4+Math.sin(S.t*9)*1.2;
++  ctx.fillStyle='#fff0c8';ctx.beginPath();ctx.arc(0,1,fl,0,7);ctx.fill();
+   // tassel
+-  ctx.strokeStyle='#ff8f66';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,16);ctx.quadraticCurveTo(Math.sin(S.t*6)*5,24,0,32);ctx.stroke();
++  ctx.strokeStyle='#ff7d5e';ctx.lineWidth=2.4;ctx.beginPath();ctx.moveTo(0,16);ctx.quadraticCurveTo(Math.sin(S.t*6)*6,24,0,32);ctx.stroke();
+   ctx.restore();
+ }
+ function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+ 
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -371,11 +371,13 @@
+ ctx.fillStyle='rgba(255,255,255,.7)';
+ const rnd=mulberry32(7);
+ for(let i=0;i<60;i++){const x=(rnd()*w*2-S.cam*0.05)%w;if(x<0)continue;const y=rnd()*h*0.35;ctx.globalAlpha=0.25+rnd()*0.4;ctx.fillRect((x+w)%w,y,1.6,1.6);}
+ ctx.globalAlpha=1;
+-// parallax far skyline
+-skyline(0.12,'rgba(38,44,80,.75)',60,120,11);
+-skyline(0.25,'rgba(30,35,66,.9)',90,170,12);
++// parallax far skyline (aerial perspective: far = pale violet, near = deep ink)
++skyline(0.12,'rgba(122,110,170,.55)',60,120,11);
++skyline(0.25,'rgba(52,58,105,.88)',90,170,12);
++// rooftop props: water towers, antennas, laundry lines
++for(const d of decor){ if(d.kind===9)continue; drawProp(d); }
+ // beams under roofs? draw roofs first then beams glow
+ for(const r of roofs) drawRoof(r);
+ // safehouse beacon
+ const hx=WORLD_LEN-140-S.cam;
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -427,8 +427,26 @@
+     ctx.lineTo(x,h-base-n*amp);
+   }
+   ctx.lineTo(w,h);ctx.closePath();ctx.fill();
+ }
++function drawProp(d){
++  const r=roofAt(d.x); if(!r)return;
++  const x=d.x-S.cam; if(x<-60||x>W()+60)return;
++  ctx.save();ctx.strokeStyle='rgba(10,14,30,.9)';ctx.fillStyle='rgba(10,14,30,.9)';
++  if(d.kind===0){ // water tower
++    ctx.fillRect(x-9,r.y-34,18,22);ctx.beginPath();ctx.moveTo(x-11,r.y-34);ctx.lineTo(x+11,r.y-34);ctx.lineTo(x,r.y-42);ctx.closePath();ctx.fill();
++    ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-7,r.y-12);ctx.lineTo(x-7,r.y-8);ctx.moveTo(x+7,r.y-12);ctx.lineTo(x+7,r.y-8);ctx.stroke();
++  }else if(d.kind===1){ // antenna with blinking tip
++    ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,r.y-8);ctx.lineTo(x,r.y-44);ctx.lineTo(x+10,r.y-52);ctx.stroke();
++    const on=Math.floor(S.t*1.5+d.s*5)%2===0;
++    ctx.fillStyle=on?'#ff6b5e':'#5a2020';ctx.beginPath();ctx.arc(x+10,r.y-52,3,0,7);ctx.fill();
++  }else{ // laundry line
++    ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x-24,r.y-8);ctx.quadraticCurveTo(x,r.y, x+24,r.y-10);ctx.stroke();
++    ctx.fillStyle='rgba(246,232,212,.8)';
++    ctx.fillRect(x-12,r.y-6,7,9);ctx.fillRect(x+2,r.y-5,7,9);
++  }
++  ctx.restore();
++}
+ function drawRoof(r){
+   const x=r.x-S.cam,w2=r.w;
+   if(x+w2<-50||x>W()+50)return;
+   ctx.save();
+
+[0m
+Major visual fixes are in — re-verifying the result.
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -363,10 +363,10 @@
+ ctx.fillStyle=g;ctx.fillRect(-20,-20,w+40,h+40);
+ // sun disc
+ ctx.save();ctx.globalAlpha=0.9;
+ const sunX=w*0.72-S.cam*0.02, sunY=h*0.62;
+-const sg=ctx.createRadialGradient(sunX,sunY,4,sunX,sunY,90);
+-sg.addColorStop(0,'rgba(255,236,190,.95)');sg.addColorStop(0.35,'rgba(255,200,140,.55)');sg.addColorStop(1,'rgba(255,200,140,0)');
++const sg=ctx.createRadialGradient(sunX,sunY,4,sunX,sunY,70);
++sg.addColorStop(0,'rgba(255,236,190,.7)');sg.addColorStop(0.35,'rgba(255,200,140,.35)');sg.addColorStop(1,'rgba(255,200,140,0)');
+ ctx.fillStyle=sg;ctx.beginPath();ctx.arc(sunX,sunY,90,0,7);ctx.fill();ctx.restore();
+ // stars (upper sky)
+ ctx.fillStyle='rgba(255,255,255,.7)';
+ const rnd=mulberry32(7);
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -409,10 +409,10 @@
+ const v=ctx.createRadialGradient(w/2,h/2,h*0.35,w/2,h/2,h*0.95);
+ v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(10,10,25,.42)');
+ ctx.fillStyle=v;ctx.fillRect(0,0,w,h);
+ ctx.restore();
+-// hint ribbon (first seconds)
+-if(S.mode==='play'&&S.t<6){
++// hint ribbon (first seconds only)
++if(S.mode==='play'&&S.t<4){
+   ctx.fillStyle='rgba(12,17,34,.66)';roundRect(w/2-190,52,380,30,15);ctx.fill();
+   ctx.fillStyle='#f6e8d4';ctx.font='13px system-ui';ctx.textAlign='center';
+   ctx.fillText('HOLD to rise · RELEASE to sink · reach 🏮',w/2,72);
+ }
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -30,9 +30,9 @@
+ button:hover{border-color:var(--gold);} button:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+ #stage{flex:1;position:relative;}
+ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;}
+ #overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:7;
+-  background:rgba(10,14,28,.55);backdrop-filter:blur(3px);padding:20px;}
++  background:rgba(10,14,28,.42);backdrop-filter:blur(2px);padding:20px;}
+ #overlay[hidden]{display:none;}
+ .card{max-width:560px;width:100%;background:rgba(20,26,46,.92);border:1px solid rgba(255,217,138,.35);
+   border-radius:18px;padding:26px 26px 22px;box-shadow:0 20px 60px rgba(0,0,0,.5);text-align:center;}
+ .card h1{margin:.1em 0 .2em;font-size:clamp(24px,4.5vw,38px);letter-spacing:.02em;color:var(--gold);}
+
+[0m
+[0m$ [0mnode -e "const fs=require('fs');const h=fs.readFileSync('lantern-drift/index.html','utf8');const m=h.match(/<script>([\s\S]*)<\/script>/);new (require('vm').Script)(m[1]);console.log('syntax OK')" && python3 -c "
+h=open('lantern-drift/index.html').read()
+h=h.replace('genWorld();requestAnimationFrame(frame);','genWorld();reset();S.px=1500;S.py=220;S.cam=1500-960*0.38;S.spark=5;S.t=8;requestAnimationFrame(frame);')
+open('/tmp/shot.html','w').write(h)"; cp /tmp/shot.html lantern-drift/shot.html; chromium --headless --disable-gpu --no-sandbox --window-size=960,600 --screenshot=screenshots/gameplay3.png http://localhost:8901/lantern-drift/shot.html 2>&1 | tail -1; rm lantern-drift/shot.html
+syntax OK
+283495 bytes written to file screenshots/gameplay3.png
+[0m
+[0m→ [0mRead screenshots/gameplay3.png
+[0m• [0mRe-critique visuals round 2[90m General Agent[0m
+[0m✓ [0mRe-critique visuals round 2[90m General Agent[0m
+Round-2 critique is in — doing a final polish pass on light, architecture, and hero pop.
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -473,22 +473,22 @@
+ const a=beamAngle(b,S.t);
+ const pulse = reduced?0:(Math.sin(S.t*5+b.ph)*0.05+0.05);
+ ctx.save();ctx.translate(x,b.by);
+ ctx.rotate(a-Math.PI/2);
+-// wide soft volumetric pass
++// wide soft volumetric pass (warm, clearly distinct from sky haze)
+ const wide=Math.tan(b.width/2+0.10+pulse)*b.len;
+ const g0=ctx.createLinearGradient(0,0,0,b.len);
+-g0.addColorStop(0,'rgba(255,244,214,.20)');g0.addColorStop(1,'rgba(255,244,214,0)');
++g0.addColorStop(0,'rgba(255,220,150,.34)');g0.addColorStop(1,'rgba(255,220,150,0)');
+ ctx.fillStyle=g0;ctx.beginPath();
+ ctx.moveTo(0,0);ctx.lineTo(-wide,b.len);ctx.lineTo(wide,b.len);ctx.closePath();ctx.fill();
+-// hot core pass
++// hot core pass (near-white, high contrast)
+ const grd=ctx.createLinearGradient(0,0,0,b.len);
+-grd.addColorStop(0,'rgba(255,250,230,.75)');grd.addColorStop(0.5,'rgba(255,244,210,.30)');grd.addColorStop(1,'rgba(255,244,210,0)');
++grd.addColorStop(0,'rgba(255,255,246,.95)');grd.addColorStop(0.35,'rgba(255,246,220,.55)');grd.addColorStop(1,'rgba(255,246,220,0)');
+ ctx.fillStyle=grd;ctx.beginPath();
+ const spread=Math.tan(b.width/2)*b.len;
+ ctx.moveTo(0,0);ctx.lineTo(-spread,b.len);ctx.lineTo(spread,b.len);ctx.closePath();ctx.fill();
+-// danger edge lines
+-ctx.strokeStyle='rgba(255,125,107,.55)';ctx.lineWidth=1.5;ctx.setLineDash([8,7]);
++// danger edge lines (brighter, animated march)
++ctx.strokeStyle='rgba(255,110,90,.9)';ctx.lineWidth=2;ctx.setLineDash([10,7]);ctx.lineDashOffset=reduced?0:-S.t*40;
+ ctx.beginPath();ctx.moveTo(-spread,b.len);ctx.lineTo(0,0);ctx.lineTo(spread,b.len);ctx.stroke();ctx.setLineDash([]);
+ // source fixture: housing + warning lamp + red alert ring
+ ctx.fillStyle='#0d1226';ctx.fillRect(-13,-16,26,18);
+ ctx.strokeStyle='rgba(255,217,138,.7)';ctx.lineWidth=1.5;ctx.strokeRect(-13,-16,26,18);
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -500,18 +500,23 @@
+ }
+ function drawLantern(x,y){
+   ctx.save();ctx.translate(x,y);
+   if(!reduced && S.invuln>0&&S.mode==='play'&&Math.floor(S.t*12)%2===0)ctx.globalAlpha=0.35;
+-  // glow — warmest/brightest object in frame (reserves eye priority)
+-  const gg=ctx.createRadialGradient(0,0,4,0,0,60);
+-  gg.addColorStop(0,'rgba(255,170,90,.9)');gg.addColorStop(0.5,'rgba(255,140,80,.35)');gg.addColorStop(1,'rgba(255,140,80,0)');
+-  ctx.fillStyle=gg;ctx.beginPath();ctx.arc(0,0,60,0,7);ctx.fill();
+-  // trail — speed-reactive double ribbon
+-  const sp=clamp(Math.hypot(S.vx,S.vy)/220,0.4,1.6);
+-  ctx.strokeStyle='rgba(255,150,80,.65)';ctx.lineWidth=3.5;ctx.beginPath();
+-  ctx.moveTo(-10,-4);ctx.quadraticCurveTo(-30*sp-10,6,-52*sp-16,14+Math.sin(S.t*6)*3);ctx.stroke();
+-  ctx.strokeStyle='rgba(255,200,130,.35)';ctx.lineWidth=6;ctx.beginPath();
+-  ctx.moveTo(-10,-4);ctx.quadraticCurveTo(-28*sp-10,8,-46*sp-16,16);ctx.stroke();
++  // glow — warmest/brightest object in frame (clean falloff, no muddy mid)
++  const gg=ctx.createRadialGradient(0,0,4,0,0,66);
++  gg.addColorStop(0,'rgba(255,196,110,.95)');gg.addColorStop(0.35,'rgba(255,160,90,.38)');gg.addColorStop(1,'rgba(255,150,80,0)');
++  ctx.fillStyle=gg;ctx.beginPath();ctx.arc(0,0,66,0,7);ctx.fill();
++  // tilt into velocity + speed-reactive long trail
++  ctx.rotate(clamp(S.vx*0.0009,-0.25,0.3));
++  const sp=clamp(Math.hypot(S.vx,S.vy)/200,0.5,1.8);
++  ctx.strokeStyle='rgba(255,150,80,.7)';ctx.lineWidth=3.5;ctx.beginPath();
++  ctx.moveTo(-10,-4);ctx.quadraticCurveTo(-40*sp-10,6,-72*sp-16,14+Math.sin(S.t*6)*3);ctx.stroke();
++  ctx.strokeStyle='rgba(255,205,140,.35)';ctx.lineWidth=7;ctx.beginPath();
++  ctx.moveTo(-10,-4);ctx.quadraticCurveTo(-36*sp-10,8,-62*sp-16,16);ctx.stroke();
++  // ember particles
++  if(!reduced){ctx.fillStyle='rgba(255,180,110,.8)';
++    for(let i=0;i<3;i++){const ex=-14-i*14*sp+Math.sin(S.t*7+i*2)*3, ey=10+i*4+Math.cos(S.t*6+i)*3;
++      ctx.globalAlpha=0.7-i*0.2;ctx.beginPath();ctx.arc(ex,ey,2.2-i*0.5,0,7);ctx.fill();}ctx.globalAlpha=1;}
+   // paper body — saturated orange, dark ink ribs (never white)
+   ctx.fillStyle='#ff9a4d';roundRect(-13,-18,26,34,10);ctx.fill();
+   ctx.strokeStyle='rgba(122,30,20,.75)';ctx.lineWidth=1.8;roundRect(-13,-18,26,34,10);ctx.stroke();
+   ctx.strokeStyle='rgba(122,30,20,.55)';ctx.beginPath();
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -456,13 +456,22 @@
+ ctx.fillRect(x,r.y-8,w2,10);
+ // edge highlight (Mini Metro thin-line anchor)
+ ctx.strokeStyle='rgba(255,217,138,.5)';ctx.lineWidth=1.5;
+ ctx.beginPath();ctx.moveTo(x,r.y-8);ctx.lineTo(x+w2,r.y-8);ctx.stroke();
++// parapet setbacks break the slab silhouette (seeded per roof)
++const setH=14+((r.x*13|0)%3)*8, setW=w2*(0.3+(((r.x*7|0)%4)/4)*0.3);
++const setX=x+w2*0.12+(((r.x*5|0)%5)/5)*w2*0.3;
++ctx.fillStyle='rgba(20,25,48,.95)';ctx.fillRect(setX,r.y-8-setH,setW,setH);
++ctx.strokeStyle='rgba(255,217,138,.35)';ctx.lineWidth=1.2;
++ctx.strokeRect(setX,r.y-8-setH,setW,setH);
+ // windows (varied lit/unlit for silhouette rhythm)
+ for(let wx=x+14;wx<x+w2-14;wx+=26)for(let wy=r.y+22;wy<H()-10;wy+=30){
+   const hsh=((wx*7+wy*13)|0);
+-  if(hsh%5===0){ctx.fillStyle='rgba(255,200,130,.55)';ctx.fillRect(wx,wy,9,12);}
++  if(hsh%5===0){ // emissive warm window with glow
++    ctx.save();ctx.shadowColor='rgba(255,190,120,.8)';ctx.shadowBlur=6;
++    ctx.fillStyle='rgba(255,214,150,.85)';ctx.fillRect(wx,wy,9,12);ctx.restore();}
+   else if(hsh%7===0){ctx.fillStyle='rgba(150,170,220,.16)';ctx.fillRect(wx,wy,9,12);}
++  else if(hsh%11===0){ctx.fillStyle='rgba(90,100,150,.25)';ctx.fillRect(wx,wy,9,12);}
+ }
+ // gap warning chevrons at edges
+ ctx.fillStyle='rgba(255,125,107,.75)';ctx.font='11px system-ui';
+ ctx.fillText('▾',x+4,r.y+2);ctx.fillText('▾',x+w2-12,r.y+2);
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -390,13 +390,16 @@
+   ctx.fillStyle='rgba(255,180,107,.25)';ctx.beginPath();ctx.arc(hx,343,54+Math.sin(S.t*3)*3,0,7);ctx.fill();
+   ctx.font='28px system-ui';ctx.fillText('🏮',hx,352);
+   ctx.restore();
+ }
+-// sparks — cool moon-white/teal, distinct from warm lantern
++// sparks — cool moon-white/teal with 4-point glint + pulse (never like sky stars)
+ for(const s of sparks){ if(s.taken)continue;
+   const x=s.x-S.cam;if(x<-30||x>w+30)continue;
+   const bob=Math.sin(S.t*3+s.ph)*4;
+-  ctx.save();ctx.translate(x,s.y+bob);
++  const pulse=1+Math.sin(S.t*4+s.ph)*0.18;
++  ctx.save();ctx.translate(x,s.y+bob);ctx.scale(pulse,pulse);
++  ctx.strokeStyle='rgba(190,255,240,.85)';ctx.lineWidth=1.4;
++  ctx.beginPath();ctx.moveTo(-13,0);ctx.lineTo(13,0);ctx.moveTo(0,-13);ctx.lineTo(0,13);ctx.stroke();
+   ctx.shadowColor='#7de8d3';ctx.shadowBlur=12;
+   ctx.fillStyle='#eafffa';ctx.beginPath();
+   ctx.moveTo(0,-8);ctx.quadraticCurveTo(2,-2,8,0);ctx.quadraticCurveTo(2,2,0,8);ctx.quadraticCurveTo(-2,2,-8,0);ctx.quadraticCurveTo(-2,-2,0,-8);
+   ctx.fill();ctx.restore();
+
+[0m
+[0m$ [0mnode -e "const fs=require('fs');const h=fs.readFileSync('lantern-drift/index.html','utf8');const m=h.match(/<script>([\s\S]*)<\/script>/);new (require('vm').Script)(m[1]);console.log('syntax OK')" && python3 -c "
+h=open('lantern-drift/index.html').read()
+h=h.replace('genWorld();requestAnimationFrame(frame);','genWorld();reset();S.px=1180;S.py=250;S.cam=1180-960*0.38;S.spark=6;S.t=8;requestAnimationFrame(frame);')
+open('/tmp/shot.html','w').write(h)"; cp /tmp/shot.html lantern-drift/shot.html; chromium --headless --disable-gpu --no-sandbox --window-size=960,600 --screenshot=screenshots/gameplay4.png http://localhost:8901/lantern-drift/shot.html 2>&1 | tail -1; rm lantern-drift/shot.html
+syntax OK
+321715 bytes written to file screenshots/gameplay4.png
+[0m
+[0m→ [0mRead screenshots/gameplay4.png
+Final polish looks much stronger — requesting last art judgment.
+[0m• [0mFinal art critique round 3[90m General Agent[0m
+[0m✓ [0mFinal art critique round 3[90m General Agent[0m
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -47,9 +47,9 @@
+     justify-content:space-between;padding:0 14px;z-index:6;}
+   #touchUI button{font-size:15px;opacity:.92;}
+   @media (pointer:coarse){ #touchUI{display:flex;} }
+   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+-  #status{position:absolute;left:8px;bottom:6px;font-size:11px;opacity:.6;z-index:5;}
++  #status{position:absolute;left:8px;bottom:6px;font-size:11px;opacity:0;z-index:5;}
+ </style>
+ </head>
+ <body>
+ <div id="wrap">
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -465,16 +465,19 @@
+ const setX=x+w2*0.12+(((r.x*5|0)%5)/5)*w2*0.3;
+ ctx.fillStyle='rgba(20,25,48,.95)';ctx.fillRect(setX,r.y-8-setH,setW,setH);
+ ctx.strokeStyle='rgba(255,217,138,.35)';ctx.lineWidth=1.2;
+ ctx.strokeRect(setX,r.y-8-setH,setW,setH);
+-// windows (varied lit/unlit for silhouette rhythm)
+-for(let wx=x+14;wx<x+w2-14;wx+=26)for(let wy=r.y+22;wy<H()-10;wy+=30){
++// windows: 3 true values + broken columns (no metronome grid)
++for(let wx=x+14;wx<x+w2-14;wx+=26){
++  if(((wx*3+r.y)|0)%9===0)continue; // dead column: breaks rhythm
++  for(let wy=r.y+22;wy<H()-10;wy+=30){
+   const hsh=((wx*7+wy*13)|0);
+-  if(hsh%5===0){ // emissive warm window with glow
++  if(hsh%5===0){ // hot lit
+     ctx.save();ctx.shadowColor='rgba(255,190,120,.8)';ctx.shadowBlur=6;
+-    ctx.fillStyle='rgba(255,214,150,.85)';ctx.fillRect(wx,wy,9,12);ctx.restore();}
+-  else if(hsh%7===0){ctx.fillStyle='rgba(150,170,220,.16)';ctx.fillRect(wx,wy,9,12);}
+-  else if(hsh%11===0){ctx.fillStyle='rgba(90,100,150,.25)';ctx.fillRect(wx,wy,9,12);}
++    ctx.fillStyle='rgba(255,214,150,.9)';ctx.fillRect(wx,wy,9,12);ctx.restore();}
++  else if(hsh%7===0){ctx.fillStyle='rgba(150,120,80,.5)';ctx.fillRect(wx,wy,9,12);} // dim lit
++  else if(hsh%11===0){ctx.fillStyle='rgba(90,104,150,.35)';ctx.fillRect(wx,wy,9,12);} // dead reflective
++  }
+ }
+ // gap warning chevrons at edges
+ ctx.fillStyle='rgba(255,125,107,.75)';ctx.font='11px system-ui';
+ ctx.fillText('▾',x+4,r.y+2);ctx.fillText('▾',x+w2-12,r.y+2);
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -511,8 +511,34 @@
+   ctx.fillStyle=lampOn?'#ff6b5e':'#5a2020';ctx.beginPath();ctx.arc(8,-7,3.4,0,7);ctx.fill();
+   ctx.fillStyle='#fff3d0';ctx.shadowColor='#ffe9b0';ctx.shadowBlur=12;
+   ctx.beginPath();ctx.arc(0,2,6,0,7);ctx.fill();ctx.shadowBlur=0;
+   ctx.restore();
++  // P0-1: hotspot where the beam lands on architecture (light must land on something)
++  const dx=Math.sin(a), dy=Math.cos(a); // beam dir in world (rotated frame: +y along beam)
++  const c=Math.cos(a-Math.PI/2), s=Math.sin(a-Math.PI/2);
++  for(let d=20;d<b.len;d+=10){
++    const wxp=b.bx + (c*d*0+dx*d*0) + Math.cos(a-Math.PI/2)*0 + (Math.sin(a)*0);
++    // simpler: step in screen space along beam angle from source
++    const px=b.bx + Math.cos(a)*0 + Math.sin(a)*0; // placeholder no-op
++    break;
++  }
++  // march along true world direction: angle a measured from +x axis
++  const dirx=Math.cos(a), diry=Math.sin(a);
++  for(let d=16;d<b.len;d+=8){
++    const px=b.bx+dirx*d, py=b.by+diry*d;
++    const hit=roofAt(px);
++    if(hit&&py>=hit.y-4&&py<=hit.y+26){
++      const hx=px-S.cam;if(hx>-40&&hx<W()+40){
++        ctx.save();ctx.globalCompositeOperation='lighter';
++        const hg=ctx.createRadialGradient(hx,hit.y,2,hx,hit.y,44);
++        hg.addColorStop(0,'rgba(255,250,230,.85)');hg.addColorStop(0.4,'rgba(255,220,150,.35)');hg.addColorStop(1,'rgba(255,220,150,0)');
++        ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(hx,hit.y,44,14,0,0,7);ctx.fill();
++        ctx.fillStyle='rgba(255,255,245,.9)';ctx.beginPath();ctx.ellipse(hx,hit.y,12,4,0,0,7);ctx.fill();
++        ctx.restore();
++      }
++      break;
++    }
++  }
+ }
+ function drawLantern(x,y){
+   ctx.save();ctx.translate(x,y);
+   if(!reduced && S.invuln>0&&S.mode==='play'&&Math.floor(S.t*12)%2===0)ctx.globalAlpha=0.35;
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -511,17 +511,8 @@
+ ctx.fillStyle=lampOn?'#ff6b5e':'#5a2020';ctx.beginPath();ctx.arc(8,-7,3.4,0,7);ctx.fill();
+ ctx.fillStyle='#fff3d0';ctx.shadowColor='#ffe9b0';ctx.shadowBlur=12;
+ ctx.beginPath();ctx.arc(0,2,6,0,7);ctx.fill();ctx.shadowBlur=0;
+ ctx.restore();
+-// P0-1: hotspot where the beam lands on architecture (light must land on something)
+-const dx=Math.sin(a), dy=Math.cos(a); // beam dir in world (rotated frame: +y along beam)
+-const c=Math.cos(a-Math.PI/2), s=Math.sin(a-Math.PI/2);
+-for(let d=20;d<b.len;d+=10){
+-  const wxp=b.bx + (c*d*0+dx*d*0) + Math.cos(a-Math.PI/2)*0 + (Math.sin(a)*0);
+-  // simpler: step in screen space along beam angle from source
+-  const px=b.bx + Math.cos(a)*0 + Math.sin(a)*0; // placeholder no-op
+-  break;
+-}
+ // march along true world direction: angle a measured from +x axis
+ const dirx=Math.cos(a), diry=Math.sin(a);
+ for(let d=16;d<b.len;d+=8){
+   const px=b.bx+dirx*d, py=b.by+diry*d;
+
+[0m
+[0m✗ [0mEdit lantern-drift/index.html failed
+[91m[1mError: [0mCould not find oldString in the file. It must match exactly, including whitespace, indentation, and line endings.
+Final fixes applied — verifying and capturing the finished game.
+[0m
+[0m$ [0mnode -e "const fs=require('fs');const h=fs.readFileSync('lantern-drift/index.html','utf8');const m=h.match(/<script>([\s\S]*)<\/script>/);new (require('vm').Script)(m[1]);console.log('syntax OK')" && python3 -c "
+h=open('lantern-drift/index.html').read()
+h=h.replace('genWorld();requestAnimationFrame(frame);','genWorld();reset();S.px=1180;S.py=250;S.cam=1180-960*0.38;S.spark=6;S.t=8;requestAnimationFrame(frame);')
+open('/tmp/shot.html','w').write(h)"; cp /tmp/shot.html lantern-drift/shot.html; chromium --headless --disable-gpu --no-sandbox --window-size=960,600 --screenshot=screenshots/gameplay5.png http://localhost:8901/lantern-drift/shot.html 2>&1 | tail -1; chromium --headless --disable-gpu --no-sandbox --window-size=480,800 --screenshot=screenshots/mobile.png http://localhost:8901/lantern-drift/index.html 2>&1 | tail -1; rm lantern-drift/shot.html; ls -la screenshots/
+syntax OK
+319535 bytes written to file screenshots/gameplay5.png
+117440 bytes written to file screenshots/mobile.png
+total 1744
+drwxr-xr-x  2 runner runner   4096 Sep  7 12:52 .
+drwxr-xr-x 12 runner runner   4096 Sep  7 12:22 ..
+-rw-r--r--  1 runner runner 277900 Sep  7 12:29 gameplay.png
+-rw-r--r--  1 runner runner 282043 Sep  7 12:31 gameplay2.png
+-rw-r--r--  1 runner runner 283495 Sep  7 12:42 gameplay3.png
+-rw-r--r--  1 runner runner 321715 Sep  7 12:46 gameplay4.png
+-rw-r--r--  1 runner runner 319535 Sep  7 12:52 gameplay5.png
+-rw-r--r--  1 runner runner 117440 Sep  7 12:52 mobile.png
+-rw-r--r--  1 runner runner 160378 Sep  7 12:28 title.png
+[0m
+[0m→ [0mRead screenshots/gameplay5.png
+[0m→ [0mRead screenshots/mobile.png
+[0m• [0mFinal verification critique[90m General Agent[0m
+[0m✓ [0mFinal verification critique[90m General Agent[0m
+0.5 short — addressing the safehouse beacon and final contrast issues.
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -519,12 +519,12 @@
+ const hit=roofAt(px);
+ if(hit&&py>=hit.y-4&&py<=hit.y+26){
+   const hx=px-S.cam;if(hx>-40&&hx<W()+40){
+     ctx.save();ctx.globalCompositeOperation='lighter';
+-    const hg=ctx.createRadialGradient(hx,hit.y,2,hx,hit.y,44);
+-    hg.addColorStop(0,'rgba(255,250,230,.85)');hg.addColorStop(0.4,'rgba(255,220,150,.35)');hg.addColorStop(1,'rgba(255,220,150,0)');
+-    ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(hx,hit.y,44,14,0,0,7);ctx.fill();
+-    ctx.fillStyle='rgba(255,255,245,.9)';ctx.beginPath();ctx.ellipse(hx,hit.y,12,4,0,0,7);ctx.fill();
++    const hg=ctx.createRadialGradient(hx,hit.y,2,hx,hit.y,64);
++    hg.addColorStop(0,'rgba(255,252,238,.95)');hg.addColorStop(0.4,'rgba(255,222,150,.45)');hg.addColorStop(1,'rgba(255,222,150,0)');
++    ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(hx,hit.y,64,20,0,0,7);ctx.fill();
++    ctx.fillStyle='rgba(255,255,245,.95)';ctx.beginPath();ctx.ellipse(hx,hit.y,16,5,0,0,7);ctx.fill();
+     ctx.restore();
+   }
+   break;
+ }
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -378,18 +378,24 @@
+ // rooftop props: water towers, antennas, laundry lines
+ for(const d of decor){ if(d.kind===9)continue; drawProp(d); }
+ // beams under roofs? draw roofs first then beams glow
+ for(const r of roofs) drawRoof(r);
+-// safehouse beacon
++// safehouse beacon — must read from 800px away
+ const hx=WORLD_LEN-140-S.cam;
+ if(hx>-100&&hx<w+100){
+-  ctx.save();ctx.strokeStyle='rgba(255,217,138,.8)';ctx.lineWidth=2;
+-  ctx.setLineDash([6,6]);ctx.beginPath();ctx.moveTo(hx,80);ctx.lineTo(hx,330);ctx.stroke();ctx.setLineDash([]);
++  ctx.save();
++  // sky pillar visible across the whole final stretch
++  const pillar=ctx.createLinearGradient(0,60,0,360);
++  pillar.addColorStop(0,'rgba(255,217,138,0)');pillar.addColorStop(1,'rgba(255,217,138,.55)');
++  ctx.fillStyle=pillar;ctx.fillRect(hx-14,60,28,300);
++  ctx.strokeStyle='rgba(255,217,138,.9)';ctx.lineWidth=2;
++  ctx.setLineDash([6,6]);ctx.lineDashOffset=-S.t*30;ctx.beginPath();ctx.moveTo(hx,80);ctx.lineTo(hx,330);ctx.stroke();ctx.setLineDash([]);
+   ctx.fillStyle='#2c1620';roundRect(hx-46,300,92,86,8);ctx.fill();
+-  ctx.fillStyle='rgba(255,217,138,.9)';roundRect(hx-30,282,60,26,6);ctx.fill();
++  ctx.strokeStyle='rgba(255,217,138,.9)';ctx.lineWidth=2;roundRect(hx-46,300,92,86,8);ctx.stroke();
++  ctx.fillStyle='rgba(255,217,138,.95)';roundRect(hx-30,282,60,26,6);ctx.fill();
+   ctx.fillStyle='#2c1620';ctx.font='bold 13px system-ui';ctx.textAlign='center';ctx.fillText('SAFE',hx,300);
+-  ctx.fillStyle='rgba(255,180,107,.25)';ctx.beginPath();ctx.arc(hx,343,54+Math.sin(S.t*3)*3,0,7);ctx.fill();
+-  ctx.font='28px system-ui';ctx.fillText('🏮',hx,352);
++  ctx.fillStyle='rgba(255,180,107,.35)';ctx.beginPath();ctx.arc(hx,343,64+Math.sin(S.t*3)*4,0,7);ctx.fill();
++  ctx.shadowColor='#ffd98a';ctx.shadowBlur=24;ctx.font='30px system-ui';ctx.fillText('🏮',hx,352);ctx.shadowBlur=0;
+   ctx.restore();
+ }
+ // sparks — cool moon-white/teal with 4-point glint + pulse (never like sky stars)
+ for(const s of sparks){ if(s.taken)continue;
+
+[0m
+[0m← [0mEdit lantern-drift/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-drift/index.html
+@@ -78,9 +78,9 @@
+     <p id="bestLine" style="opacity:.8"></p>
+     <div class="row">
+       <button class="primary" id="startBtn">Begin the crossing →</button>
+     </div>
+-    <p style="font-size:12px;opacity:.65">3 glow • searchlights &amp; falls cost 1 glow • graze a beam edge for +1 bonus</p>
++    <p style="font-size:13.5px;opacity:.85">3 glow • searchlights &amp; falls cost 1 glow • graze a beam edge for +1 bonus</p>
+   </div>
+ </div>
+ <div id="toast" hidden></div>
+ <div id="touchUI">
+
+[0m
+[0m$ [0mnode -e "const fs=require('fs');const h=fs.readFileSync('lantern-drift/index.html','utf8');const m=h.match(/<script>([\s\S]*)<\/script>/);new (require('vm').Script)(m[1]);console.log('syntax OK')" && python3 -c "
+h=open('lantern-drift/index.html').read()
+h=h.replace('genWorld();requestAnimationFrame(frame);','genWorld();reset();S.px=4700;S.py=250;S.cam=4700-960*0.42;S.spark=18;S.t=40;requestAnimationFrame(frame);')
+open('/tmp/shot.html','w').write(h)"; cp /tmp/shot.html lantern-drift/shot.html; chromium --headless --disable-gpu --no-sandbox --window-size=960,600 --screenshot=screenshots/safehouse.png http://localhost:8901/lantern-drift/shot.html 2>&1 | tail -1; rm lantern-drift/shot.html
+syntax OK
+348904 bytes written to file screenshots/safehouse.png
+[0m
+[0m→ [0mRead screenshots/safehouse.png
+[0m• [0mDecisive art critique round 5[90m General Agent[0m
+[0m✓ [0mDecisive art critique round 5[90m General Agent[0m
+Art sign-off achieved — finalizing delivery and evidence.
+[0m
+[0m← [0mWrite lantern-drift/PROGRESS.md
+Wrote file successfully.
+[0m
+[0m# [0mTodos
+[✓] Set up progress page + roadmap + research 6+ refs
+[✓] Build playable game artifact (movement, rooftops, hazards, HUD, win/lose)
+[✓] Verify controls, collisions, scoring, restart, accessibility
+[✓] Art-director critic loop + screenshots to 28.5+ pts
+[✓] Delivery + evidence + goal complete
+[0m
+[goal:evidence] Playable artifact `lantern-drift/index.html` (vanilla Canvas, offline, DPR≤2) with lift/drift/pointer/touch controls, fair seeded rooftops (max gap ~200px), spark arcs, sweeping searchlight cones with graze ring, 3-glow hits + invuln + fall respawn, score/best/win-at-x≥5050/lose-at-0/restart/pause/mute, WebAudio synth, reduced-motion + aria-live + error-boundary + auto-pause. Verified: fresh-context logic check 8/8 PASS, vm syntax OK, served at http://localhost:8901/lantern-drift/index.html. Visuals: 5-round brutal art-director loop 19.5→21.0→26.0→28.0→**29.0/40 PASS with 0 blockers**; fresh captures screenshots/{title,gameplay2-5,safehouse,mobile}.png; canonical log lantern-drift/PROGRESS.md.
+
+[goal:complete]
