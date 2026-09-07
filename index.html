@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WARZONE-OPS — Browser FPS (Original Fan-Inspired Prototype)</title>
 <meta name="description" content="Original browser first-person shooter inspired by battle-royale military shooters. All code and assets procedural/original.">
+<link rel="icon" href="data:,">
 <style>
 :root{
   --bg:#0b0e12; --panel:rgba(10,14,18,.78); --panel2:rgba(16,22,28,.88);
@@ -234,7 +235,7 @@ muzzle=new THREE.PointLight(0xffc36b,0,9);muzzle.position.set(0,0.05,-0.7);gunGr
 const flash=new THREE.Mesh(new THREE.ConeGeometry(0.09,0.3,8),new THREE.MeshBasicMaterial({color:0xffd27a,transparent:true,opacity:0}));flash.rotation.x=-Math.PI/2;flash.position.set(0,0.03,-0.75);flash.name='flash';gunGroup.add(flash);}
 gunGroup.position.set(0.28,-0.26,-0.55);camera.add(gunGroup);scene.add(camera);
 // ---------- Player controller ----------
-const P={pos:new THREE.Vector3(0,1.7,48),yaw:Math.PI,vx:0,vz:0,onGround:true,vy:0,crouch:false};
+const P={pos:new THREE.Vector3(10,1.7,48),yaw:0,vx:0,vz:0,onGround:true,vy:0,crouch:false};
 const keys={};
 addEventListener('keydown',e=>{keys[e.code]=true;
   if(e.code==='KeyR'){if(S.mode==='play')startReload();else if(S.mode==='end')restart();}
@@ -272,8 +273,9 @@ const ray=new THREE.Raycaster();
 function shoot(){if(S.reloading||S.mode!=='play'||S.dead)return;if(S.mag<=0){startReload();blip(200,.08,.15);return;}
   const now=performance.now()/1000;if(now-lastShot<60/L.rpm)return;lastShot=now;S.mag--;S.shots++;shot(loadoutKey);
   muzzle.intensity=6;const fl=gunGroup.getObjectByName('flash');fl.material.opacity=$('opt-flash').checked?0.15:0.9;setTimeout(()=>{muzzle.intensity=0;fl.material.opacity=0;},45);
-  gunGroup.position.z=-0.45;camera.rotation.x+=loadoutKey==='scout'?0.03:0.012; // recoil kick
-  ray.setFromCamera({x:(Math.random()-0.5)*(S.ads?L.adsSpread:L.spread)*40,y:(Math.random()-0.5)*(S.ads?L.adsSpread:L.spread)*40},camera);
+  gunGroup.position.z=-0.45;S.kick=(S.kick||0)+(loadoutKey==='scout'?0.035:0.014); // visual recoil kick (recovers)
+  const spreadNdc = S.ads ? L.adsSpread : L.spread;
+  ray.setFromCamera({x:(Math.random()-0.5)*2*spreadNdc,y:(Math.random()-0.5)*2*spreadNdc},camera);
   ray.far=220;let best=null,bestD=1e9,head=false;
   for(const e of enemies){if(!e.alive)continue;
     const h1=ray.intersectObject(e.g.children[1],false)[0];const h0=ray.intersectObject(e.g.children[0],false)[0];
@@ -354,7 +356,7 @@ function endGame(win){if(S.mode!=='play')return;S.mode='end';S.dead=!win;documen
   $('end-sub').textContent=win?`All 8 hostiles eliminated in ${fmt}. Dustline is yours.`:`You were eliminated with ${enemies.filter(e=>e.alive).length} hostiles remaining. Re-deploy and re-take Dustline.`;
   $('end-kills').textContent=S.kills;$('end-time').textContent=fmt;$('end-acc').textContent=(S.shots?Math.round(S.hits/S.shots*100):0)+'%';$('end-zone').textContent=zone.idx+1;
   $('screen-end').classList.remove('hidden');win?sWin():sLose();}
-function restart(){enemies.forEach(e=>enemyGroup.remove(e.g));enemies.length=0;P.pos.set(0,1.7,48);P.yaw=Math.PI;camera.rotation.set(0,0,0);spawnEnemies();applyLoadout();startMatch();}
+function restart(){enemies.forEach(e=>enemyGroup.remove(e.g));enemies.length=0;P.pos.set(10,1.7,48);P.yaw=0;camera.rotation.set(0,0,0);spawnEnemies();applyLoadout();startMatch();}
 // ---------- Main loop ----------
 spawnEnemies();applyLoadout();
 const clock=new THREE.Clock();let fpsA=0,fpsN=0,fpsT=0;
@@ -374,6 +376,7 @@ function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),0
     gunGroup.position.x=THREE.MathUtils.lerp(0.28,0.0,S.ads);gunGroup.position.y=THREE.MathUtils.lerp(-0.26,-0.185,S.ads);
     $('crosshair').classList.toggle('ads',S.ads>0.5);$('crosshair').style.opacity=S.ads>0.5?0.4:1;
     gunGroup.position.z+=((-0.55)-gunGroup.position.z)*Math.min(1,dt*12);
+    if(S.kick){const rec=S.kick*Math.min(1,dt*9);camera.rotation.x-=rec;S.kick-=rec;}
     camera.position.copy(P.pos);camera.rotation.order='YXZ';camera.rotation.y=P.yaw;
     // head-bob
     if(fx||sx){const t=performance.now()/1000;camera.position.y+=Math.sin(t*9)*0.035*(S.ads?0.2:1);}
@@ -419,7 +422,7 @@ addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updat
 $('opt-quality').addEventListener('change',e=>{renderer.shadowMap.enabled=e.target.checked;sun.castShadow=e.target.checked;});
 loop();
 // smoke-test hooks
-window.__game={S,enemies,P,startMatch,endGame,shoot,startReload,usePlate,useUAV,restart};
+window.__game={S,enemies,P,startMatch,endGame,shoot,startReload,usePlate,useUAV,restart,camera,ray,obstacles};
 </script>
 </body>
 </html>
