@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Lantern Drift: Rooftop Courier</title>
+<style>
+  :root{
+    --ink:#1a2036; --paper:#f6e8d4; --peach:#ffb46b; --rose:#ff7d6b;
+    --teal:#7de8d3; --gold:#ffd98a; --sky0:#2b3a67; --sky1:#7a5c9e; --sky2:#e8937c;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;background:#141a2e;color:var(--paper);
+    font-family:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;}
+  #wrap{position:fixed;inset:0;display:flex;flex-direction:column;}
+  #hud{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;
+    padding:calc(8px + env(safe-area-inset-top)) 170px 8px 14px;z-index:5;pointer-events:none;}
+  .pill{pointer-events:auto;display:flex;align-items:center;gap:8px;background:rgba(16,21,38,.62);
+    border:1px solid rgba(255,217,138,.28);border-radius:999px;padding:6px 12px;font-size:14px;
+    letter-spacing:.04em;backdrop-filter:blur(6px);}
+  .pill b{color:var(--gold);font-variant-numeric:tabular-nums;}
+  #rail{flex:1;height:26px;position:relative;pointer-events:none;}
+  #railLine{position:absolute;left:0;right:0;top:12px;height:2px;background:rgba(246,232,212,.35);border-radius:2px;}
+  #railDot{position:absolute;top:8px;width:10px;height:10px;border-radius:50%;background:var(--gold);
+    box-shadow:0 0 10px var(--gold);transform:translateX(-50%);}
+  #railHome{position:absolute;right:0;top:5px;font-size:14px;}
+  #btns{position:absolute;top:calc(8px + env(safe-area-inset-top));right:10px;display:flex;gap:8px;z-index:6;}
+  button{font:inherit;color:var(--paper);background:rgba(16,21,38,.7);border:1px solid rgba(255,217,138,.35);
+    border-radius:10px;padding:8px 12px;cursor:pointer;min-height:40px;}
+  button:hover{border-color:var(--gold);} button:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+  #stage{flex:1;position:relative;}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;}
+  #overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:7;
+    background:rgba(10,14,28,.42);backdrop-filter:blur(2px);padding:20px;}
+  #overlay[hidden]{display:none;}
+  .card{max-width:560px;width:100%;background:rgba(20,26,46,.92);border:1px solid rgba(255,217,138,.35);
+    border-radius:18px;padding:26px 26px 22px;box-shadow:0 20px 60px rgba(0,0,0,.5);text-align:center;}
+  .card h1{margin:.1em 0 .2em;font-size:clamp(24px,4.5vw,38px);letter-spacing:.02em;color:var(--gold);}
+  .card p{line-height:1.55;color:#e9dcc4;font-size:15px;margin:.5em 0;}
+  .card kbd{background:#0e1428;border:1px solid #4a5578;border-bottom-width:3px;border-radius:6px;padding:1px 7px;font-size:13px;}
+  .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+  .primary{background:linear-gradient(180deg,#ffc37a,#ff8f66);color:#2a1a12;border:none;font-weight:700;}
+  #toast{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);
+    background:rgba(16,21,38,.8);border:1px solid rgba(125,232,211,.4);padding:8px 16px;border-radius:999px;
+    font-size:14px;z-index:6;transition:opacity .4s;white-space:nowrap;}
+  #touchUI{position:absolute;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom));display:none;
+    justify-content:space-between;padding:0 14px;z-index:6;}
+  #touchUI button{font-size:15px;opacity:.92;}
+  @media (pointer:coarse){ #touchUI{display:flex;} }
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+  #status{position:absolute;left:8px;bottom:6px;font-size:11px;opacity:0;z-index:5;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="stage">
+    <canvas id="game" aria-label="Lantern Drift playable canvas"></canvas>
+    <div id="hud" aria-hidden="false">
+      <div class="pill" id="sparkPill">✦ <b id="sparks">0</b><span class="sr">sparks collected</span></div>
+      <div id="rail" aria-hidden="true"><div id="railLine"></div><div id="railDot"></div><div id="railHome">🏮</div></div>
+      <div class="pill" id="glowPill" role="status">🏮 <b id="glow">●●●</b></div>
+      <div class="pill">⏱ <b id="time">0:00</b></div>
+    </div>
+    <div id="btns">
+      <button id="muteBtn" aria-label="Mute audio">🔊</button>
+      <button id="pauseBtn" aria-label="Pause game">⏸</button>
+      <button id="restartBtn" aria-label="Restart game">↻</button>
+    </div>
+    <div id="overlay">
+      <div class="card" role="dialog" aria-modal="true" aria-labelledby="title">
+        <h1 id="title">🏮 Lantern Drift</h1>
+        <p id="desc"><b>Rooftop Courier.</b> Guide your paper lantern across the sleeping city.
+        Collect <b style="color:var(--gold)">signal sparks ✦</b>, slip through sweeping
+        <b>searchlights</b>, and reach the <b>safehouse 🏮</b> at the far rooftops.</p>
+        <p>Hold <kbd>Space</kbd>/<kbd>↑</kbd>/<kbd>W</kbd> or <b>press &amp; hold</b> to rise — release to sink.
+        Nudge with <kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd>. On touch, <b>drag toward where you want to go</b>.
+        <kbd>P</kbd> pause · <kbd>R</kbd> restart · <kbd>M</kbd> mute.</p>
+        <p id="bestLine" style="opacity:.8"></p>
+        <div class="row">
+          <button class="primary" id="startBtn">Begin the crossing →</button>
+        </div>
+        <p style="font-size:13.5px;opacity:.85">3 glow • searchlights &amp; falls cost 1 glow • graze a beam edge for +1 bonus</p>
+      </div>
+    </div>
+    <div id="toast" hidden></div>
+    <div id="touchUI">
+      <button id="leftBtn" aria-label="Drift left">◀</button>
+      <button id="liftBtn" aria-label="Hold to rise">▲ HOLD TO RISE ▲</button>
+      <button id="rightBtn" aria-label="Drift right">▶</button>
+    </div>
+    <div id="status" aria-live="polite"></div>
+  </div>
+</div>
+<script>
+"use strict";
+/* Lantern Drift: Rooftop Courier — single-file vanilla canvas game. */
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const titleEl = document.getElementById('title');
+const descEl = document.getElementById('desc');
+const startBtn = document.getElementById('startBtn');
+const toastEl = document.getElementById('toast');
+const statusEl = document.getElementById('status');
+const sparksEl = document.getElementById('sparks');
+const glowEl = document.getElementById('glow');
+const timeEl = document.getElementById('time');
+const railDot = document.getElementById('railDot');
+const bestLine = document.getElementById('bestLine');
+
+const W = () => canvas.clientWidth, H = () => canvas.clientHeight;
+let DPR = 1;
+function resize(){
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  canvas.width = Math.max(1, Math.round(W()*DPR));
+  canvas.height = Math.max(1, Math.round(H()*DPR));
+}
+window.addEventListener('resize', resize); resize();
+
+// ---------- utils ----------
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function clamp(v,a,b){return v<a?a:v>b?b:v;}
+function fmtTime(s){s=Math.floor(s);return Math.floor(s/60)+":"+String(s%60).padStart(2,'0');}
+function store(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function load(k){try{const v=localStorage.getItem(k);return v;}catch(e){return null;}}
+function toast(msg,ms=2200){toastEl.hidden=false;toastEl.textContent=msg;toastEl.style.opacity=1;
+  clearTimeout(toast._t);toast._t=setTimeout(()=>{toastEl.style.opacity=0;setTimeout(()=>toastEl.hidden=true,450);},ms);}
+
+// ---------- audio ----------
+let AC=null, muted = load('ld_muted')==='1', windGain=null;
+function audio(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}} 
+  if(AC&&AC.state==='suspended')AC.resume(); return AC; }
+function blip(freq,dur=0.12,type='sine',vol=0.18,slide=0){
+  if(muted)return; const ac=audio(); if(!ac)return;
+  const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(freq,ac.currentTime);
+  if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide),ac.currentTime+dur);
+  g.gain.setValueAtTime(vol,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+dur);
+  o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+dur+0.02);
+}
+function startWind(){ if(muted||windGain)return; const ac=audio(); if(!ac)return;
+  const buf=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*0.25;
+  const src=ac.createBufferSource();src.buffer=buf;src.loop=true;
+  const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=420;
+  windGain=ac.createGain();windGain.gain.value=0.05;src.connect(f).connect(windGain).connect(ac.destination);src.start();
+}
+function stopWind(){ if(windGain){try{windGain.gain.value=0;}catch(e){} windGain=null; } }
+
+// ---------- world gen (fair-play: reachable gaps) ----------
+const WORLD_LEN = 5200, GOAL_X = 5050;
+let roofs=[], sparks=[], beams=[], decor=[];
+function genWorld(){
+  const rnd = mulberry32(20260907);
+  roofs=[];sparks=[];beams=[];decor=[];
+  let x=0, y=340;
+  roofs.push({x:-200,w:700,y:360,h:400}); // launch roof
+  x=500;
+  while(x < WORLD_LEN-500){
+    const w = 220+rnd()*260;
+    const gap = 90+rnd()*90 + Math.min(120, x*0.012); // grows but capped: always jumpable
+    y = clamp(y + (rnd()-0.5)*130, 200, 430);
+    x += gap;
+    roofs.push({x,w,y,h:900});
+    // decor: vents, antennas, laundry lines
+    if(rnd()<0.7) decor.push({x:x+rnd()*w,y,kind:(rnd()*3)|0,s:rnd()});
+    // sparks arc over the gap approach + roof
+    const n = 3+((rnd()*3)|0);
+    for(let i=0;i<n;i++){
+      sparks.push({x:x+20+i*(w-40)/Math.max(1,n-1), y:y-70-40*Math.sin(i/(n-1)*Math.PI)-rnd()*20, taken:false, ph:rnd()*6});
+    }
+    // searchlight on ~55% of roofs after the tutorial zone
+    if(x>1100 && rnd()<0.62){
+      beams.push({bx:x+w*0.5, by:y, len:300+rnd()*90, width:0.16+rnd()*0.08,
+        base:(rnd()*Math.PI*2), speed:(0.5+rnd()*0.7)*(rnd()<0.5?-1:1), amp:0.7+rnd()*0.5, ph:rnd()*6});
+    }
+    x += w;
+  }
+  roofs.push({x:WORLD_LEN-300,w:800,y:350,h:900,home:true});
+  // moon + skyline decor
+  for(let i=0;i<70;i++) decor.push({x:rnd()*WORLD_LEN,y:20+rnd()*200,kind:9,s:rnd()});
+}
+function roofAt(x){
+  for(const r of roofs) if(x>=r.x&&x<=r.x+r.w) return r;
+  return null;
+}
+
+// ---------- state ----------
+const S = { mode:'title', px:120, py:250, vx:0, vy:0, glow:3, spark:0, graze:0,
+  t:0, cam:0, invuln:0, dead:0, won:false, shake:0, best:0, lift:false, left:false, right:false,
+  pointer:null, msgCd:0 };
+try{ S.best = parseInt(load('ld_best')||'0',10)||0; }catch(e){ S.best=0; }
+bestLine.textContent = S.best>0 ? ('Best delivery score: '+S.best) : 'No deliveries yet — the city waits.';
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function reset(){
+  genWorld();
+  Object.assign(S,{mode:'play',px:120,py:240,vx:0,vy:0,glow:3,spark:0,graze:0,t:0,cam:0,invuln:0,dead:0,won:false,shake:0});
+  overlay.hidden=true; statusEl.textContent='Crossing in progress.';
+  startWind(); toast('Deliver the light to the safehouse 🏮');
+}
+function score(){ return S.spark*50 + S.graze*15 + Math.max(0,Math.floor(300 - S.t*4)) + (S.won?500:0) + S.glow*100; }
+function endGame(win,reason){
+  if(S.mode!=='play')return;
+  S.mode = win?'win':'lose'; S.won=win;
+  const sc = score();
+  if(sc>S.best){S.best=sc;store('ld_best',String(sc));}
+  stopWind();
+  titleEl.textContent = win?'🏮 Delivered!':'🌊 The lantern dims…';
+  descEl.innerHTML = win
+    ? `Safehouse reached with <b>${S.spark} sparks</b> in <b>${fmtTime(S.t)}</b>. Score <b style="color:var(--gold)">${sc}</b> (best ${S.best}).<br>The city exhales. Couriers like you keep its small lights alive.`
+    : `${reason||'The night caught you.'} Score <b>${sc}</b> · best ${S.best}.<br>Press <kbd>R</kbd> or ↻ to try the crossing again.`;
+  startBtn.textContent = win?'Drift again →':'Try again →';
+  overlay.hidden=false; startBtn.focus();
+  statusEl.textContent = win?'Delivered.':'Lantern lost.';
+  blip(win?523:220, win?0.5:0.4, win?'triangle':'sawtooth', 0.2, win?523:-120);
+}
+function hurt(reason){
+  if(S.invuln>0||S.mode!=='play')return;
+  S.glow--; S.invuln=2; S.shake=reduced?0:10; S.vy=-260;
+  blip(140,0.3,'sawtooth',0.22,-60);
+  if(S.glow<=0){ endGame(false,reason); }
+  else { toast(reason+' — glow '+S.glow+'/3'); statusEl.textContent='Hit! Glow '+S.glow+' of 3.'; }
+}
+
+// ---------- input ----------
+const keys={};
+window.addEventListener('keydown',e=>{
+  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+  keys[e.code]=true;
+  if(e.code==='KeyR'){reset();}
+  if(e.code==='KeyM'){toggleMute();}
+  if(e.code==='KeyP'||e.code==='Escape'){togglePause();}
+  if(e.code==='Enter'&&S.mode!=='play'){reset();}
+  audio();
+});
+window.addEventListener('keyup',e=>{keys[e.code]=false;});
+function readKeys(){
+  S.lift = !!(keys.Space||keys.ArrowUp||keys.KeyW||touchLift);
+  S.left = !!(keys.ArrowLeft||keys.KeyA||touchLeft);
+  S.right = !!(keys.ArrowRight||keys.KeyD||touchRight);
+}
+let touchLift=false,touchLeft=false,touchRight=false;
+function bindHold(el,set){
+  const on=e=>{e.preventDefault();set(true);audio();startWind();};
+  const off=e=>{e.preventDefault();set(false);};
+  el.addEventListener('pointerdown',on);el.addEventListener('pointerup',off);
+  el.addEventListener('pointerleave',off);el.addEventListener('pointercancel',off);
+}
+bindHold(document.getElementById('liftBtn'),v=>touchLift=v);
+bindHold(document.getElementById('leftBtn'),v=>touchLeft=v);
+bindHold(document.getElementById('rightBtn'),v=>touchRight=v);
+let pointerDown=false;
+canvas.addEventListener('pointerdown',e=>{pointerDown=true;S.pointer={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);audio();if(S.mode==='play')startWind();});
+canvas.addEventListener('pointermove',e=>{if(pointerDown)S.pointer={x:e.clientX,y:e.clientY};});
+const endPointer=()=>{pointerDown=false;S.pointer=null;};
+canvas.addEventListener('pointerup',endPointer);canvas.addEventListener('pointercancel',endPointer);
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.mode==='play')togglePause(true);});
+
+function toggleMute(){ muted=!muted; store('ld_muted',muted?'1':'0');
+  document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';
+  if(muted)stopWind(); else if(S.mode==='play')startWind(); }
+function togglePause(force){
+  if(S.mode==='play'&&(force===true||force===undefined)){S.mode='pause';
+    titleEl.textContent='⏸ Paused';descEl.innerHTML='The lantern hovers, holding its breath.<br>Press <kbd>P</kbd> or Begin to resume.';
+    startBtn.textContent='Resume the drift →';overlay.hidden=false;startBtn.focus();stopWind();}
+  else if(S.mode==='pause'){S.mode='play';overlay.hidden=true;startWind();}
+}
+document.getElementById('muteBtn').onclick=toggleMute;
+document.getElementById('pauseBtn').onclick=()=>togglePause();
+document.getElementById('restartBtn').onclick=()=>reset();
+startBtn.onclick=()=>{ if(S.mode==='pause'){togglePause();} else reset(); };
+
+// ---------- physics/update ----------
+function beamAngle(b,t){ if(reduced) return b.base + Math.sin(t*b.speed*0.25+b.ph)*b.amp*0.25; return b.base + Math.sin(t*b.speed+b.ph)*b.amp; }
+function pointInBeam(px,py,b,t,pad=0){
+  const dx=px-b.bx, dy=py-b.by;
+  const dist=Math.hypot(dx,dy);
+  if(dist>b.len+pad||dist<8)return 0;
+  const a=Math.atan2(dy,dx)-beamAngle(b,t);
+  let d=Math.atan2(Math.sin(a),Math.cos(a));
+  const half=b.width/2 + Math.atan2(14,dist); // widen near source slightly
+  if(Math.abs(d)<half) return 1-Math.abs(d)/half; // 0..1 depth
+  if(Math.abs(d)<half+0.06) return -1; // graze ring
+  return 0;
+}
+function update(dt){
+  if(S.mode!=='play')return;
+  readKeys();
+  S.t+=dt; if(S.invuln>0)S.invuln-=dt;
+  // steering: auto drift + keys + pointer-follow
+  const LIFT=640, GRAV=430, MAXF=170, MAXR=260;
+  if(S.lift||(pointerDown&&S.pointer)) S.vy-=LIFT*dt*(S.lift?1:0.4);
+  S.vy+=GRAV*dt;
+  let targetVx=135;
+  if(S.left)targetVx-=160; if(S.right)targetVx+=140;
+  if(pointerDown&&S.pointer){
+    const r=canvas.getBoundingClientRect();
+    const wy=(S.pointer.y-r.top)/r.height*H();
+    const lv=H()/2; // steer vertically toward pointer
+    S.vy += clamp((wy-(S.py-S.cam))*3.2,-420,420)*dt;
+    const wx=(S.pointer.x-r.left)/r.width*W();
+    targetVx += clamp((wx-W()*0.42)*1.2,-120,160);
+    if(S.pointer.y < r.top + r.height*0.55) S.vy-=LIFT*0.55*dt;
+  }
+  S.vx += clamp(targetVx-S.vx,-300,300)*Math.min(1,dt*3);
+  S.vy=clamp(S.vy,-MAXR,MAXF);
+  S.vx=clamp(S.vx,-120,300);
+  S.px+=S.vx*dt; S.py+=S.vy*dt;
+  S.px=Math.max(20,S.px);
+  // camera
+  const want=S.px-W()*0.38;
+  S.cam += (want-S.cam)*Math.min(1,dt*4);
+  S.cam=clamp(S.cam,-50,WORLD_LEN-W()+100);
+  // roofs: land / fall
+  const r=roofAt(S.px);
+  const feetY=S.py+16;
+  if(r&&S.vy>=0&&feetY>=r.y&&feetY<=r.y+60&&(S.py-S.vy*dt+16)<=r.y+10){
+    S.py=r.y-16;S.vy=Math.min(0,S.vy);
+  }
+  if(S.py- S.cam*0 > H()+80){ // fell into street
+    hurt('Lost between rooftops');
+    const nr=roofAt(S.px)||roofs.reduce((a,b)=>Math.abs(b.x+b.w/2-S.px)<Math.abs(a.x+a.w/2-S.px)?b:a);
+    S.px=clamp(nr.x+nr.w/2,30,WORLD_LEN-30);S.py=nr.y-60;S.vy=0;S.vx=0;
+  }
+  // building side bump
+  if(r&&feetY>r.y+60&&S.py<r.y+140){ S.vx*=-0.2; S.px-=S.vx*dt*2; }
+  // sparks
+  for(const s of sparks){
+    if(s.taken)continue;
+    if(Math.hypot(s.x-S.px,s.y-S.py)<30){s.taken=true;S.spark++;
+      blip(660+Math.min(660,S.spark*30),0.14,'sine',0.2,220);}
+  }
+  // beams
+  for(const b of beams){
+    const hit=pointInBeam(S.px,S.py,b,S.t);
+    if(hit>0.25){ hurt('Caught in a searchlight'); break; }
+    else if(hit===-1&&S.invuln<=0){ S.graze++; blip(1200,0.08,'square',0.07); S.invuln=Math.max(S.invuln,0.35);
+      toast('Graze +15 ✦'); }
+  }
+  // win
+  if(S.px>=GOAL_X){ endGame(true); }
+  if(S.px>=WORLD_LEN-60)S.px=WORLD_LEN-60;
+  // HUD
+  sparksEl.textContent=S.spark;
+  glowEl.textContent='●'.repeat(S.glow)+'○'.repeat(3-S.glow);
+  timeEl.textContent=fmtTime(S.t);
+  railDot.style.left=(clamp(S.px/WORLD_LEN,0,1)*100)+'%';
+  if(S.shake>0)S.shake-=dt*30;
+}
+
+// ---------- render ----------
+let stars=[];
+function render(){
+  const w=W(),h=H();
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.clearRect(0,0,w,h);
+  const sx=S.shake>0?(Math.random()-0.5)*S.shake:0;
+  const sy=S.shake>0?(Math.random()-0.5)*S.shake:0;
+  ctx.save();ctx.translate(sx,sy);
+  // sky gradient (Alto dusk anchor)
+  const g=ctx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0,'#232c55');g.addColorStop(0.45,'#6a5a9b');g.addColorStop(0.72,'#e8937c');g.addColorStop(1,'#f7c489');
+  ctx.fillStyle=g;ctx.fillRect(-20,-20,w+40,h+40);
+  // sun disc
+  ctx.save();ctx.globalAlpha=0.9;
+  const sunX=w*0.72-S.cam*0.02, sunY=h*0.62;
+  const sg=ctx.createRadialGradient(sunX,sunY,4,sunX,sunY,70);
+  sg.addColorStop(0,'rgba(255,236,190,.7)');sg.addColorStop(0.35,'rgba(255,200,140,.35)');sg.addColorStop(1,'rgba(255,200,140,0)');
+  ctx.fillStyle=sg;ctx.beginPath();ctx.arc(sunX,sunY,90,0,7);ctx.fill();ctx.restore();
+  // stars (upper sky)
+  ctx.fillStyle='rgba(255,255,255,.7)';
+  const rnd=mulberry32(7);
+  for(let i=0;i<60;i++){const x=(rnd()*w*2-S.cam*0.05)%w;if(x<0)continue;const y=rnd()*h*0.35;ctx.globalAlpha=0.25+rnd()*0.4;ctx.fillRect((x+w)%w,y,1.6,1.6);}
+  ctx.globalAlpha=1;
+  // parallax far skyline (aerial perspective: far = pale violet, near = deep ink)
+  skyline(0.12,'rgba(122,110,170,.55)',60,120,11);
+  skyline(0.25,'rgba(52,58,105,.88)',90,170,12);
+  // rooftop props: water towers, antennas, laundry lines
+  for(const d of decor){ if(d.kind===9)continue; drawProp(d); }
+  // beams under roofs? draw roofs first then beams glow
+  for(const r of roofs) drawRoof(r);
+  // safehouse beacon — must read from 800px away
+  const hx=WORLD_LEN-140-S.cam;
+  if(hx>-100&&hx<w+100){
+    ctx.save();
+    // sky pillar visible across the whole final stretch
+    const pillar=ctx.createLinearGradient(0,60,0,360);
+    pillar.addColorStop(0,'rgba(255,217,138,0)');pillar.addColorStop(1,'rgba(255,217,138,.55)');
+    ctx.fillStyle=pillar;ctx.fillRect(hx-14,60,28,300);
+    ctx.strokeStyle='rgba(255,217,138,.9)';ctx.lineWidth=2;
+    ctx.setLineDash([6,6]);ctx.lineDashOffset=-S.t*30;ctx.beginPath();ctx.moveTo(hx,80);ctx.lineTo(hx,330);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#2c1620';roundRect(hx-46,300,92,86,8);ctx.fill();
+    ctx.strokeStyle='rgba(255,217,138,.9)';ctx.lineWidth=2;roundRect(hx-46,300,92,86,8);ctx.stroke();
+    ctx.fillStyle='rgba(255,217,138,.95)';roundRect(hx-30,282,60,26,6);ctx.fill();
+    ctx.fillStyle='#2c1620';ctx.font='bold 13px system-ui';ctx.textAlign='center';ctx.fillText('SAFE',hx,300);
+    ctx.fillStyle='rgba(255,180,107,.35)';ctx.beginPath();ctx.arc(hx,343,64+Math.sin(S.t*3)*4,0,7);ctx.fill();
+    ctx.shadowColor='#ffd98a';ctx.shadowBlur=24;ctx.font='30px system-ui';ctx.fillText('🏮',hx,352);ctx.shadowBlur=0;
+    ctx.restore();
+  }
+  // sparks — cool moon-white/teal with 4-point glint + pulse (never like sky stars)
+  for(const s of sparks){ if(s.taken)continue;
+    const x=s.x-S.cam;if(x<-30||x>w+30)continue;
+    const bob=Math.sin(S.t*3+s.ph)*4;
+    const pulse=1+Math.sin(S.t*4+s.ph)*0.18;
+    ctx.save();ctx.translate(x,s.y+bob);ctx.scale(pulse,pulse);
+    ctx.strokeStyle='rgba(190,255,240,.85)';ctx.lineWidth=1.4;
+    ctx.beginPath();ctx.moveTo(-13,0);ctx.lineTo(13,0);ctx.moveTo(0,-13);ctx.lineTo(0,13);ctx.stroke();
+    ctx.shadowColor='#7de8d3';ctx.shadowBlur=12;
+    ctx.fillStyle='#eafffa';ctx.beginPath();
+    ctx.moveTo(0,-8);ctx.quadraticCurveTo(2,-2,8,0);ctx.quadraticCurveTo(2,2,0,8);ctx.quadraticCurveTo(-2,2,-8,0);ctx.quadraticCurveTo(-2,-2,0,-8);
+    ctx.fill();ctx.restore();
+  }
+  // searchlights
+  for(const b of beams) drawBeam(b);
+  // lantern
+  drawLantern(S.px-S.cam,S.py);
+  // foreground vignette
+  const v=ctx.createRadialGradient(w/2,h/2,h*0.35,w/2,h/2,h*0.95);
+  v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(10,10,25,.42)');
+  ctx.fillStyle=v;ctx.fillRect(0,0,w,h);
+  ctx.restore();
+  // hint ribbon (first seconds only)
+  if(S.mode==='play'&&S.t<4){
+    ctx.fillStyle='rgba(12,17,34,.66)';roundRect(w/2-190,52,380,30,15);ctx.fill();
+    ctx.fillStyle='#f6e8d4';ctx.font='13px system-ui';ctx.textAlign='center';
+    ctx.fillText('HOLD to rise · RELEASE to sink · reach 🏮',w/2,72);
+  }
+}
+function skyline(par,color,base,amp,seed){
+  const w=W(),h=H();ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(0,h);
+  const rnd=mulberry32(seed);
+  const offs=[];for(let i=0;i<=24;i++)offs.push(rnd());
+  for(let x=0;x<=w;x+=8){
+    const wx=x+S.cam*par;
+    const n=Math.sin(wx*0.008+seed)*0.5+Math.sin(wx*0.021+seed*2)*0.3+offs[Math.floor(wx/90)%24]*0.4;
+    ctx.lineTo(x,h-base-n*amp);
+  }
+  ctx.lineTo(w,h);ctx.closePath();ctx.fill();
+}
+function drawProp(d){
+  const r=roofAt(d.x); if(!r)return;
+  const x=d.x-S.cam; if(x<-60||x>W()+60)return;
+  ctx.save();ctx.strokeStyle='rgba(10,14,30,.9)';ctx.fillStyle='rgba(10,14,30,.9)';
+  if(d.kind===0){ // water tower
+    ctx.fillRect(x-9,r.y-34,18,22);ctx.beginPath();ctx.moveTo(x-11,r.y-34);ctx.lineTo(x+11,r.y-34);ctx.lineTo(x,r.y-42);ctx.closePath();ctx.fill();
+    ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-7,r.y-12);ctx.lineTo(x-7,r.y-8);ctx.moveTo(x+7,r.y-12);ctx.lineTo(x+7,r.y-8);ctx.stroke();
+  }else if(d.kind===1){ // antenna with blinking tip
+    ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,r.y-8);ctx.lineTo(x,r.y-44);ctx.lineTo(x+10,r.y-52);ctx.stroke();
+    const on=Math.floor(S.t*1.5+d.s*5)%2===0;
+    ctx.fillStyle=on?'#ff6b5e':'#5a2020';ctx.beginPath();ctx.arc(x+10,r.y-52,3,0,7);ctx.fill();
+  }else{ // laundry line
+    ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x-24,r.y-8);ctx.quadraticCurveTo(x,r.y, x+24,r.y-10);ctx.stroke();
+    ctx.fillStyle='rgba(246,232,212,.8)';
+    ctx.fillRect(x-12,r.y-6,7,9);ctx.fillRect(x+2,r.y-5,7,9);
+  }
+  ctx.restore();
+}
+function drawRoof(r){
+  const x=r.x-S.cam,w2=r.w;
+  if(x+w2<-50||x>W()+50)return;
+  ctx.save();
+  ctx.fillStyle=r.home?'#3a2b3f':'#232a4a';
+  ctx.fillRect(x,r.y,w2,H()-r.y+40);
+  ctx.fillStyle=r.home?'#584064':'#2f3a5e';
+  ctx.fillRect(x,r.y-8,w2,10);
+  // edge highlight (Mini Metro thin-line anchor)
+  ctx.strokeStyle='rgba(255,217,138,.5)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(x,r.y-8);ctx.lineTo(x+w2,r.y-8);ctx.stroke();
+  // parapet setbacks break the slab silhouette (seeded per roof)
+  const setH=14+((r.x*13|0)%3)*8, setW=w2*(0.3+(((r.x*7|0)%4)/4)*0.3);
+  const setX=x+w2*0.12+(((r.x*5|0)%5)/5)*w2*0.3;
+  ctx.fillStyle='rgba(20,25,48,.95)';ctx.fillRect(setX,r.y-8-setH,setW,setH);
+  ctx.strokeStyle='rgba(255,217,138,.35)';ctx.lineWidth=1.2;
+  ctx.strokeRect(setX,r.y-8-setH,setW,setH);
+  // windows: 3 true values + broken columns (no metronome grid)
+  for(let wx=x+14;wx<x+w2-14;wx+=26){
+    if(((wx*3+r.y)|0)%9===0)continue; // dead column: breaks rhythm
+    for(let wy=r.y+22;wy<H()-10;wy+=30){
+    const hsh=((wx*7+wy*13)|0);
+    if(hsh%5===0){ // hot lit
+      ctx.save();ctx.shadowColor='rgba(255,190,120,.8)';ctx.shadowBlur=6;
+      ctx.fillStyle='rgba(255,214,150,.9)';ctx.fillRect(wx,wy,9,12);ctx.restore();}
+    else if(hsh%7===0){ctx.fillStyle='rgba(150,120,80,.5)';ctx.fillRect(wx,wy,9,12);} // dim lit
+    else if(hsh%11===0){ctx.fillStyle='rgba(90,104,150,.35)';ctx.fillRect(wx,wy,9,12);} // dead reflective
+    }
+  }
+  // gap warning chevrons at edges
+  ctx.fillStyle='rgba(255,125,107,.75)';ctx.font='11px system-ui';
+  ctx.fillText('▾',x+4,r.y+2);ctx.fillText('▾',x+w2-12,r.y+2);
+  ctx.restore();
+}
+function drawBeam(b){
+  const x=b.bx-S.cam;if(x<-450||x>W()+450)return;
+  const a=beamAngle(b,S.t);
+  const pulse = reduced?0:(Math.sin(S.t*5+b.ph)*0.05+0.05);
+  ctx.save();ctx.translate(x,b.by);
+  ctx.rotate(a-Math.PI/2);
+  // wide soft volumetric pass (warm, clearly distinct from sky haze)
+  const wide=Math.tan(b.width/2+0.10+pulse)*b.len;
+  const g0=ctx.createLinearGradient(0,0,0,b.len);
+  g0.addColorStop(0,'rgba(255,220,150,.34)');g0.addColorStop(1,'rgba(255,220,150,0)');
+  ctx.fillStyle=g0;ctx.beginPath();
+  ctx.moveTo(0,0);ctx.lineTo(-wide,b.len);ctx.lineTo(wide,b.len);ctx.closePath();ctx.fill();
+  // hot core pass (near-white, high contrast)
+  const grd=ctx.createLinearGradient(0,0,0,b.len);
+  grd.addColorStop(0,'rgba(255,255,246,.95)');grd.addColorStop(0.35,'rgba(255,246,220,.55)');grd.addColorStop(1,'rgba(255,246,220,0)');
+  ctx.fillStyle=grd;ctx.beginPath();
+  const spread=Math.tan(b.width/2)*b.len;
+  ctx.moveTo(0,0);ctx.lineTo(-spread,b.len);ctx.lineTo(spread,b.len);ctx.closePath();ctx.fill();
+  // danger edge lines (brighter, animated march)
+  ctx.strokeStyle='rgba(255,110,90,.9)';ctx.lineWidth=2;ctx.setLineDash([10,7]);ctx.lineDashOffset=reduced?0:-S.t*40;
+  ctx.beginPath();ctx.moveTo(-spread,b.len);ctx.lineTo(0,0);ctx.lineTo(spread,b.len);ctx.stroke();ctx.setLineDash([]);
+  // source fixture: housing + warning lamp + red alert ring
+  ctx.fillStyle='#0d1226';ctx.fillRect(-13,-16,26,18);
+  ctx.strokeStyle='rgba(255,217,138,.7)';ctx.lineWidth=1.5;ctx.strokeRect(-13,-16,26,18);
+  const lampOn = reduced?true:(Math.floor(S.t*2.5+b.ph)%2===0);
+  ctx.fillStyle=lampOn?'#ff6b5e':'#5a2020';ctx.beginPath();ctx.arc(8,-7,3.4,0,7);ctx.fill();
+  ctx.fillStyle='#fff3d0';ctx.shadowColor='#ffe9b0';ctx.shadowBlur=12;
+  ctx.beginPath();ctx.arc(0,2,6,0,7);ctx.fill();ctx.shadowBlur=0;
+  ctx.restore();
+  // march along true world direction: angle a measured from +x axis
+  const dirx=Math.cos(a), diry=Math.sin(a);
+  for(let d=16;d<b.len;d+=8){
+    const px=b.bx+dirx*d, py=b.by+diry*d;
+    const hit=roofAt(px);
+    if(hit&&py>=hit.y-4&&py<=hit.y+26){
+      const hx=px-S.cam;if(hx>-40&&hx<W()+40){
+        ctx.save();ctx.globalCompositeOperation='lighter';
+        const hg=ctx.createRadialGradient(hx,hit.y,2,hx,hit.y,64);
+        hg.addColorStop(0,'rgba(255,252,238,.95)');hg.addColorStop(0.4,'rgba(255,222,150,.45)');hg.addColorStop(1,'rgba(255,222,150,0)');
+        ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(hx,hit.y,64,20,0,0,7);ctx.fill();
+        ctx.fillStyle='rgba(255,255,245,.95)';ctx.beginPath();ctx.ellipse(hx,hit.y,16,5,0,0,7);ctx.fill();
+        ctx.restore();
+      }
+      break;
+    }
+  }
+}
+function drawLantern(x,y){
+  ctx.save();ctx.translate(x,y);
+  if(!reduced && S.invuln>0&&S.mode==='play'&&Math.floor(S.t*12)%2===0)ctx.globalAlpha=0.35;
+  // glow — warmest/brightest object in frame (clean falloff, no muddy mid)
+  const gg=ctx.createRadialGradient(0,0,4,0,0,66);
+  gg.addColorStop(0,'rgba(255,196,110,.95)');gg.addColorStop(0.35,'rgba(255,160,90,.38)');gg.addColorStop(1,'rgba(255,150,80,0)');
+  ctx.fillStyle=gg;ctx.beginPath();ctx.arc(0,0,66,0,7);ctx.fill();
+  // tilt into velocity + speed-reactive long trail
+  ctx.rotate(clamp(S.vx*0.0009,-0.25,0.3));
+  const sp=clamp(Math.hypot(S.vx,S.vy)/200,0.5,1.8);
+  ctx.strokeStyle='rgba(255,150,80,.7)';ctx.lineWidth=3.5;ctx.beginPath();
+  ctx.moveTo(-10,-4);ctx.quadraticCurveTo(-40*sp-10,6,-72*sp-16,14+Math.sin(S.t*6)*3);ctx.stroke();
+  ctx.strokeStyle='rgba(255,205,140,.35)';ctx.lineWidth=7;ctx.beginPath();
+  ctx.moveTo(-10,-4);ctx.quadraticCurveTo(-36*sp-10,8,-62*sp-16,16);ctx.stroke();
+  // ember particles
+  if(!reduced){ctx.fillStyle='rgba(255,180,110,.8)';
+    for(let i=0;i<3;i++){const ex=-14-i*14*sp+Math.sin(S.t*7+i*2)*3, ey=10+i*4+Math.cos(S.t*6+i)*3;
+      ctx.globalAlpha=0.7-i*0.2;ctx.beginPath();ctx.arc(ex,ey,2.2-i*0.5,0,7);ctx.fill();}ctx.globalAlpha=1;}
+  // paper body — saturated orange, dark ink ribs (never white)
+  ctx.fillStyle='#ff9a4d';roundRect(-13,-18,26,34,10);ctx.fill();
+  ctx.strokeStyle='rgba(122,30,20,.75)';ctx.lineWidth=1.8;roundRect(-13,-18,26,34,10);ctx.stroke();
+  ctx.strokeStyle='rgba(122,30,20,.55)';ctx.beginPath();
+  ctx.moveTo(-13,-6);ctx.lineTo(13,-6);ctx.moveTo(-13,6);ctx.lineTo(13,6);ctx.stroke();
+  ctx.fillStyle='#5e1f16';ctx.fillRect(-6,-23,12,6);
+  const fl=reduced?4:4+Math.sin(S.t*9)*1.2;
+  ctx.fillStyle='#fff0c8';ctx.beginPath();ctx.arc(0,1,fl,0,7);ctx.fill();
+  // tassel
+  ctx.strokeStyle='#ff7d5e';ctx.lineWidth=2.4;ctx.beginPath();ctx.moveTo(0,16);ctx.quadraticCurveTo(Math.sin(S.t*6)*6,24,0,32);ctx.stroke();
+  ctx.restore();
+}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+// ---------- loop with error boundary ----------
+let last=performance.now();
+function frame(now){
+  try{
+    let dt=(now-last)/1000;last=now;
+    dt=clamp(dt,0,0.033);
+    if(S.mode==='pause'){render();requestAnimationFrame(frame);return;}
+    update(dt);render();
+  }catch(err){
+    console.error(err);
+    try{ toast('A gust hit the lantern — recovered.'); }catch(e){}
+    last=performance.now();
+  }
+  requestAnimationFrame(frame);
+}
+document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';
+genWorld();requestAnimationFrame(frame);
+window.__LD = {S,reset,endGame,update,roofs:()=>roofs,sparks:()=>sparks,beams:()=>beams};
+</script>
+</body>
+</html>
