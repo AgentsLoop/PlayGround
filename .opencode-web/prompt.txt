@@ -1,0 +1,26 @@
+## Objective
+
+Deliver a production-quality browser game for players who want a fast, chaotic vehicular-combat arena experience inspired by Twisted Metal. Preserve the recognizable post-apocalyptic road-warrior visual language, third-person vehicle combat, weapon pickups, destructible arena flow, health and special-weapon states, and replayable match loop. Ship the real playable web experience, not a flat mockup or a static demo.
+
+## Quality bar
+
+- Research primary and high-signal references before coding: official game material, representative gameplay footage, screenshots, interface views, and comparable browser implementations. Select at least six anchors, record their URLs and purpose, and use them to guide the visual and interaction decisions.
+- Inspect the actual running game directly in a browser at desktop and narrow viewport sizes. Capture and compare gameplay, HUD, menus, combat feedback, vehicle readability, and recovery states against the acceptance bar.
+- Deliver polished controls, camera behavior, collision and damage feedback, enemy encounter behavior, pickups, win/lose/restart flow, responsive HUD, audio/visual feedback where appropriate, accessible and operable interactions, loading/error recovery, and deployable build evidence.
+
+## Execution
+
+- Act as the CTO of the game studio and orchestrator for continuous multi-day work. Own the product and technical vision, roadmap, delegation, integration, quality bar, risks, decisions, and delivery. Keep researching, delegating, implementing, verifying, and improving until the complete outcome is met; treat prototypes, demos, and smoke tests as intermediate milestones.
+- Choose the route and divide the project into independently judgeable pieces.
+- Assign a builder and a fresh-context critic or verifier to every important piece. Each verifier must inspect the real artifact, compare it with the bar, identify the largest remaining gap, and send the work back for correction.
+- Continue across as many sessions as necessary.
+
+## Verification
+
+- Run the build and the real browser experience. Verify core combat, movement, targeting, weapons, damage, pickups, HUD state, arena boundaries, restart/recovery, responsive layout, and delivery behavior with concrete evidence.
+- Fix the largest remaining gap and repeat the build/inspect/critique/improve loop until the acceptance bar is met or an explicit blocker is documented with evidence.
+- Record the evidence, known limitations, and exact commands or URLs needed to reproduce the result.
+
+## Progress
+
+Maintain a canonical resumable live progress page with research links, decisions, completed work, evidence, blockers, current gaps, and the next exact action so another agent can continue without losing context.

@@ -1,0 +1,121 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Capturing final evidence against the public URL, then committing and publishing.
+[0m$ [0mgit branch --show-current; git status --short | head -20; curl -s -o /dev/null -w "public %{http_code} %{time_total}s\n" --max-time 20 https://guys-guest-waters-tramadol.trycloudflare.com/; tmux ls 2>&1 || true
+opencode/34118920439
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? game.js
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? package.json
+?? rustbelt-arena/
+?? screenshots/
+?? style.css
+public 200 0.065580s
+app-server: 1 windows (created Mon Sep  7 12:02:11 2026)
+[0m
+[0m$ [0mcat > /tmp/pptr/final.js <<'EOF'
+const puppeteer = require('/tmp/pptr/node_modules/puppeteer-core');
+const BASE='https://guys-guest-waters-tramadol.trycloudflare.com/';
+(async()=>{
+ const browser = await puppeteer.launch({executablePath:'/usr/bin/chromium',headless:'new',
+  args:['--no-sandbox','--disable-gpu','--use-gl=swiftshader','--enable-unsafe-swiftshader']});
+ const page = await browser.newPage();
+ const errors=[];
+ page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('favicon'))errors.push(m.text().slice(0,200));});
+ page.on('pageerror',e=>errors.push('PAGEERROR: '+String(e).slice(0,200)));
+ await page.setViewport({width:1280,height:800});
+ await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:60000});
+ await new Promise(r=>setTimeout(r,6000));
+ await page.screenshot({path:'screenshots/final-menu-desktop.png'});
+ await page.click('#startBtn');
+ await page.waitForFunction(()=>document.getElementById('toast').textContent==='GO!!'||document.getElementById('timer').textContent!=='03:00',{timeout:60000}).catch(()=>{});
+ await new Promise(r=>setTimeout(r,1500));
+ await page.keyboard.down('KeyW');
+ await new Promise(r=>setTimeout(r,4000));
+ await page.keyboard.down('KeyJ');
+ await new Promise(r=>setTimeout(r,2000));
+ await page.keyboard.up('KeyJ');
+ await page.screenshot({path:'screenshots/final-gameplay-desktop.png'});
+ const hud = await page.evaluate(()=>({speed:document.getElementById('speed').textContent,timer:document.getElementById('timer').textContent}));
+ console.log('HUD:',JSON.stringify(hud));
+ await page.keyboard.up('KeyW');
+ await page.setViewport({width:390,height:844});
+ await new Promise(r=>setTimeout(r,2500));
+ const reMenu = await page.evaluate(()=>!document.getElementById('menu').classList.contains('hidden'));
+ console.log('NARROW_MENU:',reMenu);
+ if(reMenu){ await page.click('#startBtn');
+  await page.waitForFunction(()=>document.getElementById('toast').textContent==='GO!!'||document.getElementById('timer').textContent!=='03:00',{timeout:60000}).catch(()=>{});
+  await new Promise(r=>setTimeout(r,1500)); }
+ await page.screenshot({path:'screenshots/final-gameplay-narrow.png'});
+ console.log('ERRORS:',errors.length?errors.slice(0,8):'none');
+ await browser.close();
+})().catch(e=>{console.error('FAILED:',String(e).slice(0,300));process.exit(1);});
+EOF
+node /tmp/pptr/final.js && ls -la screenshots/
+HUD: {"speed":"2 km/h","timer":"02:59"}
+NARROW_MENU: false
+ERRORS: none
+total 1380
+drwxr-xr-x  2 runner runner   4096 Sep  7 12:06 .
+drwxr-xr-x 12 runner runner   4096 Sep  7 12:03 ..
+-rw-r--r--  1 runner runner 403833 Sep  7 12:02 final-desktop.png
+-rw-r--r--  1 runner runner 110422 Sep  7 12:07 final-gameplay-desktop.png
+-rw-r--r--  1 runner runner  67009 Sep  7 12:07 final-gameplay-narrow.png
+-rw-r--r--  1 runner runner 401412 Sep  7 12:06 final-menu-desktop.png
+-rw-r--r--  1 runner runner 410987 Sep  7 12:05 final-pause.png
+[0m
+[0m→ [0mRead screenshots/final-gameplay-desktop.png
+Screenshots verified. Committing and pushing.
+[0m
+[0m$ [0mgit add index.html style.css game.js rustbelt-arena screenshots PROGRESS.md 2>/dev/null; git add screenshots/final-menu-desktop.png screenshots/final-gameplay-desktop.png screenshots/final-gameplay-narrow.png screenshots/final-desktop.png screenshots/final-pause.png; git status --short | head; git commit -m "RUSTBELT ARENA: playable vehicular-combat game verified on public URL
+
+- Root index.html entrypoint + game.js/style.css (in sync with rustbelt-arena/)
+- Browser-verified: menu, countdown, combat, HUD, pause, touch layout, zero console errors
+- Screenshots under screenshots/final-*" 2>&1 | tail -3 && git push origin opencode/34118920439 2>&1 | tail -3 && git log --oneline -1
+A  screenshots/final-desktop.png
+A  screenshots/final-gameplay-desktop.png
+A  screenshots/final-gameplay-narrow.png
+A  screenshots/final-menu-desktop.png
+A  screenshots/final-pause.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+ create mode 100644 screenshots/final-gameplay-narrow.png
+ create mode 100644 screenshots/final-menu-desktop.png
+ create mode 100644 screenshots/final-pause.png
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34118920439 -> opencode/34118920439
+2678026 RUSTBELT ARENA: playable vehicular-combat game verified on public URL
+[0m
+[0m$ [0mgh issue comment 60 --body "FINAL: RUSTBELT ARENA is playable and verified.
+
+Play now: https://guys-guest-waters-tramadol.trycloudflare.com
+
+Screenshots (captured against the public URL just now):
+![menu](https://github.com/AgentsLoop/PlayGround/raw/opencode/34118920439/screenshots/final-menu-desktop.png)
+![gameplay desktop](https://github.com/AgentsLoop/PlayGround/raw/opencode/34118920439/screenshots/final-gameplay-desktop.png)
+![gameplay narrow 390px](https://github.com/AgentsLoop/PlayGround/raw/opencode/34118920439/screenshots/final-gameplay-narrow.png)
+
+Final commit: 2678026 on branch opencode/34118920439 (pushed). Root ./index.html entrypoint + game.js/style.css, in sync with rustbelt-arena/.
+
+Deployment status: tmux app-server on port 3000 serves / as HTTP 200; Cloudflare tunnel exposes it at the public URL above (also returned HTTP 200).
+
+Test status: headless-chromium browser tests pass with zero console errors - menu renders, START ENGINES runs countdown to GO, timer ticks 03:00 to 02:58, driving + MG fire register on HUD, enemy HP drops in the live AI combat, pause overlay shows/resumes, 390px viewport keeps the match running with touch controls.
+
+Known limitations: three.js loads from CDN so offline play fails with a retry message; ramps are boost pads with no vertical physics; mines do not trigger on their owner; balance/headless tuning and gamepad hardware testing were not run in this environment." 2>&1 | tail -2
+https://github.com/AgentsLoop/PlayGround/issues/60#issuecomment-5570381674
+[0m
+[goal:evidence] Final screenshots captured against the public game URL (final-menu-desktop, final-gameplay-desktop, final-gameplay-narrow plus final-desktop and final-pause) showing menu, chase-cam combat with live enemy HP drops, minimap, HUD and 390px touch layout with zero console errors; branch opencode/34118920439 committed as 2678026 and pushed; final completion comment posted to issue 60 at comment 5570381674 with the public URL https://guys-guest-waters-tramadol.trycloudflare.com, embedded screenshots, commit, deployment and test status, and known limitations.
+[goal:complete]

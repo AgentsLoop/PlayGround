@@ -1,0 +1,90 @@
+:root{
+  --amber:#ffb300; --rust:#ff5722; --blood:#ff2d2d; --teal:#39f5c8;
+  --bg:#0d0f13; --panel:rgba(12,14,19,.86); --line:#2a2f3a;
+  --txt:#f2ede3; --dim:#a89f8d;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
+  font-family:"Rajdhani","Segoe UI",system-ui,Arial,sans-serif;overflow:hidden}
+#app{position:fixed;inset:0}
+canvas#scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hud{position:absolute;pointer-events:none;z-index:5}
+#topbar{top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;
+  padding:10px 12px;gap:8px}
+.pill{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:6px 12px;font-weight:700;letter-spacing:.08em;font-size:14px}
+#timer{font-size:20px;color:var(--amber)}
+#killfeed{position:absolute;top:56px;right:12px;display:flex;flex-direction:column;gap:6px;max-width:44vw}
+.feed{background:rgba(0,0,0,.62);border-left:3px solid var(--amber);padding:5px 9px;
+  font-size:13px;border-radius:6px;animation:feedin .25s ease-out}
+@keyframes feedin{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}
+#bottomleft{left:12px;bottom:12px;width:min(330px,42vw)}
+#bottomright{right:12px;bottom:12px;width:min(330px,42vw);text-align:right}
+.bar{height:14px;background:#1b1e26;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;width:100%;transition:width .15s}
+#hp>i{background:linear-gradient(90deg,#ff2d2d,#ffb300)}
+#special>i{background:linear-gradient(90deg,#39f5c8,#3a86ff)}
+#heat>i{background:linear-gradient(90deg,#ffb300,#ff5722)}
+#armorLabel,#specialLabel,#heatLabel{font-size:12px;letter-spacing:.12em;color:var(--dim);font-weight:700}
+#weapons{display:flex;gap:6px;margin-top:8px;justify-content:flex-start}
+#enemiesPanel{margin-top:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:12px}
+#enemiesPanel .erow{display:flex;justify-content:space-between;gap:8px;padding:1px 2px}
+#enemiesPanel .dead{color:#5a5f6b;text-decoration:line-through}
+#weaponsRight{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}
+.wslot{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 8px;
+  font-size:13px;font-weight:700;min-width:64px;text-align:center}
+.wslot.active{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber)}
+.wslot small{color:var(--dim);font-weight:600}
+#minimap{position:absolute;left:12px;top:56px;width:148px;height:148px;background:rgba(8,10,14,.78);
+  border:1px solid var(--line);border-radius:12px;z-index:5}
+#hitmarker{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%) rotate(45deg);
+  width:44px;height:44px;opacity:0;z-index:6;pointer-events:none}
+#hitmarker:before,#hitmarker:after{content:"";position:absolute;background:#fff}
+#hitmarker:before{left:20px;top:0;width:4px;height:44px}
+#hitmarker:after{top:20px;left:0;width:44px;height:4px}
+#hitmarker.show{animation:hit .28s ease-out}
+@keyframes hit{0%{opacity:1;transform:translate(-50%,-50%) rotate(45deg) scale(1.4)}100%{opacity:0;transform:translate(-50%,-50%) rotate(45deg) scale(.8)}}
+#vignette{position:absolute;inset:0;pointer-events:none;z-index:4;opacity:0;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(255,20,20,.55) 100%)}
+#toast{position:absolute;left:50%;top:22%;transform:translateX(-50%);z-index:6;pointer-events:none;
+  font-size:clamp(22px,4vw,44px);font-weight:800;letter-spacing:.1em;color:var(--amber);
+  text-shadow:0 2px 0 #000,0 0 24px rgba(255,179,0,.6);text-align:center}
+.screen{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 30%,rgba(64,32,8,.88),rgba(5,6,9,.96));padding:16px}
+.screen.hidden{display:none}
+.card{width:min(680px,94vw);max-height:92vh;overflow:auto;background:#11141b;border:1px solid #3a3f4d;
+  border-radius:16px;padding:22px 22px 18px;box-shadow:0 20px 80px rgba(0,0,0,.6)}
+.card h1{margin:0 0 4px;font-size:clamp(28px,5vw,52px);letter-spacing:.06em;color:var(--amber)}
+.card h1 .rust{color:var(--rust)}
+.card p{color:var(--dim);margin:6px 0 12px;line-height:1.45}
+.vehicles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.vcard{border:2px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;background:#171b23;text-align:left;color:var(--txt)}
+.vcard[aria-selected="true"]{border-color:var(--amber);box-shadow:0 0 0 2px var(--amber)}
+.vcard h3{margin:0 0 4px;font-size:16px}
+.vcard .stats{font-size:12px;color:var(--dim);line-height:1.5}
+.btn{pointer-events:auto;cursor:pointer;border:0;border-radius:10px;padding:12px 18px;font-size:17px;
+  font-weight:800;letter-spacing:.08em;background:linear-gradient(180deg,#ffb300,#ff5722);color:#14100a}
+.btn.ghost{background:#222836;color:var(--txt);border:1px solid var(--line)}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px;color:var(--dim);margin-top:10px}
+.keys b{color:var(--txt)}
+#resultsStats{font-size:15px;line-height:1.7}
+#loading{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
+  background:#0d0f13;flex-direction:column;gap:14px}
+#loading.hidden{display:none}
+.spin{width:54px;height:54px;border-radius:50%;border:5px solid #2a2f3a;border-top-color:var(--amber);animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#touch{position:absolute;inset:auto 0 0 0;z-index:8;display:none;justify-content:space-between;
+  padding:0 10px calc(86px + env(safe-area-inset-bottom));pointer-events:none}
+#touch button{pointer-events:auto;width:62px;height:62px;border-radius:50%;border:1px solid var(--line);
+  background:rgba(15,18,24,.7);color:var(--txt);font-weight:800;font-size:15px}
+#touch .cluster{display:flex;gap:8px}
+@media (pointer:coarse){#touch{display:flex}#minimap{width:108px;height:108px}#bottomleft,#bottomright{bottom:150px}}
+@media (max-width:640px){
+  #bottomleft{width:46vw}#bottomright{width:46vw}
+  .pill{font-size:12px;padding:5px 8px}#timer{font-size:16px}
+  #killfeed{max-width:52vw;font-size:12px}
+  .vehicles{grid-template-columns:1fr}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px}

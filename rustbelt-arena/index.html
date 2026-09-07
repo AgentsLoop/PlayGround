@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>RUSTBELT ARENA — vehicular combat</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%23ff5722%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-size=%2718%27 text-anchor=%27middle%27%3E%E2%9A%99%3C/text%3E%3C/svg%3E"/>
+<meta name="description" content="Fast chaotic vehicular-combat arena: last car standing, weapon pickups, specials. Playable in browser."/>
+<link rel="stylesheet" href="style.css"/>
+<script type="importmap">
+{"imports":{
+  "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three-fallback":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+}}
+</script>
+</head>
+<body>
+<div id="app">
+  <canvas id="scene" aria-label="3D combat arena"></canvas>
+  <div id="vignette"></div>
+  <div id="hitmarker"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div id="topbar" class="hud">
+    <div class="pill" id="alive">ALIVE 6/6</div>
+    <div class="pill" id="timer">03:00</div>
+    <div class="pill" id="kills">KILLS 0</div>
+  </div>
+  <canvas id="minimap" width="148" height="148" aria-label="Minimap"></canvas>
+  <div id="killfeed" aria-live="polite"></div>
+
+  <div id="bottomleft" class="hud">
+    <div id="armorLabel">HULL ▮ VULTURE</div>
+    <div class="bar" id="hp"><i></i></div>
+    <div id="specialLabel">SPECIAL — NAPALM [Q]</div>
+    <div class="bar" id="special"><i></i></div>
+    <div id="heatLabel">MG HEAT</div>
+    <div class="bar" id="heat"><i></i></div>
+    <div id="weapons">
+      <div class="wslot active" id="wMg">MG <small>∞</small></div>
+      <div class="wslot" id="wMis">🚀 <small id="cMis">3</small></div>
+      <div class="wslot" id="wMine">💣 <small id="cMine">1</small></div>
+    </div>
+    <div id="enemiesPanel" aria-label="Opponents"></div>
+  </div>
+  <div id="bottomright" class="hud">
+    <div class="pill" id="speed">0 km/h</div>
+    <div id="weaponsRight">
+      <div class="wslot">TURBO <small id="cTurbo">100</small></div>
+      <div class="wslot" id="muteBtn" style="pointer-events:auto;cursor:pointer">🔊</div>
+    </div>
+    <div class="pill" id="hint" style="margin-top:8px">WASD drive · J/click MG · K/RMB 🚀 · L/E 💣 · Shift turbo · Q special</div>
+  </div>
+
+  <div id="touch" aria-hidden="false">
+    <div class="cluster"><button data-t="left" aria-label="steer left">◀</button><button data-t="right" aria-label="steer right">▶</button></div>
+    <div class="cluster"><button data-t="gas" aria-label="accelerate">▲</button><button data-t="brake" aria-label="brake">▼</button></div>
+    <div class="cluster"><button data-t="turbo" aria-label="turbo boost">⚡</button><button data-t="mine" aria-label="drop mine">💣</button><button data-t="pause" aria-label="pause">⏸</button></div>
+    <div class="cluster"><button data-t="mg" aria-label="fire machine gun">MG</button><button data-t="mis" aria-label="fire missile">🚀</button><button data-t="spec" aria-label="fire special">★</button></div>
+  </div>
+
+  <div id="menu" class="screen">
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="title">
+      <h1 id="title">RUSTBELT <span class="rust">ARENA</span></h1>
+      <p>Last car standing in the Junkyard Bowl. Ram, burn and blast 5 war-rigs. Grab <b style="color:#fff">repairs 🚑, missiles 🚀, mines 💣, turbo ⚡ and MG upgrades ▲</b>. Watch your hull, manage MG heat, and land your <b style="color:#fff">Napalm special</b> when it glows.</p>
+      <div class="vehicles" role="radiogroup" aria-label="Choose vehicle">
+        <button class="vcard" data-v="vulture" aria-selected="true"><h3>VULTURE (balanced)</h3><div class="stats">Hull 100 · Speed ★★★ · Special: Napalm Cone<br/>Reliable all-rounder.</div></button>
+        <button class="vcard" data-v="maw" aria-selected="false"><h3>MAW (tank)</h3><div class="stats">Hull 150 · Speed ★★ · Special: Ghost Ram<br/>Ice-cream truck of doom. Slow, brutal.</div></button>
+        <button class="vcard" data-v="wasp" aria-selected="false"><h3>WASP (interceptor)</h3><div class="stats">Hull 70 · Speed ★★★★★ · Special: Hornet Swarm<br/>Fragile, blazing, fast special.</div></button>
+      </div>
+      <div class="btnrow">
+        <button class="btn" id="startBtn">START ENGINES</button>
+        <button class="btn ghost" id="howBtn">HOW TO PLAY</button>
+      </div>
+      <div class="keys" id="howKeys" hidden>
+        <b>W / ↑</b><span>accelerate</span><b>S / ↓</b><span>brake / reverse</span>
+        <b>A D / ← →</b><span>steer</span><b>Space</b><span>handbrake</span>
+        <b>J / Left-click</b><span>machine gun (watch heat)</span><b>K / Right-click</b><span>homing missile</span>
+        <b>L / E</b><span>drop mine</span><b>Shift</b><span>turbo boost</span>
+        <b>Q / F</b><span>special weapon (when charged)</span><b>P / Esc</b><span>pause</span>
+        <b>M</b><span>mute</span><b>Gamepad</b><span>left stick drive · RT fire · A special</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="pause" class="screen hidden">
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="ptitle">
+      <h1 id="ptitle">PAUSED</h1>
+      <p>Take a breath, road warrior. Your hull holds while the dust settles.</p>
+      <div class="btnrow"><button class="btn" id="resumeBtn">RESUME</button><button class="btn ghost" id="quitBtn">QUIT TO MENU</button></div>
+    </div>
+  </div>
+
+  <div id="results" class="screen hidden">
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="rtitle">
+      <h1 id="rtitle">WRECKED</h1>
+      <div id="resultsStats"></div>
+      <div class="btnrow"><button class="btn" id="againBtn">REMATCH [R]</button><button class="btn ghost" id="menuBtn">CHANGE RIG</button></div>
+    </div>
+  </div>
+
+  <div id="loading"><div class="spin"></div><div id="loadmsg">Forging the arena…</div></div>
+</div>
+<script type="module" src="game.js"></script>
+</body>
+</html>

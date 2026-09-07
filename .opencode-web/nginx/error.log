@@ -1,0 +1,1 @@
+2026/09/07 12:02:15 [error] 3842#3842: *2 open() "/home/runner/work/PlayGround/PlayGround/favicon.ico" failed (2: No such file or directory), client: 127.0.0.1, server: , request: "GET /favicon.ico HTTP/1.1", host: "aware-simon-desktop-alike.trycloudflare.com", referrer: "https://aware-simon-desktop-alike.trycloudflare.com/"
