@@ -1,0 +1,26 @@
+# twisted metal
+
+## Objective
+
+Deliver a production-quality browser game that recreates the recognizable visual language and interaction model of Twisted Metal for players seeking vehicular combat. Preserve the arena combat, drivable vehicles, weapon pickups, destructive hazards, readable combat feedback, and real web gameplay surface; do not flatten it into a static mockup or menu demo.
+
+## Quality bar
+
+- Research authoritative and high-signal references before coding, including official material, gameplay footage, screenshots, and interface views. Record at least six selected anchors with Markdown links and explain the purpose of each.
+- Inspect the actual running artifact with vision and direct browser interaction. Compare captures against the selected references and review the game side by side or with blind A/B checks whenever practical.
+- Deliver complete playable flows, responsive controls, meaningful combat states, HUD and menu states, pause/restart/recovery behavior, accessibility and operability, polished presentation, and deployment or delivery evidence.
+
+## Execution
+
+- Have the lead choose the implementation route and divide the project into independently judgeable pieces.
+- Assign a separate builder and a fresh-context critic or verifier to every important piece. Require each verifier to inspect the actual artifact, compare it with the quality bar, identify the largest remaining gap, and send the work back for improvement.
+- Sustain the build, verify, and improve loop across as many sessions as necessary.
+
+## Verification
+
+- Fix the largest remaining gap and repeat until the acceptance bar is met, or stop only with explicit evidence of what remains and why.
+- Record concrete evidence for gameplay behavior, visual fidelity, input handling, responsive behavior, error and recovery states, performance, and delivery.
+
+## Progress
+
+Maintain a canonical live progress page that another agent can resume. Keep current references, decisions, completed work, evidence, blockers, gaps, and the next exact action there.

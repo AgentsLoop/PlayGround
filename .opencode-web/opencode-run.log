@@ -1,0 +1,1016 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Building your Twisted Metal arena — research, playable combat, and polish incoming.
+[0m⚙ [0mgoal_resume Unknown
+[0m⚙ [0mget_goal Unknown
+[0m⚙ [0mget_goal_history Unknown
+[0m→ [0mRead .
+[0m
+[0m# [0mTodos
+[•] Research 6+ authoritative Twisted Metal references
+[ ] Choose implementation route + create canonical progress page
+[ ] Build playable game (arena, vehicles, weapons, HUD, menus, pause/restart)
+[ ] Verify with browser playtest, screenshots, critics loop
+[ ] Polish: accessibility, responsive, performance, delivery evidence
+[0m
+[0m◈ [0mExa Web Search "Twisted Metal Sweet Tooth arena combat weapons gameplay footage"
+[0m◈ [0mExa Web Search "Twisted Metal gameplay official PlayStation 2026"
+[0m◈ [0mExa Web Search "Twisted Metal HUD interface screenshots vehicles list"
+References locked — now choosing the 3D arena route and building the playable game.
+[0m
+[0m# [0mTodos
+[✓] Research 6+ authoritative Twisted Metal references
+[•] Choose implementation route + create canonical progress page
+[ ] Build playable game (arena, vehicles, weapons, HUD, menus, pause/restart)
+[ ] Verify with browser playtest, screenshots, critics loop
+[ ] Polish: accessibility, responsive, performance, delivery evidence
+[0m
+[0m← [0mWrite PROGRESS_twisted-metal.md
+Wrote file successfully.
+[0m
+[0m# [0mTodos
+[✓] Research 6+ authoritative Twisted Metal references
+[✓] Choose implementation route + create canonical progress page
+[•] Build playable game (arena, vehicles, weapons, HUD, menus, pause/restart)
+[ ] Verify with browser playtest, screenshots, critics loop
+[ ] Polish: accessibility, responsive, performance, delivery evidence
+[0m
+[0m$ [0mmkdir -p twisted-metal/evidence && ls
+Agents.md
+opencode-agentsweb-id_ed25519
+opencode-agentsweb-id_ed25519.pub
+PROGRESS_twisted-metal.md
+README.md
+twisted-metal
+[0m
+[0m← [0mWrite twisted-metal/index.html
+Wrote file successfully.
+[0m
+[0m← [0mWrite twisted-metal/style.css
+Wrote file successfully.
+[0m
+Shell and styling done — now building the core combat engine.
+[0m← [0mWrite twisted-metal/game.js
+Wrote file successfully.
+[0m
+[0m← [0mWrite twisted-metal/README.md
+Wrote file successfully.
+[0m
+[0m$ [0mnode --check twisted-metal/game.js && echo SYNTAX_OK; python3 -c "import http.server; print('serve ok')"
+SYNTAX_OK
+serve ok
+[0m
+Engine built — now verifying it runs in a real browser.
+[0m$ [0mpython3 -m http.server 8901 &>/tmp/srv.log & echo $!; sleep 1; curl -s -o /dev/null -w "%{http_code}" http://localhost:8901/twisted-metal/index.html; echo; ls /tmp; which chromium || which google-chrome || echo no-chrome; python3 -c "import playwright; print('playwright ok')" 2>&1 | head -2; npm ls -g --depth=0 2>&1 | head -10
+26565
+000
+srv.log
+no-chrome
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+/opt/homebrew/lib
+├── corepack@0.35.0
+└── npm@11.19.0
+[0m
+[0m$ [0mcat /tmp/srv.log 2>&1 | head -20; ps aux | grep "http.server" | grep -v grep | head -5; curl -sv http://127.0.0.1:8901/twisted-metal/index.html 2>&1 | head -20
+runner           26565   0.0  0.4 435279248  25712   ??  S<    1:57PM   0:00.08 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python -m http.server 8901
+*   Trying 127.0.0.1:8901...
+* Connected to 127.0.0.1 (127.0.0.1) port 8901
+> GET /twisted-metal/index.html HTTP/1.1
+> Host: 127.0.0.1:8901
+> User-Agent: curl/8.7.1
+> Accept: */*
+> 
+* Request completely sent off
+* HTTP 1.0, assume close after body
+< HTTP/1.0 200 OK
+< Server: SimpleHTTP/0.6 Python/3.14.7
+< Date: Mon, 07 Sep 2026 13:58:41 GMT
+< Content-type: text/html
+< Content-Length: 4776
+< Last-Modified: Mon, 07 Sep 2026 13:49:47 GMT
+< 
+{ [4776 bytes data]
+* Closing connection
+<!DOCTYPE html>
+<html lang="en">
+[0m
+[0m$ [0mnpm i -D playwright-core 2>&1 | tail -3; node -e "console.log('node ok')"
+added 1 package in 1s
+node ok
+[0m
+[0m$ [0mls /Applications 2>&1 | head -20; ls ~/Library/Caches/ms-playwright 2>&1 | head; which safari 2>&1 | head -2; ls /usr/bin | grep -i -E "chrom|safari|firefox" | head
+Firefox.app
+Google Chrome for Testing.app
+Google Chrome.app
+Microsoft Edge.app
+PowerShell.app
+Python 3.11
+Python 3.12
+Python 3.13
+Python 3.14
+Safari.app
+Utilities
+Xcode_26.0.1.app
+Xcode_26.0.app
+Xcode_26.1.1.app
+Xcode_26.1.app
+Xcode_26.2.0.app
+Xcode_26.2.app
+Xcode_26.3.0.app
+Xcode_26.3.app
+Xcode_26.4.1.app
+ls: /Users/runner/Library/Caches/ms-playwright: No such file or directory
+safaridriver
+[0m
+[0m$ [0mnode -e "
+const {chromium}=require('playwright-core');
+(async()=>{
+ const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--no-sandbox','--use-gl=swiftshader','--enable-unsafe-swiftshader']});
+ const page=await browser.newPage({viewport:{width:1280,height:800}});
+ page.on('console',m=>console.log('CONSOLE:',m.type(),m.text().slice(0,200)));
+ page.on('pageerror',e=>console.log('PAGEERROR:',String(e).slice(0,300)));
+ await page.goto('http://127.0.0.1:8901/twisted-metal/index.html?force2d=1',{waitUntil:'networkidle'});
+ await page.waitForTimeout(1500);
+ await page.screenshot({path:'twisted-metal/evidence/01-title.png'});
+ await page.click('#btn-start'); await page.waitForTimeout(600);
+ await page.screenshot({path:'twisted-metal/evidence/02-select.png'});
+ await page.click('#btn-fight'); await page.waitForTimeout(1500);
+ await page.screenshot({path:'twisted-metal/evidence/03-countdown.png'});
+ await page.waitForTimeout(3500);
+ await page.keyboard.down('w'); await page.waitForTimeout(2000); await page.keyboard.up('w');
+ await page.keyboard.press('k'); await page.waitForTimeout(500);
+ await page.keyboard.press('e'); await page.waitForTimeout(1500);
+ await page.screenshot({path:'twisted-metal/evidence/04-battle.png'});
+ const st=await page.evaluate(()=>window.__TM?window.__TM.state():({err:'no TM'}));
+ console.log('STATE:'+JSON.stringify(st));
+ // pause test
+ await page.keyboard.press('p'); await page.waitForTimeout(600);
+ await page.screenshot({path:'twisted-metal/evidence/05-pause.png'});
+ const paused=await page.evaluate(()=>document.getElementById('screen-pause').classList.contains('hidden')?'notpaused':'paused');
+ console.log('PAUSE:'+paused);
+ await page.click('#btn-resume'); await page.waitForTimeout(800);
+ // damage test
+ const dmg=await page.evaluate(()=>{const t=window.__TM;const hp0=t.G.player.hp;t.damage(t.G.player,30,{name:'TEST',isPlayer:false},1,0);return {hp0,hp1:t.G.player.hp};});
+ console.log('DAMAGE:'+JSON.stringify(dmg));
+ await page.screenshot({path:'twisted-metal/evidence/06-damage.png'});
+ await browser.close();
+ console.log('DONE');
+})().catch(e=>{console.error('FAIL',e);process.exit(1);});
+"
+PAGEERROR: SyntaxError: Invalid optional chain from new expression
+CONSOLE: error Failed to load resource: the server responded with a status of 404 (File not found)
+FAIL page.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('#btn-fight')
+    - locator resolved to <button class="big" id="btn-fight">FIGHT →</button>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is not visible
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is not visible
+    - retrying click action
+      - waiting 100ms
+    46 × waiting for element to be visible, enabled and stable
+       - element is not visible
+     - retrying click action
+       - waiting 500ms
+    - waiting for element to be visible, enabled and stable
+
+    at [eval]:13:13 {
+  log: [
+    "  - waiting for locator('#btn-fight')",
+    '    - locator resolved to <button class="big" id="btn-fight">FIGHT →</button>',
+    '  - attempting click action',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not visible',
+    '    - retrying click action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not visible',
+    '    - retrying click action',
+    '      - waiting 100ms',
+    '    46 × waiting for element to be visible, enabled and stable',
+    '       - element is not visible',
+    '     - retrying click action',
+    '       - waiting 500ms',
+    '    - waiting for element to be visible, enabled and stable'
+  ],
+  name: 'TimeoutError'
+}
+[0m
+Browser test caught a script error — fixing it now.
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -284,9 +284,9 @@
+  m.userData.hpbar.scale.x=5*Math.max(0,c.hp/c.maxhp);m.visible=c.alive;
+  m.userData.shield.material.opacity=c.shieldT>0?.25+Math.sin(performance.now()/150)*.1:0;
+  for(const w of c.wheels||[])w.rotation.z-=c.speed*.05;
+  return m;}
+-const tmpV=new THREE.Vector3?.()||null;
++const tmpV=null;
+ function syncMeshes(){if(!G.use3D||!scene)return;
+  // clear stale
+  for(const [c,m] of [...carMeshes]){if(c!==G.player&&!G.bots.includes(c)){scene.remove(m);carMeshes.delete(c);}}
+  for(const c of [G.player,...G.bots])if(c)carMesh(c);
+
+[0m
+[0m$ [0mnode --check twisted-metal/game.js && echo OK; node -e "
+const {chromium}=require('playwright-core');
+(async()=>{
+ const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--no-sandbox','--use-gl=swiftshader','--enable-unsafe-swiftshader']});
+ const page=await browser.newPage({viewport:{width:1280,height:800}});
+ page.on('console',m=>console.log('CONSOLE:',m.type(),m.text().slice(0,220)));
+ page.on('pageerror',e=>console.log('PAGEERROR:',String(e).slice(0,300)));
+ await page.goto('http://127.0.0.1:8901/twisted-metal/index.html?force2d=1',{waitUntil:'networkidle'});
+ await page.waitForTimeout(1500);
+ await page.screenshot({path:'twisted-metal/evidence/01-title.png'});
+ await page.click('#btn-start'); await page.waitForTimeout(600);
+ await page.screenshot({path:'twisted-metal/evidence/02-select.png'});
+ await page.click('#btn-fight'); await page.waitForTimeout(1200);
+ await page.screenshot({path:'twisted-metal/evidence/03-countdown.png'});
+ await page.waitForTimeout(3500);
+ await page.keyboard.down('w'); await page.waitForTimeout(2000); await page.keyboard.up('w');
+ await page.keyboard.press('k'); await page.waitForTimeout(500);
+ await page.keyboard.press('e'); await page.waitForTimeout(1500);
+ await page.screenshot({path:'twisted-metal/evidence/04-battle.png'});
+ const st=await page.evaluate(()=>window.__TM?window.__TM.state():({err:'no TM'}));
+ console.log('STATE:'+JSON.stringify(st));
+ await page.keyboard.press('p'); await page.waitForTimeout(600);
+ await page.screenshot({path:'twisted-metal/evidence/05-pause.png'});
+ const paused=await page.evaluate(()=>document.getElementById('screen-pause').classList.contains('hidden')?'notpaused':'paused');
+ console.log('PAUSE:'+paused);
+ await page.click('#btn-resume'); await page.waitForTimeout(800);
+ const dmg=await page.evaluate(()=>{const t=window.__TM;const hp0=t.G.player.hp;t.damage(t.G.player,30,{name:'TEST',isPlayer:false},1,0);return {hp0,hp1:t.G.player.hp};});
+ console.log('DAMAGE:'+JSON.stringify(dmg));
+ const st2=await page.evaluate(()=>window.__TM.state());
+ console.log('STATE2:'+JSON.stringify(st2));
+ await page.screenshot({path:'twisted-metal/evidence/06-damage.png'});
+ await browser.close(); console.log('DONE');
+})().catch(e=>{console.error('FAIL',e);process.exit(1);});
+"
+OK
+CONSOLE: warning 3D unavailable, 2D fallback: Error: forced 2d
+    at initThree (http://127.0.0.1:8901/twisted-metal/game.js:238:28)
+    at http://127.0.0.1:8901/twisted-metal/game.js:378:30
+CONSOLE: error Failed to load resource: the server responded with a status of 404 (File not found)
+CONSOLE: error Failed to load resource: the server responded with a status of 404 (File not found)
+STATE:{"state":"play","kills":0,"playerHp":104,"bots":5,"pickups":9,"use3D":false,"fps":28}
+PAUSE:notpaused
+FAIL page.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('#btn-resume')
+    - locator resolved to <button class="big" id="btn-resume">RESUME</button>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is not visible
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is not visible
+    - retrying click action
+      - waiting 100ms
+    49 × waiting for element to be visible, enabled and stable
+       - element is not visible
+     - retrying click action
+       - waiting 500ms
+
+    at [eval]:26:13 {
+  log: [
+    "  - waiting for locator('#btn-resume')",
+    '    - locator resolved to <button class="big" id="btn-resume">RESUME</button>',
+    '  - attempting click action',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not visible',
+    '    - retrying click action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not visible',
+    '    - retrying click action',
+    '      - waiting 100ms',
+    '    49 × waiting for element to be visible, enabled and stable',
+    '       - element is not visible',
+    '     - retrying click action',
+    '       - waiting 500ms'
+  ],
+  name: 'TimeoutError'
+}
+[0m
+[0m→ [0mRead twisted-metal/evidence/01-title.png
+[0m→ [0mRead twisted-metal/evidence/04-battle.png
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -349,9 +349,9 @@
+  ctx2d.fillStyle='#ff2a1a';ctx2d.fillRect(X(-3)-4,Z(-3)-4,8,8);
+  const draw=(c,col)=>{if(!c||!c.alive)return;ctx2d.save();ctx2d.translate(X(c.x),Z(c.z));ctx2d.rotate(-c.ang);ctx2d.fillStyle=col;ctx2d.fillRect(-11,-6,22,12);ctx2d.fillStyle='#000';ctx2d.fillRect(2,-5,6,10);ctx2d.restore();};
+  draw(G.player,'#ff5a2a');G.bots.forEach((b,i)=>draw(b,['#7f7','#fff','#f7f','#8cf','#fa0'][i%5]));
+  ctx2d.fillStyle='#ffe28a';for(const b of G.bullets)ctx2d.fillRect(X(b.x)-2,Z(b.z)-2,4,4);
+- ctx2d.fillStyle='#fff';ctx2d.font='16px monospace';ctx2d.fillText(G.use3D?'':'2D FALLBACK MODE (?force2d) — add ?force2d to test offline',12,24);}
++ ctx2d.fillStyle='#fff';ctx2d.font='16px monospace';ctx2d.fillText('OFFLINE 2D MODE — same rules, no CDN needed',12,24);}
+ function drawMinimap(){const S=160;mctx.clearRect(0,0,S,S);mctx.fillStyle='#000a';mctx.fillRect(0,0,S,S);
+  const dot=(x,z,c,r=3)=>{mctx.fillStyle=c;mctx.beginPath();mctx.arc(S/2+x/ARENA*S/2,S/2+z/ARENA*S/2,r,0,7);mctx.fill();};
+  mctx.strokeStyle='#ffffff33';mctx.strokeRect(2,2,S-4,S-4);
+  for(const pk of G.pickups)dot(pk.x,pk.z,'#0f8');
+
+[0m
+[0m← [0mEdit twisted-metal/index.html
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/index.html
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/index.html
+@@ -4,8 +4,9 @@
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+ <title>TWISTED METAL: Rust Arena — Browser Vehicular Combat</title>
+ <meta name="description" content="Fan-homage browser vehicular combat: arena deathmatch, weapon pickups, AI rivals, hazards. Free playable demo.">
++<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%23a30000'/><text x='2' y='12' font-size='10' fill='white'>TM</text></svg>">
+ <link rel="stylesheet" href="style.css">
+ <script type="importmap">
+ {"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
+ </script>
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -376,6 +376,6 @@
+  if(k==='fire1'){keys['j']=v;}if(k==='fire2'&&v)fireWeapon(G.player);if(k==='special'&&v)fireSpecial(G.player);}
+ // boot
+ setState('title');showBest();initThree();requestAnimationFrame(t=>{last=t;requestAnimationFrame(loop);});
+ // smoke hook for automated verification
+-window.__TM={G,startBattle,damage,VEHICLES,
++window.__TM={G,startBattle,damage,togglePause,VEHICLES,
+  state:()=>({state:G.state,kills:G.kills,playerHp:G.player?.hp,bots:G.bots.length,pickups:G.pickups.length,use3D:G.use3D,fps:G.fps})};
+
+[0m
+[0m$ [0mnode -e "
+const {chromium}=require('playwright-core');
+(async()=>{
+ const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--no-sandbox','--use-gl=swiftshader','--enable-unsafe-swiftshader']});
+ const page=await browser.newPage({viewport:{width:1280,height:800}});
+ page.on('pageerror',e=>console.log('PAGEERROR:',String(e).slice(0,300)));
+ // 3D attempt (network may or may not work)
+ const p2=await browser.newPage({viewport:{width:1280,height:800}});
+ p2.on('pageerror',e=>console.log('3D-PAGEERROR:',String(e).slice(0,200)));
+ await p2.goto('http://127.0.0.1:8901/twisted-metal/index.html',{waitUntil:'networkidle'}).catch(e=>console.log('3D-goto:',e.message.slice(0,120)));
+ await p2.waitForTimeout(6000);
+ const st3=await p2.evaluate(()=>window.__TM?window.__TM.state():({err:'no TM module'})).catch(e=>({err:String(e).slice(0,100)}));
+ console.log('3D-STATE:'+JSON.stringify(st3));
+ await p2.screenshot({path:'twisted-metal/evidence/07-3d-attempt.png'}).catch(e=>console.log('shot fail'));
+ await page.goto('http://127.0.0.1:8901/twisted-metal/index.html?force2d=1',{waitUntil:'networkidle'});
+ await page.waitForTimeout(1000);
+ await page.click('#btn-start'); await page.waitForTimeout(400);
+ await page.click('#btn-fight'); await page.waitForTimeout(4500);
+ // pause via real key
+ await page.keyboard.press('p'); await page.waitForTimeout(500);
+ let pz=await page.evaluate(()=>({hidden:document.getElementById('screen-pause').classList.contains('hidden'),st:window.__TM.G.state,paused:window.__TM.G.paused}));
+ console.log('PAUSE-KEY:'+JSON.stringify(pz));
+ await page.screenshot({path:'twisted-metal/evidence/05-pause.png'});
+ if(pz.hidden){console.log('key-pause failed, trying direct toggle');await page.evaluate(()=>window.__TM.togglePause());await page.waitForTimeout(400);
+  pz=await page.evaluate(()=>({hidden:document.getElementById('screen-pause').classList.contains('hidden')}));console.log('PAUSE-DIRECT:'+JSON.stringify(pz));}
+ else {await page.click('#btn-resume'); await page.waitForTimeout(500);
+  console.log('RESUME:'+await page.evaluate(()=>document.getElementById('screen-pause').classList.contains('hidden')?'resumed':'stuck'));}
+ // damage + kill + restart + gameover paths
+ const t=await page.evaluate(()=>{const T=window.__TM;const hp0=T.G.player.hp;T.damage(T.G.player,25,{name:'TEST',isPlayer:false},1,0);
+  const b=T.G.bots[0];T.damage(b,9999,T.G.player,0,0);return {hp0,hp1:T.G.player.hp,kills:T.G.kills,alive:T.G.bots.filter(x=>x.alive).length};});
+ console.log('COMBAT:'+JSON.stringify(t));
+ // force win
+ const w=await page.evaluate(()=>{const T=window.__TM;for(const b of T.G.bots)if(b.alive)T.damage(b,99999,T.G.player,0,0);return {over:T.G.over,state:T.G.state};});
+ console.log('WIN-TRIG:'+JSON.stringify(w));
+ await page.waitForTimeout(1800);
+ await page.screenshot({path:'twisted-metal/evidence/08-victory.png'});
+ console.log('OVER-SHOWN:'+await page.evaluate(()=>document.getElementById('screen-over').classList.contains('hidden')?'hidden':'shown'));
+ // restart
+ await page.click('#btn-again'); await page.waitForTimeout(4500);
+ console.log('RESTART:'+JSON.stringify(await page.evaluate(()=>window.__TM.state())));
+ await page.screenshot({path:'twisted-metal/evidence/09-restart.png'});
+ await browser.close(); console.log('DONE');
+})().catch(e=>{console.error('FAIL',e);process.exit(1);});
+"
+3D-STATE:{"state":"title","kills":0,"bots":0,"pickups":0,"use3D":false,"fps":39}
+PAUSE-KEY:{"hidden":true,"st":"pause","paused":false}
+key-pause failed, trying direct toggle
+PAUSE-DIRECT:{"hidden":true}
+COMBAT:{"hp0":130,"hp1":105,"kills":1,"alive":4}
+WIN-TRIG:{"over":true,"state":"pause"}
+OVER-SHOWN:shown
+RESTART:{"state":"play","kills":0,"playerHp":130,"bots":5,"pickups":10,"use3D":false,"fps":28}
+DONE
+[0m
+Found a real soft-lock: pausing freezes the game with no visible menu. Fixing.
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -69,9 +69,12 @@
+  if(s==='countdown')$('screen-countdown').classList.remove('hidden');
+  if(s==='pause')$('screen-pause').classList.remove('hidden');
+  if(s==='over')$('screen-over').classList.remove('hidden');
+  $('touch').classList.toggle('hidden',!(('ontouchstart'in window)&&s==='play'));}
+-function togglePause(){if(G.state!=='play')return;G.paused=!G.paused;if(G.paused){setState('pause');G.state='pause';}else{setState('play');G.state='play';G.paused=false;}$('screen-pause').classList.toggle('hidden',!G.paused);$('hud').classList.remove('hidden');}
++function togglePause(){
++ if(G.state==='play'&&!G.paused){setState('pause');G.state='pause';G.paused=true;
++  $('screen-pause').classList.remove('hidden');$('hud').classList.remove('hidden');beep(330,.12);}
++ else if(G.state==='pause'&&G.paused){setState('play');G.state='play';G.paused=false;beep(440,.12);}}
+ // ---------- vehicle select ----------
+ function buildCards(){const c=$('cards');c.innerHTML='';VEHICLES.forEach((v,i)=>{const d=document.createElement('div');d.className='card'+(i===G.sel?' sel':'');d.tabIndex=0;
+  d.setAttribute('role','button');d.setAttribute('aria-label',v.name+' '+v.desc);
+  d.innerHTML=`<div class="swatch" style="background:linear-gradient(135deg,#${v.color.toString(16).padStart(6,'0')},#111)"></div><h3>${v.name}</h3><div class="stat">${v.desc}<br>Special: ${v.special}<div class="bars"><i style="width:${v.armor/1.5*100}%"></i><i style="width:${v.speed/1.2*100}%"></i><i style="width:${v.hp/150*100}%"></i></div>ARMOR / SPEED / HULL</div>`;
+
+[0m
+[0m$ [0mnode --check twisted-metal/game.js && echo OK; node -e "
+const {chromium}=require('playwright-core');
+(async()=>{
+ const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--no-sandbox','--use-gl=swiftshader','--enable-unsafe-swiftshader']});
+ const page=await browser.newPage({viewport:{width:1280,height:800}});
+ page.on('pageerror',e=>console.log('PAGEERROR:',String(e).slice(0,200)));
+ await page.goto('http://127.0.0.1:8901/twisted-metal/index.html?force2d=1',{waitUntil:'networkidle'});
+ await page.waitForTimeout(800);
+ await page.click('#btn-start'); await page.waitForTimeout(300);
+ await page.click('#btn-fight'); await page.waitForTimeout(4500);
+ await page.keyboard.press('p'); await page.waitForTimeout(400);
+ console.log('PAUSE1:'+await page.evaluate(()=>JSON.stringify({hidden:document.getElementById('screen-pause').classList.contains('hidden'),st:window.__TM.G.state,pz:window.__TM.G.paused})));
+ await page.screenshot({path:'twisted-metal/evidence/05-pause.png'});
+ await page.click('#btn-resume'); await page.waitForTimeout(400);
+ console.log('RESUME:'+await page.evaluate(()=>JSON.stringify({hidden:document.getElementById('screen-pause').classList.contains('hidden'),st:window.__TM.G.state})));
+ await page.keyboard.press('Escape'); await page.waitForTimeout(400);
+ console.log('PAUSE-ESC:'+await page.evaluate(()=>JSON.stringify({hidden:document.getElementById('screen-pause').classList.contains('hidden'),st:window.__TM.G.state})));
+ await page.click('#btn-resume'); await page.waitForTimeout(400);
+ // responsive check
+ await page.setViewportSize({width:390,height:844}); await page.waitForTimeout(800);
+ await page.screenshot({path:'twisted-metal/evidence/10-mobile.png'});
+ console.log('MOBILE-STATE:'+JSON.stringify(await page.evaluate(()=>window.__TM.state())));
+ await browser.close(); console.log('DONE');
+})().catch(e=>{console.error('FAIL',e);process.exit(1);});
+"
+OK
+PAUSE1:{"hidden":true,"st":"countdown","pz":false}
+FAIL page.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('#btn-resume')
+    - locator resolved to <button class="big" id="btn-resume">RESUME</button>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is not visible
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is not visible
+    - retrying click action
+      - waiting 100ms
+    50 × waiting for element to be visible, enabled and stable
+       - element is not visible
+     - retrying click action
+       - waiting 500ms
+
+    at [eval]:14:13 {
+  log: [
+    "  - waiting for locator('#btn-resume')",
+    '    - locator resolved to <button class="big" id="btn-resume">RESUME</button>',
+    '  - attempting click action',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not visible',
+    '    - retrying click action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not visible',
+    '    - retrying click action',
+    '      - waiting 100ms',
+    '    50 × waiting for element to be visible, enabled and stable',
+    '       - element is not visible',
+    '     - retrying click action',
+    '       - waiting 500ms'
+  ],
+  name: 'TimeoutError'
+}
+[0m
+[0m$ [0mnode -e "
+const {chromium}=require('playwright-core');
+(async()=>{
+ const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--no-sandbox','--use-gl=swiftshader','--enable-unsafe-swiftshader']});
+ const page=await browser.newPage({viewport:{width:1280,height:800}});
+ page.on('pageerror',e=>console.log('PAGEERROR:',String(e).slice(0,200)));
+ await page.goto('http://127.0.0.1:8901/twisted-metal/index.html?force2d=1',{waitUntil:'networkidle'});
+ await page.waitForTimeout(800);
+ await page.click('#btn-start'); await page.waitForTimeout(300);
+ await page.click('#btn-fight');
+ await page.waitForFunction(()=>window.__TM&&window.__TM.G.state==='play',{timeout:30000});
+ console.log('REACHED-PLAY');
+ await page.keyboard.press('p'); await page.waitForTimeout(400);
+ console.log('PAUSE1:'+await page.evaluate(()=>JSON.stringify({hidden:document.getElementById('screen-pause').classList.contains('hidden'),st:window.__TM.G.state,pz:window.__TM.G.paused})));
+ await page.screenshot({path:'twisted-metal/evidence/05-pause.png'});
+ await page.click('#btn-resume'); await page.waitForTimeout(400);
+ console.log('RESUME:'+await page.evaluate(()=>JSON.stringify({hidden:document.getElementById('screen-pause').classList.contains('hidden'),st:window.__TM.G.state})));
+ await page.keyboard.press('Escape'); await page.waitForTimeout(400);
+ console.log('PAUSE-ESC:'+await page.evaluate(()=>JSON.stringify({hidden:document.getElementById('screen-pause').classList.contains('hidden'),st:window.__TM.G.state})));
+ await page.click('#btn-resume'); await page.waitForTimeout(400);
+ console.log('RESUME2:'+await page.evaluate(()=>window.__TM.G.state));
+ await page.setViewportSize({width:390,height:844}); await page.waitForTimeout(800);
+ await page.screenshot({path:'twisted-metal/evidence/10-mobile.png'});
+ console.log('MOBILE-STATE:'+JSON.stringify(await page.evaluate(()=>window.__TM.state())));
+ await browser.close(); console.log('DONE');
+})().catch(e=>{console.error('FAIL',e);process.exit(1);});
+"
+REACHED-PLAY
+PAUSE1:{"hidden":false,"st":"pause","pz":true}
+RESUME:{"hidden":true,"st":"play"}
+PAUSE-ESC:{"hidden":false,"st":"pause"}
+RESUME2:play
+MOBILE-STATE:{"state":"play","kills":0,"playerHp":104,"bots":5,"pickups":10,"use3D":false,"fps":17}
+DONE
+[0m
+Pause fixed and verified. Now running independent critic reviews.
+[0m• [0mCritic: combat gameplay[90m General Agent[0m
+[0m• [0mCritic: visuals & HUD[90m General Agent[0m
+[0m• [0mCritic: flows & a11y[90m General Agent[0m
+[0m✓ [0mCritic: combat gameplay[90m General Agent[0m
+[0m✓ [0mCritic: visuals & HUD[90m General Agent[0m
+[0m✓ [0mCritic: flows & a11y[90m General Agent[0m
+Critics found three gaps — timeout stalemate, flat 2D art, and focus handling. Fixing all three.
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -136,9 +136,13 @@
+  G.frames++;if(t-G.fpsT>500){G.fps=Math.round(G.frames*1000/(t-G.fpsT));G.frames=0;G.fpsT=t;$('fps').textContent=G.fps+' fps · '+(G.use3D?'3D':'2D fallback');}
+  if(G.state==='countdown'){G.countT-=dt;const c=Math.ceil(G.countT-0.6);$('count').textContent=G.countT<0.6?'GO!':String(Math.max(1,c));if(G.countT<=0){setState('play');G.state='play';announce('DESTROY THEM ALL!',2000);beep(880,.4);}}
+  if(G.state==='play'&&!G.paused&&!G.over){update(dt);}
+  render(dt,t/1000);}
+-function update(dt){G.time-=dt;if(G.time<=0){G.time=0;const aliveBots=G.bots.filter(b=>b.alive).length;gameOver(G.player.alive&&aliveBots===0);}
++function update(dt){G.time-=dt;
++ if(G.time<=0){G.time=0;
++  if(!G.sudden){G.sudden=true;announce('SUDDEN DEATH — CALYPSO HUNGRY!',2500);feed('☠ SUDDEN DEATH: all hulls failing');beep(110,.6,'sawtooth',.25);}
++  G.suddenT=(G.suddenT||0)+dt;
++  if(G.suddenT>=1){G.suddenT=0;for(const o of [G.player,...G.bots])if(o.alive)damage(o,5,{name:'CALYPSO',isPlayer:false},0,0);}}
+  $('timer').textContent=fmtT(G.time);
+  stepCar(G.player,dt,true);for(const b of G.bots)stepCar(b,dt,false);
+  // turret
+  const T=G.turret;if(T&&G.player.alive){T.cd-=dt;const tgt=nearestTo(T.x,T.z);if(tgt){T.ang=Math.atan2(-(tgt.z-T.z),tgt.x-T.x);if(T.cd<=0){T.cd=2.2;G.bullets.push({x:T.x,z:T.z,vx:Math.cos(T.ang)*55,vy:-Math.sin(T.ang)*55,life:2.5,dmg:18,from:{name:'TURRET',isPlayer:false},homing:0,kind:'mg'});beep(200,.15,'sawtooth',.12);}}}
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -220,9 +220,11 @@
+  c.wt+=dt;
+ }
+ function aiDrive(c,dt){c.aiT-=dt;
+  if(c.aiT<=0||!c.target||!c.target.alive){c.aiT=2+Math.random()*2;
+-  if(c.hp<40&&Math.random()<.6){let bp=null,bd=1e9;for(const pk of G.pickups){if(pk.kind!=='repair')continue;const d=Math.hypot(pk.x-c.x,pk.z-c.z);if(d<bd){bd=d;bp=pk;}}c.target=bp||nearestEnemy(c);}
++  const needsGun=(c.ammo.homing+c.ammo.napalm)===0;
++  if(c.hp<45&&Math.random()<.6){let bp=null,bd=1e9;for(const pk of G.pickups){if(pk.kind!=='repair')continue;const d=Math.hypot(pk.x-c.x,pk.z-c.z);if(d<bd){bd=d;bp=pk;}}c.target=bp||nearestEnemy(c);}
++  else if(needsGun){let bp=null,bd=1e9;for(const pk of G.pickups){if(pk.kind!=='homing'&&pk.kind!=='napalm')continue;const d=Math.hypot(pk.x-c.x,pk.z-c.z);if(d<bd){bd=d;bp=pk;}}c.target=bp||nearestEnemy(c);}
+   else c.target=Math.random()<.25?(G.pickups[Math.floor(Math.random()*G.pickups.length)]||nearestEnemy(c)):nearestEnemy(c);}
+  const t=c.target;let want=c.ang;
+  if(t){want=Math.atan2(-(t.z-c.z),t.x-c.x);}
+  let d=want-c.ang;while(d>Math.PI)d-=6.283;while(d<-Math.PI)d+=6.283;
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -233,9 +233,11 @@
+ if(Math.abs(c.x)>ARENA-16||Math.abs(c.z)>ARENA-16)c._st+=.8;
+ c.aiCd-=dt;if(c.aiCd<=0&&t&&t.x!==undefined&&Math.abs(d)<.4){c.aiCd=1+Math.random()*2;
+  const dist=Math.hypot((t.x??0)-c.x,(t.z??0)-c.z);
+  if(t.hp!==undefined&&dist<70){ // enemy car
+-  if(Math.random()<.5){const keep=c.windex;c.windex=c.ammo.homing>0?1:0;fireWeapon(c);c.windex=keep;}
++  if(Math.random()<.6){const keep=c.windex;
++   if(dist<25&&c.ammo.napalm>0)c.windex=2;else c.windex=c.ammo.homing>0?1:0;
++   fireWeapon(c);c.windex=keep;}
+   else fireSpecial(c);}
+  else if(dist<8){/* pickup reached */}
+ }
+ if(c.heat>0)c.heat=Math.max(0,c.heat-dt*.5);}
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -45,9 +45,9 @@
+   d.textContent=`${i+1}. ${WEAPONS[i].name} ×${n}`;el.appendChild(d);});}
+ // ---------- level setup ----------
+ function scatter(n,minD){const pts=[];let guard=0;while(pts.length<n&&guard++<800){const x=(Math.random()*2-1)*(ARENA-14),z=(Math.random()*2-1)*(ARENA-14);
+  let ok=true;for(const p of pts){if(Math.hypot(p.x-x,p.z-z)<minD){ok=false;break;}}if(ok)pts.push({x,z});}return pts;}
+-function startBattle(){G.over=false;G.time=180;G.kills=0;G.bullets=[];G.parts=[];G.rings=[];G.pickups=[];G.barrels=[];G.stats={shots:0,hits:0,damage:0};G.overheat=0;G.turbo=100;G.slowmo=1;G.startT=performance.now();
++function startBattle(){G.over=false;G.sudden=false;G.suddenT=0;G.time=180;G.kills=0;G.bullets=[];G.parts=[];G.rings=[];G.pickups=[];G.barrels=[];G.stats={shots:0,hits:0,damage:0};G.overheat=0;G.turbo=100;G.slowmo=1;G.startT=performance.now();
+  $('killfeed').innerHTML='';$('over-stats').innerHTML='';
+  const v=VEHICLES[G.sel];
+  const spawns=scatter(6,34);
+  G.player=mkCar(v,spawns[0].x,spawns[0].z,Math.random()*6.28,true,'YOU ('+v.name+')');
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -105,9 +105,9 @@
+ function spawnParts(x,z,n,col,sp){for(let i=0;i<n;i++){const a=Math.random()*6.28,s=sp*(.3+Math.random());G.parts.push({x,z,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.5+Math.random()*.7,t:0,col});}if(G.parts.length>600)G.parts.splice(0,G.parts.length-600);}
+ function shake(t,m){if(!G.shake)return;G.shakeT=Math.max(G.shakeT,t);G.shakeMag=Math.max(G.shakeMag,m);}
+ function damage(o,dmg,from,dirx,dirz){if(!o.alive||G.over)return;if(o.shieldT>0){dmg*=.25;spawnParts(o.x,o.z,3,0x35c4ff,50);}
+  if(o.ramT>0&&from&&from!==o){damage(from,10,o,0,0);}o.hp-=dmg;
+- if(o.isPlayer){G.stats.damage+=dmg;G.lastDmgDir=Math.atan2(dirz||0,dirx||0);$('dmg-flash').style.opacity=Math.min(.8,.25+dmg/60);setTimeout(()=>$('dmg-flash').style.opacity=0,140);beep(90,.15,'sawtooth',.2);}
++ if(o.isPlayer){G.stats.damage+=dmg;G.lastDmgDir=Math.atan2(dirz||0,dirx||0);G.lastDmgT=performance.now();$('dmg-flash').style.opacity=Math.min(.8,.25+dmg/60);setTimeout(()=>$('dmg-flash').style.opacity=0,140);beep(90,.15,'sawtooth',.2);}
+  if(from&&from.isPlayer&&o!==from){G.stats.hits++;hitmark();}
+  if(o.hp<=0){o.hp=0;o.alive=false;explode(o.x,o.z,true,from);
+   const kn=from?from.name:'ARENA';
+   feed(`${kn} 💥 ${o.name}`);
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -67,10 +67,11 @@
+  if(s==='title'){$('screen-title').classList.remove('hidden');showBest();}
+  if(s==='select'){$('screen-select').classList.remove('hidden');buildCards();}
+  if(s==='countdown')$('screen-countdown').classList.remove('hidden');
+  if(s==='pause')$('screen-pause').classList.remove('hidden');
+- if(s==='over')$('screen-over').classList.remove('hidden');
++ if(s==='over'){$('screen-over').classList.remove('hidden');setTimeout(()=>$('btn-again').focus(),50);}
+  $('touch').classList.toggle('hidden',!(('ontouchstart'in window)&&s==='play'));}
++function shake(t,m){if(!G.shake||G.reduced)return;G.shakeT=Math.max(G.shakeT,t);G.shakeMag=Math.max(G.shakeMag,m);}
+ function togglePause(){
+  if(G.state==='play'&&!G.paused){setState('pause');G.state='pause';G.paused=true;
+   $('screen-pause').classList.remove('hidden');$('hud').classList.remove('hidden');beep(330,.12);}
+  else if(G.state==='pause'&&G.paused){setState('play');G.state='play';G.paused=false;beep(440,.12);}}
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -103,9 +103,9 @@
+ function explode(x,z,big,from){const n=big?26:12;spawnParts(x,z,n,0xff6a00,120);spawnParts(x,z,Math.floor(n/2),0x333333,60);
+  G.rings.push({x,z,r:1,t:0,dmg:0,from});noise(big?.6:.25,big?.4:.2);shake(big?.6:.25,big?1:.4);
+  if(!G.reduced){$('dmg-flash').style.opacity=.25;setTimeout(()=>$('dmg-flash').style.opacity=0,120);}}
+ function spawnParts(x,z,n,col,sp){for(let i=0;i<n;i++){const a=Math.random()*6.28,s=sp*(.3+Math.random());G.parts.push({x,z,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.5+Math.random()*.7,t:0,col});}if(G.parts.length>600)G.parts.splice(0,G.parts.length-600);}
+-function shake(t,m){if(!G.shake)return;G.shakeT=Math.max(G.shakeT,t);G.shakeMag=Math.max(G.shakeMag,m);}
++/* shake() defined near setState (reduced-motion aware) */
+ function damage(o,dmg,from,dirx,dirz){if(!o.alive||G.over)return;if(o.shieldT>0){dmg*=.25;spawnParts(o.x,o.z,3,0x35c4ff,50);}
+  if(o.ramT>0&&from&&from!==o){damage(from,10,o,0,0);}o.hp-=dmg;
+  if(o.isPlayer){G.stats.damage+=dmg;G.lastDmgDir=Math.atan2(dirz||0,dirx||0);G.lastDmgT=performance.now();$('dmg-flash').style.opacity=Math.min(.8,.25+dmg/60);setTimeout(()=>$('dmg-flash').style.opacity=0,140);beep(90,.15,'sawtooth',.2);}
+  if(from&&from.isPlayer&&o!==from){G.stats.hits++;hitmark();}
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -63,10 +63,10 @@
+  announce('READY…');beep(220,.3);}
+ function setState(s){G.state=s;G.paused=false;
+  for(const id of ['screen-title','screen-select','screen-countdown','screen-pause','screen-over'])$(id).classList.add('hidden');
+  $('hud').classList.toggle('hidden',!(s==='play'||s==='countdown'));
+- if(s==='title'){$('screen-title').classList.remove('hidden');showBest();}
+- if(s==='select'){$('screen-select').classList.remove('hidden');buildCards();}
++ if(s==='title'){$('screen-title').classList.remove('hidden');showBest();setTimeout(()=>$('btn-start').focus(),50);}
++ if(s==='select'){$('screen-select').classList.remove('hidden');buildCards();setTimeout(()=>$('btn-fight').focus(),50);}
+  if(s==='countdown')$('screen-countdown').classList.remove('hidden');
+  if(s==='pause')$('screen-pause').classList.remove('hidden');
+  if(s==='over'){$('screen-over').classList.remove('hidden');setTimeout(()=>$('btn-again').focus(),50);}
+  $('touch').classList.toggle('hidden',!(('ontouchstart'in window)&&s==='play'));}
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -66,9 +66,9 @@
+  $('hud').classList.toggle('hidden',!(s==='play'||s==='countdown'));
+  if(s==='title'){$('screen-title').classList.remove('hidden');showBest();setTimeout(()=>$('btn-start').focus(),50);}
+  if(s==='select'){$('screen-select').classList.remove('hidden');buildCards();setTimeout(()=>$('btn-fight').focus(),50);}
+  if(s==='countdown')$('screen-countdown').classList.remove('hidden');
+- if(s==='pause')$('screen-pause').classList.remove('hidden');
++ if(s==='pause'){$('screen-pause').classList.remove('hidden');setTimeout(()=>$('btn-resume').focus(),50);}
+  if(s==='over'){$('screen-over').classList.remove('hidden');setTimeout(()=>$('btn-again').focus(),50);}
+  $('touch').classList.toggle('hidden',!(('ontouchstart'in window)&&s==='play'));}
+ function shake(t,m){if(!G.shake||G.reduced)return;G.shakeT=Math.max(G.shakeT,t);G.shakeMag=Math.max(G.shakeMag,m);}
+ function togglePause(){
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -116,9 +116,9 @@
+   if(o.isPlayer){gameOver(false);}
+   else if(G.bots.every(b=>!b.alive))gameOver(true);
+   $('alive-count').textContent=[G.player,...G.bots].filter(c=>c.alive).length;}}
+ function hitmark(){const h=$('hitmarker');h.classList.remove('hidden');clearTimeout(h._t);h._t=setTimeout(()=>h.classList.add('hidden'),120);}
+-function gameOver(win){if(G.over)return;G.over=true;G.slowmo=.25;setTimeout(()=>G.slowmo=1,900);
++function gameOver(win){if(G.over)return;G.over=true;if(!G.reduced){G.slowmo=.25;setTimeout(()=>G.slowmo=1,900);}
+  const t=((performance.now()-G.startT)/1000)|0;const best=JSON.parse(localStorage.getItem('tm_best')||'null');
+  const score=G.kills*1000+Math.max(0,180-Math.floor(G.time))*10+(win?5000:0);
+  if(!best||score>best.score)localStorage.setItem('tm_best',JSON.stringify({score,kills:G.kills,win,date:new Date().toISOString().slice(0,10)}));
+  setTimeout(()=>{setState('over');G.state='over';
+
+[0m
+[0m✗ [0mEdit twisted-metal/game.js failed
+[91m[1mError: [0mCould not find oldString in the file. It must match exactly, including whitespace, indentation, and line endings.
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -386,8 +386,9 @@
+  b.addEventListener('pointerdown',dn);b.addEventListener('pointerup',up);b.addEventListener('pointerleave',up);});
+ function touchSet(k,v){if(k==='left')keys['a']=v;if(k==='right')keys['d']=v;if(k==='up')keys['w']=v;if(k==='down')keys['s']=v;
+  if(k==='fire1'){keys['j']=v;}if(k==='fire2'&&v)fireWeapon(G.player);if(k==='special'&&v)fireSpecial(G.player);}
+ // boot
++try{if(matchMedia('(prefers-reduced-motion: reduce)').matches){G.reduced=true;$('opt-reduced').checked=true;}}catch{}
+ setState('title');showBest();initThree();requestAnimationFrame(t=>{last=t;requestAnimationFrame(loop);});
+ // smoke hook for automated verification
+ window.__TM={G,startBattle,damage,togglePause,VEHICLES,
+  state:()=>({state:G.state,kills:G.kills,playerHp:G.player?.hp,bots:G.bots.length,pickups:G.pickups.length,use3D:G.use3D,fps:G.fps})};
+
+[0m
+[0m✱ [0mGrep "dmg-flash|G\.reduced"[90m in twisted-metal · 6 matches[0m
+[0m
+[0m← [0mEdit twisted-metal/index.html
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/index.html
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/index.html
+@@ -19,9 +19,9 @@
+ <div id="dmg-flash"></div>
+ <div id="letterbox-top"></div><div id="letterbox-bottom"></div>
+ 
+ <!-- HUD -->
+-<div id="hud" class="hidden" aria-hidden="true">
++<div id="hud" class="hidden" role="status" aria-label="Battle status: hull, turbo, weapons, timer">
+   <div id="hud-top">
+     <div id="timer" role="timer">3:00</div>
+     <div id="alive">ALIVE <b id="alive-count">6</b></div>
+     <div id="kills">KILLS <b id="kill-count">0</b></div>
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -106,9 +106,9 @@
+ function spawnParts(x,z,n,col,sp){for(let i=0;i<n;i++){const a=Math.random()*6.28,s=sp*(.3+Math.random());G.parts.push({x,z,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.5+Math.random()*.7,t:0,col});}if(G.parts.length>600)G.parts.splice(0,G.parts.length-600);}
+ /* shake() defined near setState (reduced-motion aware) */
+ function damage(o,dmg,from,dirx,dirz){if(!o.alive||G.over)return;if(o.shieldT>0){dmg*=.25;spawnParts(o.x,o.z,3,0x35c4ff,50);}
+  if(o.ramT>0&&from&&from!==o){damage(from,10,o,0,0);}o.hp-=dmg;
+- if(o.isPlayer){G.stats.damage+=dmg;G.lastDmgDir=Math.atan2(dirz||0,dirx||0);G.lastDmgT=performance.now();$('dmg-flash').style.opacity=Math.min(.8,.25+dmg/60);setTimeout(()=>$('dmg-flash').style.opacity=0,140);beep(90,.15,'sawtooth',.2);}
++ if(o.isPlayer){G.stats.damage+=dmg;G.lastDmgDir=Math.atan2(dirz||0,dirx||0);G.lastDmgT=performance.now();if(!G.reduced){$('dmg-flash').style.opacity=Math.min(.8,.25+dmg/60);setTimeout(()=>$('dmg-flash').style.opacity=0,140);}beep(90,.15,'sawtooth',.2);}
+  if(from&&from.isPlayer&&o!==from){G.stats.hits++;hitmark();}
+  if(o.hp<=0){o.hp=0;o.alive=false;explode(o.x,o.z,true,from);
+   const kn=from?from.name:'ARENA';
+   feed(`${kn} 💥 ${o.name}`);
+
+[0m
+[0m← [0mEdit twisted-metal/index.html
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/index.html
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/index.html
+@@ -50,8 +50,9 @@
+   <button data-k="left" aria-label="Steer left">◀</button>
+   <button data-k="right" aria-label="Steer right">▶</button>
+ </div>
+ <div class="t-right">
++  <button data-k="pause" aria-label="Pause">II</button>
+   <button data-k="up" aria-label="Accelerate">▲</button>
+   <button data-k="down" aria-label="Brake">▼</button>
+   <button data-k="fire1" aria-label="Fire machine gun">MG</button>
+   <button data-k="fire2" aria-label="Fire missile">🚀</button>
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -384,9 +384,9 @@
+ $('opt-reduced').onchange=e=>G.reduced=e.target.checked;
+ document.querySelectorAll('#touch button').forEach(b=>{const k=b.dataset.k;const dn=e=>{e.preventDefault();touchSet(k,true);};const up=e=>{e.preventDefault();touchSet(k,false);};
+  b.addEventListener('pointerdown',dn);b.addEventListener('pointerup',up);b.addEventListener('pointerleave',up);});
+ function touchSet(k,v){if(k==='left')keys['a']=v;if(k==='right')keys['d']=v;if(k==='up')keys['w']=v;if(k==='down')keys['s']=v;
+- if(k==='fire1'){keys['j']=v;}if(k==='fire2'&&v)fireWeapon(G.player);if(k==='special'&&v)fireSpecial(G.player);}
++ if(k==='fire1'){keys['j']=v;}if(k==='fire2'&&v)fireWeapon(G.player);if(k==='special'&&v)fireSpecial(G.player);if(k==='pause'&&v)togglePause();}
+ // boot
+ try{if(matchMedia('(prefers-reduced-motion: reduce)').matches){G.reduced=true;$('opt-reduced').checked=true;}}catch{}
+ setState('title');showBest();initThree();requestAnimationFrame(t=>{last=t;requestAnimationFrame(loop);});
+ // smoke hook for automated verification
+
+[0m
+[0m← [0mEdit twisted-metal/style.css
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/style.css
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/style.css
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/style.css
+@@ -62,6 +62,8 @@
+ #touch{position:absolute;inset:auto 0 0 0;display:flex;justify-content:space-between;padding:0 10px 76px;z-index:15;pointer-events:none}
+ #touch button{pointer-events:auto;width:62px;height:62px;font-size:20px;background:#ffffff1c;color:#fff;border:1px solid #ffffff44;margin:4px}
+ #touch .t-left,#touch .t-right{display:flex;align-items:flex-end}
+ #err{position:absolute;left:10px;bottom:40px;z-index:50;background:#3a0000ee;color:#ffd9d9;font-family:monospace;font-size:12px;padding:8px 10px;border:1px solid red;border-radius:6px;max-width:70vw}
+-@media (max-width:700px){#minimap{width:92px;height:92px}#hud-bottom-right{width:150px}#fps{display:none}}
++@media (max-width:700px){#minimap{width:92px;height:92px}#hud-bottom-right{width:150px}#weapon-list{font-size:10px}#fps{display:none}}
++button:focus-visible,.card:focus-visible{outline:3px solid #39ff5a;outline-offset:2px}
++.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+ @media (prefers-reduced-motion:reduce){#vignette{box-shadow:none}}
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /Users/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -349,21 +349,39 @@
+  if(G.turret&&G.turret.mesh)G.turret.mesh.userData.gun.rotation.y=G.turret.ang;
+  // health bars face camera automatically (sprites)
+  renderer.render(scene,camera);}
+ function syncDynamic(){if(G.player)carMesh(G.player);for(const b of G.bots)carMesh(b);}
+-function render2D(tt){const w=canvas.width,h=canvas.height;ctx2d.fillStyle='#10131a';ctx2d.fillRect(0,0,w,h);
++function render2D(tt){const w=canvas.width,h=canvas.height;ctx2d.fillStyle='#14100d';ctx2d.fillRect(0,0,w,h);
+  const p=G.player||{x:0,z:0,ang:0};const s=Math.min(w,h)/(ARENA*2.4);
+  const X=x=>w/2+(x-p.x)*s, Z=z=>h/2+(z-p.z)*s;
+- ctx2d.strokeStyle='#3a4150';ctx2d.lineWidth=3;ctx2d.strokeRect(X(-ARENA),Z(-ARENA),ARENA*2*s,ARENA*2*s);
+- ctx2d.fillStyle='#333a45';if(G.blocks)for(const b of G.blocks)ctx2d.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*s,b.d*s);
+- for(const br of G.barrels){ctx2d.fillStyle='#cc2222';ctx2d.beginPath();ctx2d.arc(X(br.x),Z(br.z),2.2*s,0,7);ctx2d.fill();}
++ // rust-noise ground speckle (deterministic)
++ ctx2d.fillStyle='#ffffff08';for(let i=0;i<90;i++){const gx=((i*53)%200)-100,gz=((i*91)%200)-100;ctx2d.fillRect(X(gx),Z(gz),2,2);}
++ ctx2d.strokeStyle='#ff2a1a66';ctx2d.lineWidth=3;ctx2d.strokeRect(X(-ARENA),Z(-ARENA),ARENA*2*s,ARENA*2*s);
++ ctx2d.fillStyle='#2e2a26';if(G.blocks)for(const b of G.blocks){ctx2d.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*s,b.d*s);ctx2d.strokeStyle='#00000088';ctx2d.strokeRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*s,b.d*s);}
++ // decals: scorch craters
++ ctx2d.fillStyle='#00000055';for(const r of G.rings){ctx2d.beginPath();ctx2d.arc(X(r.x),Z(r.z),Math.min(20,r.r)*s*.5,0,7);ctx2d.fill();}
++ for(const br of G.barrels){ctx2d.fillStyle='#cc2222';ctx2d.beginPath();ctx2d.arc(X(br.x),Z(br.z),2.2*s,0,7);ctx2d.fill();ctx2d.fillStyle='#ffdd44';ctx2d.fillRect(X(br.x)-2,Z(br.z)-5,4,3);}
+  const cols={homing:'#39ff5a',napalm:'#ff6a00',repair:'#fff',turbo:'#35c4ff',shield:'#b44dff'};
+- for(const pk of G.pickups){ctx2d.fillStyle=cols[pk.kind]||'#fff';ctx2d.save();ctx2d.translate(X(pk.x),Z(pk.z));ctx2d.rotate(tt*2);ctx2d.fillRect(-6,-6,12,12);ctx2d.restore();}
+- ctx2d.fillStyle='#ff2a1a';ctx2d.fillRect(X(-3)-4,Z(-3)-4,8,8);
+- const draw=(c,col)=>{if(!c||!c.alive)return;ctx2d.save();ctx2d.translate(X(c.x),Z(c.z));ctx2d.rotate(-c.ang);ctx2d.fillStyle=col;ctx2d.fillRect(-11,-6,22,12);ctx2d.fillStyle='#000';ctx2d.fillRect(2,-5,6,10);ctx2d.restore();};
+- draw(G.player,'#ff5a2a');G.bots.forEach((b,i)=>draw(b,['#7f7','#fff','#f7f','#8cf','#fa0'][i%5]));
++ for(const pk of G.pickups){ctx2d.fillStyle=cols[pk.kind]||'#fff';ctx2d.save();ctx2d.translate(X(pk.x),Z(pk.z));ctx2d.rotate(tt*2);ctx2d.fillRect(-6,-6,12,12);ctx2d.strokeStyle='#000';ctx2d.strokeRect(-6,-6,12,12);ctx2d.restore();}
++ // center turret
++ ctx2d.fillStyle='#ff2a1a';ctx2d.save();ctx2d.translate(X(0),Z(0));ctx2d.rotate(G.turret?-G.turret.ang:0);ctx2d.fillRect(-8,-3,16,6);ctx2d.restore();
++ ctx2d.fillStyle='#888';ctx2d.beginPath();ctx2d.arc(X(0),Z(0),5,0,7);ctx2d.fill();
++ const draw=(c,col)=>{if(!c||!c.alive)return;ctx2d.save();ctx2d.translate(X(c.x),Z(c.z));ctx2d.rotate(-c.ang);
++  ctx2d.fillStyle='#000000aa';ctx2d.fillRect(-12,-6,24,14);
++  ctx2d.fillStyle=col;ctx2d.fillRect(-11,-6,22,12);
++  ctx2d.fillStyle='#10141c';ctx2d.fillRect(-2,-5,7,10); // cabin
++  ctx2d.fillStyle='#ffe9a8';ctx2d.fillRect(11,-5,3,3);ctx2d.fillRect(11,2,3,3); // headlights
++  if(c.shieldT>0){ctx2d.strokeStyle='#35c4ff';ctx2d.lineWidth=2;ctx2d.beginPath();ctx2d.arc(0,0,15,0,7);ctx2d.stroke();}
++  ctx2d.restore();
++  // hp bar
++  ctx2d.fillStyle='#000';ctx2d.fillRect(X(c.x)-12,Z(c.z)-16,24,4);
++  ctx2d.fillStyle=c.hp/c.maxhp>.5?'#39ff5a':c.hp/c.maxhp>.25?'#ffb400':'#ff2a1a';
++  ctx2d.fillRect(X(c.x)-12,Z(c.z)-16,24*Math.max(0,c.hp/c.maxhp),4);};
++ draw(G.player,'#ff5a2a');G.bots.forEach((b,i)=>draw(b,['#7fd67f','#e8e8e8','#e07fe0','#8cc8ff','#ffaa33'][i%5]));
+  ctx2d.fillStyle='#ffe28a';for(const b of G.bullets)ctx2d.fillRect(X(b.x)-2,Z(b.z)-2,4,4);
+- ctx2d.fillStyle='#fff';ctx2d.font='16px monospace';ctx2d.fillText('OFFLINE 2D MODE — same rules, no CDN needed',12,24);}
++ // damage direction arc (uses G.lastDmgDir)
++ if(G.lastDmgT&&performance.now()-G.lastDmgT<900&&G.player){ctx2d.strokeStyle='#ff2a1a';ctx2d.lineWidth=4;ctx2d.beginPath();
++  ctx2d.arc(w/2,h/2,46,G.lastDmgDir-.5,G.lastDmgDir+.5);ctx2d.stroke();}}
+ function drawMinimap(){const S=160;mctx.clearRect(0,0,S,S);mctx.fillStyle='#000a';mctx.fillRect(0,0,S,S);
+  const dot=(x,z,c,r=3)=>{mctx.fillStyle=c;mctx.beginPath();mctx.arc(S/2+x/ARENA*S/2,S/2+z/ARENA*S/2,r,0,7);mctx.fill();};
+  mctx.strokeStyle='#ffffff33';mctx.strokeRect(2,2,S-4,S-4);
+  for(const pk of G.pickups)dot(pk.x,pk.z,'#0f8');
+
+[0m
+All three critic gaps patched — re-verifying the full loop.
+[0m$ [0mnode --check twisted-metal/game.js && echo OK; node -e "
+const {chromium}=require('playwright-core');
+(async()=>{
+ const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--no-sandbox','--use-gl=swiftshader','--enable-unsafe-swiftshader']});
+ const page=await browser.newPage({viewport:{width:1280,height:800}});
+ const errs=[];page.on('pageerror',e=>errs.push(String(e).slice(0,150)));
+ await page.goto('http://127.0.0.1:8901/twisted-metal/index.html?force2d=1',{waitUntil:'networkidle'});
+ await page.waitForTimeout(800);
+ await page.click('#btn-start'); await page.waitForTimeout(300);
+ await page.screenshot({path:'twisted-metal/evidence/02-select.png'});
+ await page.click('#btn-fight');
+ await page.waitForFunction(()=>window.__TM&&window.__TM.G.state==='play',{timeout:30000});
+ await page.keyboard.down('w'); await page.waitForTimeout(1500); await page.keyboard.up('w');
+ await page.keyboard.press('k'); await page.waitForTimeout(400); await page.keyboard.press('e'); await page.waitForTimeout(1200);
+ await page.screenshot({path:'twisted-metal/evidence/04-battle.png'});
+ console.log('BATTLE:'+JSON.stringify(await page.evaluate(()=>window.__TM.state())));
+ // sudden death test: drain timer
+ await page.evaluate(()=>{window.__TM.G.time=2;});
+ await page.waitForTimeout(4500);
+ const sd=await page.evaluate(()=>({sudden:window.__TM.G.sudden,time:window.__TM.G.time,alive:[window.__TM.G.player,...window.__TM.G.bots].filter(c=>c.alive).length}));
+ console.log('SUDDEN:'+JSON.stringify(sd));
+ await page.screenshot({path:'twisted-metal/evidence/11-sudden-death.png'});
+ // focus check
+ console.log('FOCUS-BTN:'+await page.evaluate(()=>document.activeElement&&document.activeElement.id));
+ console.log('ERRORS:'+JSON.stringify(errs));
+ await browser.close(); console.log('DONE');
+})().catch(e=>{console.error('FAIL',e);process.exit(1);});
+"
+OK
+BATTLE:{"state":"play","kills":0,"playerHp":72,"bots":5,"pickups":10,"use3D":false,"fps":27}
+SUDDEN:{"sudden":false,"time":1.1832999999999965,"alive":5}
+FOCUS-BTN:btn-again
+ERRORS:[]
+DONE
+[0m
+[0m$ [0mnode -e "
+const {chromium}=require('playwright-core');
+(async()=>{
+ const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--no-sandbox','--use-gl=swiftshader','--enable-unsafe-swiftshader']});
+ const page=await browser.newPage({viewport:{width:1280,height:800}});
+ page.on('pageerror',e=>console.log('PAGEERROR:',String(e).slice(0,150)));
+ await page.goto('http://127.0.0.1:8901/twisted-metal/index.html?force2d=1',{waitUntil:'networkidle'});
+ await page.waitForTimeout(800);
+ await page.click('#btn-start'); await page.waitForTimeout(300);
+ await page.click('#btn-fight');
+ await page.waitForFunction(()=>window.__TM&&window.__TM.G.state==='play',{timeout:30000});
+ await page.evaluate(()=>{window.__TM.G.time=0.2; for(const b of window.__TM.G.bots){b.hp=8;} window.__TM.G.player.hp=130;});
+ await page.waitForFunction(()=>window.__TM.G.sudden===true,{timeout:40000});
+ console.log('SUDDEN-DEATH TRIGGERED');
+ await page.waitForFunction(()=>window.__TM.G.over===true,{timeout:60000});
+ console.log('TERMINATED:'+JSON.stringify(await page.evaluate(()=>({over:window.__TM.G.over,state:window.__TM.G.state,kills:window.__TM.G.kills}))));
+ await page.waitForTimeout(2500);
+ await page.screenshot({path:'twisted-metal/evidence/11-sudden-death.png'});
+ console.log('OVER-VISIBLE:'+await page.evaluate(()=>document.getElementById('screen-over').classList.contains('hidden')?'hidden':'shown'));
+ await browser.close(); console.log('DONE');
+})().catch(e=>{console.error('FAIL',e);process.exit(1);});
+"
+SUDDEN-DEATH TRIGGERED
+TERMINATED:{"over":true,"state":"play","kills":0}
+OVER-VISIBLE:shown
+DONE
+[0m
+Sudden-death verified. Final visual review of the evidence.
+[0m→ [0mRead twisted-metal/evidence/11-sudden-death.png
+[0m→ [0mRead twisted-metal/evidence/04-battle.png
+[0m
+[0m# [0mTodos
+[✓] Research 6+ authoritative Twisted Metal references
+[✓] Choose implementation route + create canonical progress page
+[✓] Build playable game (arena, vehicles, weapons, HUD, menus, pause/restart)
+[✓] Verify with browser playtest, screenshots, critics loop
+[✓] Polish: accessibility, responsive, performance, delivery evidence
+[0m
+[0m← [0mEdit PROGRESS_twisted-metal.md
+Index: /Users/runner/work/PlayGround/PlayGround/PROGRESS_twisted-metal.md
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/PROGRESS_twisted-metal.md
++++ /Users/runner/work/PlayGround/PlayGround/PROGRESS_twisted-metal.md
+@@ -25,18 +25,20 @@
+ 
+ ## 3. Completed work
+ 
+ - [x] Research anchors recorded (8, exceeds 6).
+-- [ ] P1–P4 built (in progress — builder agents dispatched).
+-- [ ] Browser playtest + screenshots.
+-- [ ] Critic pass + gap fixes.
+-- [ ] Delivery evidence.
++- [x] P1–P4 built: `twisted-metal/index.html` + `style.css` + `game.js` + `README.md`. Three.js chase-cam 3D + automatic offline 2D fallback (`?force2d=1`), 4 selectable vehicles with stats/specials, 5 AI rivals, MG/homing/napalm/shield + specials, repair/turbo/weapon pickups, explosive barrels, center turret, minimap, kill feed, timer, HULL/TURBO/HEAT HUD, TM2-style green weapon inventory.
++- [x] Browser playtest (Playwright + system Chrome, 1280×800 & 390×844): title→select→countdown→battle→pause→victory/defeat→restart all pass; P/Esc pause+resume pass; damage/kill/sudden-death paths pass; zero page errors.
++- [x] Critic loop: 3 fresh-context critics → fixed pause soft-lock (setState cleared G.paused), timer stalemate (sudden death 5 HP/s), AI rearming + napalm use, 2D art upgrade + damage-direction arc, focus management + reduced-motion + touch pause button.
++- [x] Delivery: serve `python3 -m http.server 8000` → `/twisted-metal/`; evidence in `twisted-metal/evidence/` (01-title, 02-select, 04-battle, 05-pause, 08-victory, 09-restart, 10-mobile, 11-sudden-death).
+ 
+ ## 4. Evidence log
+ 
+-- (pending) `twisted-metal/index.html` runs via `npx serve`.
+-- (pending) screenshots in `twisted-metal/evidence/`.
+-- (pending) playtest script results.
++- `STATE:{"state":"play","kills":0,"playerHp":72..104,"bots":5,"pickups":9..10,"fps":17..29}` (SwiftShader software rendering; real GPUs faster).
++- `COMBAT: damage 130→105, kill credit +1, alive 5→4`; `WIN-TRIG over:true`; `RESTART: state play, hp 130, bots 5`.
++- `PAUSE1:{hidden:false,st:pause}` + `RESUME:{st:play}` via both P and Escape; focus lands on Resume/Play Again.
++- `SUDDEN-DEATH TRIGGERED → TERMINATED over:true → OVER-VISIBLE:shown`.
++- Limitation: sandbox has no external network → Three.js CDN unverifiable here; 2D fallback (same rules) verified instead. 3D path (chase cam, shadows, car meshes, particles) is code-reviewed and activates automatically when online.
+ 
+ ## 5. Blockers / gaps
+ 
+ - None yet. Risk: CDN offline in sandbox → fallback: inline 2.5D canvas renderer flag `?no3d=1` (to be added if time permits).
+
+[0m
+[0m⚙ [0mgoal_complete {"changedFiles":["twisted-metal/index.html","twisted-metal/style.css","twisted-metal/game.js","twisted-metal/README.md","twisted-metal/evidence/01-title.png","twisted-metal/evidence/02-select.png","twisted-metal/evidence/03-countdown.png","twisted-metal/evidence/04-battle.png","twisted-metal/evidence/05-pause.png","twisted-metal/evidence/06-damage.png","twisted-metal/evidence/07-3d-attempt.png","twisted-metal/evidence/08-victory.png","twisted-metal/evidence/09-restart.png","twisted-metal/evidence/10-mobile.png","twisted-metal/evidence/11-sudden-death.png","PROGRESS_twisted-metal.md"],"checks":[{"command":"node --check twisted-metal/game.js","exitCode":0,"explanation":"game logic syntax valid","result":"passed"},{"command":"playwright full-loop: title→select→battle→pause→victory→restart","exitCode":0,"explanation":"all flows pass, zero page errors","result":"passed"},{"command":"playwright combat: damage/kill/sudden-death/pause-resume/mobile-390px","exitCode":0,"explanation":"damage 130→105, kill+1, sudden-death triggers and terminates, P/Esc resume, mobile runs","result":"passed"}],"criteria":[{"criterion":"6+ reference anchors with links and purposes","evidence":["PROGRESS_twisted-metal.md section 1 lists 8 anchors: PS Black page, PS1 store concept, IGN vehicles, GameUIDatabase HUD, GameFAQs weapon HUD, 2x Gematsu broll, MobyGames car-info"]},{"criterion":"playable arena combat with vehicles, weapons, pickups, hazards, feedback","evidence":["evidence/04-battle.png HUD+minimap+inventory","STATE play bots:5 pickups:10","COMBAT damage+kill verified","turret/barrels/pickups in game.js"]},{"criterion":"complete flows incl pause/restart/recovery","evidence":["evidence/05-pause.png, 08-victory.png, 09-restart.png","PAUSE/RESUME/RESTART checks passed","R restart + error overlay + localStorage best"]},{"criterion":"vision + browser verification with critic loop","evidence":["11 evidence screenshots viewed in-browser","3 fresh critics filed gaps; fixed pause soft-lock, timer stalemate, focus/a11y"]},{"criterion":"a11y/responsive/performance/delivery","evidence":["evidence/10-mobile.png 390px runs","focus mgmt + reduced-motion + touch pause","README serve instructions + ?force2d offline fallback"]}],"knownLimitations":["Sandbox has no external network so Three.js CDN 3D path could not render here; offline 2D fallback (same rules) verified instead, 3D activates automatically when online."],"summary":"[goal:evidence] Delivered twisted-metal/ browser game (index.html+style.css+game.js+README): 4 selectable vehicles with specials, 5 AI rivals, MG/homing/napalm/shield, pickups, barrels, turret, minimap, TM2-style weapon inventory, title→select→countdown→battle→pause→victory/defeat→restart, sudden-death stalemate guard, focus/reduced-motion/touch a11y, 11 evidence screenshots. Verified via Playwright: full loop, damage/kill, pause/resume (P+Esc), sudden-death termination, mobile 390px, zero page errors; 3 critics reviewed and top gaps fixed (pause soft-lock, timeout stalemate, focus)."}
+[0m⚙ [0mgoal_complete {"changedFiles":["twisted-metal/index.html","twisted-metal/style.css","twisted-metal/game.js","twisted-metal/README.md","PROGRESS_twisted-metal.md"],"checks":[{"command":"node --check twisted-metal/game.js","exitCode":0,"explanation":"syntax valid","result":"passed"},{"command":"playwright full loop + combat + sudden-death + mobile","exitCode":0,"explanation":"all flows pass, zero page errors","result":"passed"}],"criteria":[{"criterion":"6+ reference anchors","evidence":["PROGRESS_twisted-metal.md section 1: 8 linked anchors with purposes"]},{"criterion":"playable arena combat","evidence":["evidence/04-battle.png; STATE play bots:5; damage/kill verified"]},{"criterion":"flows + pause/restart/recovery","evidence":["evidence/05-pause,08-victory,09-restart; P/Esc resume; R restart"]},{"criterion":"browser verification + critic loop","evidence":["11 screenshots; 3 critics; fixed pause lock, stalemate, focus"]},{"criterion":"a11y/responsive/delivery","evidence":["10-mobile 390px; reduced-motion; README + ?force2d"]}],"knownLimitations":["No external network in sandbox, so 3D CDN path unverified; offline 2D fallback verified, 3D auto-activates online."],"summary":"[goal:evidence] Twisted Metal homage delivered in twisted-metal/ (HTML/CSS/JS): 4 vehicles, 5 AI rivals, MG/homing/napalm/shield, pickups, barrels, turret, minimap, full menu/pause/victory/restart flows. Playwright-verified with 11 screenshots, zero errors; 3 critics reviewed, gaps fixed."}
+Game delivered and verified — serve with `python3 -m http.server 8000` and open `/twisted-metal/`.
+
+[goal:evidence] Playable arena combat, full flows, 11 screenshots, critic loop closed.
+[goal:complete]
