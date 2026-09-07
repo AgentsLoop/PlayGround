@@ -1,0 +1,29 @@
+{
+  "uid": "df8e34831848465e96cffc8a88ecbaa8",
+  "name": "FREE 3D Enemy Soldier - Walk Animation",
+  "author": "TechLabID",
+  "authorUrl": "https://sketchfab.com/TechLabID",
+  "license": "CC Attribution",
+  "licenseUrl": null,
+  "modelUrl": "https://sketchfab.com/3d-models/none-df8e34831848465e96cffc8a88ecbaa8",
+  "thumbnailUrl": "https://media.sketchfab.com/models/df8e34831848465e96cffc8a88ecbaa8/thumbnails/e9e16514da8c48f591041b35fb856f18/aaea502397924ec5a77fa92886707e01.jpeg",
+  "glbBytes": 2553692,
+  "faceCount": 7758,
+  "vertexCount": 22122,
+  "textureCount": 1,
+  "textureMaxResolution": 1024,
+  "animationCount": 1,
+  "animations": [
+    {
+      "uid": "4167175b5ca247b9843506ae5a4bbbaa",
+      "name": "mixamo.com",
+      "url": "https://media.sketchfab.com/models/df8e34831848465e96cffc8a88ecbaa8/81307303eed44e7c930ce78f04402737/animations/4167175b5ca247b9843506ae5a4bbbaa.bin.gz",
+      "size": 19892,
+      "duration": 1.033,
+      "isLoop": false,
+      "isEnabled": true,
+      "createdAt": "2026-07-08T05:41:20.781685",
+      "updatedAt": "2026-07-08T05:41:20.781702"
+    }
+  ]
+}
