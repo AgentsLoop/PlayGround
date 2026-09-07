@@ -1,0 +1,828 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Resuming the Contra build — play-testing, critiquing, and pushing visual fidelity higher.
+[0m# [0mTodos
+[ ] Play-test in Chromium via Playwright + screenshots + console errors
+[ ] Fresh harsh critic vs arcade + Galuga, name largest gap
+[ ] Fix gap: GLB models/animation + lighting/polish/gameplay feel
+[ ] Re-verify in browser + update progress.html + final screenshots
+[0m
+[0m→ [0mSkill "load-sketchfab-threejs"
+[0m
+[0m$ [0mls -la contra-3d/ contra-3d/screenshots/ 2>&1; curl -s -o /dev/null -w "srv:%{http_code}\n" http://localhost:8901/contra-3d/index.html || (nohup python3 -m http.server 8901 >/tmp/opencode/srv.log 2>&1 & sleep 1; curl -s -o /dev/null -w "srv2:%{http_code}\n" http://localhost:8901/contra-3d/index.html)
+contra-3d/:
+total 36
+drwxr-xr-x  3 runner runner  4096 Sep  7 05:47 .
+drwxr-xr-x 11 runner runner  4096 Sep  7 05:43 ..
+-rw-r--r--  1 runner runner 19676 Sep  7 05:52 index.html
+-rw-r--r--  1 runner runner  1438 Sep  7 05:54 progress.html
+drwxr-xr-x  2 runner runner  4096 Sep  7 05:53 screenshots
+
+contra-3d/screenshots/:
+total 556
+drwxr-xr-x 2 runner runner   4096 Sep  7 05:53 .
+drwxr-xr-x 3 runner runner   4096 Sep  7 05:47 ..
+-rw-r--r-- 1 runner runner 103737 Sep  7 05:48 action.png
+-rw-r--r-- 1 runner runner  98364 Sep  7 05:53 action2.png
+-rw-r--r-- 1 runner runner  94046 Sep  7 05:53 action2_aimup.png
+-rw-r--r-- 1 runner runner 116504 Sep  7 05:51 boss-warp.png
+-rw-r--r-- 1 runner runner 137962 Sep  7 05:48 start.png
+srv:200
+[0m
+[0m# [0mTodos
+[•] Play-test in Chromium via Playwright + screenshots + console errors
+[ ] Fresh harsh critic vs arcade + Galuga, name largest gap
+[ ] Fix gap: GLB models/animation + lighting/polish/gameplay feel
+[ ] Re-verify in browser + update progress.html + final screenshots
+[0m
+[0m• [0mplaytest capture screenshots[90m General Agent[0m
+[0m• [0mharsh critic vs references[90m General Agent[0m
+[0m✓ [0mharsh critic vs references[90m General Agent[0m
+[0m✓ [0mplaytest capture screenshots[90m General Agent[0m
+Play-test clean, critic verdict is clear: camera and boss arena are game-breaking. Fixing those plus visual upgrades.
+[0m→ [0mRead contra-3d/index.html
+[0m
+[0m$ [0mls /home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs/scripts/; SKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; timeout 60 python3 "$SKILL_DIR/scripts/download_model.py" "low poly soldier" --count 6 --max-glb-mb 6 --max-faces 20000 --require-glb --downloadable --no-animations --preview-sheet /tmp/opencode/soldier-sheet.png 2>&1 | tail -20; ls -la /tmp/opencode/ | tail
+create_fixtures.mjs
+decompress_glb.mjs
+download_model.py
+extract_public_model.py
+inspect_glb.mjs
+lib
+normalize_glb.mjs
+prepare_playcanvas_glb.mjs
+prepare_viewer.py
+serve_public_extractor.py
+validate_glb.mjs
+Traceback (most recent call last):
+  File "/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs/scripts/download_model.py", line 20, in <module>
+    from PIL import Image, ImageDraw, ImageFont
+ModuleNotFoundError: No module named 'PIL'
+-rw-r--r--  1 runner runner  2976 Sep  7 05:53 action2.mjs
+-rw-r--r--  1 runner runner  4361 Sep  7 05:48 capture.mjs
+-rw-r--r--  1 runner runner  2816 Sep  7 05:49 capture2.mjs
+-rw-r--r--  1 runner runner  2137 Sep  7 05:51 capture3.mjs
+-rw-r--r--  1 runner runner 16198 Sep  7 05:52 g.mjs
+drwxr-xr-x  6 runner runner  4096 Sep  7 05:47 node_modules
+-rw-r--r--  1 runner runner  1522 Sep  7 05:47 package-lock.json
+-rw-r--r--  1 runner runner   298 Sep  7 05:47 package.json
+-rw-r--r--  1 runner runner  1727 Sep  7 05:56 srv.log
+-rw-r--r--  1 runner runner  3612 Sep  7 05:56 verify_task.mjs
+[0m
+[0m$ [0mpip install pillow -q 2>&1 | tail -2; SKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; timeout 90 python3 "$SKILL_DIR/scripts/download_model.py" "low poly soldier" --count 6 --max-glb-mb 6 --max-faces 20000 --require-glb --downloadable --no-animations --preview-sheet /tmp/opencode/soldier-sheet.png 2>&1 | tail -30
+Preview sheet: /tmp/opencode/soldier-sheet.png
+[0] low poly soldier | daf5de38902e458aa57ff5ba9460ca02 | 0.4 MB | 3,092 faces | Kolos Studios | CC Attribution no animations
+[1] Low Poly Soldier | 49d68f7e505e43e989e0c0bd4e3f7e4d | 1.9 MB | 7,570 faces | pooiloui2 | CC Attribution-NonCommercial no animations
+[2] Low Poly Soldier | 326c4883a68e46d7bbfea4bc4d72b4e6 | 1.0 MB | 9,070 faces | Dezryelle | CC Attribution no animations
+[3] Low Poly Soldier | b715ac1b71824543bb7f22aa40c7404e | 0.3 MB | 2,962 faces | MLGprogect | CC Attribution no animations
+[0m
+[0m$ [0mSKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs/scripts; SKD=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; timeout 120 python3 "$SKD/scripts/download_model.py" "low poly soldier" --count 6 --max-glb-mb 6 --max-faces 20000 --require-glb --downloadable --no-animations --download 0 --output /home/runner/work/PlayGround/PlayGround/contra-3d/models/soldier.glb 2>&1 | tail -10; node "$SKD/scripts/inspect_glb.mjs" /home/runner/work/PlayGround/PlayGround/contra-3d/models/soldier.glb 2>&1 | head -40; ls -la /home/runner/work/PlayGround/PlayGround/contra-3d/models/
+Preview sheet: /home/runner/work/PlayGround/PlayGround/sketchfab-preview-sheet.png
+[0] low poly soldier | daf5de38902e458aa57ff5ba9460ca02 | 0.4 MB | 3,092 faces | Kolos Studios | CC Attribution no animations
+[1] Low Poly Soldier | 49d68f7e505e43e989e0c0bd4e3f7e4d | 1.9 MB | 7,570 faces | pooiloui2 | CC Attribution-NonCommercial no animations
+[2] Low Poly Soldier | 326c4883a68e46d7bbfea4bc4d72b4e6 | 1.0 MB | 9,070 faces | Dezryelle | CC Attribution no animations
+[3] Low Poly Soldier | b715ac1b71824543bb7f22aa40c7404e | 0.3 MB | 2,962 faces | MLGprogect | CC Attribution no animations
+Downloaded 387,048 bytes to /home/runner/work/PlayGround/PlayGround/contra-3d/models/soldier.glb
+Attribution metadata: /home/runner/work/PlayGround/PlayGround/contra-3d/models/soldier.glb.attribution.json
+{
+  "schemaVersion": 2,
+  "path": "/home/runner/work/PlayGround/PlayGround/contra-3d/models/soldier.glb",
+  "bytes": 387048,
+  "sha256": "df37458a25a08a72b77b28225ea28e54f7caabeb0254b26a2fa3e9ae714be3c2",
+  "title": "low poly soldier",
+  "author": "Kolos Studios (https://sketchfab.com/KolosStudios)",
+  "generator": "Sketchfab-13.74.0",
+  "extensionsUsed": [],
+  "extensionsRequired": [],
+  "scenes": 1,
+  "nodes": 90,
+  "meshes": 7,
+  "morphTargets": 0,
+  "skins": [
+    {
+      "index": 0,
+      "name": "skin-0",
+      "joints": 71,
+      "skeleton": 6
+    }
+  ],
+  "animations": [
+    {
+      "index": 0,
+      "name": "Armature|Standing",
+      "channels": 75,
+      "jointChannels": 75,
+      "morphChannels": 0,
+      "targetNodes": 47,
+      "missingTargets": 0
+    }
+  ],
+  "materials": 5,
+  "textures": 0,
+  "images": [],
+  "materialDetails": [
+    {
+      "index": 0,
+      "name": "Material.001",
+total 392
+drwxr-xr-x 2 runner runner   4096 Sep  7 05:57 .
+drwxr-xr-x 4 runner runner   4096 Sep  7 05:57 ..
+-rw-r--r-- 1 runner runner 387048 Sep  7 05:57 soldier.glb
+-rw-r--r-- 1 runner runner    630 Sep  7 05:57 soldier.glb.attribution.json
+[0m
+[0m$ [0mSKD=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; timeout 90 python3 "$SKD/scripts/download_model.py" "alien monster" --count 6 --max-glb-mb 6 --max-faces 25000 --require-glb --downloadable --no-animations --preview-sheet /tmp/opencode/alien-sheet.png 2>&1 | tail -12
+error: No search results found across the supplied queries
+[0m
+[0m$ [0mSKD=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; timeout 90 python3 "$SKD/scripts/download_model.py" "monster" "alien creature" --count 8 --max-glb-mb 6 --max-faces 25000 --require-glb --downloadable --no-animations --preview-sheet /tmp/opencode/alien-sheet.png 2>&1 | tail -14
+Preview sheet: /tmp/opencode/alien-sheet.png
+[0] Monster | bb37d9f7239a40bfaa78fb6075fc271f | 4.2 MB | 2,532 faces | rudolfs | CC Attribution-NonCommercial-ShareAlike no animations
+[1] Bread monster model | 1a5dd20359f34b20ab572860a39db18a | 0.2 MB | 2,780 faces | 80S5 | CC Attribution no animations
+[0m
+Soldier GLB secured (CC Attribution, animated) — now integrating it and fixing the camera/arena.
+[0m# [0mTodos
+[✓] Play-test in Chromium via Playwright + screenshots + console errors
+[✓] Fresh harsh critic vs arcade + Galuga, name largest gap
+[•] Fix gap: GLB models/animation + lighting/polish/gameplay feel
+[ ] Re-verify in browser + update progress.html + final screenshots
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -25,9 +25,9 @@
+   .hidden{display:none!important}
+   #controls{position:fixed;bottom:16px;left:12px;color:#cfc;font-size:12px;background:#0009;border:1px solid #7CFC0066;border-radius:8px;padding:8px 10px;z-index:5;line-height:1.6}
+   #toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);color:#ffe600;font-weight:bold;font-size:18px;text-shadow:2px 2px 0 #000;z-index:6}
+ </style>
+-<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
++<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+ </head>
+ <body>
+ <canvas id="c"></canvas>
+ <div id="hud">
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -50,13 +50,14 @@
+ const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+ renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+ renderer.setSize(innerWidth,innerHeight);
+ renderer.shadowMap.enabled=true;
++renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
+ const scene=new THREE.Scene();
+-scene.background=new THREE.Color(0x87ceeb);
+-scene.fog=new THREE.Fog(0x87ceeb,30,110);
+-const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,0.1,300);
+-camera.position.set(0,4.2,11);
++scene.background=new THREE.Color(0x9fd4ef);
++scene.fog=new THREE.Fog(0x9fd4ef,34,120);
++const camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,300);
++camera.position.set(0,3.4,10.5);
+ addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+ // lights
+ scene.add(new THREE.HemisphereLight(0xbfefff,0x1d4d1d,0.95));
+ const sun=new THREE.DirectionalLight(0xfff6d8,1.6);sun.position.set(8,18,10);sun.castShadow=true;sun.shadow.camera.left=-20;sun.shadow.camera.right=20;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -57,11 +57,13 @@
+ scene.fog=new THREE.Fog(0x9fd4ef,34,120);
+ const camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,300);
+ camera.position.set(0,3.4,10.5);
+ addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+-// lights
+-scene.add(new THREE.HemisphereLight(0xbfefff,0x1d4d1d,0.95));
+-const sun=new THREE.DirectionalLight(0xfff6d8,1.6);sun.position.set(8,18,10);sun.castShadow=true;sun.shadow.camera.left=-20;sun.shadow.camera.right=20;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
++// lights — hemi + key sun + green rim (Galuga-style separation) + muzzle point light
++scene.add(new THREE.HemisphereLight(0xcfefff,0x1d4d1d,0.9));
++const sun=new THREE.DirectionalLight(0xfff2d0,1.7);sun.position.set(8,18,10);sun.castShadow=true;sun.shadow.camera.left=-20;sun.shadow.camera.right=20;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
++const rim=new THREE.DirectionalLight(0x66ff99,0.9);rim.position.set(-10,6,-12);scene.add(rim);
++const muzzle=new THREE.PointLight(0xffee66,0,9);scene.add(muzzle);
+ // materials helpers
+ const M=(c,r=0.7)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
+ function box(w,h,d,c,x=0,y=0,z=0){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;return m;}
+ // parallax mountains + trees backdrop
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -65,11 +65,13 @@
+ const muzzle=new THREE.PointLight(0xffee66,0,9);scene.add(muzzle);
+ // materials helpers
+ const M=(c,r=0.7)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
+ function box(w,h,d,c,x=0,y=0,z=0){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;return m;}
+-// parallax mountains + trees backdrop
+-for(let i=0;i<30;i++){const h=8+Math.random()*14;const m=new THREE.Mesh(new THREE.ConeGeometry(6+Math.random()*6,h,5),M(i%2?0x2e6b34:0x3a7d44,1));m.position.set(i*14-40, h/2-2, -45-Math.random()*20);scene.add(m);}
+-for(let i=0;i<60;i++){const t=new THREE.Group();const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.25,.35,2.4,6),M(0x6b4a2b));trunk.position.y=1.2;t.add(trunk);const top=new THREE.Mesh(new THREE.ConeGeometry(1.6+Math.random(),3.5,7),M(0x1f7a2e,1));top.position.y=3.6;t.add(top);t.position.set(i*7-50+Math.random()*3,0,-14-Math.random()*10);scene.add(t);}
++// parallax mountains + grounded trees (two rows, bases at y=0, second row darker)
++for(let i=0;i<30;i++){const h=8+Math.random()*14;const m=new THREE.Mesh(new THREE.ConeGeometry(6+Math.random()*6,h,5),M(i%2?0x2e6b34:0x3a7d44,1));m.position.set(i*14-40, h/2-3, -50-Math.random()*20);scene.add(m);}
++function tree(x,z,s=1,dark=false){const t=new THREE.Group();const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.25*s,.35*s,2.4*s,6),M(0x6b4a2b));trunk.position.y=1.2*s;trunk.castShadow=true;t.add(trunk);for(let k=0;k<2;k++){const top=new THREE.Mesh(new THREE.ConeGeometry((1.7-k*0.4)*s,2.2*s,7),M(dark?0x175423:0x1f7a2e,1));top.position.y=(2.8+k*1.4)*s;top.castShadow=true;t.add(top);}t.position.set(x,0,z);scene.add(t);}
++for(let i=0;i<40;i++){tree(i*6.5-50+Math.random()*2,-11-Math.random()*4,0.9+Math.random()*0.5,false);}
++for(let i=0;i<24;i++){tree(i*11-55,-20-Math.random()*6,1.3+Math.random()*0.7,true);}
+ // ground segments with pits
+ const LEVEL_LEN=230, GRAV=-30;
+ const grounds=[], hazards=[], pickups=[], enemies=[], pbullets=[], ebullets=[], parts=[];
+ const groundMat=M(0x4d8a3d,1), dirtMat=M(0x6e5233,1);
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -77,10 +77,10 @@
+ const groundMat=M(0x4d8a3d,1), dirtMat=M(0x6e5233,1);
+ function addGround(x0,x1){const w=x1-x0;const g=new THREE.Group();
+   const top=box(w,1,7,0x4d8a3d,(x0+x1)/2,-0.5,0);g.add(top);
+   const dirt=box(w,2.2,6.6,0x6e5233,(x0+x1)/2,-2,0);g.add(dirt);
+-  // grass tufts
+-  for(let x=x0+1;x<x1;x+=2){if(Math.random()<0.6){const t=box(.18,.7,.18,0x7CFC00,x,-0.1+0.3,(Math.random()*4-2));g.add(t);}}
++  // grass tufts — small, dark, grounded on top face
++  for(let x=x0+1;x<x1;x+=2.4){if(Math.random()<0.55){const t=box(.16,.45,.16,0x2f7a2e,x,0.22,(Math.random()*4.4-2.2));g.add(t);}}
+   scene.add(g);grounds.push({x0,x1,mesh:g});}
+ addGround(-10,34);addGround(38,70);addGround(74,110);addGround(114,150);addGround(154,LEVEL_LEN+20);
+ // pits lava glow
+ for(const p of [[34,38],[70,74],[110,114],[150,154]]){const lava=new THREE.Mesh(new THREE.PlaneGeometry(p[1]-p[0],7),new THREE.MeshBasicMaterial({color:0xff4400}));lava.rotation.x=-Math.PI/2;lava.position.set((p[0]+p[1])/2,-2.9,0);scene.add(lava);}
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -98,14 +98,15 @@
+ [30,60,90,118,148,180,200].forEach(x=>addFlyer(x,5+Math.random()*2));
+ // capsules (Falcon pickups)
+ function addCapsule(x,type){const g=new THREE.Group();const c=new THREE.Mesh(new THREE.SphereGeometry(.55,12,10),new THREE.MeshStandardMaterial({color:0x2266ff,emissive:0x1133ff,emissiveIntensity:.6}));c.position.y=1.4;g.add(c);const f=box(.5,.3,.1,0xffffff,0,1.4,.5);g.add(f);g.position.set(x,0,0);scene.add(g);pickups.push({x,type,g,taken:false});}
+ addCapsule(12,'S');addCapsule(42,'M');addCapsule(78,'S');addCapsule(108,'R');addCapsule(136,'M');addCapsule(162,'L');addCapsule(190,'S');
+-// boss: alien heart gate at end
++// boss: alien heart gate at end — wall is a backdrop (z=-3, non-occluding), heart+cores at z=0 on-screen
+ const bossG=new THREE.Group();bossG.position.set(LEVEL_LEN,0,0);
+-const wall=box(2,9,9,0x3b3f4a,0,4.5,-1);bossG.add(wall);
+-const heart=new THREE.Mesh(new THREE.SphereGeometry(1.6,16,12),new THREE.MeshStandardMaterial({color:0xff2050,emissive:0xaa0022,emissiveIntensity:.8,roughness:.3}));heart.position.set(-1.5,4.5,2);bossG.add(heart);
++const wall=box(10,9,1,0x3b3f4a,2,4.5,-3);bossG.add(wall);
++const doorL=box(1,7,1.2,0x222831,-2.5,3.5,-2.5),doorR=box(1,7,1.2,0x222831,2.5,3.5,-2.5);bossG.add(doorL,doorR);
++const heart=new THREE.Mesh(new THREE.SphereGeometry(1.6,16,12),new THREE.MeshStandardMaterial({color:0xff2050,emissive:0xaa0022,emissiveIntensity:.8,roughness:.3}));heart.position.set(0,4.5,0);heart.castShadow=true;bossG.add(heart);
+ const cores=[];
+-for(let i=0;i<3;i++){const c=new THREE.Mesh(new THREE.SphereGeometry(.55,10,8),new THREE.MeshStandardMaterial({color:0xffcc00,emissive:0xff8800,emissiveIntensity:.9}));c.position.set(-1.5,2.5+i*2,2.6);bossG.add(c);cores.push({mesh:c,hp:6,alive:true});}
++for(let i=0;i<3;i++){const c=new THREE.Mesh(new THREE.SphereGeometry(.55,10,8),new THREE.MeshStandardMaterial({color:0xffcc00,emissive:0xff8800,emissiveIntensity:.9}));c.position.set(0,2.5+i*2,0.9);bossG.add(c);cores.push({mesh:c,hp:6,alive:true});}
+ scene.add(bossG);
+ const boss={x:LEVEL_LEN,hp:18,max:18,active:false};
+ // player (shirtless Contra hero: tan + red pants)
+ const P={x:0,y:0,vx:0,vy:0,onGround:true,crouch:false,face:1,hp:3,lives:3,score:0,gun:'N',fireCd:0,inv:0,dead:false,won:false};
+
+[0m
+Arena and lighting fixed — now gameplay feel, capsules, and character models.
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -95,10 +95,10 @@
+ [25,50,80,100,120,138,160,175,195,205].forEach(addRunner);
+ // flyers
+ function addFlyer(x,y=6){const g=new THREE.Group();const b=box(1,.4,.6,0x7d3c98,0,0,0);g.add(b);const w1=box(1.4,.08,.8,0xd2b4de,0,.1,0);g.add(w1);g.position.set(x,y,0);scene.add(g);enemies.push({kind:'flyer',x,y,hp:2,g,t:Math.random()*5,fire:1.5});}
+ [30,60,90,118,148,180,200].forEach(x=>addFlyer(x,5+Math.random()*2));
+-// capsules (Falcon pickups)
+-function addCapsule(x,type){const g=new THREE.Group();const c=new THREE.Mesh(new THREE.SphereGeometry(.55,12,10),new THREE.MeshStandardMaterial({color:0x2266ff,emissive:0x1133ff,emissiveIntensity:.6}));c.position.y=1.4;g.add(c);const f=box(.5,.3,.1,0xffffff,0,1.4,.5);g.add(f);g.position.set(x,0,0);scene.add(g);pickups.push({x,type,g,taken:false});}
++// capsules (Falcon pickups) — arcade rule: SHOOT to open, then walk over to grab
++function addCapsule(x,type){const g=new THREE.Group();const c=new THREE.Mesh(new THREE.SphereGeometry(.55,12,10),new THREE.MeshStandardMaterial({color:0x2266ff,emissive:0x1133ff,emissiveIntensity:.6}));c.position.y=1.4;c.castShadow=true;g.add(c);const f=box(.5,.3,.1,0xffffff,0,1.4,.5);g.add(f);g.position.set(x,0,0);scene.add(g);pickups.push({x,type,g,taken:false,opened:false,hp:3,core:c});}
+ addCapsule(12,'S');addCapsule(42,'M');addCapsule(78,'S');addCapsule(108,'R');addCapsule(136,'M');addCapsule(162,'L');addCapsule(190,'S');
+ // boss: alien heart gate at end — wall is a backdrop (z=-3, non-occluding), heart+cores at z=0 on-screen
+ const bossG=new THREE.Group();bossG.position.set(LEVEL_LEN,0,0);
+ const wall=box(10,9,1,0x3b3f4a,2,4.5,-3);bossG.add(wall);
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -146,11 +146,18 @@
+ function hurt(){if(P.inv>0||P.dead)return;P.hp--;P.inv=1.5;beep(150,.2,'sawtooth',.08);boom(P.x,1,0xff0000,12);shake=0.5;if(P.hp<=0){P.lives--;P.gun='N';if(P.lives<0){die();}else{P.hp=3;P.x=Math.max(0,P.x-4);P.y=2;P.vy=0;toast('LIFE LOST — '+P.lives+' LEFT');}}}
+ function die(){P.dead=true;showEnd(false);}
+ function win(){if(P.won)return;P.won=true;P.score+=5000;showEnd(true);}
+ function showEnd(w){const m=document.getElementById('msg');m.classList.remove('hidden');
+-  m.innerHTML=`<h1>${w?'MISSION CLEAR!':'GAME OVER'}</h1><h2>SCORE ${P.score}</h2><p>${w?'Alien heart destroyed. You are the Contra! Press R or click to play again.':'The jungle took you. Press R or click to retry — that instant restart is the arcade loop.'}</p><button onclick="location.reload()">↻ ${w?'PLAY AGAIN':'RETRY'} (R)</button>`;
+-  document.getElementById('start')?.addEventListener('click',()=>location.reload());}
+-function reset(){location.reload();}
++  m.innerHTML=`<h1>${w?'MISSION CLEAR!':'GAME OVER'}</h1><h2>SCORE ${P.score}</h2><p>${w?'Alien heart destroyed. You are the Contra! Press R or click to restart instantly.':'The jungle took you. Press R or click for instant retry — no reload. Capsules must be SHOT open (arcade rule).'}</p><button id="again">↻ ${w?'PLAY AGAIN':'RETRY'} (R)</button>`;
++  document.getElementById('again').onclick=(e)=>{e.stopPropagation();resetGame();};}
++function reset(){resetGame();}
++function resetGame(){ // in-place arcade restart: no CDN refetch
++  P.x=0;P.y=0;P.vx=0;P.vy=0;P.hp=3;P.lives=3;P.score=0;P.gun='N';P.fireCd=0;P.inv=0;P.dead=false;P.won=false;P.face=1;
++  for(const b of [...pbullets,...ebullets])scene.remove(b.mesh);pbullets.length=0;ebullets.length=0;
++  for(const e of enemies){e.hp=e.max;e.g.visible=true;if(e.kind==='runner'){e.x=e.x0;e.g.position.x=e.x;}}
++  for(const p of pickups){p.taken=false;p.opened=false;p.hp=3;p.g.visible=true;p.g.rotation.y=0;p.core.material.emissive.setHex(0x1133ff);}
++  for(const c of cores){c.hp=6;c.alive=true;c.mesh.visible=true;}
++  document.getElementById('msg').classList.add('hidden');started=true;toast('GO!');}
+ let shake=0, time=0, started=false;
+ document.getElementById('start').onclick=()=>{document.getElementById('msg').classList.add('hidden');started=true;AC=null;};
+ addEventListener('pointerdown',()=>{if(!started){document.getElementById('msg').classList.add('hidden');started=true;}autofire=true;});
+ addEventListener('pointerup',()=>autofire=false);
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -87,9 +87,9 @@
+ // spikes hazard
+ function addSpikes(x,n=3){for(let i=0;i<n;i++){const s=new THREE.Mesh(new THREE.ConeGeometry(.45,1.3,4),M(0xcccccc,0.4));s.position.set(x+i*1.2,0.65,0);scene.add(s);hazards.push({x:x+i*1.2,r:.7,dmg:1,type:'spike',mesh:s});}}
+ addSpikes(22,3);addSpikes(58,4);addSpikes(95,4);addSpikes(130,4);
+ // turrets (Contra-style dome guns)
+-function addTurret(x,y=1.2){const g=new THREE.Group();const base=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,.5,10),M(0x555c66));base.position.y=-.2;g.add(base);const dome=new THREE.Mesh(new THREE.SphereGeometry(.75,12,10,0,Math.PI*2,0,Math.PI/2),M(0x8a93a0,0.4));g.add(dome);const barrel=box(1.6,.25,.25,0x222831,.8,.35,0);g.add(barrel);g.position.set(x,y,0);scene.add(g);enemies.push({kind:'turret',x,y,hp:4,g,fire:Math.random()*2,barrel});}
++function addTurret(x,y=1.2){const g=new THREE.Group();const base=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,.5,10),M(0x555c66));base.position.y=-.2;g.add(base);const dome=new THREE.Mesh(new THREE.SphereGeometry(.75,12,10,0,Math.PI*2,0,Math.PI/2),M(0x8a93a0,0.4));g.add(dome);const barrel=box(1.6,.25,.25,0x222831,.8,.35,0);g.add(barrel);g.position.set(x,y,0);scene.add(g);enemies.push({kind:'turret',x,x0:x,y,hp:4,max:4,g,fire:Math.random()*2,barrel});}
+ [16,45,64,88,104,124,142,166,188].forEach(x=>addTurret(x));
+ // runners
+ function addRunner(x){const g=new THREE.Group();const b=box(.7,1.1,.5,0xc0392b,0,.9,0);g.add(b);const h=new THREE.Mesh(new THREE.SphereGeometry(.3,10,8),M(0xf1c27d));h.position.y=1.7;g.add(h);const gun=box(.9,.15,.15,0x222,0.4,1.1,0);g.add(gun);g.position.set(x,0,0);scene.add(g);enemies.push({kind:'runner',x,y:0,hp:2,g,dir:-1,speed:2+Math.random()*1.5,fire:1+Math.random()*2});}
+ [25,50,80,100,120,138,160,175,195,205].forEach(addRunner);
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -90,9 +90,9 @@
+ // turrets (Contra-style dome guns)
+ function addTurret(x,y=1.2){const g=new THREE.Group();const base=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,.5,10),M(0x555c66));base.position.y=-.2;g.add(base);const dome=new THREE.Mesh(new THREE.SphereGeometry(.75,12,10,0,Math.PI*2,0,Math.PI/2),M(0x8a93a0,0.4));g.add(dome);const barrel=box(1.6,.25,.25,0x222831,.8,.35,0);g.add(barrel);g.position.set(x,y,0);scene.add(g);enemies.push({kind:'turret',x,x0:x,y,hp:4,max:4,g,fire:Math.random()*2,barrel});}
+ [16,45,64,88,104,124,142,166,188].forEach(x=>addTurret(x));
+ // runners
+-function addRunner(x){const g=new THREE.Group();const b=box(.7,1.1,.5,0xc0392b,0,.9,0);g.add(b);const h=new THREE.Mesh(new THREE.SphereGeometry(.3,10,8),M(0xf1c27d));h.position.y=1.7;g.add(h);const gun=box(.9,.15,.15,0x222,0.4,1.1,0);g.add(gun);g.position.set(x,0,0);scene.add(g);enemies.push({kind:'runner',x,y:0,hp:2,g,dir:-1,speed:2+Math.random()*1.5,fire:1+Math.random()*2});}
++function addRunner(x){const g=new THREE.Group();const b=box(.7,1.1,.5,0xc0392b,0,.9,0);g.add(b);const h=new THREE.Mesh(new THREE.SphereGeometry(.3,10,8),M(0xf1c27d));h.position.y=1.7;g.add(h);const gun=box(.9,.15,.15,0x222,0.4,1.1,0);g.add(gun);g.position.set(x,0,0);scene.add(g);enemies.push({kind:'runner',x,x0:x,y:0,hp:2,max:2,g,dir:-1,speed:2+Math.random()*1.5,fire:1+Math.random()*2});}
+ [25,50,80,100,120,138,160,175,195,205].forEach(addRunner);
+ // flyers
+ function addFlyer(x,y=6){const g=new THREE.Group();const b=box(1,.4,.6,0x7d3c98,0,0,0);g.add(b);const w1=box(1.4,.08,.8,0xd2b4de,0,.1,0);g.add(w1);g.position.set(x,y,0);scene.add(g);enemies.push({kind:'flyer',x,y,hp:2,g,t:Math.random()*5,fire:1.5});}
+ [30,60,90,118,148,180,200].forEach(x=>addFlyer(x,5+Math.random()*2));
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -93,9 +93,9 @@
+ // runners
+ function addRunner(x){const g=new THREE.Group();const b=box(.7,1.1,.5,0xc0392b,0,.9,0);g.add(b);const h=new THREE.Mesh(new THREE.SphereGeometry(.3,10,8),M(0xf1c27d));h.position.y=1.7;g.add(h);const gun=box(.9,.15,.15,0x222,0.4,1.1,0);g.add(gun);g.position.set(x,0,0);scene.add(g);enemies.push({kind:'runner',x,x0:x,y:0,hp:2,max:2,g,dir:-1,speed:2+Math.random()*1.5,fire:1+Math.random()*2});}
+ [25,50,80,100,120,138,160,175,195,205].forEach(addRunner);
+ // flyers
+-function addFlyer(x,y=6){const g=new THREE.Group();const b=box(1,.4,.6,0x7d3c98,0,0,0);g.add(b);const w1=box(1.4,.08,.8,0xd2b4de,0,.1,0);g.add(w1);g.position.set(x,y,0);scene.add(g);enemies.push({kind:'flyer',x,y,hp:2,g,t:Math.random()*5,fire:1.5});}
++function addFlyer(x,y=6){const g=new THREE.Group();const b=box(1,.4,.6,0x7d3c98,0,0,0);g.add(b);const w1=box(1.4,.08,.8,0xd2b4de,0,.1,0);g.add(w1);g.position.set(x,y,0);scene.add(g);enemies.push({kind:'flyer',x,x0:x,y,hp:2,max:2,g,t:Math.random()*5,fire:1.5});}
+ [30,60,90,118,148,180,200].forEach(x=>addFlyer(x,5+Math.random()*2));
+ // capsules (Falcon pickups) — arcade rule: SHOOT to open, then walk over to grab
+ function addCapsule(x,type){const g=new THREE.Group();const c=new THREE.Mesh(new THREE.SphereGeometry(.55,12,10),new THREE.MeshStandardMaterial({color:0x2266ff,emissive:0x1133ff,emissiveIntensity:.6}));c.position.y=1.4;c.castShadow=true;g.add(c);const f=box(.5,.3,.1,0xffffff,0,1.4,.5);g.add(f);g.position.set(x,0,0);scene.add(g);pickups.push({x,type,g,taken:false,opened:false,hp:3,core:c});}
+ addCapsule(12,'S');addCapsule(42,'M');addCapsule(78,'S');addCapsule(108,'R');addCapsule(136,'M');addCapsule(162,'L');addCapsule(190,'S');
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -117,8 +117,30 @@
+ const band=box(.66,.12,.47,0xff2222,0,1.98,0);
+ const armR=box(.7,.22,.22,0xe8b88a,.4,1.3,0);
+ const gunM=box(1,.2,.2,0x222831,.9,1.3,0);
+ pg.add(legL,legR,torso,head,band,armR,gunM);pg.traverse(o=>{o.castShadow=true});scene.add(pg);
++// leg pivots at hip (rotate around top, not center)
++for(const l of [legL,legR]){l.geometry.translate(0,-0.4,0);l.position.y=0.8;}
++// Sketchfab GLB hero + runner skins (Kolos Studios low poly soldier, CC Attribution) — progressive enhancement over boxes
++let heroGLB=null,heroMixer=null;const runnerSkins=[];
++async function loadSoldiers(){try{
++  const {GLTFLoader}=await import('three/addons/loaders/GLTFLoader.js');
++  const gltf=await new GLTFLoader().loadAsync('./models/soldier.glb');
++  const src=gltf.scene;
++  // hero: fit ~1.9m, standing clip
++  heroGLB=src.clone();heroGLB.scale.setScalar(1.05);heroGLB.traverse(o=>{if(o.isMesh){o.castShadow=true;}});
++  heroMixer=new THREE.AnimationMixer(heroGLB);if(gltf.animations.length){heroMixer.clipAction(gltf.animations[0]).play();}
++  pg.visible=false;scene.add(heroGLB);
++  // runners: red-tinted clones
++  for(const e of enemies){if(e.kind!=='runner')continue;
++    const c=src.clone();c.scale.setScalar(1.0);
++    c.traverse(o=>{if(o.isMesh){o.castShadow=true;o.material=o.material.clone();if(o.material.color)o.material.color.multiply(new THREE.Color(0xff6666));}});
++    c.position.set(e.x,0,0);scene.add(c);e.g.visible=false;e.skin=c;
++    const mx=new THREE.AnimationMixer(c);if(gltf.animations.length)mx.clipAction(gltf.animations[0]).play();e.mixer=mx;
++  }
++  toast('HD TROOPS LOADED');
++}catch(err){console.warn('soldier GLB fallback to boxes',err);}}
++loadSoldiers();
+ // input
+ const K={};addEventListener('keydown',e=>{K[e.code]=true;if(e.code==='KeyR')reset();if(e.code==='KeyM')muted=!muted;if(['ArrowUp','ArrowDown','Space'].includes(e.code))e.preventDefault();});
+ addEventListener('keyup',e=>K[e.code]=false);
+ let muted=false;
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -160,8 +160,9 @@
+   const base=Math.atan2(dy,dx);
+   if(P.gun==='S'){[-0.25,0,0.25].forEach(o=>mk(base+o));}
+   else if(P.gun==='L'){[-0.15,0.15].forEach(o=>mk(base+o,18));mk(base,18);}
+   else mk(base,P.gun==='M'?20:16);
++  muzzle.position.set(P.x+dx*1.2,oy+dy*0.5,1);muzzle.intensity=14;
+   beep(P.gun==='S'?300:700,.05,'square',.04);}
+ // particles
+ function boom(x,y,c=0xff8800,n=10){for(let i=0;i<n;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(.2,.2,.2),new THREE.MeshBasicMaterial({color:c}));m.position.set(x,y,1);scene.add(m);parts.push({mesh:m,vx:(Math.random()-.5)*10,vy:Math.random()*8,life:.6});}}
+ function toast(t){const el=document.getElementById('toast');el.textContent=t;clearTimeout(el._h);el._h=setTimeout(()=>el.textContent='',1500);}
+
+[0m
+Character and combat upgrades in — now locking the camera and boss fight.
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -201,17 +201,23 @@
+ const g=groundAt(P.x);
+ if(g!==null&&P.y<=0&&P.vy<=0){if(P.y<-1){hurt();P.y=2;P.vy=0;}else{P.y=0;P.vy=0;P.onGround=true;}}else if(g===null){P.onGround=false;if(P.y<-4){P.lives--;if(P.lives<0){die();return;}P.hp=3;P.x-=6;P.y=3;P.vy=0;toast('FELL IN PIT!');}}
+ else if(P.y>0)P.onGround=false;
+ if(P.fireCd>0)P.fireCd-=dt;if(P.inv>0)P.inv-=dt;
+-// pose player
++// pose player (+ GLB hero follows, faces travel dir)
+ pg.position.set(P.x,P.y+(P.crouch?-0.4:0),0);pg.scale.y=P.crouch?0.7:1;
+-pg.rotation.y=P.face>0?0:Math.PI;armR.rotation.z=(K.ArrowUp||K.KeyW)?0.9:0;
+-pg.visible=!(P.inv>0&&Math.floor(time*12)%2===0);
++pg.rotation.y=P.face>0?0:Math.PI;armR.rotation.z=(K.ArrowUp||K.KeyW)?0.9:((K.ArrowDown||K.KeyS)&&!P.onGround?-0.9:0);
++gunM.rotation.z=(K.ArrowUp||K.KeyW)?0.9:((K.ArrowDown||K.KeyS)&&!P.onGround?-0.9:0);
++pg.visible=!(P.inv>0&&Math.floor(time*12)%2===0)&&!heroGLB;
++if(heroGLB){heroGLB.position.set(P.x,P.y,0);heroGLB.rotation.y=P.face>0?Math.PI/2:-Math.PI/2;heroGLB.visible=!(P.inv>0&&Math.floor(time*12)%2===0);if(heroMixer)heroMixer.update(dt);}
+ legL.rotation.x=Math.sin(time*12)* (Math.abs(P.vx)>1?0.7:0);legR.rotation.x=-legL.rotation.x;
+-// camera follow + shake
+-const tx=P.x+2.5;camera.position.x+=(tx-camera.position.x)*Math.min(1,dt*5);
+-camera.position.y=4.2+(P.y*0.25);if(shake>0){shake-=dt;camera.position.x+=(Math.random()-.5)*shake;camera.position.y+=(Math.random()-.5)*shake;}
+-camera.lookAt(camera.position.x-2.5,2.5,0);
++muzzle.intensity=Math.max(0,muzzle.intensity-dt*120);
++// camera — locked readable side view: fixed height/depth, look at player plane, boss pull-back
++const bossZone0=P.x>LEVEL_LEN-25;const wantZ=bossZone0?15:10.5;
++const tx=P.x+1.5;camera.position.x+=(tx-camera.position.x)*Math.min(1,dt*6);
++camera.position.y+=(3.4-camera.position.y)*Math.min(1,dt*4);
++camera.position.z+=(wantZ-camera.position.z)*Math.min(1,dt*3);
++if(shake>0){shake-=dt;camera.position.x+=(Math.random()-.5)*shake;camera.position.y+=(Math.random()-.5)*shake;}
++camera.lookAt(camera.position.x-1.5,2.2,0);
+ // enemies AI
+ const bossZone=P.x>LEVEL_LEN-25;boss.active=bossZone;
+ document.getElementById('bossbar').style.display=bossZone?'block':'none';
+ for(const e of enemies){if(Math.abs(e.x-P.x)>30)continue;
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -220,10 +220,10 @@
+ // enemies AI
+ const bossZone=P.x>LEVEL_LEN-25;boss.active=bossZone;
+ document.getElementById('bossbar').style.display=bossZone?'block':'none';
+ for(const e of enemies){if(Math.abs(e.x-P.x)>30)continue;
+-  if(e.kind==='runner'){e.x+=e.dir*e.speed*dt;if(Math.random()<dt*0.3)e.dir*=-1;if(e.x<P.x-12)e.dir=1;if(e.x>P.x+12)e.dir=-1;e.g.position.x=e.x;e.g.position.y=Math.abs(Math.sin(time*8+e.x))*0.15;e.fire-=dt;if(e.fire<0&&Math.abs(e.x-P.x)<16){e.fire=2;const m=new THREE.Mesh(new THREE.SphereGeometry(.16,8,6),new THREE.MeshBasicMaterial({color:0xff3333}));m.position.set(e.x,1.1,1);scene.add(m);const a=Math.atan2(1.2-1.1,P.x-e.x);ebullets.push({x:e.x,y:1.1,vx:Math.cos(a)*8,vy:Math.sin(a)*8,mesh:m,life:3});beep(200,.08,'sawtooth',.03);}}
+-  if(e.kind==='turret'){e.fire-=dt;const pyT=(P.crouch?0.7:1.3)+P.y;e.barrel.rotation.z=Math.atan2(pyT-1.4,P.x-e.x)*0.3;if(e.fire<0&&Math.abs(e.x-P.x)<20){e.fire=2.2;const m=new THREE.Mesh(new THREE.SphereGeometry(.18,8,6),new THREE.MeshBasicMaterial({color:0xff3333}));m.position.set(e.x,1.4,1);scene.add(m);const a=Math.atan2(pyT-1.4,P.x-e.x);ebullets.push({x:e.x,y:1.4,vx:Math.cos(a)*9,vy:Math.sin(a)*9,mesh:m,life:3});}}
++  if(e.kind==='runner'){e.dir=P.x>e.x?1:-1;e.x+=e.dir*e.speed*dt;e.g.position.x=e.x;e.g.position.y=Math.abs(Math.sin(time*8+e.x))*0.15;if(e.skin){e.skin.position.x=e.x;e.skin.position.y=e.g.position.y;e.skin.rotation.y=e.dir>0?Math.PI/2:-Math.PI/2;if(e.mixer)e.mixer.update(dt);}e.fire-=dt;if(e.fire<0&&Math.abs(e.x-P.x)<16){e.fire=2;const py0=(P.crouch?0.7:1.3)+P.y;const m=new THREE.Mesh(new THREE.SphereGeometry(.16,8,6),new THREE.MeshBasicMaterial({color:0xff3333}));m.position.set(e.x,1.1,1);scene.add(m);const a=Math.atan2(py0-1.1,P.x-e.x);ebullets.push({x:e.x,y:1.1,vx:Math.cos(a)*8,vy:Math.sin(a)*8,mesh:m,life:3});beep(200,.08,'sawtooth',.03);}}
++  if(e.kind==='turret'){e.fire-=dt;const pyT=(P.crouch?0.7:1.3)+P.y;e.barrel.rotation.z=Math.atan2(pyT-1.4,P.x-e.x);if(e.fire<0&&Math.abs(e.x-P.x)<20){e.fire=2.2;const m=new THREE.Mesh(new THREE.SphereGeometry(.18,8,6),new THREE.MeshBasicMaterial({color:0xff3333}));m.position.set(e.x,1.4,1);scene.add(m);const a=Math.atan2(pyT-1.4,P.x-e.x);ebullets.push({x:e.x,y:1.4,vx:Math.cos(a)*9,vy:Math.sin(a)*9,mesh:m,life:3});}}
+   if(e.kind==='flyer'){e.t+=dt;e.x-=dt*2;e.g.position.x=e.x;e.g.position.y=e.y+Math.sin(e.t*2)*0.8;e.fire-=dt;if(e.fire<0&&Math.abs(e.x-P.x)<18){e.fire=2.5;const m=new THREE.Mesh(new THREE.SphereGeometry(.16,8,6),new THREE.MeshBasicMaterial({color:0xff3333}));m.position.set(e.x,e.g.position.y,1);scene.add(m);ebullets.push({x:e.x,y:e.g.position.y,vx:-4,vy:-2,mesh:m,life:3});}}
+ }
+ // boss
+ heart.scale.setScalar(1+Math.sin(time*5)*0.12);
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -227,11 +227,11 @@
+ }
+ // boss
+ heart.scale.setScalar(1+Math.sin(time*5)*0.12);
+ if(boss.active){boss.hp=cores.reduce((s,c)=>s+(c.alive?c.hp:0),0);boss.max=18;document.getElementById('bossfill').style.width=(boss.hp/boss.max*100)+'%';
+-  if(Math.random()<dt*1.2){const m=new THREE.Mesh(new THREE.SphereGeometry(.2,8,6),new THREE.MeshBasicMaterial({color:0xff3333}));m.position.set(LEVEL_LEN-1,3+Math.random()*4,1);scene.add(m);ebullets.push({x:LEVEL_LEN-1,y:3,vx:-7-Math.random()*3,vy:(Math.random()-.5)*4,mesh:m,life:4});}
++  if(Math.random()<dt*1.2){const m=new THREE.Mesh(new THREE.SphereGeometry(.2,8,6),new THREE.MeshBasicMaterial({color:0xff3333}));m.position.set(LEVEL_LEN-2,3+Math.random()*4,1);scene.add(m);ebullets.push({x:LEVEL_LEN-2,y:4,vx:-7-Math.random()*3,vy:(Math.random()-.5)*4,mesh:m,life:4});}
+   if(cores.every(c=>!c.alive)){boom(LEVEL_LEN,4,0xffff00,40);win();}
+-  if(P.x>LEVEL_LEN-3){/* touch wall hurts */ if(Math.random()<dt*2)hurt();}
++  if(P.x>LEVEL_LEN-1.2){P.x=LEVEL_LEN-1.2;if(Math.random()<dt*2)hurt();}
+ }
+ // bullets
+ for(let i=pbullets.length-1;i>=0;i--){const b=pbullets[i];b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;b.mesh.position.set(b.x,b.y,1);
+   let hit=false;
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -234,9 +234,10 @@
+ }
+ // bullets
+ for(let i=pbullets.length-1;i>=0;i--){const b=pbullets[i];b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;b.mesh.position.set(b.x,b.y,1);
+   let hit=false;
+-  for(const e of enemies){if(e.hp<=0)continue;const ey=e.kind==='turret'?1.2:e.kind==='flyer'?e.g.position.y:1;if(Math.abs(b.x-e.x)<0.9&&Math.abs(b.y-ey)<1){e.hp--;hit=true;boom(b.x,b.y,0xffff66,4);if(e.hp<=0){scene.remove(e.g);P.score+=e.kind==='turret'?300:e.kind==='runner'?100:200;boom(e.x,ey,0xff6600,14);beep(120,.15,'sawtooth',.06);toast('+'+(e.kind==='turret'?'300':e.kind==='runner'?'100':'200'));}break;}}
++  for(const e of enemies){if(e.hp<=0)continue;const ey=e.kind==='turret'?1.2:e.kind==='flyer'?e.g.position.y:1;if(Math.abs(b.x-e.x)<0.9&&Math.abs(b.y-ey)<1.2){e.hp--;hit=true;boom(b.x,b.y,0xffff66,4);e.flash=0.12;if(e.hp<=0){if(e.skin)e.skin.visible=false;scene.remove(e.g);P.score+=e.kind==='turret'?300:e.kind==='runner'?100:200;boom(e.x,ey,0xff6600,14);beep(120,.15,'sawtooth',.06);toast('+'+(e.kind==='turret'?'300':e.kind==='runner'?'100':'200'));}break;}}
++  if(!hit)for(const pk of pickups){if(pk.taken||pk.opened)continue;if(Math.abs(b.x-pk.x)<0.9&&Math.abs(b.y-1.4)<1){pk.hp--;hit=true;boom(b.x,b.y,0x66ccff,4);if(pk.hp<=0){pk.opened=true;pk.core.material.emissive.setHex(0xffcc00);toast('CAPSULE OPEN — GRAB!');beep(1200,.12,'square',.06);}break;}}
+   if(!hit)for(const c of cores){if(!c.alive)continue;const wp=new THREE.Vector3();c.mesh.getWorldPosition(wp);if(Math.hypot(b.x-wp.x,b.y-wp.y)<0.9){c.hp--;hit=true;boom(b.x,b.y,0xffff00,6);if(c.hp<=0){c.alive=false;c.mesh.visible=false;P.score+=1000;boom(wp.x,wp.y,0xff0000,20);beep(90,.3,'sawtooth',.08);}break;}}
+   if(hit||b.life<0||b.y<0||b.y>14){scene.remove(b.mesh);pbullets.splice(i,1);}}
+ for(let i=ebullets.length-1;i>=0;i--){const b=ebullets[i];b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;b.mesh.position.set(b.x,b.y,1);
+   const py=(P.crouch?0.7:1.3)+P.y;if(Math.abs(b.x-P.x)<0.6&&Math.abs(b.y-py)<0.8){hurt();scene.remove(b.mesh);ebullets.splice(i,1);continue;}
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -241,11 +241,11 @@
+   if(hit||b.life<0||b.y<0||b.y>14){scene.remove(b.mesh);pbullets.splice(i,1);}}
+ for(let i=ebullets.length-1;i>=0;i--){const b=ebullets[i];b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;b.mesh.position.set(b.x,b.y,1);
+   const py=(P.crouch?0.7:1.3)+P.y;if(Math.abs(b.x-P.x)<0.6&&Math.abs(b.y-py)<0.8){hurt();scene.remove(b.mesh);ebullets.splice(i,1);continue;}
+   if(b.life<0||b.y<0){scene.remove(b.mesh);ebullets.splice(i,1);}}
+-// pickups / hazards
+-for(const p of pickups){if(p.taken)continue;p.g.rotation.y+=dt*2;p.g.position.y=Math.abs(Math.sin(time*3+p.x))*0.2;
+-  if(Math.abs(P.x-p.x)<1&&Math.abs(P.y)<2){p.taken=true;scene.remove(p.g);P.gun=p.type;P.score+=500;toast(p.type==='S'?'SPREAD GUN!':p.type==='M'?'MACHINE GUN!':p.type==='L'?'LASER!':'RAPID + SHIELD');if(p.type==='R')P.hp=Math.min(3,P.hp+1);beep(900,.15,'square',.06);}}
++// pickups: opened capsules are grabbed by walking over (arcade); unopened hint on touch
++for(const p of pickups){if(p.taken)continue;p.g.rotation.y+=dt*(p.opened?4:2);p.g.position.y=Math.abs(Math.sin(time*3+p.x))*0.2;
++  if(Math.abs(P.x-p.x)<1.2&&Math.abs(P.y)<2){if(!p.opened){if(!p.hinted||time-p.hinted>2){p.hinted=time;toast('SHOOT CAPSULE TO OPEN!');}continue;}p.taken=true;p.g.visible=false;P.gun=p.type;P.score+=500;toast(p.type==='S'?'SPREAD GUN!':p.type==='M'?'MACHINE GUN!':p.type==='L'?'LASER!':'RAPID + SHIELD');if(p.type==='R')P.hp=Math.min(3,P.hp+1);beep(900,.15,'square',.06);}}
+ for(const h of hazards){if(h.type==='spike'&&Math.abs(P.x-h.x)<h.r&&P.y<0.5)hurt();}
+ for(const pt of parts){pt.life-=dt;pt.mesh.position.x+=pt.vx*dt;pt.mesh.position.y+=pt.vy*dt;pt.vy-=20*dt;if(pt.life<0){scene.remove(pt.mesh);parts.splice(parts.indexOf(pt),1);}}
+ // HUD
+ document.getElementById('score').textContent=P.score;
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -39,9 +39,9 @@
+   <div class="pill">PROGRESS <span id="prog">0%</span></div>
+ </div>
+ <div id="bar"><div id="barfill"></div></div>
+ <div id="toast"></div>
+-<div id="controls">MOVE ⬅➡ / A D &nbsp;•&nbsp; JUMP ⬆/W/SPACE &nbsp;•&nbsp; CROUCH ⬇/S &nbsp;•&nbsp; SHOOT Z/J or auto &nbsp;•&nbsp; AIM: hold ⬆/⬇ while shooting &nbsp;•&nbsp; R restart &nbsp;•&nbsp; M mute</div>
++<div id="controls">MOVE ⬅➡ / A D &nbsp;•&nbsp; JUMP ⬆/W/SPACE &nbsp;•&nbsp; CROUCH ⬇/S &nbsp;•&nbsp; SHOOT Z/J or click (auto) &nbsp;•&nbsp; AIM: hold ⬆ (straight-up) / ⬇ in air / ⬆+⬅➡ diagonals &nbsp;•&nbsp; SHOOT capsules open &nbsp;•&nbsp; R instant restart &nbsp;•&nbsp; M mute</div>
+ <div id="msg"><h1>CONTRA 3D</h1><h2>JUNGLE STRIKE — run &amp; gun</h2>
+ <p>Konami Contra (Arcade 1987) is the bar: run right, jump pits, shoot soldiers/turrets, grab Falcon capsules for Spread, take the base, kill the alien heart. Click START, push right, hold shoot, dodge red bullets.</p>
+ <button id="start">▶ START MISSION</button></div>
+ <script type="module">
+
+[0m
+All major fixes applied — verifying syntax and visuals in the browser.
+[0m$ [0mpython3 -c "h=open('contra-3d/index.html').read().split('<script type=\"module\">')[1].split('</script>')[0];open('/tmp/opencode/g2.mjs','w').write(h)" && node --check /tmp/opencode/g2.mjs && echo SYNTAX_OK; SKD=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; python3 "$SKD/scripts/prepare_viewer.py" --model /home/runner/work/PlayGround/PlayGround/contra-3d/models/soldier.glb --output /tmp/opencode/soldier-ab 2>&1 | tail -3; nohup python3 -m http.server 8765 --directory /tmp/opencode/soldier-ab >/tmp/opencode/ab.log 2>&1 & sleep 1; echo AB_UP
+SYNTAX_OK
+error: decoder assets are missing; run npm install in the skill directory
+AB_UP
+[0m
+[0m$ [0mnpm install --prefix /home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs 2>&1 | tail -2; SKD=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; python3 "$SKD/scripts/prepare_viewer.py" --model /home/runner/work/PlayGround/PlayGround/contra-3d/models/soldier.glb --output /tmp/opencode/soldier-ab 2>&1 | tail -3; ls /tmp/opencode/soldier-ab | head
+found 0 vulnerabilities
+}
+
+error: Khronos validation failed; inspect /tmp/opencode/soldier-ab/model.glb.validation.json or use --allow-invalid
+model.glb.inspection.json
+model.glb.validation.json
+[0m
+[0m$ [0mSKD=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; python3 "$SKD/scripts/prepare_viewer.py" --model /home/runner/work/PlayGround/PlayGround/contra-3d/models/soldier.glb --output /tmp/opencode/soldier-ab --allow-invalid 2>&1 | tail -3; ls /tmp/opencode/soldier-ab | head; cat /home/runner/work/PlayGround/PlayGround/contra-3d/models/soldier.glb.attribution.json
+Inspection report: /tmp/opencode/soldier-ab/model.glb.inspection.json
+Validation report: /tmp/opencode/soldier-ab/model.glb.validation.json
+Serve with: python3 -m http.server 8765 --directory /tmp/opencode/soldier-ab
+decoders
+index.html
+main.js
+model.glb
+model.glb.attribution.json
+model.glb.inspection.json
+model.glb.validation.json
+styles.css
+viewer-config.json
+{
+  "uid": "daf5de38902e458aa57ff5ba9460ca02",
+  "name": "low poly soldier",
+  "author": "Kolos Studios",
+  "authorUrl": "https://sketchfab.com/KolosStudios",
+  "license": "CC Attribution",
+  "licenseUrl": null,
+  "modelUrl": "https://sketchfab.com/3d-models/none-daf5de38902e458aa57ff5ba9460ca02",
+  "thumbnailUrl": "https://media.sketchfab.com/models/daf5de38902e458aa57ff5ba9460ca02/thumbnails/5072c6d890df4182b23725aad799752c/883d0f55acf04c56801dbbc291acbd9a.jpeg",
+  "glbBytes": 387048,
+  "faceCount": 3092,
+  "vertexCount": 5936,
+  "textureCount": 0,
+  "textureMaxResolution": 0,
+  "animationCount": 1,
+  "animations": []
+}
+[0m
+[0m• [0mverify game + AB screenshots[90m General Agent[0m
+[0m✓ [0mverify game + AB screenshots[90m General Agent[0m
+Verification passed with zero errors, but headless runs show a performance dip from the new models — tightening that up.
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -46,10 +46,10 @@
+ <button id="start">▶ START MISSION</button></div>
+ <script type="module">
+ import * as THREE from 'three';
+ const canvas=document.getElementById('c');
+-const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
++const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
++renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+ renderer.setSize(innerWidth,innerHeight);
+ renderer.shadowMap.enabled=true;
+ renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
+ const scene=new THREE.Scene();
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -59,9 +59,9 @@
+ camera.position.set(0,3.4,10.5);
+ addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+ // lights — hemi + key sun + green rim (Galuga-style separation) + muzzle point light
+ scene.add(new THREE.HemisphereLight(0xcfefff,0x1d4d1d,0.9));
+-const sun=new THREE.DirectionalLight(0xfff2d0,1.7);sun.position.set(8,18,10);sun.castShadow=true;sun.shadow.camera.left=-20;sun.shadow.camera.right=20;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
++const sun=new THREE.DirectionalLight(0xfff2d0,1.7);sun.position.set(8,18,10);sun.castShadow=true;sun.shadow.camera.left=-20;sun.shadow.camera.right=20;sun.shadow.mapSize.set(512,512);scene.add(sun);
+ const rim=new THREE.DirectionalLight(0x66ff99,0.9);rim.position.set(-10,6,-12);scene.add(rim);
+ const muzzle=new THREE.PointLight(0xffee66,0,9);scene.add(muzzle);
+ // materials helpers
+ const M=(c,r=0.7)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
+
+[0m
+[0m• [0mfresh harsh critic round 2[90m General Agent[0m
+[0m✓ [0mfresh harsh critic round 2[90m General Agent[0m
+Critic nailed it: characters glide instead of running. Adding real locomotion and fixing restart now.
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -201,15 +201,20 @@
+ const g=groundAt(P.x);
+ if(g!==null&&P.y<=0&&P.vy<=0){if(P.y<-1){hurt();P.y=2;P.vy=0;}else{P.y=0;P.vy=0;P.onGround=true;}}else if(g===null){P.onGround=false;if(P.y<-4){P.lives--;if(P.lives<0){die();return;}P.hp=3;P.x-=6;P.y=3;P.vy=0;toast('FELL IN PIT!');}}
+ else if(P.y>0)P.onGround=false;
+ if(P.fireCd>0)P.fireCd-=dt;if(P.inv>0)P.inv-=dt;
+-// pose player (+ GLB hero follows, faces travel dir)
+-pg.position.set(P.x,P.y+(P.crouch?-0.4:0),0);pg.scale.y=P.crouch?0.7:1;
+-pg.rotation.y=P.face>0?0:Math.PI;armR.rotation.z=(K.ArrowUp||K.KeyW)?0.9:((K.ArrowDown||K.KeyS)&&!P.onGround?-0.9:0);
+-gunM.rotation.z=(K.ArrowUp||K.KeyW)?0.9:((K.ArrowDown||K.KeyS)&&!P.onGround?-0.9:0);
++// pose player (+ GLB hero follows, faces travel dir) — procedural locomotion: bob/lean/crouch/jump-tuck
++const spdF=Math.min(1,Math.abs(P.vx)/7);
++const runPh=time*(8+6*spdF);
++pg.position.set(P.x,P.y+(P.crouch?-0.4:0)+Math.abs(Math.sin(runPh))*0.09*spdF,0);pg.scale.y=P.crouch?0.7:1;
++pg.rotation.y=P.face>0?0:Math.PI;
++const aimA=(typeof P.aim==='number')?P.aim:(P.face>0?0:Math.PI);
++let armAng=0;{let a=aimA;if(P.face<0)a=Math.PI-a;armAng=a;}
++armR.rotation.z=armAng;gunM.rotation.z=armAng;gunM.position.y=1.3+Math.sin(armAng)*0.55;gunM.position.x=Math.cos(armAng)*0.55+0.35;
++armR.position.y=1.3+Math.sin(armAng)*0.35;armR.position.x=Math.cos(armAng)*0.35;
+ pg.visible=!(P.inv>0&&Math.floor(time*12)%2===0)&&!heroGLB;
+-if(heroGLB){heroGLB.position.set(P.x,P.y,0);heroGLB.rotation.y=P.face>0?Math.PI/2:-Math.PI/2;heroGLB.visible=!(P.inv>0&&Math.floor(time*12)%2===0);if(heroMixer)heroMixer.update(dt);}
+-legL.rotation.x=Math.sin(time*12)* (Math.abs(P.vx)>1?0.7:0);legR.rotation.x=-legL.rotation.x;
++if(heroGLB){heroGLB.position.set(P.x,P.y+Math.abs(Math.sin(runPh))*0.09*spdF,0);heroGLB.rotation.y=P.face>0?Math.PI/2:-Math.PI/2;heroGLB.rotation.z=P.crouch?0:(-0.12*spdF + (P.onGround?0:-0.25));heroGLB.scale.y=P.crouch?0.72:1.05;heroGLB.visible=!(P.inv>0&&Math.floor(time*12)%2===0);if(heroMixer)heroMixer.update(dt*(P.onGround?0.4+spdF:0.3));}
++legL.rotation.z=Math.sin(runPh)*(Math.abs(P.vx)>1?0.7:0);legR.rotation.z=-legL.rotation.z;
+ muzzle.intensity=Math.max(0,muzzle.intensity-dt*120);
+ // camera — locked readable side view: fixed height/depth, look at player plane, boss pull-back
+ const bossZone0=P.x>LEVEL_LEN-25;const wantZ=bossZone0?15:10.5;
+ const tx=P.x+1.5;camera.position.x+=(tx-camera.position.x)*Math.min(1,dt*6);
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -156,9 +156,9 @@
+ else{dy=0;dx=(lf&&!rt)?-1:(rt&&!lf)?1:P.face;}
+ const len=Math.hypot(dx,dy)||1;dx/=len;dy/=len;
+ const oy=(P.crouch?0.7:1.3)+P.y;
+ const mk=(a,s=16)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.14,8,6),new THREE.MeshBasicMaterial({color:0xffff66}));m.position.set(P.x,oy,1);scene.add(m);pbullets.push({x:P.x,y:oy,vx:Math.cos(a)*s,vy:Math.sin(a)*s,mesh:m,life:1.6});};
+-const base=Math.atan2(dy,dx);
++const base=Math.atan2(dy,dx);P.aim=base;
+ if(P.gun==='S'){[-0.25,0,0.25].forEach(o=>mk(base+o));}
+ else if(P.gun==='L'){[-0.15,0.15].forEach(o=>mk(base+o,18));mk(base,18);}
+ else mk(base,P.gun==='M'?20:16);
+ muzzle.position.set(P.x+dx*1.2,oy+dy*0.5,1);muzzle.intensity=14;
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -173,11 +173,14 @@
+   m.innerHTML=`<h1>${w?'MISSION CLEAR!':'GAME OVER'}</h1><h2>SCORE ${P.score}</h2><p>${w?'Alien heart destroyed. You are the Contra! Press R or click to restart instantly.':'The jungle took you. Press R or click for instant retry — no reload. Capsules must be SHOT open (arcade rule).'}</p><button id="again">↻ ${w?'PLAY AGAIN':'RETRY'} (R)</button>`;
+   document.getElementById('again').onclick=(e)=>{e.stopPropagation();resetGame();};}
+ function reset(){resetGame();}
+ function resetGame(){ // in-place arcade restart: no CDN refetch
+-  P.x=0;P.y=0;P.vx=0;P.vy=0;P.hp=3;P.lives=3;P.score=0;P.gun='N';P.fireCd=0;P.inv=0;P.dead=false;P.won=false;P.face=1;
++  P.x=0;P.y=0;P.vx=0;P.vy=0;P.hp=3;P.lives=3;P.score=0;P.gun='N';P.fireCd=0;P.inv=0;P.dead=false;P.won=false;P.face=1;P.aim=0;
+   for(const b of [...pbullets,...ebullets])scene.remove(b.mesh);pbullets.length=0;ebullets.length=0;
+-  for(const e of enemies){e.hp=e.max;e.g.visible=true;if(e.kind==='runner'){e.x=e.x0;e.g.position.x=e.x;}}
++  for(const e of enemies){e.hp=e.max;e.fire=1+Math.random();
++    if(e.kind==='runner'||e.kind==='flyer'){e.x=e.x0;}
++    if(!e.g.parent)scene.add(e.g);e.g.visible=true;e.g.position.x=e.x;e.g.position.y=e.kind==='flyer'?e.y:0;
++    if(e.skin){e.skin.visible=true;e.skin.position.x=e.x;e.skin.position.y=e.kind==='flyer'?e.y:0;}}
+   for(const p of pickups){p.taken=false;p.opened=false;p.hp=3;p.g.visible=true;p.g.rotation.y=0;p.core.material.emissive.setHex(0x1133ff);}
+   for(const c of cores){c.hp=6;c.alive=true;c.mesh.visible=true;}
+   document.getElementById('msg').classList.add('hidden');started=true;toast('GO!');}
+ let shake=0, time=0, started=false;
+
+[0m
+[0m← [0mEdit contra-3d/index.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/index.html
+@@ -228,9 +228,9 @@
+ // enemies AI
+ const bossZone=P.x>LEVEL_LEN-25;boss.active=bossZone;
+ document.getElementById('bossbar').style.display=bossZone?'block':'none';
+ for(const e of enemies){if(Math.abs(e.x-P.x)>30)continue;
+-  if(e.kind==='runner'){e.dir=P.x>e.x?1:-1;e.x+=e.dir*e.speed*dt;e.g.position.x=e.x;e.g.position.y=Math.abs(Math.sin(time*8+e.x))*0.15;if(e.skin){e.skin.position.x=e.x;e.skin.position.y=e.g.position.y;e.skin.rotation.y=e.dir>0?Math.PI/2:-Math.PI/2;if(e.mixer)e.mixer.update(dt);}e.fire-=dt;if(e.fire<0&&Math.abs(e.x-P.x)<16){e.fire=2;const py0=(P.crouch?0.7:1.3)+P.y;const m=new THREE.Mesh(new THREE.SphereGeometry(.16,8,6),new THREE.MeshBasicMaterial({color:0xff3333}));m.position.set(e.x,1.1,1);scene.add(m);const a=Math.atan2(py0-1.1,P.x-e.x);ebullets.push({x:e.x,y:1.1,vx:Math.cos(a)*8,vy:Math.sin(a)*8,mesh:m,life:3});beep(200,.08,'sawtooth',.03);}}
++  if(e.kind==='runner'){e.dir=P.x>e.x?1:-1;e.x+=e.dir*e.speed*dt;const bob=Math.abs(Math.sin(time*10+e.x))*0.15;e.g.position.x=e.x;e.g.position.y=bob;if(e.flash>0){e.flash-=dt;e.g.position.x+=Math.random()*0.2-0.1;}if(e.skin){e.skin.position.x=e.g.position.x;e.skin.position.y=bob;e.skin.rotation.y=e.dir>0?Math.PI/2:-Math.PI/2;e.skin.rotation.z=-0.1;if(e.mixer)e.mixer.update(dt*1.4);}e.fire-=dt;if(e.fire<0&&Math.abs(e.x-P.x)<16){e.fire=2;const py0=(P.crouch?0.7:1.3)+P.y;const m=new THREE.Mesh(new THREE.SphereGeometry(.16,8,6),new THREE.MeshBasicMaterial({color:0xff3333}));m.position.set(e.x,1.1,1);scene.add(m);const a=Math.atan2(py0-1.1,P.x-e.x);ebullets.push({x:e.x,y:1.1,vx:Math.cos(a)*8,vy:Math.sin(a)*8,mesh:m,life:3});beep(200,.08,'sawtooth',.03);}}
+   if(e.kind==='turret'){e.fire-=dt;const pyT=(P.crouch?0.7:1.3)+P.y;e.barrel.rotation.z=Math.atan2(pyT-1.4,P.x-e.x);if(e.fire<0&&Math.abs(e.x-P.x)<20){e.fire=2.2;const m=new THREE.Mesh(new THREE.SphereGeometry(.18,8,6),new THREE.MeshBasicMaterial({color:0xff3333}));m.position.set(e.x,1.4,1);scene.add(m);const a=Math.atan2(pyT-1.4,P.x-e.x);ebullets.push({x:e.x,y:1.4,vx:Math.cos(a)*9,vy:Math.sin(a)*9,mesh:m,life:3});}}
+   if(e.kind==='flyer'){e.t+=dt;e.x-=dt*2;e.g.position.x=e.x;e.g.position.y=e.y+Math.sin(e.t*2)*0.8;e.fire-=dt;if(e.fire<0&&Math.abs(e.x-P.x)<18){e.fire=2.5;const m=new THREE.Mesh(new THREE.SphereGeometry(.16,8,6),new THREE.MeshBasicMaterial({color:0xff3333}));m.position.set(e.x,e.g.position.y,1);scene.add(m);ebullets.push({x:e.x,y:e.g.position.y,vx:-4,vy:-2,mesh:m,life:3});}}
+ }
+ // boss
+
+[0m
+[0m$ [0mpython3 -c "h=open('contra-3d/index.html').read().split('<script type=\"module\">')[1].split('</script>')[0];open('/tmp/opencode/g3.mjs','w').write(h)" && node --check /tmp/opencode/g3.mjs && echo SYNTAX_OK
+SYNTAX_OK
+[0m
+[0m• [0mfinal verify + screenshots[90m General Agent[0m
+[0m✓ [0mfinal verify + screenshots[90m General Agent[0m
+All green — updating the progress page and closing out.
+[0m→ [0mRead contra-3d/progress.html
+[0m
+[0m← [0mEdit contra-3d/progress.html
+Index: /home/runner/work/PlayGround/PlayGround/contra-3d/progress.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/contra-3d/progress.html
++++ /home/runner/work/PlayGround/PlayGround/contra-3d/progress.html
+@@ -5,6 +5,9 @@
+ <div class="card done">✅ P1 scaffold + Three.js scene + parallax jungle — DONE</div>
+ <div class="card done">✅ P2 movement / jump / crouch / 8-way aim + shooting (N/S/M/L/R) — DONE</div>
+ <div class="card done">✅ P3 runners + turrets + flyers + spikes + pits + capsules + alien-heart boss + HUD + restart — DONE</div>
+ <div class="card done">✅ P4 polish vs Galuga + critic round 2 (true 8-way aim, turret aim, boss-HP bar, favicon) + browser verify — DONE, 0 console errors</div>
++<div class="card done">✅ P5 resumed: play-test clean (0 console/page errors) + harsh critic #1 (largest gap: side-camera/arena framing) → FIXED: locked side camera + boss pull-back, wall→backdrop, rim+ACES+muzzle, grounded trees, runner/turret aim, shoot-to-open capsules, in-place R restart</div>
++<div class="card done">✅ P6 Sketchfab GLB via load-sketchfab-threejs: "low poly soldier" daf5de38902e458aa57ff5ba9460ca02, Kolos Studios, CC Attribution, 387048 B, 7 meshes / 3092 tris / 5 mats / 0 tex / 1 clip (Armature|Standing) — A/B viewer ready (/tmp/opencode/soldier-ab-proof.png), hero + red-tinted runner clones with box fallback</div>
++<div class="card done">✅ P7 harsh critic #2 (largest gap: locomotion — sliding statues) → FIXED: hip-pivot legs on Z axis, run bob/lean, aim-driven gun arm, GLB bob/crouch/jump-tuck, restart restores all enemies/skins. Final verify: 0 errors, action score=500 gun=S, aimup score=800, R-restart PASS (lives=3 score=0), shots 99.5%+ non-black</div>
+ <p>Play: <a href="./index.html" style="color:#7CFC00">contra-3d/index.html</a> — screenshots in ./screenshots/</p>
+ <p id="t"></p><script>document.getElementById('t').textContent='updated '+new Date().toISOString()</script>
+
+[0m
+[0m$ [0mcp /tmp/opencode/soldier-ab-proof.png contra-3d/screenshots/soldier-ab-proof.png && ls -la contra-3d/screenshots/ contra-3d/models/
+contra-3d/models/:
+total 392
+drwxr-xr-x 2 runner runner   4096 Sep  7 05:57 .
+drwxr-xr-x 4 runner runner   4096 Sep  7 05:57 ..
+-rw-r--r-- 1 runner runner 387048 Sep  7 05:57 soldier.glb
+-rw-r--r-- 1 runner runner    630 Sep  7 05:57 soldier.glb.attribution.json
+
+contra-3d/screenshots/:
+total 1096
+drwxr-xr-x 2 runner runner   4096 Sep  7 06:03 .
+drwxr-xr-x 4 runner runner   4096 Sep  7 05:57 ..
+-rw-r--r-- 1 runner runner 161250 Sep  7 06:03 action.png
+-rw-r--r-- 1 runner runner  98364 Sep  7 05:53 action2.png
+-rw-r--r-- 1 runner runner  94046 Sep  7 05:53 action2_aimup.png
+-rw-r--r-- 1 runner runner 149558 Sep  7 06:03 aimup.png
+-rw-r--r-- 1 runner runner 116504 Sep  7 05:51 boss-warp.png
+-rw-r--r-- 1 runner runner 142539 Sep  7 06:03 restart.png
+-rw-r--r-- 1 runner runner 169161 Sep  7 06:03 soldier-ab-proof.png
+-rw-r--r-- 1 runner runner 166325 Sep  7 06:00 start.png
+[0m
+[0m# [0mTodos
+[✓] Play-test in Chromium via Playwright + screenshots + console errors
+[✓] Fresh harsh critic vs arcade + Galuga, name largest gap
+[✓] Fix gap: GLB models/animation + lighting/polish/gameplay feel
+[✓] Re-verify in browser + update progress.html + final screenshots
+[0m
+Resumed goal work is done — all systems verified live in Chromium.
+
+Final state: locked readable side camera with boss pull-back, true 8-way aim (incl. straight-up), runners/turrets/flyers with corrected aim, pits/lava/spikes, shoot-to-open Falcon capsules (S/M/L/R), alien-heart boss with HP bar, score/lives/HP/gun/progress HUD, in-place R restart, rim+ACES+muzzle lighting, grounded jungle, run-bob/lean locomotion, Sketchfab GLB troops with fallback.
+
+[goal:evidence] files: contra-3d/index.html, contra-3d/progress.html (arcade-1987 gameplay bar + Galuga-2024 visual bar with why), contra-3d/models/soldier.glb + attribution (Kolos Studios CC Attribution, 7 meshes/3092 tris/1 clip), screenshots/{start,action,aimup,restart,soldier-ab-proof}.png; builders/critics: play-test 0 console+page errors, critic#1 camera/arena fixed, critic#2 locomotion fixed; final verify: action score=500 gun=S (capsule opened), aimup score=800, R-restart PASS lives=3/score=0, all shots 99.5%+ non-black at 1280x720
+[goal:complete]
