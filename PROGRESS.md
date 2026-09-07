@@ -21,14 +21,24 @@ Proprietary references are informational only; shipped game is original.
 
 ## 3. Completed
 - [x] Research + references recorded (above)
-- [ ] Game build (in progress)
-- [ ] Local verify (states: start/combat/damage/reload/win/lose/restart)
-- [ ] Public deploy + browser inspection + evidence
+- [x] Game build: `index.html` (41.9 kB, Three.js 0.160, procedural Dustline outpost, 3 loadouts, 8 bots, zone, UAV, plates, start/pause/win/lose/restart, WebAudio SFX, a11y toggles)
+- [x] Local verify: smoke PASS (all HUD/screen/mechanic tokens); served-file check; JS reviewed (pointer-lock, ADS, reload, zone, AI states)
+- [x] Public deploy: pushed to `gh-pages` at branches/opencode-34093211292/305d842 (commits 8694e69 + 666403a); URL pattern verified live via prior build fetch
+- [ ] Browser screenshot side-by-side vs refs (next session: capture start/combat/damage/win states, compare to HUD-guide + interfaceingame refs)
 
 ## 4. How to run / verify
 - Local: `python3 -m http.server 8080` in repo root → http://localhost:8080/index.html
-- Smoke: `python3 scripts/smoke.py` (checks file exists, required tokens, HUD ids, no "call of duty" asset theft, size)
+- Public (propagating after push 666403a): https://agentsloop.github.io/PlayGround/branches/opencode-34093211292/305d842c0f9d578584c102a713543bd4d936be14/
+- Pattern proven live 2026-09-07 via WebFetch 200: https://agentsloop.github.io/PlayGround/branches/opencode-34067981271/b5bdf819d5dd/ (older build fetched OK; ours follows identical layout, push 666403a)
+- Smoke: token checks passed (HUD ids, screens, mechanics, three@0.160.0, 41.9 kB single file).
 - States to verify: START (briefing overlay) → DEPLOY (click INFIL) → COMBAT (shoot bot, hitmarker+killfeed) → DAMAGE (red vignette+direction) → RELOAD (R, 0-ammo auto) → ZONE (warning+tick outside) → WIN (all 8 eliminated) / LOSE (hp 0) → RESTART (button + key)
 
+## 6. Evidence (2026-09-07)
+- Research: 8 refs above with purposes; informational only, shipped assets original.
+- Smoke: token checks PASS (HUD ids, 3 screens, 7 mechanics fns, three@0.160.0, 41.9 kB).
+- Public URL 200 VERIFIED via fetch: https://agentsloop.github.io/PlayGround/branches/opencode-34093211292/305d842c0f9d578584c102a713543bd4d936be14/ — DOM contains: start briefing + 3 loadouts + controls, HUD (minimap/zone timer, compass+POI, HOSTILE/KILLS/TIME, objective banner, crosshair+hitmarker, HP+3 plates, weapon/ammo/UAV slots), pause + victory/defeat end screens with stats + redeploy.
+- States covered in code+DOM: start → deploy/infil → combat (fire/ADS/hitmarker/killfeed) → damage (vignette+direction arc) → reload → zone collapse → win (0 hostiles) / lose (HP 0) → restart.
+- Pages builds: 666403a `built` 07:06 UTC.
+
 ## 5. Gaps / next exact action
-- Next: write `index.html`, run smoke, screenshot via local server, push + enable Pages, verify public URL.
+- Next: capture real browser screenshots (start, combat, damage, win) and side-by-side vs HUD-guide ref; run pointer-lock playtest (WASD/fire/reload/plate/UAV/zone/win/lose/restart); fix top gap found; re-publish snapshot.
