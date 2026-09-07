@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><title>Contra 3D — progress</title>
+<style>body{font-family:monospace;background:#0a0f0a;color:#cfc;padding:24px;max-width:800px;margin:auto}h1{color:#7CFC00}.card{border:1px solid #7CFC00;border-radius:8px;padding:12px;margin:10px 0}.done{color:#7CFC00}.todo{color:#ffb}.bar{color:#f88}</style>
+<h1>CONTRA 3D — live progress</h1>
+<p><b>Gameplay bar:</b> Konami Contra Arcade (1987) — run-right, 8-way shoot, Falcon capsules, base + alien heart. <b>Visual bar:</b> Contra: Operation Galuga (2024) — why: modern 3D remake of the same jungle run-and-gun, keeps side-view readability with stylized low-poly jungle + saturated rim light. That is exactly our Three.js target.</p>
+<div class="card done">✅ P1 scaffold + Three.js scene + parallax jungle — DONE</div>
+<div class="card done">✅ P2 movement / jump / crouch / 8-way aim + shooting (N/S/M/L/R) — DONE</div>
+<div class="card done">✅ P3 runners + turrets + flyers + spikes + pits + capsules + alien-heart boss + HUD + restart — DONE</div>
+<div class="card done">✅ P4 polish vs Galuga + critic round 2 (true 8-way aim, turret aim, boss-HP bar, favicon) + browser verify — DONE, 0 console errors</div>
+<div class="card done">✅ P5 resumed: play-test clean (0 console/page errors) + harsh critic #1 (largest gap: side-camera/arena framing) → FIXED: locked side camera + boss pull-back, wall→backdrop, rim+ACES+muzzle, grounded trees, runner/turret aim, shoot-to-open capsules, in-place R restart</div>
+<div class="card done">✅ P6 Sketchfab GLB via load-sketchfab-threejs: "low poly soldier" daf5de38902e458aa57ff5ba9460ca02, Kolos Studios, CC Attribution, 387048 B, 7 meshes / 3092 tris / 5 mats / 0 tex / 1 clip (Armature|Standing) — A/B viewer ready (/tmp/opencode/soldier-ab-proof.png), hero + red-tinted runner clones with box fallback</div>
+<div class="card done">✅ P7 harsh critic #2 (largest gap: locomotion — sliding statues) → FIXED: hip-pivot legs on Z axis, run bob/lean, aim-driven gun arm, GLB bob/crouch/jump-tuck, restart restores all enemies/skins. Final verify: 0 errors, action score=500 gun=S, aimup score=800, R-restart PASS (lives=3 score=0), shots 99.5%+ non-black</div>
+<p>Play: <a href="./index.html" style="color:#7CFC00">contra-3d/index.html</a> — screenshots in ./screenshots/</p>
+<p id="t"></p><script>document.getElementById('t').textContent='updated '+new Date().toISOString()</script>
