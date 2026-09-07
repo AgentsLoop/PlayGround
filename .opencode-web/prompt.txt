@@ -1,0 +1,8 @@
+Build a small, original browser-based top-down tactical arcade shooter with the fast, readable pacing of a modern military action game. Keep it self-contained and playable in one compact arena.
+
+Acceptance criteria:
+- The player moves with WASD or arrow keys and aims/fires toward the pointer.
+- A short enemy wave attacks; enemies visibly react to hits and the player has clear health/ammo feedback.
+- Clearing the wave produces an obvious victory state; losing all health produces a defeat state.
+- A visible restart control or key reliably starts a fresh run.
+- The arena, HUD, effects, and sound cues share a cohesive restrained military-console visual style, using original names and assets.

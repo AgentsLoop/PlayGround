@@ -1,0 +1,149 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Verifying the shipped game per Agents.md — checking the entrypoint and server setup.
+[0m$ [0mls -la index.html dist/index.html 2>&1; echo ---; tmux has-session -t app-server 2>&1; echo ---; tmux ls 2>&1
+ls: cannot access 'dist/index.html': No such file or directory
+-rw-r--r-- 1 runner runner 23581 Sep  7 01:52 index.html
+---
+error connecting to /tmp/tmux-1001/default (No such file or directory)
+---
+error connecting to /tmp/tmux-1001/default (No such file or directory)
+[0m
+[0m→ [0mRead Agents.md
+[0m
+[0m$ [0mwhich tmux && tmux -V; gh auth status 2>&1 | head -5
+/usr/bin/tmux
+tmux 3.4
+github.com
+  ✓ Logged in to github.com account github-actions[bot] (GH_TOKEN)
+  - Active account: true
+  - Git operations protocol: https
+  - Token: ghs_*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
+[0m
+[0m$ [0mtmux new-session -d -s app-server -c "/home/runner/work/PlayGround/PlayGround" "python3 -m http.server 3000" && sleep 1 && tmux has-session -t app-server && echo SESSION_OK && curl -s -o /dev/null -w "port3000:%{http_code}\n" http://127.0.0.1:3000/index.html
+SESSION_OK
+port3000:200
+[0m
+Server is live on port 3000 — running the full browser test suite against it.
+[0m$ [0mls /tmp/opencode/verify/ 2>&1; ls node_modules/puppeteer-core 2>&1 | head -3
+node_modules
+package-lock.json
+package.json
+server.log
+shot-lose.png
+shot-menu.png
+shot-pause.png
+shot-play.png
+shot-win.png
+verify.js
+README.md
+lib
+package.json
+[0m
+[0m← [0mWrite /tmp/opencode/verify/final-verify.js
+Wrote file successfully.
+[0m
+[0m$ [0mmkdir -p screenshots && node /tmp/opencode/verify/final-verify.js
+{
+ "title": "IRONLINE // Sector 7 Perimeter",
+ "st1": {
+  "state": "play",
+  "kills": 3,
+  "foe": "9",
+  "hp": "100 HP",
+  "ammo": "8 / ∞ — [R] RELOAD"
+ },
+ "ammoAfterR": "— RELOADING… —",
+ "winVisible": {
+  "state": "win",
+  "overlay": true,
+  "title": "MISSION COMPLETE"
+ },
+ "afterRestart": {
+  "state": "play",
+  "overlay": false,
+  "foe": "12"
+ },
+ "loseVisible": {
+  "state": "lose",
+  "overlay": true,
+  "title": "OPERATOR DOWN"
+ },
+ "afterBtn": {
+  "state": "play",
+  "overlay": false
+ },
+ "errors": []
+}
+[0m
+All tests pass on port 3000 — confirming the screenshots and finding the issue to update.
+[0m$ [0mls -la screenshots/
+total 296
+drwxr-xr-x  2 runner runner  4096 Sep  7 01:56 .
+drwxr-xr-x 11 runner runner  4096 Sep  7 01:56 ..
+-rw-r--r--  1 runner runner 65176 Sep  7 01:56 final-defeat.png
+-rw-r--r--  1 runner runner 74206 Sep  7 01:56 final-gameplay.png
+-rw-r--r--  1 runner runner 73002 Sep  7 01:56 final-menu.png
+-rw-r--r--  1 runner runner 76964 Sep  7 01:56 final-victory.png
+[0m
+[0m→ [0mRead /tmp/opencode/verify/shot-play.png
+[0m→ [0mRead screenshots/final-gameplay.png
+[0m→ [0mRead screenshots/final-victory.png
+Screenshots confirmed — now locating the triggering GitHub issue for the completion update.
+[0m
+[0m$ [0mgh repo view --json nameWithOwner -q .nameWithOwner 2>&1; echo ---; gh issue list --limit 10 --json number,title,state 2>&1; echo ---; env | grep -i -E "issue|gh_|github" | sed 's/=ghs_.*/=ghs_**/;s/GH_TOKEN.*/GH_TOKEN=**/' | head -20
+AgentsLoop/PlayGround
+---
+[{"number":50,"state":"OPEN","title":"Full workflow test: final screenshot proof"},{"number":49,"state":"OPEN","title":"Full workflow test: screenshot evidence"},{"number":48,"state":"OPEN","title":"Call of Duty"},{"number":47,"state":"OPEN","title":"Full workflow test: completion comments"},{"number":46,"state":"OPEN","title":"Call of Duty"},{"number":45,"state":"OPEN","title":"Full workflow test: real reporting with mock generation"},{"number":44,"state":"OPEN","title":"Build an original top-down military shooter with Call of Duty-style pacing"},{"number":43,"state":"OPEN","title":"Call of Duty-inspired browser game"},{"number":42,"state":"OPEN","title":"Full workflow test retry: mock OpenCode project"},{"number":41,"state":"OPEN","title":"call of duty"}]
+---
+GITHUB_WORKSPACE=/home/runner/work/PlayGround/PlayGround
+GITHUB_PATH=/home/runner/work/_temp/_runner_file_commands/add_path_3f6d715b-0a56-40e7-bea0-64000eb4d5ae
+GITHUB_ACTION=opencode_web
+GITHUB_RUN_NUMBER=61
+RUNNER_NAME=GitHub Actions 1000000190
+GITHUB_REPOSITORY_OWNER_ID=318478564
+GH_TOKEN=**
+GITHUB_TRIGGERING_ACTOR=oh-my-github-app[bot]
+GITHUB_REF_TYPE=branch
+TRIGGER_ISSUE_NUMBER=46
+GITHUB_ARTIFACTS_LIST=/home/runner/work/_temp/_runner_file_commands/artifacts_list_3f6d715b-0a56-40e7-bea0-64000eb4d5ae
+GITHUB_REPOSITORY_ID=1353029669
+GITHUB_ACTIONS=true
+GITHUB_SHA=b4fe44a788e990e138c4d8d1a9b5f61988c117e2
+GITHUB_WORKFLOW_REF=AgentsLoop/PlayGround/.github/workflows/opencode.yml@refs/heads/main
+POWERSHELL_DISTRIBUTION_CHANNEL=GitHub-Actions-Linux
+RUNNER_ENVIRONMENT=github-hosted
+GITHUB_REF=refs/heads/main
+GITHUB_REF_PROTECTED=false
+GITHUB_API_URL=https://api.github.com
+[0m
+[0m$ [0mgh issue view 46 --json title,body,state,comments --jq '{title, state, body: (.body // "" | .[0:1500])}' 2>&1
+{"body":"Build a small, original browser-based top-down tactical arcade shooter with the fast, readable pacing of a modern military action game. Keep it self-contained and playable in one compact arena.\n\nAcceptance criteria:\n- The player moves with WASD or arrow keys and aims/fires toward the pointer.\n- A short enemy wave attacks; enemies visibly react to hits and the player has clear health/ammo feedback.\n- Clearing the wave produces an obvious victory state; losing all health produces a defeat state.\n- A visible restart control or key reliably starts a fresh run.\n- The arena, HUD, effects, and sound cues share a cohesive restrained military-console visual style, using original names and assets.","state":"OPEN","title":"Call of Duty"}
+[0m
+[0m$ [0mtest -f index.html && echo ENTRYPOINT_OK; tmux has-session -t app-server 2>/dev/null && echo TMUX_OK; curl -s -o /dev/null -w "serve:%{http_code}\n" http://127.0.0.1:3000/index.html
+ENTRYPOINT_OK
+TMUX_OK
+serve:200
+[0m
+[0m$ [0mgh issue comment 46 --body "## Verification complete — playable on port 3000
+
+**Entrypoint:** \`./index.html\` exists (single self-contained vanilla HTML/CSS/JS canvas, no external assets) and is the page served with HTTP 200 by the \`app-server\` tmux session on port 3000.
+
+**Game:** IRONLINE // Sector 7 Perimeter (OP: DUSTWALL) — top-down tactical arcade shooter in one compact arena, original names/assets (Vanguard-1 vs Jackal/Trooper/Bulwark), restrained military-console style with procedural WebAudio cues.
+
+**Browser tests (Chromium via puppeteer-core against http://127.0.0.1:3000/index.html), all passing, zero console/page errors:**
+- Menu loads with title, instructions, START OP control
+- START begins play; WASD movement + mouse aim + click/hold fire verified (bot moved, fired, scored kills, ammo drained 30→8, hostiles 12→9)
+- Enemy wave of 12 with visible hit-flash, knockback, damage floaters (-34), kill floaters/scores, death-burst particles
+- HP/ammo HUD feedback live (100 HP bar, mag bar, RELOADING state via R key)
+- MISSION COMPLETE victory overlay with stats; R key restarts to fresh 12-hostile run
+- OPERATOR DOWN defeat overlay with stats; REDEPLOY button restarts to fresh run
+
+**Final screenshots** captured under \`screenshots/\`: \`final-menu.png\`, \`final-gameplay.png\`, \`final-victory.png\`, \`final-defeat.png\`.
+
+No branch or PR created per instructions — workflow handles both." 2>&1
+https://github.com/AgentsLoop/PlayGround/issues/46#issuecomment-5563928876
+[0m
+[goal:evidence] Per Agents.md: confirmed `./index.html` exists and is served with HTTP 200 from the `app-server` tmux session on port 3000; ran full Chromium browser tests against port 3000 (movement, pointer aim/fire, 12-hostile wave with hit-flash/knockback/floaters/death bursts, HP/ammo/reload HUD, MISSION COMPLETE + OPERATOR DOWN overlays, R-key and button restarts) with zero console errors; captured `screenshots/final-menu.png`, `final-gameplay.png`, `final-victory.png`, `final-defeat.png`; published completion update to triggering issue #46 (comment 5563928876). No branch/PR created.
+[goal:complete]
