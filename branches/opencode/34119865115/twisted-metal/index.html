@@ -40,6 +40,9 @@ button.tbtn{pointer-events:auto;cursor:pointer;background:rgba(12,18,32,.9);colo
   border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;}
 button.tbtn:hover{border-color:var(--neon);color:var(--neon);}
 button.tbtn[aria-pressed="true"]{border-color:var(--green);color:var(--green);}
+/* WCAG 2.2 focus appearance: always-visible keyboard focus ring */
+button:focus-visible,.veh-card:focus-visible,input:focus-visible{outline:3px solid var(--neon);outline-offset:2px;}
+.veh-card:focus-visible{border-color:var(--neon);}
 /* ---------- HUD bottom-left: health/turbo ---------- */
 #status-hud{position:absolute;left:12px;bottom:12px;width:300px;z-index:20;pointer-events:none;}
 .bar-shell{background:rgba(8,12,22,.85);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:8px;}
@@ -212,10 +215,10 @@ body.hc .subtitle{background:#000;border:1px solid #fff;}
   <div id="touch-ui">
     <div id="joy-zone"><div id="joy-knob"></div></div>
     <div class="tbtns">
-      <button id="tb-mg">MG 🔥</button>
-      <button id="tb-msl">MSL 🚀</button>
-      <button id="tb-spc">SPCL ✦</button>
-      <button id="tb-cyc">WPN ⇄</button>
+      <button id="tb-mg" aria-label="Fire machine gun">MG 🔥</button>
+      <button id="tb-msl" aria-label="Fire selected weapon">MSL 🚀</button>
+      <button id="tb-spc" aria-label="Fire vehicle special">SPCL ✦</button>
+      <button id="tb-cyc" aria-label="Cycle weapon">WPN ⇄</button>
     </div>
   </div>
 
@@ -334,6 +337,9 @@ function $id(x){return document.getElementById(x);}
 /* ================= 1. AUDIO (WebAudio synth) ================= */
 const AudioSys={
   ctx:null, muted:false, engineOsc:null, engineGain:null, engineFilter:null, noiseBuf:null,
+  voices:0, MAXV:10, // polyphony cap: crowded fights stay audible, no node spam
+  _take(crit){ if(this.voices>=this.MAXV&&!crit) return false; this.voices++; return true; },
+  _release(){ this.voices=Math.max(0,this.voices-1); },
   init(){
     if(this.ctx) return;
     try{
@@ -360,37 +366,41 @@ const AudioSys={
     this.engineGain.gain.setTargetAtTime(0.05+speed01*0.06+(turbo?0.03:0),t,0.08);
     this.engineOsc.frequency.setTargetAtTime(50+speed01*130+(turbo?40:0),t,0.06);
   },
-  blip(freq,dur,type,vol,slide){
-    if(!this.ctx||this.muted) return;
+  blip(freq,dur,type,vol,slide,crit){
+    if(!this.ctx||this.muted||!this._take(crit)) return;
     try{
       const o=this.ctx.createOscillator(),g=this.ctx.createGain(),t=this.ctx.currentTime;
       o.type=type||'square'; o.frequency.setValueAtTime(freq,t);
       if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(20,freq+slide),t+dur);
       g.gain.setValueAtTime(vol||0.12,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
       o.connect(g); g.connect(this.ctx.destination); o.start(t); o.stop(t+dur+0.02);
-    }catch(e){}
+      o.onended=()=>this._release();
+    }catch(e){ this._release(); }
   },
-  noise(dur,vol,filterFreq){
-    if(!this.ctx||this.muted) return;
+  noise(dur,vol,filterFreq,crit){
+    if(!this.ctx||this.muted||!this._take(crit)) return;
     try{
       const s=this.ctx.createBufferSource(); s.buffer=this.noiseBuf; s.loop=true;
       const f=this.ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=filterFreq||1200;
       const g=this.ctx.createGain(),t=this.ctx.currentTime;
       g.gain.setValueAtTime(vol||0.3,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
       s.connect(f); f.connect(g); g.connect(this.ctx.destination); s.start(t); s.stop(t+dur+0.02);
-    }catch(e){}
+      s.onended=()=>this._release();
+    }catch(e){ this._release(); }
   },
   mg(){this.noise(0.07,0.10,3200); this.blip(220,0.05,'square',0.05,-120);},
   missile(){this.noise(0.35,0.16,900); this.blip(300,0.3,'sawtooth',0.08,500);},
-  explosion(big){this.noise(big?1.1:0.6,big?0.5:0.32,300); this.blip(big?60:90,big?0.9:0.5,'sine',0.35,-40);},
+  explosion(big){this.noise(big?1.1:0.6,big?0.5:0.32,300,true); this.blip(big?60:90,big?0.9:0.5,'sine',0.35,-40,true);},
   pickup(){this.blip(660,0.09,'square',0.10);setTimeout(()=>this.blip(990,0.12,'square',0.10),90);},
   repair(){this.blip(520,0.15,'sine',0.08,260);},
   ui(){this.blip(440,0.06,'triangle',0.10);},
-  hurt(){this.blip(140,0.18,'sawtooth',0.14,-60);},
+  hurt(){this.blip(140,0.18,'sawtooth',0.14,-60,true);},
+  warn(){this.blip(880,0.09,'square',0.12,0,true);setTimeout(()=>this.blip(880,0.09,'square',0.12,0,true),140);}, // low-HP warning (critical)
+  kill(){[392,523,659].forEach((f,i)=>setTimeout(()=>this.blip(f,0.12,'triangle',0.13,0,true),i*70));}, // kill confirm (critical)
   special(){this.blip(180,0.5,'sawtooth',0.16,700); this.noise(0.5,0.2,1800);},
   empty(){this.blip(160,0.08,'square',0.08,-40);},
-  win(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>this.blip(f,0.25,'triangle',0.14),i*160));},
-  lose(){[330,262,196,131].forEach((f,i)=>setTimeout(()=>this.blip(f,0.3,'sawtooth',0.12),i*200));}
+  win(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>this.blip(f,0.25,'triangle',0.14,0,true),i*160));},
+  lose(){[330,262,196,131].forEach((f,i)=>setTimeout(()=>this.blip(f,0.3,'sawtooth',0.12,0,true),i*200));}
 };
 
 /* ================= 2. INPUT ================= */
@@ -534,6 +544,7 @@ const Game={
       const el=document.createElement('div');
       el.className='veh-card'+(i===this.selectedVeh?' selected':'');
       el.tabIndex=0; el.setAttribute('role','button');
+      el.setAttribute('aria-pressed',i===this.selectedVeh?'true':'false');
       el.setAttribute('aria-label',v.name+' '+v.desc);
       const hex='#'+v.color.toString(16).padStart(6,'0');
       el.innerHTML=`<h3>${v.name} <span style="font-size:11px;color:var(--dim)">${v.desc}</span></h3>
@@ -546,7 +557,8 @@ const Game={
         }).join('')}
         <div class="special-box">✦ <b>${v.special}</b><br>${v.specialDesc}<br><span style="color:var(--dim)">Press G / middle-click</span></div>`;
       const pick=()=>{this.selectedVeh=i;AudioSys.init();AudioSys.ui();
-        grid.querySelectorAll('.veh-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');};
+        grid.querySelectorAll('.veh-card').forEach(c=>{c.classList.remove('selected');c.setAttribute('aria-pressed','false');});
+        el.classList.add('selected');el.setAttribute('aria-pressed','true');};
       el.onclick=pick;
       el.onkeydown=e=>{if(e.code==='Enter'||e.code==='Space'){pick();e.preventDefault();}};
       el.ondblclick=()=>this.startFromMenu();
@@ -654,6 +666,7 @@ const Game={
     });
     World.spawnPickups();
     HUD.refreshBay();HUD.buildEnemyBars();
+    HUD.drawMinimap(); // first-frame minimap so it never shows black on match start
     $id('vehicle-name').textContent=vd.name+' · '+vd.special+' (G)';
   }
 };
@@ -1508,6 +1521,9 @@ const Combat={
     try{FX.damageNumber(car.x,car.z,amt);}catch(e){}
     if(car.isPlayer){
       AudioSys.hurt();
+      // low-HP warning edge: cue + subtitle once when crossing 30%
+      if(car.hp>=0&&car.hp<car.maxHp*0.3&&!car._warned){car._warned=true;AudioSys.warn();Game.subtitle('WARNING: hull critical — find the green REPAIR pad!');}
+      if(car.hp>=car.maxHp*0.3)car._warned=false;
       if(!Game.reduceFlash)Game.shake=Math.min(0.9,Game.shake+0.18);
     }
     if(car.hp<=0){
@@ -1519,6 +1535,7 @@ const Combat={
         setTimeout(()=>Game.gameOver(false),1400);
       }else{
         Game.kills++;
+        if(attacker&&attacker.isPlayer)AudioSys.kill();
         Game.feed(`${attacker&&attacker.isPlayer?'YOU':aname} wrecked ${car.name}${label?' · '+label:''}`,'you');
         Game.subtitle(`${car.name} destroyed! (${Game.kills}/5)`);
         // drop a random pickup at wreck
@@ -1707,8 +1724,10 @@ const HUD={
     // special cooldown refresh ~4Hz
     this._t=(this._t||0)+dt;
     if(this._t>0.25){this._t=0;this.refreshBay();}
-    this.drawMinimap();
-    this.updateEnemyBars();
+    // perf: throttle expensive 2D overlays (minimap ~20Hz, enemy bars ~30Hz)
+    this._frame=(this._frame||0)+1;
+    if(this._frame%3===0)this.drawMinimap();
+    if(this._frame%2===0)this.updateEnemyBars();
   },
   drawMinimap(){
     const cv=$id('minimap'),ctx=cv.getContext('2d');
