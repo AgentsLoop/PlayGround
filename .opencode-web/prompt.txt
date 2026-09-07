@@ -1,0 +1,1 @@
+Build a small playable browser game called Neon Threader. The player pilots a glowing line through a compact arena, collects energy sparks, and avoids expanding pulse rings. Include a clear start state, keyboard controls, score, game-over state, restart action, and polished responsive visuals. Keep it self-contained and verify the playable loop in the browser.
