@@ -1,0 +1,133 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+On it — confirming the public deployment, then capturing, committing, and reporting.
+[0m$ [0mgit branch --show-current; git log --oneline -5 2>&1 | head; git status --short | head -n 20
+opencode/34072336039
+b4fe44a Grant reusable OpenCode workflow Pages permission
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? screenshots/
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "public:%{http_code} bytes:%{size_download}\n" https://locate-mysterious-attention-thats.trycloudflare.com/ --max-time 20; curl -s https://locate-mysterious-attention-thats.trycloudflare.com/ --max-time 20 | grep -o "<title>[^<]*</title>"
+public:200 bytes:35804
+<title>Call of Duty: Browser Ops — Playground</title>
+[0m
+[0m$ [0mnpm init -y >/dev/null 2>&1 && npm i playwright@1.63.0 2>&1 | tail -n 1
+found 0 vulnerabilities
+[0m
+[0m← [0mWrite pubshot-tmp.js
+Wrote file successfully.
+[0m
+[0m$ [0mnode ./pubshot-tmp.js 2>&1; echo "EXIT:$?"; ls -la screenshots/
+PUBLIC_STATUS 200
+PUBLIC_COMBAT {"kills":4,"score":450,"wave":1,"foes":0}
+ERRORS []
+BADRESP []
+EXIT:0
+total 6648
+drwxr-xr-x  10 runner  staff     320 Sep  7 01:36 .
+drwxr-xr-x  20 runner  staff     640 Sep  7 01:35 ..
+-rw-r--r--   1 runner  staff  313541 Sep  7 01:33 final-combat.png
+-rw-r--r--   1 runner  staff  524181 Sep  7 01:34 final-gameover.png
+-rw-r--r--   1 runner  staff  520620 Sep  7 01:33 final-menu.png
+-rw-r--r--   1 runner  staff  313670 Sep  7 01:36 final-public-combat.png
+-rw-r--r--   1 runner  staff  518945 Sep  7 01:36 final-public-gameover.png
+-rw-r--r--   1 runner  staff  517895 Sep  7 01:35 final-public-menu.png
+-rw-r--r--   1 runner  staff  341527 Sep  7 01:34 final-restart.png
+-rw-r--r--   1 runner  staff  339657 Sep  7 01:33 final-wave-start.png
+[0m
+[0m→ [0mRead screenshots/final-public-combat.png
+[0m→ [0mRead screenshots/final-public-gameover.png
+Public build confirmed playable — committing and pushing now.
+[0m
+[0m$ [0mrm -f pubshot-tmp.js && rm -rf node_modules package.json package-lock.json && git config user.name 2>&1; git config user.email 2>&1; git status --short | head -n 12
+opencode[bot]
+41898282+github-actions[bot]@users.noreply.github.com
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? screenshots/
+[0m
+[0m$ [0mgit add index.html screenshots/ && git status --short | head -n 15 && git diff --cached --stat | tail -n 12
+A  index.html
+A  screenshots/final-combat.png
+A  screenshots/final-gameover.png
+A  screenshots/final-menu.png
+A  screenshots/final-public-combat.png
+A  screenshots/final-public-gameover.png
+A  screenshots/final-public-menu.png
+A  screenshots/final-restart.png
+A  screenshots/final-wave-start.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+ index.html                            | 486 ++++++++++++++++++++++++++++++++++
+ screenshots/final-combat.png          | Bin 0 -> 313541 bytes
+ screenshots/final-gameover.png        | Bin 0 -> 524181 bytes
+ screenshots/final-menu.png            | Bin 0 -> 520620 bytes
+ screenshots/final-public-combat.png   | Bin 0 -> 313670 bytes
+ screenshots/final-public-gameover.png | Bin 0 -> 518945 bytes
+ screenshots/final-public-menu.png     | Bin 0 -> 517895 bytes
+ screenshots/final-restart.png         | Bin 0 -> 341527 bytes
+ screenshots/final-wave-start.png      | Bin 0 -> 339657 bytes
+ 9 files changed, 486 insertions(+)
+[0m
+[0m$ [0mgit commit -m "Call of Duty: Browser Ops — playable top-down wave shooter with final screenshots" 2>&1 | tail -n 3 && git push origin opencode/34072336039 2>&1 | tail -n 5 && git rev-parse HEAD
+create mode 100644 screenshots/final-public-menu.png
+ create mode 100644 screenshots/final-restart.png
+ create mode 100644 screenshots/final-wave-start.png
+remote: Create a pull request for 'opencode/34072336039' on GitHub by visiting:        
+remote:      https://github.com/AgentsLoop/PlayGround/pull/new/opencode/34072336039        
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34072336039 -> opencode/34072336039
+6a022016f41da66d8e17a82cb82ede5cf18f6127
+[0m
+[0m$ [0mgh issue comment 41 --body "🎖️ **FINAL — Call of Duty: Browser Ops is complete and publicly playable**
+
+🎮 **Public game:** https://locate-mysterious-attention-thats.trycloudflare.com
+
+Single-file top-down wave shooter (\`index.html\`, ~35KB, zero dependencies): WASD+sprint, mouse aim/fire, RMB ADS, R reload + auto-reload, 3 weapons (M4A1 / MP5 / M1014 shotgun), 4 enemy types (grunt / rusher / heavy / sniper) across escalating waves, cover + line-of-sight, CoD-style health regen, ammo/medkit pickups, tac-map minimap, compass heading, killfeed, hitmarkers, tracers, muzzle flash, particles, screen shake, procedural WebAudio SFX, pause / game-over / redeploy, touch fallback.
+
+**Final screenshots (captured against the public URL):**
+![menu](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34072336039/screenshots/final-public-menu.png)
+![combat — 4 kills, wave cleared](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34072336039/screenshots/final-public-combat.png)
+![game over + redeploy](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34072336039/screenshots/final-public-gameover.png)
+
+**Final commit:** \`6a022016f41da66d8e17a82cb82ede5cf18f6127\` on branch \`opencode/34072336039\` (contains \`index.html\` + 8 \`screenshots/final-*.png\`).
+
+**Deployment status:** public URL returns HTTP 200 with bytes identical to the committed \`index.html\`; local entrypoint also verified byte-identical from tmux \`app-server\` on port 3000.
+
+**Test status:** 10/10 browser checks PASS in real Chromium against both the public URL and port 3000 — load, menu, wave start, combat kills/score/killfeed (public run: 4 kills, score 450), weapon switch, pause/resume, game-over, redeploy restart — zero JS console errors, zero HTTP 4xx/5xx.
+
+**Known limitations:**
+- Top-down 2D homage, not a 3D FPS; no real CoD assets (all art/sound procedural).
+- No persistent high scores, multiplayer, or mobile layout tuning beyond basic touch aim/move.
+- Balance/enemy AI is arcade-simple; long-session difficulty curve untuned.
+
+No pull request created, per instructions — branch is pushed and ready for the workflow." 2>&1
+https://github.com/AgentsLoop/PlayGround/issues/41#issuecomment-5563792877
+[0m
+Complete. Summary of what was done:
+
+- **Public URL verified:** `https://locate-mysterious-attention-thats.trycloudflare.com` returns HTTP 200 with bytes identical to the committed `index.html` and the correct game title.
+- **Screenshots:** captured fresh against the public URL in real Chromium (`final-public-menu/combat/gameover.png`, plus the existing local `final-*` set) — combat verified live on the public build (4 kills, score 450, wave cleared, zero errors). All viewed and confirmed.
+- **Committed & pushed:** `index.html` + 8 screenshots under `screenshots/` committed as `6a02201` and pushed to branch `opencode/34072336039`. Only game files staged — no keys or runtime junk. No PR created.
+- **Issue #41:** final completion comment posted with the public URL, embedded screenshots, final commit, deployment/test status, and known limitations.
