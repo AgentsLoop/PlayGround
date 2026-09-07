@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Piece C — Objective / Win / Lose / Restart Prototype</title>
+<style>
+  html,body{margin:0;height:100%;background:#0b0e13;color:#e8ecf1;font-family:system-ui,sans-serif;overflow:hidden}
+  #c{position:fixed;inset:0;width:100%;height:100%;display:block}
+  #hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;gap:18px;padding:10px;pointer-events:none;font-size:15px;z-index:5}
+  .pill{background:rgba(10,14,20,.72);border:1px solid #2a3442;border-radius:8px;padding:6px 12px}
+  #objective-bar{position:fixed;top:52px;left:0;right:0;text-align:center;pointer-events:none;z-index:5;font-size:13px;color:#ffd257;text-shadow:0 1px 4px #000}
+  #cross{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:22px;z-index:5;pointer-events:none;text-shadow:0 0 4px #000}
+  #hitmark{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) rotate(45deg);font-size:26px;color:#ff5252;opacity:0;z-index:6;pointer-events:none}
+  #hpwrap{position:fixed;left:16px;bottom:16px;width:260px;z-index:5;pointer-events:none}
+  #hpbar{height:14px;background:#222;border:1px solid #444;border-radius:7px;overflow:hidden}
+  #hpfill{height:100%;width:100%;background:linear-gradient(90deg,#37d67a,#a6ff7a)}
+  #ammo{position:fixed;right:18px;bottom:16px;font-size:20px;z-index:5;pointer-events:none;text-shadow:0 1px 4px #000}
+  #vignette{position:fixed;inset:0;pointer-events:none;z-index:4;box-shadow:inset 0 0 120px rgba(255,0,0,0);transition:box-shadow .15s}
+  #feed{position:fixed;right:14px;top:90px;z-index:5;font-size:13px;text-align:right;pointer-events:none}
+  .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(4,6,10,.82);z-index:10}
+  .panel{max-width:560px;width:92%;background:#141a22;border:1px solid #2a3442;border-radius:12px;padding:24px;text-align:center}
+  .panel h1{margin:0 0 8px;font-size:26px}
+  .panel p{color:#c6cfda;font-size:14px;line-height:1.5}
+  .btn{display:inline-block;margin-top:14px;padding:12px 26px;font-size:17px;font-weight:700;border:0;border-radius:9px;cursor:pointer;background:#2f7bff;color:#fff}
+  .btn:hover{background:#4a90ff}
+  .btn.green{background:#22a355}.btn.green:hover{background:#2cbb64}
+  #endScreen,#pauseMenu{display:none}
+  kbd{background:#222c38;border:1px solid #3a4657;border-radius:4px;padding:1px 6px;font-size:12px}
+  #timerPill.warn{color:#ff6b6b;border-color:#ff6b6b}
+  .stats{display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+  .stat{background:#0f141b;border:1px solid #2a3442;border-radius:8px;padding:8px 14px;font-size:14px}
+  small{color:#8b96a5}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div class="pill" id="objPill">☠ <b id="kills">0</b>/8 HOSTILES &nbsp;·&nbsp; <span id="remain">8 remaining</span></div>
+  <div class="pill" id="timerPill">⏱ <b id="timer">2:00</b></div>
+  <div class="pill">WAVE <b id="wave">1</b> · SCORE <b id="score">0</b></div>
+</div>
+<div id="objective-bar">objective: Eliminate 8 hostiles before 120s timer expires</div>
+<div id="cross">+</div>
+<div id="hitmark">✕</div>
+<div id="hpwrap"><div style="font-size:13px;margin-bottom:4px">HP <b id="hpnum">100</b></div><div id="hpbar"><div id="hpfill"></div></div><small>regen after 4s no-damage (CoD-style)</small></div>
+<div id="ammo">30 / ∞</div>
+<div id="feed"></div>
+<div id="vignette"></div>
+
+<div class="overlay" id="startMenu">
+  <div class="panel">
+    <h1>PIECE C — HOSTILE CLEARANCE</h1>
+    <p><b>objective:</b> Eliminate <b>8 hostiles</b> before the <b>120s timer</b> expires.<br>
+    Enemies spawn in <b>waves</b> (max 3 alive) and seek you — melee up close, ranged spit at distance.<br>
+    Player HP 100 + regen after 4s without damage.</p>
+    <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move · <kbd>Shift</kbd> sprint · <kbd>Space</kbd> jump · mouse look<br>
+    <b>Left-click</b> shoot · <kbd>R</kbd> reload · <kbd>P</kbd>/<kbd>Esc</kbd> pause</p>
+    <p><small>win → MISSION COMPLETE · lose → KIA (HP=0) or TIMEOUT · restart button resets fully, no reload</small></p>
+    <button class="btn green" id="startBtn">▶ CLICK TO START (pointer lock)</button>
+  </div>
+</div>
+
+<div class="overlay" id="pauseMenu">
+  <div class="panel">
+    <h1>PAUSED</h1>
+    <p>Pointer lock lost. Timer frozen.</p>
+    <button class="btn" id="resumeBtn">RESUME (re-lock)</button><br>
+    <button class="btn" id="restartBtn2" style="background:#3a4657;margin-top:8px">RESTART MISSION</button>
+  </div>
+</div>
+
+<div class="overlay" id="endScreen">
+  <div class="panel">
+    <h1 id="endTitle">MISSION COMPLETE</h1>
+    <p id="endSub"></p>
+    <div class="stats">
+      <div class="stat">Kills<br><b id="stKills">0</b></div>
+      <div class="stat">Time<br><b id="stTime">0s</b></div>
+      <div class="stat">Shots<br><b id="stShots">0</b></div>
+      <div class="stat">Accuracy<br><b id="stAcc">0%</b></div>
+      <div class="stat">Score<br><b id="stScore">0</b></div>
+    </div>
+    <button class="btn green" id="restartBtn">↻ RESTART (no reload)</button>
+    <p><small>restart fully resets state: hp, timer, kills, waves, enemies, ammo, stats.</small></p>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+// Piece C: compact objective + win/lose/restart flow. Keywords: objective timer win lose restart.
+/* game config */
+const KILLS_TO_WIN = 8, TIME_LIMIT = 120, MAX_ALIVE = 3, ENEMY_HP = 60, PLAYER_HP = 100;
+
+let scene, camera, renderer, clock;
+let state = 'menu'; // menu | playing | paused | over
+let result = null;  // 'win' | 'lose-hp' | 'lose-timeout'
+let player, enemies = [], projectiles = [], tracers = [], crates = [];
+let keys = {};
+let yaw = 0, pitch = 0;
+let hp = PLAYER_HP, lastDamageT = -99, elapsed = 0, timeLeft = TIME_LIMIT;
+let kills = 0, score = 0, shots = 0, hits = 0, spawned = 0, wave = 1, spawnT = 0;
+let ammo = 30, MAG = 30, reloading = false;
+let enemyId = 0;
+
+const $ = id => document.getElementById(id);
+const startMenu=$('startMenu'), pauseMenu=$('pauseMenu'), endScreen=$('endScreen');
+
+init();
+function init(){
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x87a5c4);
+  scene.fog = new THREE.Fog(0x87a5c4, 30, 110);
+  camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 300);
+  renderer = new THREE.WebGLRenderer({canvas:$('c'), antialias:true});
+  renderer.setSize(innerWidth, innerHeight);
+  clock = new THREE.Clock();
+  // lights
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x334455, 0.9));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.1); sun.position.set(20,35,10); scene.add(sun);
+  // procedural map: ground + walls + crates
+  const g = new THREE.Mesh(new THREE.PlaneGeometry(80,80), new THREE.MeshLambertMaterial({color:0x5b7a52}));
+  g.rotation.x = -Math.PI/2; scene.add(g);
+  const grid = new THREE.GridHelper(80, 40, 0x000000, 0x000000); grid.material.transparent=true; grid.material.opacity=0.12; scene.add(grid);
+  const wallMat = new THREE.MeshLambertMaterial({color:0x8a8f96});
+  function wall(x,z,w,d,h=3){ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallMat); m.position.set(x,h/2,z); scene.add(m); return m; }
+  wall(0,-30,80,1,5); wall(0,30,80,1,5); wall(-30,0,1,60,5); wall(30,0,1,60,5);
+  wall(-10,-8,8,1); wall(10,8,8,1); wall(0,-2,1,10);
+  const crateMat = new THREE.MeshLambertMaterial({color:0x9a6b3f});
+  const crateMat2 = new THREE.MeshLambertMaterial({color:0x6b7f9a});
+  [[-14,-14],[14,-14],[-14,14],[14,14],[0,-18],[0,18],[-6,4],[6,-4]].forEach(([x,z],i)=>{
+    const m = new THREE.Mesh(new THREE.BoxGeometry(2,2,2), i%2?crateMat2:crateMat);
+    m.position.set(x,1,z); m.rotation.y = i*0.4; scene.add(m); crates.push(m);
+  });
+  // player rig
+  player = { pos: new THREE.Vector3(0,1.7,20), vel: new THREE.Vector3(), onGround:true };
+  // gun stub (viewmodel box)
+  const gun = new THREE.Mesh(new THREE.BoxGeometry(0.08,0.12,0.5), new THREE.MeshBasicMaterial({color:0x222222}));
+  gun.position.set(0.22,-0.18,-0.5); camera.add(gun); scene.add(camera);
+  // events
+  addEventListener('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+  addEventListener('keydown', e=>{ keys[e.code]=true; if(e.code==='KeyR') startReload(); if(e.code==='KeyP'&&state==='playing') pauseGame(); });
+  addEventListener('keyup', e=>{ keys[e.code]=false; });
+  document.addEventListener('mousemove', e=>{
+    if(state!=='playing'||document.pointerLockElement==null) return;
+    yaw -= e.movementX*0.0023; pitch -= e.movementY*0.0023;
+    pitch = Math.max(-1.45, Math.min(1.45, pitch));
+  });
+  document.addEventListener('mousedown', e=>{
+    if(state==='playing' && document.pointerLockElement!=null && e.button===0) shoot();
+  });
+  document.addEventListener('pointerlockchange', ()=>{
+    if(document.pointerLockElement==null && state==='playing') pauseGame();
+  });
+  $('startBtn').onclick = ()=>{ resetGame(); lock(); };
+  $('resumeBtn').onclick = ()=>{ lock(); };
+  $('restartBtn').onclick = ()=>{ resetGame(); lock(); };
+  $('restartBtn2').onclick = ()=>{ resetGame(); lock(); };
+  camera.position.copy(player.pos); camera.rotation.order='YXZ';
+  animate();
+}
+function lock(){ renderer.domElement.requestPointerLock?.(); }
+// lock promise resolves async; unpause on next frame once locked OR immediately if already locked.
+// Simpler: set playing immediately; pause handler only fires on lock-loss after playing.
+function startReload(){ if(reloading||ammo===MAG||state!=='playing')return; reloading=true; setTimeout(()=>{ammo=MAG;reloading=false;updateHUD();},1100); }
+function pauseGame(){ if(state!=='playing')return; state='paused'; pauseMenu.style.display='flex'; }
+function resumeIfLocked(){
+  if(state==='paused' && document.pointerLockElement!=null){ state='playing'; pauseMenu.style.display='none'; clock.getDelta(); }
+}
+setInterval(resumeIfLocked, 200);
+
+function resetGame(){
+  // full reset without page reload (restart requirement)
+  for(const e of enemies) scene.remove(e.group);
+  for(const p of projectiles) scene.remove(p.mesh);
+  for(const t of tracers) scene.remove(t.mesh);
+  enemies=[]; projectiles=[]; tracers=[];
+  hp=PLAYER_HP; lastDamageT=-99; elapsed=0; timeLeft=TIME_LIMIT;
+  kills=0; score=0; shots=0; hits=0; spawned=0; wave=1; spawnT=0;
+  ammo=MAG; reloading=false; yaw=0; pitch=0; result=null;
+  player.pos.set(0,1.7,20); player.vel.set(0,0,0);
+  endScreen.style.display='none'; pauseMenu.style.display='none'; startMenu.style.display='none';
+  $('feed').innerHTML='';
+  state='playing';
+  updateHUD();
+}
+function spawnEnemy(){
+  const melee = Math.random()<0.5;
+  const grp = new THREE.Group();
+  const bodyMat = new THREE.MeshLambertMaterial({color: melee?0xb03030:0x7a2fd0});
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry ? new THREE.CapsuleGeometry(0.4,0.9,4,8) : new THREE.BoxGeometry(0.8,1.4,0.5), bodyMat);
+  body.position.y = 1.0; grp.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28,12,10), new THREE.MeshLambertMaterial({color:0xffd9b0}));
+  head.position.y = 2.0; grp.add(head);
+  const eye = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.08,0.05), new THREE.MeshBasicMaterial({color:0xff0000}));
+  eye.position.set(0,2.0,-0.26); grp.add(eye);
+  // spawn on far edge
+  const a = Math.random()*Math.PI*2, r = 22+Math.random()*5;
+  grp.position.set(Math.cos(a)*r, 0, Math.sin(a)*r*0.8);
+  scene.add(grp);
+  const e = { id:++enemyId, group:grp, body, hp:ENEMY_HP, melee, meleeCd:0, rangedCd:1+Math.random()*1.5, speed: melee?4.2:3.0, bob:Math.random()*6 };
+  body.userData.enemy = e; head.userData.enemy = e;
+  enemies.push(e); spawned++;
+  wave = Math.floor(kills/3)+1;
+}
+function shoot(){
+  if(reloading) return;
+  if(ammo<=0){ startReload(); return; }
+  ammo--; shots++;
+  // raycast from camera center against enemy bodies+heads
+  const rc = new THREE.Raycaster();
+  rc.setFromCamera({x:0,y:0}, camera);
+  const targets=[]; for(const e of enemies) targets.push(...e.group.children);
+  const hitsArr = rc.intersectObjects(targets, false);
+  // tracer visual
+  const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
+  addTracer(camera.position.clone().add(dir.clone().multiplyScalar(0.5)), camera.position.clone().add(dir.clone().multiplyScalar(30)));
+  if(hitsArr.length && hitsArr[0].distance<60){
+    const en = hitsArr[0].object.userData.enemy;
+    if(en){ hits++; damageEnemy(en, 34, hitsArr[0].point); }
+  }
+  flashHit(false);
+  updateHUD();
+  if(ammo===0) startReload();
+}
+function damageEnemy(e, dmg, point){
+  e.hp -= dmg; flashHit(true);
+  // spark
+  const s = new THREE.Mesh(new THREE.SphereGeometry(0.09,6,6), new THREE.MeshBasicMaterial({color:0xffff66}));
+  s.position.copy(point||e.group.position.clone().add(new THREE.Vector3(0,1.2,0))); scene.add(s);
+  setTimeout(()=>scene.remove(s),120);
+  if(e.hp<=0) killEnemy(e);
+}
+function killEnemy(e){
+  scene.remove(e.group);
+  enemies = enemies.filter(x=>x!==e);
+  kills++; score+=100;
+  feed(`☠ Hostile ${e.id} down (+100)`);
+  updateHUD();
+  if(kills>=KILLS_TO_WIN) endGame('win');
+}
+function damagePlayer(dmg, fromPos){
+  if(state!=='playing') return;
+  hp -= dmg; lastDamageT = elapsed;
+  const v=$('vignette'); v.style.boxShadow='inset 0 0 140px rgba(255,0,0,.85)';
+  setTimeout(()=>v.style.boxShadow='inset 0 0 120px rgba(255,0,0,0)',160);
+  updateHUD();
+  if(hp<=0){ hp=0; endGame('lose-hp'); }
+}
+function endGame(r){
+  if(state==='over') return;
+  state='over'; result=r;
+  document.exitPointerLock?.();
+  const acc = shots? Math.round(hits/shots*100):0;
+  const tUsed = Math.round(elapsed);
+  $('stKills').textContent=kills; $('stTime').textContent=tUsed+'s';
+  $('stShots').textContent=shots; $('stAcc').textContent=acc+'%'; $('stScore').textContent=score;
+  const title=$('endTitle'), sub=$('endSub');
+  if(r==='win'){ title.textContent='🏆 MISSION COMPLETE'; title.style.color='#5dff8a';
+    sub.textContent=`win — eliminated ${kills}/${KILLS_TO_WIN} hostiles with ${fmt(timeLeft)} to spare.`; }
+  else if(r==='lose-hp'){ title.textContent='☠ KIA — YOU DIED'; title.style.color='#ff6b6b';
+    sub.textContent=`lose — HP reached 0 after ${tUsed}s. Kills ${kills}/${KILLS_TO_WIN}.`; }
+  else { title.textContent='⌛ TIMEOUT — MISSION FAILED'; title.style.color='#ffd257';
+    sub.textContent=`lose — 120s timer expired with only ${kills}/${KILLS_TO_WIN} kills.`; }
+  endScreen.style.display='flex';
+}
+function fmt(s){ s=Math.max(0,Math.ceil(s)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
+function feed(msg){ const d=document.createElement('div'); d.textContent=msg; $('feed').prepend(d); while($('feed').children.length>5)$('feed').lastChild.remove(); setTimeout(()=>d.remove(),4000); }
+function flashHit(k){ const h=$('hitmark'); h.style.opacity=k?1:0.35; h.style.color=k?'#ffd257':'#ffffff'; setTimeout(()=>h.style.opacity=0,120); }
+function addTracer(a,b){ const geo=new THREE.BufferGeometry().setFromPoints([a,b]); const m=new THREE.Line(geo,new THREE.LineBasicMaterial({color:0xfff2a0,transparent:true,opacity:0.9})); scene.add(m); tracers.push({mesh:m,life:0.08}); }
+function updateHUD(){
+  $('kills').textContent=kills; $('remain').textContent=(KILLS_TO_WIN-kills)+' remaining';
+  $('timer').textContent=fmt(timeLeft); $('wave').textContent=wave; $('score').textContent=score;
+  $('hpnum').textContent=Math.ceil(hp); $('hpfill').style.width=(hp/PLAYER_HP*100)+'%';
+  $('ammo').textContent=reloading?'RELOADING…':`${ammo} / ∞`;
+  $('timerPill').classList.toggle('warn', timeLeft<20);
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if(state==='playing'){
+    elapsed += dt; timeLeft -= dt;
+    if(timeLeft<=0){ timeLeft=0; updateHUD(); endGame('lose-timeout'); }
+    // movement (WASD + sprint + jump + gravity)
+    const sp = (keys.ShiftLeft||keys.ShiftRight)?7:4.5;
+    const f = new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+    const r = new THREE.Vector3(-f.z,0,f.x);
+    const mv = new THREE.Vector3();
+    if(keys.KeyW)mv.add(f); if(keys.KeyS)mv.sub(f); if(keys.KeyD)mv.add(r); if(keys.KeyA)mv.sub(r);
+    if(mv.lengthSq()>0)mv.normalize().multiplyScalar(sp*dt);
+    player.vel.x=mv.x/dt*0.12+player.vel.x*0.88; player.vel.z=mv.z/dt*0.12+player.vel.z*0.88;
+    if(keys.Space&&player.onGround){player.vel.y=5;player.onGround=false;}
+    player.vel.y-=12*dt;
+    player.pos.add(new THREE.Vector3(player.vel.x*dt,player.vel.y*dt,player.vel.z*dt));
+    player.pos.x=Math.max(-28,Math.min(28,player.pos.x)); player.pos.z=Math.max(-28,Math.min(28,player.pos.z));
+    if(player.pos.y<=1.7){player.pos.y=1.7;player.vel.y=0;player.onGround=true;}
+    camera.position.copy(player.pos); camera.rotation.set(pitch,yaw,0);
+    // hp regen after 4s no-damage
+    if(elapsed-lastDamageT>4 && hp<PLAYER_HP && hp>0){ hp=Math.min(PLAYER_HP,hp+18*dt); }
+    // wave spawning
+    spawnT-=dt;
+    const alive=enemies.length;
+    if(spawnT<=0 && alive<MAX_ALIVE && kills< KILLS_TO_WIN){ spawnEnemy(); spawnT=1.6; updateHUD(); }
+    // enemy AI
+    for(const e of [...enemies]){
+      const gp=e.group.position;
+      const to=new THREE.Vector3(player.pos.x-gp.x,0,player.pos.z-gp.z);
+      const dist=to.length(); to.normalize();
+      if(dist>1.8){ gp.addScaledVector(to, e.speed*dt); }
+      e.group.lookAt(player.pos.x,0,player.pos.z);
+      e.bob+=dt*6; e.group.position.y=Math.abs(Math.sin(e.bob))*0.08;
+      e.meleeCd-=dt; e.rangedCd-=dt;
+      if(dist<2.3 && e.meleeCd<=0){ e.meleeCd=1.1; damagePlayer(9+Math.random()*6, gp); }
+      if(!e.melee && dist<26 && dist>4 && e.rangedCd<=0){
+        e.rangedCd=2.2+Math.random();
+        const m=new THREE.Mesh(new THREE.SphereGeometry(0.12,8,8),new THREE.MeshBasicMaterial({color:0xff44ff}));
+        m.position.copy(gp).add(new THREE.Vector3(0,1.6,0)); scene.add(m);
+        const d=new THREE.Vector3(player.pos.x-m.position.x,(player.pos.y-0.2)-m.position.y,player.pos.z-m.position.z).normalize();
+        projectiles.push({mesh:m,vel:d.multiplyScalar(12),life:3});
+      }
+    }
+    // projectiles
+    for(const p of [...projectiles]){
+      p.mesh.position.addScaledVector(p.vel,dt); p.life-=dt;
+      const d=p.mesh.position.distanceTo(player.pos);
+      if(d<0.9){ damagePlayer(7, p.mesh.position); scene.remove(p.mesh); projectiles=projectiles.filter(x=>x!==p); }
+      else if(p.life<=0||p.mesh.position.y<0){ scene.remove(p.mesh); projectiles=projectiles.filter(x=>x!==p); }
+    }
+    // tracers fade
+    for(const t of [...tracers]){ t.life-=dt; t.mesh.material.opacity=Math.max(0,t.life/0.08); if(t.life<=0){scene.remove(t.mesh);tracers=tracers.filter(x=>x!==t);} }
+    updateHUD();
+  }
+  renderer.render(scene,camera);
+}
+</script>
+</body>
+</html>
