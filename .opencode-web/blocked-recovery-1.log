@@ -1,0 +1,1093 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Resuming the build — verifying current state and pushing fidelity higher.
+[0m# [0mTodos
+[•] Inspect index.html + progress.html, serve HTTP 200, verify gameplay systems
+[ ] Invoke load-sketchfab-threejs skill, attempt GLB upgrades or polish procedural
+[ ] High-impact fixes: physics/yaw/goals, cam framing, arena/lighting, materials, FX, HUD, WebAudio
+[ ] Screenshot/A-B + fresh harsh critic loop, fix largest mismatch
+[ ] Update progress.html refs/captures/gaps/next, re-verify 200s
+[0m
+[0m→ [0mRead index.html
+[0m→ [0mRead progress.html
+[0m→ [0mSkill "load-sketchfab-threejs"
+[0m
+[0m$ [0mpython3 -m http.server 8766 >/dev/null 2>&1 & sleep 1; curl -s -o /dev/null -w "index:%{http_code} %{size_download}\n" http://localhost:8766/index.html; curl -s -o /dev/null -w "progress:%{http_code} %{size_download}\n" http://localhost:8766/progress.html; kill %1 2>/dev/null; which chromium chromium-browser google-chrome 2>/dev/null; python3 -c "import playwright" 2>&1 | head -1; true
+index:200 27041
+progress:200 5637
+/usr/bin/chromium
+/usr/bin/chromium-browser
+/usr/bin/google-chrome
+Traceback (most recent call last):
+[0m
+[0m$ [0mSKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; timeout 70 python3 "$SKILL_DIR/scripts/download_model.py" "low poly arcade race car" --count 8 --max-glb-mb 6 --max-faces 20000 --require-glb --downloadable --no-animations --preview-sheet /tmp/rl-car-search.png 2>&1 | tail -20; ls -la /tmp/rl-car-search* 2>/dev/null; true
+Traceback (most recent call last):
+  File "/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs/scripts/download_model.py", line 20, in <module>
+    from PIL import Image, ImageDraw, ImageFont
+ModuleNotFoundError: No module named 'PIL'
+[0m
+[0m$ [0mSKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; timeout 90 python3 "$SKILL_DIR/scripts/download_model.py" "low poly arcade race car" --count 8 --max-glb-mb 6 --max-faces 20000 --require-glb --downloadable --no-animations --no-preview-sheet 2>&1 | tail -25; true
+Traceback (most recent call last):
+  File "/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs/scripts/download_model.py", line 20, in <module>
+    from PIL import Image, ImageDraw, ImageFont
+ModuleNotFoundError: No module named 'PIL'
+[0m
+[0m$ [0mpip install pillow -q 2>&1 | tail -2; SKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; timeout 100 python3 "$SKILL_DIR/scripts/download_model.py" "low poly arcade race car" --count 8 --max-glb-mb 6 --max-faces 20000 --require-glb --downloadable --no-animations --no-preview-sheet 2>&1 | tail -30; true
+[0] Lowpoly Vehicles [BLEND FILE] | 7ababb78b4f34c9b93a6b1894e569631 | 0.5 MB | 9,096 faces | nk | CC Attribution no animations
+[1] sporting car | bfcf858a15434fd2930b06e5865742a3 | 0.1 MB | 1,198 faces | laranjarodada | CC Attribution no animations
+[0m
+Car search returned candidates — inspecting them visually.
+[0m$ [0mSKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; timeout 100 python3 "$SKILL_DIR/scripts/download_model.py" "low poly arcade race car" --count 8 --max-glb-mb 6 --max-faces 20000 --require-glb --downloadable --no-animations --preview-sheet /tmp/rl-car-search.png 2>&1 | tail -8; ls -la /tmp/rl-car-search* 2>/dev/null; true
+Preview sheet: /tmp/rl-car-search.png
+[0] Lowpoly Vehicles [BLEND FILE] | 7ababb78b4f34c9b93a6b1894e569631 | 0.5 MB | 9,096 faces | nk | CC Attribution no animations
+[1] sporting car | bfcf858a15434fd2930b06e5865742a3 | 0.1 MB | 1,198 faces | laranjarodada | CC Attribution no animations
+-rw-r--r-- 1 runner runner  1417 Sep  7 06:37 /tmp/rl-car-search.json
+-rw-r--r-- 1 runner runner 71260 Sep  7 06:37 /tmp/rl-car-search.png
+[0m
+[0m→ [0mRead /tmp/rl-car-search.png
+[0m
+[0m$ [0mmkdir -p models && SKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; timeout 120 python3 "$SKILL_DIR/scripts/download_model.py" "low poly arcade race car" --count 8 --max-glb-mb 6 --max-faces 20000 --require-glb --downloadable --no-animations --no-preview-sheet --download 1 --output /home/runner/work/PlayGround/PlayGround/models/sportscar.glb 2>&1 | tail -6; ls -la models/; node "$SKILL_DIR/scripts/inspect_glb.mjs" /home/runner/work/PlayGround/PlayGround/models/sportscar.glb 2>&1 | head -40; true
+[0] Lowpoly Vehicles [BLEND FILE] | 7ababb78b4f34c9b93a6b1894e569631 | 0.5 MB | 9,096 faces | nk | CC Attribution no animations
+[1] sporting car | bfcf858a15434fd2930b06e5865742a3 | 0.1 MB | 1,198 faces | laranjarodada | CC Attribution no animations
+Downloaded 108,132 bytes to /home/runner/work/PlayGround/PlayGround/models/sportscar.glb
+Attribution metadata: /home/runner/work/PlayGround/PlayGround/models/sportscar.glb.attribution.json
+total 120
+drwxr-xr-x  2 runner runner   4096 Sep  7 06:38 .
+drwxr-xr-x 11 runner runner   4096 Sep  7 06:38 ..
+-rw-r--r--  1 runner runner 108132 Sep  7 06:38 sportscar.glb
+-rw-r--r--  1 runner runner    629 Sep  7 06:38 sportscar.glb.attribution.json
+{
+  "schemaVersion": 2,
+  "path": "/home/runner/work/PlayGround/PlayGround/models/sportscar.glb",
+  "bytes": 108132,
+  "sha256": "6a3df1c5abd2eed303a7649decc956bd2cb8e64bf4c3d31e9302510c41bbd82e",
+  "title": "sporting car",
+  "author": "laranjarodada (https://sketchfab.com/laranjarodada)",
+  "generator": "Sketchfab-14.68.0",
+  "extensionsUsed": [
+    "KHR_materials_specular"
+  ],
+  "extensionsRequired": [],
+  "scenes": 1,
+  "nodes": 38,
+  "meshes": 24,
+  "morphTargets": 0,
+  "skins": [],
+  "animations": [],
+  "materials": 11,
+  "textures": 4,
+  "images": [
+    {
+      "index": 0,
+      "name": "image-0",
+      "mimeType": "image/png",
+      "uri": null,
+      "bytes": 8812,
+      "embedded": true
+    },
+    {
+      "index": 1,
+      "name": "image-1",
+      "mimeType": "image/png",
+      "uri": null,
+      "bytes": 4372,
+      "embedded": true
+    },
+    {
+      "index": 2,
+      "name": "image-2",
+[0m
+[0m$ [0mSKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; python3 "$SKILL_DIR/scripts/prepare_viewer.py" --model /home/runner/work/PlayGround/PlayGround/models/sportscar.glb --output /tmp/sketchfab-engine-ab 2>&1 | tail -3; python3 -m http.server 8767 --directory /tmp/sketchfab-engine-ab >/dev/null 2>&1 & sleep 1; timeout 60 chromium --headless --disable-gpu --no-sandbox --window-size=1500,700 --virtual-time-budget=12000 --screenshot=/tmp/ab-car.png "http://127.0.0.1:8767/?spin=0" 2>&1 | tail -2; ls -la /tmp/ab-car.png; kill %1 2>/dev/null; true
+error: decoder assets are missing; run npm install in the skill directory
+[8117:8117:0907/063809.684461:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+15982 bytes written to file /tmp/ab-car.png
+-rw-r--r-- 1 runner runner 15982 Sep  7 06:38 /tmp/ab-car.png
+[0m
+[0m→ [0mRead /tmp/ab-car.png
+[0m
+[0m$ [0mls -la /tmp/sketchfab-engine-ab/ 2>/dev/null; SKILL_DIR=/home/runner/work/PlayGround/PlayGround/.agents/skills/load-sketchfab-threejs; python3 "$SKILL_DIR/scripts/prepare_viewer.py" --model /home/runner/work/PlayGround/PlayGround/models/sportscar.glb --output /tmp/sketchfab-engine-ab2 2>&1 | tail -5; ls -la /tmp/sketchfab-engine-ab2/ 2>/dev/null; true
+error: decoder assets are missing; run npm install in the skill directory
+[0m
+Viewer tooling is broken, so verifying the GLB with a minimal Three.js loader page instead.
+[0m← [0mWrite glb-check.html
+Wrote file successfully.
+[0m
+[0m$ [0mpython3 -m http.server 8768 >/dev/null 2>&1 & sleep 1; timeout 90 chromium --headless --no-sandbox --disable-gpu --enable-unsafe-swiftshader --window-size=1280,800 --virtual-time-budget=15000 --screenshot=/tmp/glb-check.png "http://127.0.0.1:8768/glb-check.html" 2>&1 | tail -2; ls -la /tmp/glb-check.png; kill %1 2>/dev/null; true
+[8598:8598:0907/063842.226234:ERROR:gpu/command_buffer/service/gl_utils.cc:427] [.WebGL-0x2e74001e7200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
+62075 bytes written to file /tmp/glb-check.png
+-rw-r--r-- 1 runner runner 62075 Sep  7 06:38 /tmp/glb-check.png
+[0m
+[0m→ [0mRead /tmp/glb-check.png
+GLB verified rendering in-engine. Now upgrading the game itself: car detail, ball texture, audio, trails, captures.
+[0m
+[0m# [0mTodos
+[✓] Inspect index.html + progress.html, serve HTTP 200, verify gameplay systems
+[✓] Invoke load-sketchfab-threejs skill, attempt GLB upgrades or polish procedural
+[•] High-impact fixes: physics/yaw/goals, cam framing, arena/lighting, materials, FX, HUD, WebAudio
+[ ] Screenshot/A-B + fresh harsh critic loop, fix largest mismatch
+[ ] Update progress.html refs/captures/gaps/next, re-verify 200s
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -65,11 +65,13 @@
+ // Arena dims (RL-like proportions)
+ const W=56,H=34,LEN=92,wallH=14,goalW=16,goalH=7,goalD=8;
+ const groundMat=new THREE.MeshStandardMaterial({color:0x2fae4e,roughness:.9});
+ const ground=new THREE.Mesh(new THREE.PlaneGeometry(LEN,W),groundMat);ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+-// field markings
++// field markings: halfway line across width + centre circle + goal boxes
+ function line(w,l,x,z,c=0xffffff){const m=new THREE.Mesh(new THREE.PlaneGeometry(l,w),new THREE.MeshBasicMaterial({color:c}));m.rotation.x=-Math.PI/2;m.position.set(x,0.02,z);scene.add(m);}
+-line(0.5,LEN-2,0,0);line(W,0.5,0,0);
++line(W,0.5,0,0);
++function box2d(hw,hl,cx){const t=0.35;line(t,hl*2,cx-hw,0);line(t,hl*2,cx+hw,0);line(hl*2,t,cx,-hl);line(hl*2,t,cx,hl);}
++box2d(14,8,-LEN/2+14);box2d(14,8,LEN/2-14);
+ {const ring=new THREE.Mesh(new THREE.RingGeometry(6.4,7,48),new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=0.02;scene.add(ring);}
+ for(let s=-1;s<=1;s+=2){for(let e=-1;e<=1;e+=2){const box=new THREE.Mesh(new THREE.BoxGeometry(10,0.02,10),new THREE.MeshStandardMaterial({color:0x2a9c46,roughness:1}));box.position.set(e*LEN/4,0.015,s*W/4);scene.add(box);}}
+ // turf stripes
+ for(let i=0;i<8;i++){const s=new THREE.Mesh(new THREE.PlaneGeometry(LEN/8,W),new THREE.MeshStandardMaterial({color:i%2?0x33b455:0x2da34c,roughness:1}));s.rotation.x=-Math.PI/2;s.position.set(-LEN/2+LEN/16+i*LEN/8,0.005,0);scene.add(s);}
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -68,10 +68,10 @@
+ const ground=new THREE.Mesh(new THREE.PlaneGeometry(LEN,W),groundMat);ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+ // field markings: halfway line across width + centre circle + goal boxes
+ function line(w,l,x,z,c=0xffffff){const m=new THREE.Mesh(new THREE.PlaneGeometry(l,w),new THREE.MeshBasicMaterial({color:c}));m.rotation.x=-Math.PI/2;m.position.set(x,0.02,z);scene.add(m);}
+ line(W,0.5,0,0);
+-function box2d(hw,hl,cx){const t=0.35;line(t,hl*2,cx-hw,0);line(t,hl*2,cx+hw,0);line(hl*2,t,cx,-hl);line(hl*2,t,cx,hl);}
+-box2d(14,8,-LEN/2+14);box2d(14,8,LEN/2-14);
++function goalBox(dir){const x0=dir*LEN/2,xc=x0-dir*6,xf=x0-dir*12;line(t0,12,xc,-10);line(t0,12,xc,10);line(20,t0,xf,0);}
++const t0=0.35;goalBox(-1);goalBox(1);
+ {const ring=new THREE.Mesh(new THREE.RingGeometry(6.4,7,48),new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=0.02;scene.add(ring);}
+ for(let s=-1;s<=1;s+=2){for(let e=-1;e<=1;e+=2){const box=new THREE.Mesh(new THREE.BoxGeometry(10,0.02,10),new THREE.MeshStandardMaterial({color:0x2a9c46,roughness:1}));box.position.set(e*LEN/4,0.015,s*W/4);scene.add(box);}}
+ // turf stripes
+ for(let i=0;i<8;i++){const s=new THREE.Mesh(new THREE.PlaneGeometry(LEN/8,W),new THREE.MeshStandardMaterial({color:i%2?0x33b455:0x2da34c,roughness:1}));s.rotation.x=-Math.PI/2;s.position.set(-LEN/2+LEN/16+i*LEN/8,0.005,0);scene.add(s);}
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -106,20 +106,34 @@
+ // boost pads
+ const pads=[];const padGeo=new THREE.CylinderGeometry(1.1,1.1,0.18,20);
+ const padPositions=[[0,0],[-20,-10],[20,10],[-20,10],[20,-10],[-36,0],[36,0],[0,-14],[0,14],[-12,-14],[12,14],[-12,14],[12,-14]];
+ for(const [x,z] of padPositions){const big=Math.abs(x)===36;const m=new THREE.Mesh(padGeo,new THREE.MeshStandardMaterial({color:0xffc233,emissive:0xff9d00,emissiveIntensity:1.6}));m.scale.setScalar(big?1.4:0.9);m.position.set(x,0.12,z);scene.add(m);pads.push({mesh:m,x,z,big,active:true,t:0});}
+-// car builder
++// car builder (Octane-inspired wedge: bumper, slanted glass, roof, wing spoiler, light bars)
+ function buildCar(color,glow){const g=new THREE.Group();
+- const bodyMat=new THREE.MeshStandardMaterial({color,roughness:.35,metalness:.55});
++ const bodyMat=new THREE.MeshStandardMaterial({color,roughness:.32,metalness:.6});
++ const darkMat=new THREE.MeshStandardMaterial({color:0x0b1526,roughness:.12,metalness:.85});
++ const trimMat=new THREE.MeshStandardMaterial({color:0x141414,roughness:.5,emissive:glow,emissiveIntensity:.9});
+  const body=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.9,1.9),bodyMat);body.position.y=0.95;body.castShadow=true;g.add(body);
+  const nose=new THREE.Mesh(new THREE.BoxGeometry(1.1,0.6,1.7),bodyMat);nose.position.set(2.1,0.8,0);nose.castShadow=true;g.add(nose);
+- const cab=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.7,1.5),new THREE.MeshStandardMaterial({color:0x0b1526,roughness:.15,metalness:.8}));cab.position.set(-0.2,1.6,0);cab.castShadow=true;g.add(cab);
+- const fin=new THREE.Mesh(new THREE.BoxGeometry(0.25,0.8,1.6),bodyMat);fin.position.set(-1.75,1.5,0);g.add(fin);
++ const bumper=new THREE.Mesh(new THREE.BoxGeometry(0.35,0.45,1.85),trimMat);bumper.position.set(2.65,0.55,0);g.add(bumper);
++ const shield=new THREE.Mesh(new THREE.BoxGeometry(0.95,0.55,1.45),darkMat);shield.position.set(0.55,1.5,0);shield.rotation.z=-0.32;shield.castShadow=true;g.add(shield);
++ const roof=new THREE.Mesh(new THREE.BoxGeometry(1.15,0.14,1.35),bodyMat);roof.position.set(-0.45,1.82,0);roof.castShadow=true;g.add(roof);
++ const wing=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.12,2.05),bodyMat);wing.position.set(-1.85,2.05,0);wing.castShadow=true;g.add(wing);
++ for(const sz of [-0.7,0.7]){const strut=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.55,0.16),trimMat);strut.position.set(-1.85,1.72,sz);g.add(strut);}
++ const skirtL=new THREE.Mesh(new THREE.BoxGeometry(2.9,0.22,0.12),trimMat);skirtL.position.set(0,0.55,1.0);g.add(skirtL);
++ const skirtR=skirtL.clone();skirtR.position.z=-1.0;g.add(skirtR);
++ const head=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.22,1.4),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:2.2}));head.position.set(2.66,0.85,0);g.add(head);
++ const tail=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.2,1.5),new THREE.MeshStandardMaterial({color:0xff2222,emissive:0xff2222,emissiveIntensity:2}));tail.position.set(-1.76,1.0,0);g.add(tail);
+  const wheelGeo=new THREE.CylinderGeometry(0.5,0.5,0.45,18);const wheelMat=new THREE.MeshStandardMaterial({color:0x111111,roughness:.9});
+- const wheels=[];for(const [wx,wz] of [[1.25,1.05],[1.25,-1.05],[-1.25,1.05],[-1.25,-1.05]]){const w=new THREE.Mesh(wheelGeo,wheelMat);w.rotation.x=Math.PI/2;w.position.set(wx,0.5,wz);w.castShadow=true;g.add(w);wheels.push(w);}
++ const hubMat=new THREE.MeshStandardMaterial({color:0xcc9933,roughness:.35,metalness:.8});
++ const wheels=[];for(const [wx,wz] of [[1.25,1.05],[1.25,-1.05],[-1.25,1.05],[-1.25,-1.05]]){
++  const pivot=new THREE.Group();pivot.position.set(wx,0.5,wz);
++  const w=new THREE.Mesh(wheelGeo,wheelMat);w.rotation.x=Math.PI/2;w.castShadow=true;pivot.add(w);
++  const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,0.47,6),hubMat);hub.rotation.x=Math.PI/2;pivot.add(hub);
++  g.add(pivot);wheels.push({pivot,front:wx>0});}
+  const under=new THREE.PointLight(glow,60,12);under.position.set(0,0.4,0);g.add(under);
+  const flame=new THREE.Mesh(new THREE.ConeGeometry(0.55,2.6,12),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:0}));flame.rotation.z=Math.PI/2;flame.position.set(-2.8,0.95,0);g.add(flame);
+- const trail=[];scene.add(g);return {g,wheels,flame,color,glow};}
++ scene.add(g);return {g,wheels,flame,color,glow,lastSteer:0};}
+ const player=buildCar(0x1c6de0,0x3388ff);const enemy=buildCar(0xe07010,0xff8830);
+ // ball (big, RL-like: white with dark patches via canvas)
+ function ballTexture(){const cv=document.createElement('canvas');cv.width=cv.height=256;const x=cv.getContext('2d');x.fillStyle='#f2f4f6';x.fillRect(0,0,256,256);x.fillStyle='#1b2a44';for(let i=0;i<14;i++){x.beginPath();const px=Math.random()*256,py=Math.random()*256;x.arc(px,py,22+Math.random()*18,0,7);x.fill();}const t=new THREE.CanvasTexture(cv);return t;}
+ const ballR=2.2;const ball=new THREE.Mesh(new THREE.SphereGeometry(ballR,32,24),new THREE.MeshStandardMaterial({map:ballTexture(),roughness:.5,metalness:.15}));ball.castShadow=true;scene.add(ball);
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -133,10 +133,18 @@
+  const under=new THREE.PointLight(glow,60,12);under.position.set(0,0.4,0);g.add(under);
+  const flame=new THREE.Mesh(new THREE.ConeGeometry(0.55,2.6,12),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:0}));flame.rotation.z=Math.PI/2;flame.position.set(-2.8,0.95,0);g.add(flame);
+  scene.add(g);return {g,wheels,flame,color,glow,lastSteer:0};}
+ const player=buildCar(0x1c6de0,0x3388ff);const enemy=buildCar(0xe07010,0xff8830);
+-// ball (big, RL-like: white with dark patches via canvas)
+-function ballTexture(){const cv=document.createElement('canvas');cv.width=cv.height=256;const x=cv.getContext('2d');x.fillStyle='#f2f4f6';x.fillRect(0,0,256,256);x.fillStyle='#1b2a44';for(let i=0;i<14;i++){x.beginPath();const px=Math.random()*256,py=Math.random()*256;x.arc(px,py,22+Math.random()*18,0,7);x.fill();}const t=new THREE.CanvasTexture(cv);return t;}
++// ball (big, RL-style: light shell, dark pentagon patches in offset rows + seam shading)
++function ballTexture(){const cv=document.createElement('canvas');cv.width=cv.height=256;const x=cv.getContext('2d');
++ x.fillStyle='#eef1f4';x.fillRect(0,0,256,256);
++ x.strokeStyle='rgba(120,140,160,.4)';x.lineWidth=2;
++ for(let i=0;i<=256;i+=32){x.beginPath();x.moveTo(i,0);x.lineTo(i,256);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(256,i);x.stroke();}
++ function pent(cx,cy,r){x.beginPath();for(let i=0;i<5;i++){const a=-Math.PI/2+i*2*Math.PI/5;const px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r;i?x.lineTo(px,py):x.moveTo(px,py);}x.closePath();x.fill();}
++ x.fillStyle='#16233c';
++ const rows=[[32,0],[96,32],[160,0],[224,32]];
++ for(const [yy,off] of rows){for(let xx=off;xx<256;xx+=64){pent(xx+16,yy,24);}}
++ const t=new THREE.CanvasTexture(cv);return t;}
+ const ballR=2.2;const ball=new THREE.Mesh(new THREE.SphereGeometry(ballR,32,24),new THREE.MeshStandardMaterial({map:ballTexture(),roughness:.5,metalness:.15}));ball.castShadow=true;scene.add(ball);
+ const ballShadow=new THREE.Mesh(new THREE.RingGeometry(ballR*0.7,ballR*1.05,32),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.35,side:THREE.DoubleSide}));ballShadow.rotation.x=-Math.PI/2;scene.add(ballShadow);
+ // particles
+ const parts=[];function burst(p,color,n=24,speed=12,life=0.7,size=0.35){for(let i=0;i<n;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(size,size,size),new THREE.MeshBasicMaterial({color,transparent:true}));m.position.copy(p);const v=new THREE.Vector3((Math.random()-.5)*speed,Math.random()*speed*0.9,(Math.random()-.5)*speed);parts.push({m,v,life,max:life});scene.add(m);}}
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -166,10 +166,10 @@
+ function driveCar(C,dt,throttle,steer,boosting,jumpPressed){
+  const accel=boosting?46:26, maxSp=boosting?34:23;
+  const fwd=new THREE.Vector3(Math.cos(C.yaw),0,-Math.sin(C.yaw));
+  // steering scales with speed
+- const sp=C.vel.length();const grip=THREE.MathUtils.clamp(sp/10,0.25,1);
+- C.yaw+=steer*2.6*dt*(throttle<0?-1:1)*grip*(sp>0.5?1:0.4);
++  const sp=C.vel.length();const grip=THREE.MathUtils.clamp(sp/10,0.25,1);
++  C.lastSteer=steer;C.yaw+=steer*2.6*dt*(throttle<0?-1:1)*grip*(sp>0.5?1:0.4);
+  const nFwd=new THREE.Vector3(Math.cos(C.yaw),0,-Math.sin(C.yaw));
+  if(throttle!==0){C.vel.addScaledVector(nFwd,throttle*accel*dt);}
+  if(boosting&&C.boost>0){C.vel.addScaledVector(nFwd,30*dt);C.boost=Math.max(0,C.boost-33*dt);}
+  // drift/friction
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -197,10 +197,11 @@
+  enemy.g.position.copy(S.e.pos);enemy.g.rotation.y=S.e.yaw;enemy.g.position.y=S.e.pos.y;
+  enemy.g.rotation.z=THREE.MathUtils.clamp(-S.e.vy*0.02,-0.4,0.4);
+  ball.position.copy(S.ball.pos);ball.rotation.x+=S.ball.vel.length()*dt*0.25;ball.rotation.z+=S.ball.vel.x*dt*0.1;
+  ballShadow.position.set(S.ball.pos.x,0.03,S.ball.pos.z);const h=THREE.MathUtils.clamp(S.ball.pos.y/12,0,1);ballShadow.material.opacity=0.38*(1-h);ballShadow.scale.setScalar(1+h*0.6);
+- for(const w of [...player.wheels,...enemy.wheels])w.rotation.y+=0.2;
++ spinWheels(player,S.p,dt);spinWheels(enemy,S.e,dt);
+ }
++function spinWheels(V,C,dt){const w=THREE.MathUtils.clamp(C.vel.length()/0.5,0,40);for(const o of V.wheels){o.pivot.rotation.z-=w*dt;o.pivot.rotation.y=o.front?C.lastSteer*0.35:0;}}
+ function carBall(C,power=1){const d=S.ball.pos.clone().sub(C.pos);d.y-=1;const dist=d.length();const rr=ballR+1.6;
+  if(dist<rr){const n=d.normalize();const relV=C.vel.clone().sub(S.ball.vel);const imp=Math.max(6,relV.dot(n)*1.6+ C.vel.length()*0.9+6)*power;
+   S.ball.vel.addScaledVector(n,imp);S.ball.vel.y+=Math.max(2,C.vy*0.6+3);S.ball.pos.copy(C.pos).addScaledVector(n,rr+0.05);S.ball.pos.y=Math.max(S.ball.pos.y,ballR);
+   burst(S.ball.pos,0xffffff,14,10,.5,.3);S.lastTouch=performance.now();return true;}return false;}
+
+[0m
+Fixing a NaN risk in wheel steering state, then adding audio.
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -149,10 +149,10 @@
+ // particles
+ const parts=[];function burst(p,color,n=24,speed=12,life=0.7,size=0.35){for(let i=0;i<n;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(size,size,size),new THREE.MeshBasicMaterial({color,transparent:true}));m.position.copy(p);const v=new THREE.Vector3((Math.random()-.5)*speed,Math.random()*speed*0.9,(Math.random()-.5)*speed);parts.push({m,v,life,max:life});scene.add(m);}}
+ function updateParts(dt){for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.life-=dt;p.v.y-=18*dt;p.m.position.addScaledVector(p.v,dt);p.m.material.opacity=Math.max(p.life/p.max,0);p.m.rotation.x+=4*dt;p.m.rotation.y+=3*dt;if(p.life<=0){scene.remove(p.m);p.m.geometry.dispose();p.m.material.dispose();parts.splice(i,1);}}}
+ // state
+-const S={p:{pos:new THREE.Vector3(-18,0.6,0),vel:new THREE.Vector3(),yaw:0,vy:0,grounded:true,boost:33,jumps:0,airTime:0},
+- e:{pos:new THREE.Vector3(18,0.6,0),vel:new THREE.Vector3(),yaw:Math.PI,vy:0,grounded:true,boost:60},
++const S={p:{pos:new THREE.Vector3(-18,0.6,0),vel:new THREE.Vector3(),yaw:0,vy:0,grounded:true,boost:33,jumps:0,airTime:0,lastSteer:0},
++ e:{pos:new THREE.Vector3(18,0.6,0),vel:new THREE.Vector3(),yaw:Math.PI,vy:0,grounded:true,boost:60,lastSteer:0},
+  ball:{pos:new THREE.Vector3(0,ballR+3,0),vel:new THREE.Vector3()},
+  scoreB:0,scoreO:0,time:300,playing:false,over:false,countdown:0,ballcam:true,lastTouch:0};
+ const keys={};addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyC'){S.ballcam=!S.ballcam;document.getElementById('camState').textContent=S.ballcam?'ON':'OFF';}if(e.code==='KeyR')restart(true);if(e.code==='Space')e.preventDefault();});
+ addEventListener('keyup',e=>keys[e.code]=false);
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -84,8 +84,9 @@
+ for(const s of [-1,1]){const segW=(W-goalW)/2;const cx=goalW/2+segW/2;for(const sd of [-1,1]){const m=new THREE.Mesh(new THREE.PlaneGeometry(segW,wallH),wallMat);m.position.set(s*LEN/2,wallH/2,sd*cx);m.rotation.y=Math.PI/2;scene.add(m);}}
+ // ceiling grid glow (RL arena roof feel)
+ {const g=new THREE.GridHelper(140,28,0x2a6cff,0x12315e);g.position.y=wallH+6;g.material.transparent=true;g.material.opacity=.35;scene.add(g);}
+ // goals
++const goalLights=[];
+ function makeGoal(s,color){const grp=new THREE.Group();const mat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.4,metalness:.1,emissive:color,emissiveIntensity:.25});
+  const post=new THREE.CylinderGeometry(0.35,0.35,goalH,12);const cross=new THREE.CylinderGeometry(0.35,0.35,goalW,12);
+  for(const sd of [-1,1]){const p=new THREE.Mesh(post,mat);p.position.set(s*(LEN/2),goalH/2,sd*goalW/2);p.castShadow=true;grp.add(p);}
+  const cr=new THREE.Mesh(cross,mat);cr.rotation.x=Math.PI/2;cr.position.set(s*LEN/2,goalH,0);grp.add(cr);
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -90,9 +90,9 @@
+  const post=new THREE.CylinderGeometry(0.35,0.35,goalH,12);const cross=new THREE.CylinderGeometry(0.35,0.35,goalW,12);
+  for(const sd of [-1,1]){const p=new THREE.Mesh(post,mat);p.position.set(s*(LEN/2),goalH/2,sd*goalW/2);p.castShadow=true;grp.add(p);}
+  const cr=new THREE.Mesh(cross,mat);cr.rotation.x=Math.PI/2;cr.position.set(s*LEN/2,goalH,0);grp.add(cr);
+  const net=new THREE.Mesh(new THREE.BoxGeometry(goalD,goalH,goalW),new THREE.MeshBasicMaterial({color:color,wireframe:true,transparent:true,opacity:.5}));net.position.set(s*(LEN/2+goalD/2),goalH/2,0);grp.add(net);
+- const glow=new THREE.PointLight(color,350,50);glow.position.set(s*(LEN/2-4),4,0);grp.add(glow);scene.add(grp);}
++ const glow=new THREE.PointLight(color,350,50);glow.position.set(s*(LEN/2-4),4,0);grp.add(glow);goalLights.push(glow);scene.add(grp);}
+ makeGoal(-1,0x2288ff);makeGoal(1,0xff7722);
+ // stadium: stands ring + lights + jumbotron
+ {const standMat=new THREE.MeshStandardMaterial({color:0x101c33,roughness:1});
+  for(const sd of [-1,1]){const st=new THREE.Mesh(new THREE.BoxGeometry(LEN+40,18,14),standMat);st.position.set(0,9,sd*(W/2+14));scene.add(st);
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -240,8 +240,30 @@
+  const win=S.scoreB>S.scoreO?'BLUE WINS!':S.scoreO>S.scoreB?'ORANGE WINS!':'DRAW!';
+  document.getElementById('endTitle').textContent=win;document.getElementById('endTitle').style.color=S.scoreB>=S.scoreO?'#5eb0ff':'#ff9d2e';
+  document.getElementById('endSub').textContent=`Final ${S.scoreB} – ${S.scoreO}. Press R or click Rematch.`;}
+ let jumpQueued=false;addEventListener('keydown',e=>{if(e.code==='Space'&&!e.repeat)jumpQueued=true;});
++// WebAudio: engine hum + boost noise + event blips + goal horn (created on first click)
++let AC=null,engineOsc=null,engineGain=null,boostGain=null;
++function initAudio(){if(AC){AC.resume&&AC.resume();return;}try{
++ AC=new (window.AudioContext||window.webkitAudioContext)();
++ engineOsc=AC.createOscillator();engineOsc.type='sawtooth';engineOsc.frequency.value=55;
++ const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=380;
++ engineGain=AC.createGain();engineGain.gain.value=0;
++ engineOsc.connect(f);f.connect(engineGain);engineGain.connect(AC.destination);engineOsc.start();
++ const nb=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const ch=nb.getChannelData(0);
++ for(let i=0;i<ch.length;i++)ch[i]=Math.random()*2-1;
++ const ns=AC.createBufferSource();ns.buffer=nb;ns.loop=true;
++ const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=900;bp.Q.value=0.7;
++ boostGain=AC.createGain();boostGain.gain.value=0;
++ ns.connect(bp);bp.connect(boostGain);boostGain.connect(AC.destination);ns.start();
++}catch(e){AC=null;}}
++function blip(freq,dur,type,vol,slide){if(!AC)return;try{
++ const o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';
++ o.frequency.setValueAtTime(freq,AC.currentTime);
++ if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,freq+slide),AC.currentTime+dur);
++ g.gain.setValueAtTime(vol||0.18,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+dur);
++ o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+dur+0.03);}catch(e){}}
++function horn(){if(!AC)return;[220,277,330,440].forEach((f,i)=>setTimeout(()=>blip(f,0.35,'square',0.15),i*140));}
+ // AI: chase ball, aim at player goal (-x), grab pads loosely
+ function aiControl(dt){const E=S.e;const toBall=S.ball.pos.clone().sub(E.pos);toBall.y=0;
+  const targetYaw=Math.atan2(-toBall.z,toBall.x);let dy=targetYaw-E.yaw;while(dy>Math.PI)dy-=2*Math.PI;while(dy<-Math.PI)dy+=2*Math.PI;
+  const steer=THREE.MathUtils.clamp(dy*2,-1,1);const throttle=0.9;const boosting=E.boost>25&&toBall.length()>14;
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -160,9 +160,9 @@
+ function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',1800);}
+ function showBanner(txt,sub){const b=document.getElementById('banner');b.textContent=txt;b.classList.add('show');const s=document.getElementById('subbanner');s.textContent=sub||'';s.classList.add('show');setTimeout(()=>{b.classList.remove('show');s.classList.remove('show');},1900);}
+ function resetKickoff(){S.p.pos.set(-18,0.6,0);S.p.vel.set(0,0,0);S.p.yaw=0;S.p.vy=0;S.p.boost=Math.max(S.p.boost,33);S.e.pos.set(18,0.6,0);S.e.vel.set(0,0,0);S.e.yaw=Math.PI;S.e.vy=0;jumpQueued=false;S.ball.pos.set(0,ballR+4,0);S.ball.vel.set(0,0,0);syncMeshes(0);}
+ function restart(full){S.scoreB=0;S.scoreO=0;S.time=300;S.over=false;document.getElementById('end').style.display='none';document.getElementById('sB').textContent='0';document.getElementById('sO').textContent='0';resetKickoff();startCountdown();if(full)toast('Match restarted');}
+-document.getElementById('play').onclick=()=>{document.getElementById('menu').style.display='none';S.playing=true;restart(false);};
++document.getElementById('play').onclick=()=>{initAudio();document.getElementById('menu').style.display='none';S.playing=true;restart(false);};
+ document.getElementById('again').onclick=()=>restart(true);
+ function startCountdown(){S.countdown=3.6;S.playing=false;const c=document.getElementById('count');c.style.display='block';}
+ function driveCar(C,dt,throttle,steer,boosting,jumpPressed){
+  const accel=boosting?46:26, maxSp=boosting?34:23;
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -204,9 +204,9 @@
+ function spinWheels(V,C,dt){const w=THREE.MathUtils.clamp(C.vel.length()/0.5,0,40);for(const o of V.wheels){o.pivot.rotation.z-=w*dt;o.pivot.rotation.y=o.front?C.lastSteer*0.35:0;}}
+ function carBall(C,power=1){const d=S.ball.pos.clone().sub(C.pos);d.y-=1;const dist=d.length();const rr=ballR+1.6;
+  if(dist<rr){const n=d.normalize();const relV=C.vel.clone().sub(S.ball.vel);const imp=Math.max(6,relV.dot(n)*1.6+ C.vel.length()*0.9+6)*power;
+   S.ball.vel.addScaledVector(n,imp);S.ball.vel.y+=Math.max(2,C.vy*0.6+3);S.ball.pos.copy(C.pos).addScaledVector(n,rr+0.05);S.ball.pos.y=Math.max(S.ball.pos.y,ballR);
+-  burst(S.ball.pos,0xffffff,14,10,.5,.3);S.lastTouch=performance.now();return true;}return false;}
++  burst(S.ball.pos,0xffffff,14,10,.5,.3);blip(260+Math.min(400,C.vel.length()*10),0.15,'triangle',0.22);S.lastTouch=performance.now();return true;}return false;}
+ function updateBall(dt){
+  S.ball.vel.y-=22*dt;
+  S.ball.vel.multiplyScalar(1-0.25*dt);
+  S.ball.pos.addScaledVector(S.ball.vel,dt);
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -210,9 +210,9 @@
+ S.ball.vel.y-=22*dt;
+ S.ball.vel.multiplyScalar(1-0.25*dt);
+ S.ball.pos.addScaledVector(S.ball.vel,dt);
+ // ground
+-if(S.ball.pos.y<ballR){S.ball.pos.y=ballR;if(S.ball.vel.y<-3)burst(S.ball.pos,0x88ff88,5,5,.3,.2);S.ball.vel.y*=-0.62;S.ball.vel.x*=0.985;S.ball.vel.z*=0.985;}
++if(S.ball.pos.y<ballR){S.ball.pos.y=ballR;if(S.ball.vel.y<-3){burst(S.ball.pos,0x88ff88,5,5,.3,.2);blip(120,0.12,'sine',0.2);}S.ball.vel.y*=-0.62;S.ball.vel.x*=0.985;S.ball.vel.z*=0.985;}
+ // spin drag cap
+ if(S.ball.vel.length()>46)S.ball.vel.setLength(46);
+ // side walls
+ if(S.ball.pos.z>W/2-ballR){S.ball.pos.z=W/2-ballR;S.ball.vel.z*=-0.75;burst(S.ball.pos,0x9fd0ff,8,8,.4,.25);}
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -214,10 +214,10 @@
+ if(S.ball.pos.y<ballR){S.ball.pos.y=ballR;if(S.ball.vel.y<-3){burst(S.ball.pos,0x88ff88,5,5,.3,.2);blip(120,0.12,'sine',0.2);}S.ball.vel.y*=-0.62;S.ball.vel.x*=0.985;S.ball.vel.z*=0.985;}
+ // spin drag cap
+ if(S.ball.vel.length()>46)S.ball.vel.setLength(46);
+ // side walls
+-if(S.ball.pos.z>W/2-ballR){S.ball.pos.z=W/2-ballR;S.ball.vel.z*=-0.75;burst(S.ball.pos,0x9fd0ff,8,8,.4,.25);}
+-if(S.ball.pos.z<-(W/2-ballR)){S.ball.pos.z=-(W/2-ballR);S.ball.vel.z*=-0.75;burst(S.ball.pos,0x9fd0ff,8,8,.4,.25);}
++if(S.ball.pos.z>W/2-ballR){S.ball.pos.z=W/2-ballR;S.ball.vel.z*=-0.75;burst(S.ball.pos,0x9fd0ff,8,8,.4,.25);blip(180,0.1,'sine',0.15);}
++if(S.ball.pos.z<-(W/2-ballR)){S.ball.pos.z=-(W/2-ballR);S.ball.vel.z*=-0.75;burst(S.ball.pos,0x9fd0ff,8,8,.4,.25);blip(180,0.1,'sine',0.15);}
+ // end walls / goals
+ const inMouth=Math.abs(S.ball.pos.z)<goalW/2&&S.ball.pos.y<goalH;
+ for(const s of [-1,1]){
+  if(s*S.ball.pos.x>LEN/2-ballR){
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -231,8 +231,9 @@
+  // ceiling-ish
+  if(S.ball.pos.y>24){S.ball.pos.y=24;S.ball.vel.y*=-0.5;}
+ }
+ function goalScored(side){
++ S.goalPulse=1;horn();
+  if(side==='B'){S.scoreB++;document.getElementById('sB').textContent=S.scoreB;showBanner('GOAL!','Blue scores on Orange');burst(new THREE.Vector3(LEN/2-3,4,0),0x2288ff,80,22,1.2,.5);burst(S.ball.pos,0xffd23f,40,16,1,.4);}
+  else{S.scoreO++;document.getElementById('sO').textContent=S.scoreO;showBanner('GOAL!','Orange scores — defend your net!');burst(new THREE.Vector3(-LEN/2+3,4,0),0xff7722,80,22,1.2,.5);}
+  resetKickoff();if(S.scoreB>=5||S.scoreO>=5){endMatch();return;}startCountdown();
+ }
+
+[0m
+Wiring countdown beeps, engine audio, and supersonic effects.
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -162,9 +162,9 @@
+ function resetKickoff(){S.p.pos.set(-18,0.6,0);S.p.vel.set(0,0,0);S.p.yaw=0;S.p.vy=0;S.p.boost=Math.max(S.p.boost,33);S.e.pos.set(18,0.6,0);S.e.vel.set(0,0,0);S.e.yaw=Math.PI;S.e.vy=0;jumpQueued=false;S.ball.pos.set(0,ballR+4,0);S.ball.vel.set(0,0,0);syncMeshes(0);}
+ function restart(full){S.scoreB=0;S.scoreO=0;S.time=300;S.over=false;document.getElementById('end').style.display='none';document.getElementById('sB').textContent='0';document.getElementById('sO').textContent='0';resetKickoff();startCountdown();if(full)toast('Match restarted');}
+ document.getElementById('play').onclick=()=>{initAudio();document.getElementById('menu').style.display='none';S.playing=true;restart(false);};
+ document.getElementById('again').onclick=()=>restart(true);
+-function startCountdown(){S.countdown=3.6;S.playing=false;const c=document.getElementById('count');c.style.display='block';}
++function startCountdown(){S.countdown=3.6;S.lastCount=-1;S.playing=false;const c=document.getElementById('count');c.style.display='block';}
+ function driveCar(C,dt,throttle,steer,boosting,jumpPressed){
+  const accel=boosting?46:26, maxSp=boosting?34:23;
+  const fwd=new THREE.Vector3(Math.cos(C.yaw),0,-Math.sin(C.yaw));
+  // steering scales with speed
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -276,8 +276,9 @@
+ let last=performance.now();
+ function loop(now){requestAnimationFrame(loop);let dt=Math.min((now-last)/1000,0.033);last=now;
+  // countdown
+   if(S.countdown>0){S.countdown-=dt;const c=document.getElementById('count');const n=Math.ceil(S.countdown-0.6);c.textContent=S.countdown<=0.6?'GO!':String(Math.max(n,1));
++   const ci=S.countdown<=0.6?0:Math.max(n,1);if(ci!==S.lastCount){S.lastCount=ci;blip(ci===0?880:440,ci===0?0.4:0.15,'square',0.14);}
+    if(S.countdown<=0){c.style.display='none';jumpQueued=false;if(!S.over)S.playing=true;if(!S.over)toast('Kickoff!');}syncMeshes(dt);updateCamera(dt);renderer.render(scene,camera);return;}
+  if(!S.playing||S.over){ // idle attract: slow orbit
+   if(document.getElementById('menu').style.display!=='none'){const t=now*0.0002;camera.position.set(Math.cos(t)*60,26,Math.sin(t)*60);camera.lookAt(0,2,0);renderer.render(scene,camera);}else{updateParts(dt);syncMeshes(dt);updateCamera(dt);renderer.render(scene,camera);}return;}
+  S.time-=dt;if(S.time<=0){S.time=0;endMatch();}
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -296,9 +296,9 @@
+ updateBall(dt);
+ // pads pickup
+ for(const p of pads){if(!p.active){p.t-=dt;if(p.t<=0){p.active=true;p.mesh.visible=true;}}
+  else{const dP=Math.hypot(S.p.pos.x-p.x,S.p.pos.z-p.z);const dE=Math.hypot(S.e.pos.x-p.x,S.e.pos.z-p.z);
+-  if(dP<2.2){S.p.boost=Math.min(100,S.p.boost+(p.big?100:25));p.active=false;p.t=8;p.mesh.visible=false;burst(new THREE.Vector3(p.x,1,p.z),0xffc233,12,8,.5,.3);toast('+BOOST');}
++  if(dP<2.2){S.p.boost=Math.min(100,S.p.boost+(p.big?100:25));p.active=false;p.t=8;p.mesh.visible=false;burst(new THREE.Vector3(p.x,1,p.z),0xffc233,12,8,.5,.3);blip(880,0.12,'sine',0.18);toast('+BOOST');}
+   else if(dE<2.2){S.e.boost=Math.min(100,S.e.boost+(p.big?100:25));p.active=false;p.t=8;p.mesh.visible=false;}}}
+ jumpQueued=false;
+ // boost flame + trail
+ player.flame.material.opacity+=(((pb)?0.95:0)-player.flame.material.opacity)*Math.min(1,12*dt);
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -305,8 +305,19 @@
+ player.flame.scale.set(1+Math.random()*0.4,1+Math.random()*0.5,1);
+ enemy.flame.material.opacity+=(((eb)?0.95:0)-enemy.flame.material.opacity)*Math.min(1,12*dt);
+ if(pb){burst(player.g.position.clone().add(new THREE.Vector3(-Math.cos(S.p.yaw)*2.4,1,Math.sin(S.p.yaw)*2.4)),0xff9d00,2,4,.4,.3);}
+ if(eb){burst(enemy.g.position.clone(),0x66aaff,1,3,.3,.25);}
++// engine hum + boost noise follow speed
++if(AC&&engineGain){const spd=S.p.vel.length();const tgt=(S.playing&&!S.over)?0.035+spd*0.0016:0;
++ engineGain.gain.setTargetAtTime(tgt,AC.currentTime,0.08);engineOsc.frequency.setTargetAtTime(50+spd*3.2+(pb?40:0),AC.currentTime,0.06);
++ boostGain.gain.setTargetAtTime(pb?0.11:0,AC.currentTime,0.05);}
++// supersonic trail + FOV kick at high speed
++const pSpd=S.p.vel.length();
++if(S.playing&&pSpd>26){burst(player.g.position.clone().add(new THREE.Vector3(-Math.cos(S.p.yaw)*2.6,1.1,Math.sin(S.p.yaw)*2.6)),0xbfe6ff,1,3,.35,.28);}
++const wantFov=(pb||pSpd>27)?70:62;
++if(Math.abs(camera.fov-wantFov)>0.05){camera.fov+=(wantFov-camera.fov)*Math.min(1,4*dt);camera.updateProjectionMatrix();}
++// goal light pulse decay
++if(S.goalPulse>0){S.goalPulse=Math.max(0,S.goalPulse-dt*0.7);for(const gl of goalLights)gl.intensity=350+S.goalPulse*1400;}
+ updateParts(dt);syncMeshes(dt);updateCamera(dt);
+ // HUD
+ document.getElementById('boostVal').textContent=Math.round(S.p.boost);
+ document.getElementById('boostFill').style.width=S.p.boost+'%';
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -335,7 +335,9 @@
+  camPos.lerp(desired,1-Math.pow(0.0001,dt));camera.position.copy(camPos);camera.lookAt(look);
+ }
+ addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+ resetKickoff();requestAnimationFrame(loop);
++// ?autostart=1 skips the menu for automated screenshots/tests
++if(new URLSearchParams(location.search).has('autostart')){document.getElementById('menu').style.display='none';restart(false);}
+ </script>
+ </body>
+ </html>
+
+[0m
+All upgrades in — verifying syntax and capturing gameplay screenshots.
+[0m$ [0mpython3 - <<'PY'
+import re,pathlib
+h=pathlib.Path('index.html').read_text()
+m=re.search(r'<script type="module">(.*?)</script>\s*</body>', h, re.S)
+pathlib.Path('/tmp/game-check.mjs').write_text(m.group(1))
+print('extracted', len(m.group(1)))
+PY
+node --check /tmp/game-check.mjs && echo JS_SYNTAX_OK
+mkdir -p captures
+python3 -m http.server 8769 >/dev/null 2>&1 & sleep 1
+timeout 90 chromium --headless --no-sandbox --disable-gpu --enable-unsafe-swiftshader --window-size=1280,800 --virtual-time-budget=6000 --screenshot=/tmp/cap-menu.png "http://127.0.0.1:8769/index.html" 2>&1 | tail -1
+timeout 120 chromium --headless --no-sandbox --disable-gpu --enable-unsafe-swiftshader --window-size=1280,800 --virtual-time-budget=12000 --screenshot=/tmp/cap-game.png "http://127.0.0.1:8769/index.html?autostart=1" 2>&1 | tail -1
+ls -la /tmp/cap-menu.png /tmp/cap-game.png; kill %1 2>/dev/null; true
+extracted 26927
+JS_SYNTAX_OK
+369539 bytes written to file /tmp/cap-menu.png
+252789 bytes written to file /tmp/cap-game.png
+-rw-r--r-- 1 runner runner 252789 Sep  7 06:45 /tmp/cap-game.png
+-rw-r--r-- 1 runner runner 369539 Sep  7 06:44 /tmp/cap-menu.png
+[0m
+[0m→ [0mRead /tmp/cap-game.png
+[0m→ [0mRead /tmp/cap-menu.png
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -53,15 +53,15 @@
+ const canvas=document.getElementById('c');
+ const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+ renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+ renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+-renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+-const scene=new THREE.Scene();scene.background=new THREE.Color(0x060d1a);scene.fog=new THREE.Fog(0x060d1a,90,220);
++renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.28;
++const scene=new THREE.Scene();scene.background=new THREE.Color(0x0a1626);scene.fog=new THREE.Fog(0x0a1626,110,260);
+ const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,0.1,600);
+ // Lights
+-scene.add(new THREE.HemisphereLight(0xbcd6ff,0x1a2a12,0.75));
+-const sun=new THREE.DirectionalLight(0xffffff,1.5);sun.position.set(30,60,20);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-70;sun.shadow.camera.right=70;sun.shadow.camera.top=70;sun.shadow.camera.bottom=-70;scene.add(sun);
+-const stad1=new THREE.PointLight(0x66aaff,900,160);stad1.position.set(0,38,0);scene.add(stad1);
++scene.add(new THREE.HemisphereLight(0xcfe4ff,0x2a4423,1.15));
++const sun=new THREE.DirectionalLight(0xffffff,2.2);sun.position.set(30,60,20);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-70;sun.shadow.camera.right=70;sun.shadow.camera.top=70;sun.shadow.camera.bottom=-70;scene.add(sun);
++const stad1=new THREE.PointLight(0x88bbff,1400,200);stad1.position.set(0,38,0);scene.add(stad1);
+ const goalBlueLight=new THREE.PointLight(0x2288ff,400,60);const goalOrangeLight=new THREE.PointLight(0xff7722,400,60);
+ // Arena dims (RL-like proportions)
+ const W=56,H=34,LEN=92,wallH=14,goalW=16,goalH=7,goalD=8;
+ const groundMat=new THREE.MeshStandardMaterial({color:0x2fae4e,roughness:.9});
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -75,9 +75,9 @@
+ for(let s=-1;s<=1;s+=2){for(let e=-1;e<=1;e+=2){const box=new THREE.Mesh(new THREE.BoxGeometry(10,0.02,10),new THREE.MeshStandardMaterial({color:0x2a9c46,roughness:1}));box.position.set(e*LEN/4,0.015,s*W/4);scene.add(box);}}
+ // turf stripes
+ for(let i=0;i<8;i++){const s=new THREE.Mesh(new THREE.PlaneGeometry(LEN/8,W),new THREE.MeshStandardMaterial({color:i%2?0x33b455:0x2da34c,roughness:1}));s.rotation.x=-Math.PI/2;s.position.set(-LEN/2+LEN/16+i*LEN/8,0.005,0);scene.add(s);}
+ // walls (transparent like RL)
+-const wallMat=new THREE.MeshPhysicalMaterial({color:0x9fd0ff,transparent:true,opacity:0.16,roughness:.1,metalness:0,side:THREE.DoubleSide});
++const wallMat=new THREE.MeshPhysicalMaterial({color:0x9fd0ff,transparent:true,opacity:0.24,roughness:.1,metalness:0,side:THREE.DoubleSide});
+ function wall(w,h,x,y,z,ry){const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),wallMat);m.position.set(x,y,z);m.rotation.y=ry;scene.add(m);
+  const f=new THREE.Mesh(new THREE.BoxGeometry(ry?0.4:w,0.5,ry?w:0.4),new THREE.MeshStandardMaterial({color:0x9fd0ff,emissive:0x2266aa,emissiveIntensity:1}));f.position.set(x,h+0.2,z);scene.add(f);return m;}
+ wall(LEN,wallH,0,wallH/2,-W/2,0);wall(LEN,wallH,0,wallH/2,W/2,0);
+ // end walls with goal gaps: two segments each
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -93,9 +93,9 @@
+  const net=new THREE.Mesh(new THREE.BoxGeometry(goalD,goalH,goalW),new THREE.MeshBasicMaterial({color:color,wireframe:true,transparent:true,opacity:.5}));net.position.set(s*(LEN/2+goalD/2),goalH/2,0);grp.add(net);
+  const glow=new THREE.PointLight(color,350,50);glow.position.set(s*(LEN/2-4),4,0);grp.add(glow);goalLights.push(glow);scene.add(grp);}
+ makeGoal(-1,0x2288ff);makeGoal(1,0xff7722);
+ // stadium: stands ring + lights + jumbotron
+-{const standMat=new THREE.MeshStandardMaterial({color:0x101c33,roughness:1});
++{const standMat=new THREE.MeshStandardMaterial({color:0x22345a,roughness:.9});
+  for(const sd of [-1,1]){const st=new THREE.Mesh(new THREE.BoxGeometry(LEN+40,18,14),standMat);st.position.set(0,9,sd*(W/2+14));scene.add(st);
+   for(let i=0;i<300;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(.7,.9,.4),new THREE.MeshBasicMaterial({color:new THREE.Color().setHSL(Math.random(),.8,.6)}));c.position.set((Math.random()-.5)*(LEN+30),10+Math.random()*9,sd*(W/2+8+Math.random()*11));scene.add(c);}}
+  for(const e of [-1,1]){const st=new THREE.Mesh(new THREE.BoxGeometry(14,18,W+40),standMat);st.position.set(e*(LEN/2+14),9,0);scene.add(st);}
+  for(let i=0;i<4;i++){const p=new THREE.Mesh(new THREE.CylinderGeometry(.5,.7,44,8),new THREE.MeshStandardMaterial({color:0x222}));const sx=i<2?-1:1,sz=i%2?-1:1;p.position.set(sx*(LEN/2+6),22,sz*(W/2+6));scene.add(p);
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -141,10 +141,10 @@
+  x.strokeStyle='rgba(120,140,160,.4)';x.lineWidth=2;
+  for(let i=0;i<=256;i+=32){x.beginPath();x.moveTo(i,0);x.lineTo(i,256);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(256,i);x.stroke();}
+  function pent(cx,cy,r){x.beginPath();for(let i=0;i<5;i++){const a=-Math.PI/2+i*2*Math.PI/5;const px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r;i?x.lineTo(px,py):x.moveTo(px,py);}x.closePath();x.fill();}
+  x.fillStyle='#16233c';
+- const rows=[[32,0],[96,32],[160,0],[224,32]];
+- for(const [yy,off] of rows){for(let xx=off;xx<256;xx+=64){pent(xx+16,yy,24);}}
++ const rows=[[24,0],[72,24],[120,0],[168,24],[216,0]];
++ for(const [yy,off] of rows){for(let xx=off;xx<256;xx+=48){pent(xx+12,yy,15);}}
+  const t=new THREE.CanvasTexture(cv);return t;}
+ const ballR=2.2;const ball=new THREE.Mesh(new THREE.SphereGeometry(ballR,32,24),new THREE.MeshStandardMaterial({map:ballTexture(),roughness:.5,metalness:.15}));ball.castShadow=true;scene.add(ball);
+ const ballShadow=new THREE.Mesh(new THREE.RingGeometry(ballR*0.7,ballR*1.05,32),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.35,side:THREE.DoubleSide}));ballShadow.rotation.x=-Math.PI/2;scene.add(ballShadow);
+ // particles
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -154,9 +154,9 @@
+ const S={p:{pos:new THREE.Vector3(-18,0.6,0),vel:new THREE.Vector3(),yaw:0,vy:0,grounded:true,boost:33,jumps:0,airTime:0,lastSteer:0},
+  e:{pos:new THREE.Vector3(18,0.6,0),vel:new THREE.Vector3(),yaw:Math.PI,vy:0,grounded:true,boost:60,lastSteer:0},
+  ball:{pos:new THREE.Vector3(0,ballR+3,0),vel:new THREE.Vector3()},
+  scoreB:0,scoreO:0,time:300,playing:false,over:false,countdown:0,ballcam:true,lastTouch:0};
+-const keys={};addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyC'){S.ballcam=!S.ballcam;document.getElementById('camState').textContent=S.ballcam?'ON':'OFF';}if(e.code==='KeyR')restart(true);if(e.code==='Space')e.preventDefault();});
++const keys={};const DEMO=new URLSearchParams(location.search).has('demo');
+ addEventListener('keyup',e=>keys[e.code]=false);
+ function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',1800);}
+ function showBanner(txt,sub){const b=document.getElementById('banner');b.textContent=txt;b.classList.add('show');const s=document.getElementById('subbanner');s.textContent=sub||'';s.classList.add('show');setTimeout(()=>{b.classList.remove('show');s.classList.remove('show');},1900);}
+ function resetKickoff(){S.p.pos.set(-18,0.6,0);S.p.vel.set(0,0,0);S.p.yaw=0;S.p.vy=0;S.p.boost=Math.max(S.p.boost,33);S.e.pos.set(18,0.6,0);S.e.vel.set(0,0,0);S.e.yaw=Math.PI;S.e.vy=0;jumpQueued=false;S.ball.pos.set(0,ballR+4,0);S.ball.vel.set(0,0,0);syncMeshes(0);}
+
+[0m
+I accidentally dropped the keyboard listener — restoring it.
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -155,8 +155,9 @@
+  e:{pos:new THREE.Vector3(18,0.6,0),vel:new THREE.Vector3(),yaw:Math.PI,vy:0,grounded:true,boost:60,lastSteer:0},
+  ball:{pos:new THREE.Vector3(0,ballR+3,0),vel:new THREE.Vector3()},
+  scoreB:0,scoreO:0,time:300,playing:false,over:false,countdown:0,ballcam:true,lastTouch:0};
+ const keys={};const DEMO=new URLSearchParams(location.search).has('demo');
++addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyC'){S.ballcam=!S.ballcam;document.getElementById('camState').textContent=S.ballcam?'ON':'OFF';}if(e.code==='KeyR')restart(true);if(e.code==='Space')e.preventDefault();});
+ addEventListener('keyup',e=>keys[e.code]=false);
+ function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',1800);}
+ function showBanner(txt,sub){const b=document.getElementById('banner');b.textContent=txt;b.classList.add('show');const s=document.getElementById('subbanner');s.textContent=sub||'';s.classList.add('show');setTimeout(()=>{b.classList.remove('show');s.classList.remove('show');},1900);}
+ function resetKickoff(){S.p.pos.set(-18,0.6,0);S.p.vel.set(0,0,0);S.p.yaw=0;S.p.vy=0;S.p.boost=Math.max(S.p.boost,33);S.e.pos.set(18,0.6,0);S.e.vel.set(0,0,0);S.e.yaw=Math.PI;S.e.vy=0;jumpQueued=false;S.ball.pos.set(0,ballR+4,0);S.ball.vel.set(0,0,0);syncMeshes(0);}
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -283,12 +283,17 @@
+ if(!S.playing||S.over){ // idle attract: slow orbit
+  if(document.getElementById('menu').style.display!=='none'){const t=now*0.0002;camera.position.set(Math.cos(t)*60,26,Math.sin(t)*60);camera.lookAt(0,2,0);renderer.render(scene,camera);}else{updateParts(dt);syncMeshes(dt);updateCamera(dt);renderer.render(scene,camera);}return;}
+ S.time-=dt;if(S.time<=0){S.time=0;endMatch();}
+ const m=Math.floor(S.time/60),s=Math.floor(S.time%60);clockEl.textContent=`${m}:${String(s).padStart(2,'0')}`;
+-// player input
+-const th=(keys.KeyW||keys.ArrowUp?1:0)+(keys.KeyS||keys.ArrowDown?-0.7:0);
+-const st=(keys.KeyA||keys.ArrowLeft?1:0)+(keys.KeyD||keys.ArrowRight?-1:0);
+-const boosting=(keys.ShiftLeft||keys.ShiftRight)&&S.p.boost>0&&th!==0;
++// player input (or demo autopilot chasing the ball for captures/attract mode)
++let th=(keys.KeyW||keys.ArrowUp?1:0)+(keys.KeyS||keys.ArrowDown?-0.7:0);
++let st=(keys.KeyA||keys.ArrowLeft?1:0)+(keys.KeyD||keys.ArrowRight?-1:0);
++let boosting=(keys.ShiftLeft||keys.ShiftRight)&&S.p.boost>0&&th!==0;
++let pJump=jumpQueued;
++if(DEMO){const tb=S.ball.pos.clone().sub(S.p.pos);tb.y=0;const ty=Math.atan2(-tb.z,tb.x);
++ let dyy=ty-S.p.yaw;while(dyy>Math.PI)dyy-=2*Math.PI;while(dyy<-Math.PI)dyy+=2*Math.PI;
++ st=THREE.MathUtils.clamp(dyy*2,-1,1);th=1;boosting=S.p.boost>20&&tb.length()>12;
++ pJump=S.ball.pos.y>3&&tb.length()<7&&S.p.grounded;}
+ const pb=driveCar(S.p,dt,th,st,boosting,jumpQueued);
+ carBall(S.p,1);
+ // AI
+ const ai=aiControl(dt);const eb=driveCar(S.e,dt,ai.throttle,ai.steer,ai.boosting,ai.jump);carBall(S.e,0.95);
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -292,9 +292,9 @@
+ if(DEMO){const tb=S.ball.pos.clone().sub(S.p.pos);tb.y=0;const ty=Math.atan2(-tb.z,tb.x);
+  let dyy=ty-S.p.yaw;while(dyy>Math.PI)dyy-=2*Math.PI;while(dyy<-Math.PI)dyy+=2*Math.PI;
+  st=THREE.MathUtils.clamp(dyy*2,-1,1);th=1;boosting=S.p.boost>20&&tb.length()>12;
+  pJump=S.ball.pos.y>3&&tb.length()<7&&S.p.grounded;}
+-const pb=driveCar(S.p,dt,th,st,boosting,jumpQueued);
++const pb=driveCar(S.p,dt,th,st,boosting,pJump);
+ carBall(S.p,1);
+ // AI
+ const ai=aiControl(dt);const eb=driveCar(S.e,dt,ai.throttle,ai.steer,ai.boosting,ai.jump);carBall(S.e,0.95);
+ // enemy boost regen slow
+
+[0m
+[0m$ [0mpython3 - <<'PY'
+import re,pathlib
+h=pathlib.Path('index.html').read_text()
+m=re.search(r'<script type="module">(.*?)</script>\s*</body>', h, re.S)
+pathlib.Path('/tmp/game-check.mjs').write_text(m.group(1))
+PY
+node --check /tmp/game-check.mjs && echo JS_SYNTAX_OK
+python3 -m http.server 8770 >/dev/null 2>&1 & sleep 1
+timeout 90 chromium --headless --no-sandbox --disable-gpu --enable-unsafe-swiftshader --window-size=1280,800 --virtual-time-budget=6000 --screenshot=/tmp/cap-menu.png "http://127.0.0.1:8770/index.html" 2>&1 | tail -1
+timeout 150 chromium --headless --no-sandbox --disable-gpu --enable-unsafe-swiftshader --window-size=1280,800 --virtual-time-budget=16000 --screenshot=/tmp/cap-game.png "http://127.0.0.1:8770/index.html?autostart=1&demo=1" 2>&1 | tail -1
+ls -la /tmp/cap-menu.png /tmp/cap-game.png; kill %1 2>/dev/null; true
+JS_SYNTAX_OK
+508323 bytes written to file /tmp/cap-menu.png
+87514 bytes written to file /tmp/cap-game.png
+-rw-r--r-- 1 runner runner  87514 Sep  7 06:48 /tmp/cap-game.png
+-rw-r--r-- 1 runner runner 508323 Sep  7 06:47 /tmp/cap-menu.png
+[0m
+[0m→ [0mRead /tmp/cap-game.png
+[0m→ [0mRead /tmp/cap-menu.png
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -333,9 +333,14 @@
+ const camPos=new THREE.Vector3(-30,12,20);
+ function updateCamera(dt){
+  const yaw=S.p.yaw;const back=new THREE.Vector3(-Math.cos(yaw),0,Math.sin(yaw));
+  let desired,look;
+- if(S.ballcam){desired=S.p.pos.clone().addScaledVector(back,9.5).add(new THREE.Vector3(0,4.6,0));look=S.ball.pos.clone().lerp(S.p.pos,0.28);}
++ if(S.ballcam){desired=S.p.pos.clone().addScaledVector(back,10).add(new THREE.Vector3(0,5,0));
++  look=S.ball.pos.clone().lerp(S.p.pos,0.35);
++  // clamp look elevation so the car never leaves the frame (RL-style pitch limit)
++  const dx=look.x-desired.x,dy=look.y-desired.y,dz=look.z-desired.z;
++  const horiz=Math.hypot(dx,dz),maxDy=Math.tan(0.5)*horiz;
++  if(dy>maxDy)look.y=desired.y+maxDy;}
+  else{desired=S.p.pos.clone().addScaledVector(back,10.5).add(new THREE.Vector3(0,4.2,0));look=S.p.pos.clone().add(new THREE.Vector3(Math.cos(yaw)*10,2,-Math.sin(yaw)*10));}
+  // keep camera inside arena & above ground
+  desired.x=THREE.MathUtils.clamp(desired.x,-LEN/2-6,LEN/2+6);desired.z=THREE.MathUtils.clamp(desired.z,-W/2-8,W/2+8);desired.y=Math.max(desired.y,2.2);
+  camPos.lerp(desired,1-Math.pow(0.0001,dt));camera.position.copy(camPos);camera.lookAt(look);
+
+[0m
+[0m$ [0mpython3 - <<'PY'
+import re,pathlib
+h=pathlib.Path('index.html').read_text()
+m=re.search(r'<script type="module">(.*?)</script>\s*</body>', h, re.S)
+pathlib.Path('/tmp/game-check.mjs').write_text(m.group(1))
+PY
+node --check /tmp/game-check.mjs && echo JS_SYNTAX_OK
+python3 -m http.server 8771 >/dev/null 2>&1 & sleep 1
+timeout 150 chromium --headless --no-sandbox --disable-gpu --enable-unsafe-swiftshader --window-size=1280,800 --virtual-time-budget=16000 --screenshot=/tmp/cap-game.png "http://127.0.0.1:8771/index.html?autostart=1&demo=1" 2>&1 | tail -1
+ls -la /tmp/cap-game.png; kill %1 2>/dev/null; true
+JS_SYNTAX_OK
+173219 bytes written to file /tmp/cap-game.png
+-rw-r--r-- 1 runner runner 173219 Sep  7 06:50 /tmp/cap-game.png
+[0m
+[0m→ [0mRead /tmp/cap-game.png
+[0m
+[0m$ [0mcp /tmp/cap-menu.png captures/menu.png && cp /tmp/cap-game.png captures/gameplay.png && cp /tmp/glb-check.png captures/glb-ab.png && cp /tmp/rl-car-search.png captures/sketchfab-sheet.png && ls -la captures/ models/
+captures/:
+total 816
+drwxr-xr-x  2 runner runner   4096 Sep  7 06:50 .
+drwxr-xr-x 12 runner runner   4096 Sep  7 06:43 ..
+-rw-r--r--  1 runner runner 173219 Sep  7 06:50 gameplay.png
+-rw-r--r--  1 runner runner  62075 Sep  7 06:50 glb-ab.png
+-rw-r--r--  1 runner runner 508323 Sep  7 06:50 menu.png
+-rw-r--r--  1 runner runner  71260 Sep  7 06:50 sketchfab-sheet.png
+
+models/:
+total 120
+drwxr-xr-x  2 runner runner   4096 Sep  7 06:38 .
+drwxr-xr-x 12 runner runner   4096 Sep  7 06:43 ..
+-rw-r--r--  1 runner runner 108132 Sep  7 06:38 sportscar.glb
+-rw-r--r--  1 runner runner    629 Sep  7 06:38 sportscar.glb.attribution.json
+[0m
+[0m• [0mHarsh critic A/B review[90m General Agent[0m
+[0m✓ [0mHarsh critic A/B review[90m General Agent[0m
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -125,9 +125,10 @@
+ const head=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.22,1.4),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:2.2}));head.position.set(2.66,0.85,0);g.add(head);
+ const tail=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.2,1.5),new THREE.MeshStandardMaterial({color:0xff2222,emissive:0xff2222,emissiveIntensity:2}));tail.position.set(-1.76,1.0,0);g.add(tail);
+ const wheelGeo=new THREE.CylinderGeometry(0.5,0.5,0.45,18);const wheelMat=new THREE.MeshStandardMaterial({color:0x111111,roughness:.9});
+ const hubMat=new THREE.MeshStandardMaterial({color:0xcc9933,roughness:.35,metalness:.8});
+-const wheels=[];for(const [wx,wz] of [[1.25,1.05],[1.25,-1.05],[-1.25,1.05],[-1.25,-1.05]]){
++const wheels=[];for(const [wx,wz] of [[1.25,0.88],[1.25,-0.88],[-1.25,0.88],[-1.25,-0.88]]){
++ const fen=new THREE.Mesh(new THREE.BoxGeometry(1.35,0.32,0.34),bodyMat);fen.position.set(wx,1.02,wz>0?0.92:-0.92);fen.castShadow=true;g.add(fen);
+  const pivot=new THREE.Group();pivot.position.set(wx,0.5,wz);
+  const w=new THREE.Mesh(wheelGeo,wheelMat);w.rotation.x=Math.PI/2;w.castShadow=true;pivot.add(w);
+  const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,0.47,6),hubMat);hub.rotation.x=Math.PI/2;pivot.add(hub);
+  g.add(pivot);wheels.push({pivot,front:wx>0});}
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -114,8 +114,9 @@
+ const darkMat=new THREE.MeshStandardMaterial({color:0x0b1526,roughness:.12,metalness:.85});
+ const trimMat=new THREE.MeshStandardMaterial({color:0x141414,roughness:.5,emissive:glow,emissiveIntensity:.9});
+ const body=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.9,1.9),bodyMat);body.position.y=0.95;body.castShadow=true;g.add(body);
+ const nose=new THREE.Mesh(new THREE.BoxGeometry(1.1,0.6,1.7),bodyMat);nose.position.set(2.1,0.8,0);nose.castShadow=true;g.add(nose);
++const hood=new THREE.Mesh(new THREE.BoxGeometry(1.15,0.32,1.6),bodyMat);hood.position.set(1.35,1.28,0);hood.rotation.z=-0.22;hood.castShadow=true;g.add(hood);
+ const bumper=new THREE.Mesh(new THREE.BoxGeometry(0.35,0.45,1.85),trimMat);bumper.position.set(2.65,0.55,0);g.add(bumper);
+ const shield=new THREE.Mesh(new THREE.BoxGeometry(0.95,0.55,1.45),darkMat);shield.position.set(0.55,1.5,0);shield.rotation.z=-0.32;shield.castShadow=true;g.add(shield);
+ const roof=new THREE.Mesh(new THREE.BoxGeometry(1.15,0.14,1.35),bodyMat);roof.position.set(-0.45,1.82,0);roof.castShadow=true;g.add(roof);
+ const wing=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.12,2.05),bodyMat);wing.position.set(-1.85,2.05,0);wing.castShadow=true;g.add(wing);
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -132,10 +132,11 @@
+   const pivot=new THREE.Group();pivot.position.set(wx,0.5,wz);
+   const w=new THREE.Mesh(wheelGeo,wheelMat);w.rotation.x=Math.PI/2;w.castShadow=true;pivot.add(w);
+   const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,0.47,6),hubMat);hub.rotation.x=Math.PI/2;pivot.add(hub);
+   g.add(pivot);wheels.push({pivot,front:wx>0});}
+- const under=new THREE.PointLight(glow,60,12);under.position.set(0,0.4,0);g.add(under);
+- const flame=new THREE.Mesh(new THREE.ConeGeometry(0.55,2.6,12),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:0}));flame.rotation.z=Math.PI/2;flame.position.set(-2.8,0.95,0);g.add(flame);
++ const under=new THREE.PointLight(glow,35,11);under.position.set(0,0.4,0);g.add(under);
++ const flame=new THREE.Mesh(new THREE.ConeGeometry(0.55,2.6,12),new THREE.MeshBasicMaterial({color:0xff9d1f,transparent:true,opacity:0}));flame.rotation.z=Math.PI/2;flame.position.set(-2.8,0.95,0);g.add(flame);
++ const core=new THREE.Mesh(new THREE.ConeGeometry(0.28,1.5,10),new THREE.MeshBasicMaterial({color:0xfff2b0,transparent:true,opacity:0}));core.rotation.z=Math.PI/2;core.position.set(-2.5,0.95,0);g.add(core);
+  scene.add(g);return {g,wheels,flame,color,glow,lastSteer:0};}
+ const player=buildCar(0x1c6de0,0x3388ff);const enemy=buildCar(0xe07010,0xff8830);
+ // ball (big, RL-style: light shell, dark pentagon patches in offset rows + seam shading)
+ function ballTexture(){const cv=document.createElement('canvas');cv.width=cv.height=256;const x=cv.getContext('2d');
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -135,9 +135,9 @@
+   g.add(pivot);wheels.push({pivot,front:wx>0});}
+  const under=new THREE.PointLight(glow,35,11);under.position.set(0,0.4,0);g.add(under);
+  const flame=new THREE.Mesh(new THREE.ConeGeometry(0.55,2.6,12),new THREE.MeshBasicMaterial({color:0xff9d1f,transparent:true,opacity:0}));flame.rotation.z=Math.PI/2;flame.position.set(-2.8,0.95,0);g.add(flame);
+  const core=new THREE.Mesh(new THREE.ConeGeometry(0.28,1.5,10),new THREE.MeshBasicMaterial({color:0xfff2b0,transparent:true,opacity:0}));core.rotation.z=Math.PI/2;core.position.set(-2.5,0.95,0);g.add(core);
+- scene.add(g);return {g,wheels,flame,color,glow,lastSteer:0};}
++ scene.add(g);return {g,wheels,flame,core,color,glow,lastSteer:0};}
+ const player=buildCar(0x1c6de0,0x3388ff);const enemy=buildCar(0xe07010,0xff8830);
+ // ball (big, RL-style: light shell, dark pentagon patches in offset rows + seam shading)
+ function ballTexture(){const cv=document.createElement('canvas');cv.width=cv.height=256;const x=cv.getContext('2d');
+  x.fillStyle='#eef1f4';x.fillRect(0,0,256,256);
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -309,11 +309,13 @@
+   if(dP<2.2){S.p.boost=Math.min(100,S.p.boost+(p.big?100:25));p.active=false;p.t=8;p.mesh.visible=false;burst(new THREE.Vector3(p.x,1,p.z),0xffc233,12,8,.5,.3);blip(880,0.12,'sine',0.18);toast('+BOOST');}
+   else if(dE<2.2){S.e.boost=Math.min(100,S.e.boost+(p.big?100:25));p.active=false;p.t=8;p.mesh.visible=false;}}}
+ jumpQueued=false;
+ // boost flame + trail
+-player.flame.material.opacity+=(((pb)?0.95:0)-player.flame.material.opacity)*Math.min(1,12*dt);
++player.flame.material.opacity+=(((pb)?0.85:0)-player.flame.material.opacity)*Math.min(1,12*dt);
++player.core.material.opacity=player.flame.material.opacity;
+ player.flame.scale.set(1+Math.random()*0.4,1+Math.random()*0.5,1);
+-enemy.flame.material.opacity+=(((eb)?0.95:0)-enemy.flame.material.opacity)*Math.min(1,12*dt);
++enemy.flame.material.opacity+=(((eb)?0.85:0)-enemy.flame.material.opacity)*Math.min(1,12*dt);
++enemy.core.material.opacity=enemy.flame.material.opacity;
+ if(pb){burst(player.g.position.clone().add(new THREE.Vector3(-Math.cos(S.p.yaw)*2.4,1,Math.sin(S.p.yaw)*2.4)),0xff9d00,2,4,.4,.3);}
+ if(eb){burst(enemy.g.position.clone(),0x66aaff,1,3,.3,.25);}
+ // engine hum + boost noise follow speed
+ if(AC&&engineGain){const spd=S.p.vel.length();const tgt=(S.playing&&!S.over)?0.035+spd*0.0016:0;
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -276,8 +276,9 @@
+  let j=false;if(S.ball.pos.y>3.4&&toBall.length()<7&&E.grounded&&Math.random()<0.03)j=true;
+  // slight aim offset toward goal
+  return {throttle,steer,boosting,jump:j};}
+ const clockEl=document.getElementById('clock');
++const helpEl=document.getElementById('help');
+ let last=performance.now();
+ function loop(now){requestAnimationFrame(loop);let dt=Math.min((now-last)/1000,0.033);last=now;
+  // countdown
+   if(S.countdown>0){S.countdown-=dt;const c=document.getElementById('count');const n=Math.ceil(S.countdown-0.6);c.textContent=S.countdown<=0.6?'GO!':String(Math.max(n,1));
+
+[0m
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -333,8 +333,9 @@
+  // HUD
+  document.getElementById('boostVal').textContent=Math.round(S.p.boost);
+  document.getElementById('boostFill').style.width=S.p.boost+'%';
+  document.getElementById('speed').textContent=`${Math.round(S.p.vel.length()*4)} mph • R restart • Space jump • Shift boost`;
++ helpEl.style.opacity=(S.playing&&!S.over)?0:1;
+  renderer.render(scene,camera);
+ }
+ const camPos=new THREE.Vector3(-30,12,20);
+ function updateCamera(dt){
+
+[0m
+Final polish pass — fading help text, re-capturing, updating progress.
+[0m← [0mEdit index.html
+Index: /home/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/index.html
++++ /home/runner/work/PlayGround/PlayGround/index.html
+@@ -17,9 +17,9 @@
+ #boostNum{font-size:44px;font-weight:900;text-shadow:0 2px 8px #000}
+ #boostBar{height:12px;background:rgba(255,255,255,.18);border-radius:8px;overflow:hidden;border:1px solid #fff3}
+ #boostFill{height:100%;width:33%;background:linear-gradient(90deg,#ffd23f,#ff9d00);transition:width .08s}
+ #speed{font-size:13px;opacity:.85;margin-top:4px}
+-#help{position:absolute;left:14px;bottom:12px;font-size:12.5px;line-height:1.55;background:rgba(0,0,0,.55);padding:10px 12px;border-radius:10px;border:1px solid #ffffff2a;max-width:300px}
++#help{position:absolute;left:14px;bottom:12px;font-size:12.5px;line-height:1.55;background:rgba(0,0,0,.55);padding:10px 12px;border-radius:10px;border:1px solid #ffffff2a;max-width:300px;transition:opacity .4s}
+ #help b{color:#ffd23f}
+ #banner{position:absolute;left:50%;top:32%;transform:translate(-50%,-50%) scale(.8);font-size:84px;font-weight:900;letter-spacing:2px;opacity:0;transition:all .25s;text-shadow:0 0 30px #ffae00,0 4px 0 #7a2e00,0 6px 24px #000}
+ #banner.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+ #subbanner{position:absolute;left:50%;top:calc(32% + 70px);transform:translateX(-50%);font-size:20px;font-weight:700;opacity:0;text-shadow:0 2px 6px #000}
+
+[0m
+[0m$ [0mpython3 - <<'PY'
+import re,pathlib
+h=pathlib.Path('index.html').read_text()
+m=re.search(r'<script type="module">(.*?)</script>\s*</body>', h, re.S)
+pathlib.Path('/tmp/game-check.mjs').write_text(m.group(1))
+PY
+node --check /tmp/game-check.mjs && echo JS_SYNTAX_OK
+python3 -m http.server 8772 >/dev/null 2>&1 & sleep 1
+timeout 150 chromium --headless --no-sandbox --disable-gpu --enable-unsafe-swiftshader --window-size=1280,800 --virtual-time-budget=16000 --screenshot=/tmp/cap-game.png "http://127.0.0.1:8772/index.html?autostart=1&demo=1" 2>&1 | tail -1
+cp /tmp/cap-game.png captures/gameplay.png && ls -la captures/
+curl -s -o /dev/null -w "index:%{http_code}\n" http://127.0.0.1:8772/index.html; curl -s -o /dev/null -w "progress:%{http_code}\n" http://127.0.0.1:8772/progress.html; kill %1 2>/dev/null; true
+JS_SYNTAX_OK
+168998 bytes written to file /tmp/cap-game.png
+total 812
+drwxr-xr-x  2 runner runner   4096 Sep  7 06:50 .
+drwxr-xr-x 12 runner runner   4096 Sep  7 06:43 ..
+-rw-r--r--  1 runner runner 168998 Sep  7 06:53 gameplay.png
+-rw-r--r--  1 runner runner  62075 Sep  7 06:50 glb-ab.png
+-rw-r--r--  1 runner runner 508323 Sep  7 06:50 menu.png
+-rw-r--r--  1 runner runner  71260 Sep  7 06:50 sketchfab-sheet.png
+index:200
+progress:200
+[0m
+[0m→ [0mRead /tmp/cap-game.png
+[0m
+[0m← [0mEdit progress.html
+Index: /home/runner/work/PlayGround/PlayGround/progress.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/progress.html
++++ /home/runner/work/PlayGround/PlayGround/progress.html
+@@ -10,16 +10,20 @@
+ <div class="card"><span class="pill">4 · Cars + ball</span><p>Octane-like wedge bodies (blue vs orange), dark cabin, spoiler, 4 wheels; oversized white/black patterned ball (~2× car height) with ground blob shadow.</p><p>Sources:<br/><a href="https://wallpapermotion.com/wallpapers/thrilling-arena-action-in-4k-rocket-league-bn81gdcjavskpohx.html">4K arena action wallpaper (wallpapermotion)</a><br/><a href="https://deepdreamgenerator.com/ddream/vn008jvnou2">Overtime collision breakdown (deepdreamgenerator)</a></p></div>
+ <div class="card"><span class="pill">5 · Boost / trails / impact</span><p>Rear cone flame + particle trail while boosting, supersonic trails, impact burst on car-ball contact, goal explosion confetti, boost-pad pickup flash.</p><p>Sources:<br/><a href="https://rocketleague.fandom.com/wiki/Boost">Boost meter + pads wiki (fandom)</a><br/><a href="https://www.youtube.com/watch?v=dbJ54xC0EpA">Rocket League in 2024 gameplay compilation (SunlessKhan)</a></p></div>
+ <div class="card"><span class="pill">6 · HUD / menus</span><p>Top-center scoreboard BLUE score + timer + ORANGE score; bottom-right big boost number + bar; GOAL! banner centre; kickoff countdown; start menu + win/lose + rematch.</p><p>Sources:<br/><a href="https://www.epicgames.com/help/en-US/c-Category_RocketLeague/c-RocketLeague_Gameplay/what-is-team-colored-boost-meter-in-rocket-league-a000084257">Team-colored boost meter (epicgames help)</a><br/><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=625155586">Screenshot/HUD staging guide (steamcommunity)</a><br/><a href="https://www.youtube.com/watch?v=OSZi1duGpIQ">Season 11 gameplay trailer HUD views (youtube)</a></p></div>
+ </div>
+-<h2>Current build captures</h2>
+-<p>Open <a href="./index.html">the game</a>, press KICK OFF, drive with WASD. Capture: menu → countdown → gameplay → GOAL! banner → 5:00 end screen. (Headless screenshot pending in CI; manual capture attached next iteration.)</p>
++<h2>Current build captures (real headless-Chromium renders)</h2>
++<p>Menu over bright arena attract orbit:</p><img src="./captures/menu.png" alt="menu capture"/>
++<p>Live gameplay (?autostart=1&amp;demo=1): blue car chasing pentagon ball toward orange car/goal, boost flame, HUD:</p><img src="./captures/gameplay.png" alt="gameplay capture"/>
++<h2>Sketchfab GLB attempt (load-sketchfab-threejs skill)</h2>
++<p>Searched "low poly arcade race car" (downloadable, &lt;6MB, &lt;20k faces): 2 candidates. Tile [1] "sporting car" by laranjarodada, CC Attribution, 1198 tris, 108132 bytes, 24 meshes / 11 materials / 4 textures, KHR_materials_specular (valid) — downloaded to models/sportscar.glb with attribution sidecar. Verified rendering in Three.js 0.160 GLTFLoader via glb-check.html:</p><img src="./captures/glb-ab.png" alt="GLB three.js render"/><p>Contact sheet:</p><img src="./captures/sketchfab-sheet.png" alt="sketchfab contact sheet"/>
++<p>Decision: kept polished procedural cars (free blue/orange team tint, spinning/steering wheels, zero download risk) and folded GLB cues in — slanted glass, roof, wing spoiler + struts, headlight/taillight bars, fenders over tucked wheels, gold hubs. Skill viewer (prepare_viewer.py) failed on missing decoder assets, so the minimal loader page above is the engine proof.</p>
+ <h2>Gaps (largest first)</h2>
+-<pre id="gaps">1. Ball texture is procedural canvas, not true RL pentagon pattern — acceptable tribute, could improve with texture map.
+-2. No wall-drive / aerial rotation (flip) — jump+double-jump only; RL aerials deeper.
+-3. Crowd is instanced boxes, not animated; stadium lighting static.
+-4. No demo/knockout, no ball spin curve; single AI difficulty only.
+-5. No audio (engine/boost/goal horn) — next improvement.</pre>
+-<h2>Next improvement</h2><p>Add WebAudio engine hum + boost + bounce + goal horn, then refine ball texture + supersonic trail at high speed.</p>
++<pre id="gaps">1. No dodge-flip / aerial rotation / wall-drive — jump + double-jump only; RL aerials deeper.
++2. Boxy procedural silhouette vs true Octane curves (fenders/hood/spoiler/glass added, still angular).
++3. Crowd is static colored boxes; stadium lighting static except goal pulse.
++4. No demolitions, no ball curve; single AI difficulty (ball-chase + demo autopilot for captures).
++5. Night-arena grade vs RL daytime brightness (exposure/lights raised, walls at 0.24).</pre>
++<h2>Next improvement</h2><p>Dodge-flip impulse + air pitch control, then day-arena lighting preset toggle.</p>
+ <h2>Controls / verification</h2><pre>W/S throttle+reverse, A/D steer, Shift boost (drains 33/s, pads +25/+100), Space jump/double-jump, C ball-cam, R restart. Goal when ball fully enters mouth (orange end = Blue scores). First to 5 or timer 5:00 ends match with win/lose + rematch.</pre>
+ <p><i>Updated 2026-09-07 UTC · builder: lead implementer · critic round 1 (2 fresh-context critics): PASS 10/10 requirements, 6 bugs fixed — kickoff yaw, mesh/physics yaw mirror, AI steer invert, end-wall width (W-goalW)/2, car goal-recess clamp, win-goal countdown race + boost/jump resets. Re-verified: all patterns OK, both pages HTTP 200.</i></p>
+ </body></html>
+
+[0m
+[0m← [0mEdit progress.html
+Index: /home/runner/work/PlayGround/PlayGround/progress.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/progress.html
++++ /home/runner/work/PlayGround/PlayGround/progress.html
+@@ -23,7 +23,7 @@
+ 3. Crowd is static colored boxes; stadium lighting static except goal pulse.
+ 4. No demolitions, no ball curve; single AI difficulty (ball-chase + demo autopilot for captures).
+ 5. Night-arena grade vs RL daytime brightness (exposure/lights raised, walls at 0.24).</pre>
+ <h2>Next improvement</h2><p>Dodge-flip impulse + air pitch control, then day-arena lighting preset toggle.</p>
+-<h2>Controls / verification</h2><pre>W/S throttle+reverse, A/D steer, Shift boost (drains 33/s, pads +25/+100), Space jump/double-jump, C ball-cam, R restart. Goal when ball fully enters mouth (orange end = Blue scores). First to 5 or timer 5:00 ends match with win/lose + rematch.</pre>
+-<p><i>Updated 2026-09-07 UTC · builder: lead implementer · critic round 1 (2 fresh-context critics): PASS 10/10 requirements, 6 bugs fixed — kickoff yaw, mesh/physics yaw mirror, AI steer invert, end-wall width (W-goalW)/2, car goal-recess clamp, win-goal countdown race + boost/jump resets. Re-verified: all patterns OK, both pages HTTP 200.</i></p>
++<h2>Controls / verification</h2><pre>W/S throttle+reverse, A/D steer, Shift boost (drains 33/s, pads +25/+100), Space jump/double-jump, C ball-cam, R restart. Goal when ball fully enters mouth (orange end = Blue scores). First to 5 or timer 5:00 ends match with win/lose/draw + rematch. WebAudio: engine hum follows speed, boost noise, bounce/blip, countdown beeps, goal horn (starts on KICK OFF click). ?autostart=1 skips menu, ?demo=1 enables autopilot for captures. Verified: JS node --check OK; index.html + progress.html HTTP 200; real Chromium screenshots above (menu, GO!/gameplay, GLB proof).</pre>
++<p><i>Updated 2026-09-07 UTC · critic round 2 (fresh harsh): 11/11 functional PASS; fixes applied — brightness pass, pentagon ball texture, car detail (glass/roof/wing/lights/fenders/tucked spin+steer wheels), ball-cam elevation clamp, WebAudio, supersonic trail + FOV, goal light pulse, goal boxes, help fade, demo autopilot. Previous round-1 6-bug fix (kickoff yaw, mesh/physics mirror, AI steer, end-wall width, goal recess, countdown race) still holding.</i></p>
+ </body></html>
+
+[0m
+[0m$ [0mpython3 -m http.server 8773 >/dev/null 2>&1 & sleep 1
+curl -s -o /dev/null -w "index:%{http_code} %{size_download}\n" http://127.0.0.1:8773/index.html
+curl -s -o /dev/null -w "progress:%{http_code} %{size_download}\n" http://127.0.0.1:8773/progress.html
+curl -s -o /dev/null -w "gameplay:%{http_code}\n" http://127.0.0.1:8773/captures/gameplay.png
+curl -s -o /dev/null -w "menu:%{http_code}\n" http://127.0.0.1:8773/captures/menu.png
+curl -s -o /dev/null -w "glb:%{http_code}\n" http://127.0.0.1:8773/models/sportscar.glb
+kill %1 2>/dev/null; true
+index:200 34005
+progress:200 7142
+gameplay:200
+menu:200
+glb:200
+[0m
+[0m# [0mTodos
+[✓] Inspect index.html + progress.html, serve HTTP 200, verify gameplay systems
+[✓] Invoke load-sketchfab-threejs skill, attempt GLB upgrades or polish procedural
+[✓] High-impact fixes: physics/yaw/goals, cam framing, arena/lighting, materials, FX, HUD, WebAudio
+[✓] Screenshot/A-B + fresh harsh critic loop, fix largest mismatch
+[✓] Update progress.html refs/captures/gaps/next, re-verify 200s
+[0m
+[goal:evidence] index.html 34005 bytes Three.js soccar verified JS node --check OK plus progress.html 7142 bytes with 6 sourced anchors, all pages HTTP 200 including captures and models, real Chromium screenshots of menu and live demo gameplay embedded, Sketchfab sporting car GLB 108132 bytes verified rendering in Three.js 0.160 GLTFLoader, fresh harsh critic 11 of 11 functional PASS with silhouette and lighting gaps actioned
+[goal:complete]
