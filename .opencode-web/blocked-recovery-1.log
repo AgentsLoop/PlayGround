@@ -1,0 +1,637 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Continuing the CoD build — inspecting current game and assets.
+[0m⚙ [0mget_goal Unknown
+[0m→ [0mRead index.html
+[0m→ [0mRead .agents/skills/load-sketchfab-threejs/SKILL.md
+[0m
+[0m$ [0mls -R .agents/skills 2>/dev/null; echo ---; ls skills 2>/dev/null; echo ---; ls -la; which chromium google-chrome chromium-browser 2>/dev/null; python3 -c "import playwright" 2>&1; npx -y playwright --version 2>&1 | head -5
+gauntlet-loop
+image-search
+load-sketchfab-threejs
+mcp-duckgo
+opencode-zen-completions
+
+.agents/skills/gauntlet-loop:
+SKILL.md
+
+.agents/skills/image-search:
+scripts
+SKILL.md
+
+.agents/skills/image-search/scripts:
+image_search.py
+
+.agents/skills/load-sketchfab-threejs:
+agents
+AGENTS.md
+assets
+package-lock.json
+package.json
+scripts
+SKILL.md
+vendor
+wiki
+
+.agents/skills/load-sketchfab-threejs/agents:
+openai.yaml
+
+.agents/skills/load-sketchfab-threejs/assets:
+viewer
+
+.agents/skills/load-sketchfab-threejs/assets/viewer:
+index.html
+main.js
+styles.css
+
+.agents/skills/load-sketchfab-threejs/scripts:
+create_fixtures.mjs
+decompress_glb.mjs
+download_model.py
+extract_public_model.py
+inspect_glb.mjs
+lib
+normalize_glb.mjs
+prepare_playcanvas_glb.mjs
+prepare_viewer.py
+serve_public_extractor.py
+validate_glb.mjs
+
+.agents/skills/load-sketchfab-threejs/scripts/lib:
+glb.mjs
+
+.agents/skills/load-sketchfab-threejs/vendor:
+sketchfab_downloader_extension
+
+.agents/skills/load-sketchfab-threejs/vendor/sketchfab_downloader_extension:
+background.js
+bulk
+content
+headless.html
+headless.js
+icons
+lib
+LICENSE
+manifest.json
+offscreen
+package.json
+popup
+README.md
+README.ru.md
+test
+
+.agents/skills/load-sketchfab-threejs/vendor/sketchfab_downloader_extension/bulk:
+bulk.css
+bulk.html
+bulk.js
+
+.agents/skills/load-sketchfab-threejs/vendor/sketchfab_downloader_extension/content:
+boot-hook.js
+panel.css
+panel.js
+viewer-inject.js
+webgl-hook.js
+
+.agents/skills/load-sketchfab-threejs/vendor/sketchfab_downloader_extension/icons:
+icon128.png
+icon16.png
+icon48.png
+
+.agents/skills/load-sketchfab-threejs/vendor/sketchfab_downloader_extension/lib:
+decrypt.js
+descramble.js
+devlog.js
+i18n.js
+orm.js
+osg-codec.js
+osg-scene.js
+osgjs2gltf.js
+pipeline.js
+run-download.js
+save-sw.js
+save.js
+settings.js
+sf-api.js
+skin.js
+ui-progress.js
+ui-settings.js
+wasm
+zip.js
+
+.agents/skills/load-sketchfab-threejs/vendor/sketchfab_downloader_extension/lib/wasm:
+decrypt.wasm
+
+.agents/skills/load-sketchfab-threejs/vendor/sketchfab_downloader_extension/offscreen:
+offscreen.html
+offscreen.js
+
+.agents/skills/load-sketchfab-threejs/vendor/sketchfab_downloader_extension/popup:
+popup.html
+popup.js
+
+.agents/skills/load-sketchfab-threejs/vendor/sketchfab_downloader_extension/test:
+animations.test.js
+axis.test.js
+base-color-workflow.test.js
+coat-sheen.test.js
+descramble.test.js
+glass-geometry.test.js
+image-mime.test.js
+line-geometry.test.js
+materials.test.js
+morph.test.js
+object-animation.test.js
+orientation.test.js
+orm.test.js
+placement.test.js
+point-cloud.test.js
+samplers.test.js
+settings.test.js
+skin-weights.test.js
+skin.test.js
+textures.test.js
+uv-sets.test.js
+uv-transforms.test.js
+zip.test.js
+
+.agents/skills/load-sketchfab-threejs/wiki:
+public-extraction.md
+
+.agents/skills/mcp-duckgo:
+SKILL.md
+
+.agents/skills/opencode-zen-completions:
+agents
+SKILL.md
+
+.agents/skills/opencode-zen-completions/agents:
+openai.yaml
+---
+---
+total 64
+drwxr-xr-x  15 runner  staff    480 Sep  7 01:03 .
+drwxr-xr-x   3 runner  staff     96 Sep  7 01:01 ..
+drwxr-xr-x   6 runner  staff    192 Sep  7 01:01 .agents
+drwxr-xr-x   5 runner  staff    160 Sep  7 01:01 .agentsweb
+drwxr-xr-x  15 runner  staff    480 Sep  7 01:04 .git
+drwxr-xr-x   3 runner  staff     96 Sep  7 01:01 .github
+drwxr-xr-x  12 runner  staff    384 Sep  7 01:01 .omgithub-runtime
+drwx------   3 runner  staff     96 Sep  7 01:02 .opencode
+drwx------   2 runner  staff     64 Sep  7 01:01 .opencode-ssh
+drwx------  23 runner  staff    736 Sep  7 01:04 .opencode-web
+-rw-r--r--   1 runner  staff    357 Sep  7 01:01 Agents.md
+-rw-r--r--   1 runner  staff  15731 Sep  7 01:03 index.html
+-rw-------   1 runner  staff    484 Sep  7 01:01 opencode-agentsweb-id_ed25519
+-rw-r--r--   1 runner  staff    157 Sep  7 01:01 opencode-agentsweb-id_ed25519.pub
+-rw-r--r--   1 runner  staff     53 Sep  7 01:01 README.md
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import playwright
+ModuleNotFoundError: No module named 'playwright'
+Version 1.63.0
+[0m
+[0m# [0mTodos
+[•] Upgrade index.html to v2 (ADS, killfeed, minimap, viewmodel, lighting, blood, animated enemies)
+[ ] Screenshot-verify in real browser, critique and fix
+[ ] Final syntax + smoke verification
+[0m
+[0m$ [0mnpx -y playwright install --dry-run 2>&1 | head -20; ls ~/.cache/ms-playwright 2>/dev/null || echo "no browsers cached"
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║ WARNING: It looks like you are running 'npx playwright install' without first ║
+║ installing your project's dependencies.                                       ║
+║                                                                               ║
+║ To avoid unexpected behavior, please install your dependencies first, and     ║
+║ then run Playwright's install command:                                        ║
+║                                                                               ║
+║     npm install                                                               ║
+║     npx playwright install                                                    ║
+║                                                                               ║
+║ If your project does not yet depend on Playwright, first install the          ║
+║ applicable npm package (most commonly @playwright/test), and                  ║
+║ then run Playwright's install command to download the browsers:               ║
+║                                                                               ║
+║     npm install @playwright/test                                              ║
+║     npx playwright install                                                    ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+Chrome for Testing 153.0.8010.12 (playwright chromium v1243)
+  Install location:    /Users/runner/Library/Caches/ms-playwright/chromium-1243
+no browsers cached
+[0m
+[0m$ [0mls "/Users/runner/Library/Caches/ms-playwright" 2>/dev/null || echo "missing"; which chromium 2>/dev/null; ls /Applications 2>/dev/null | head; which google-chrome-stable 2>/dev/null; echo done
+missing
+Firefox.app
+Google Chrome for Testing.app
+Google Chrome.app
+Microsoft Edge.app
+PowerShell.app
+Python 3.11
+Python 3.12
+Python 3.13
+Python 3.14
+Safari.app
+done
+[0m
+Chrome is available for screenshots. Building the v2 upgrade now.
+[0m← [0mWrite index.html
+Wrote file successfully.
+[0m
+[0m$ [0mpython3 -c "import re; html=open('index.html').read(); open('/tmp/game.js','w').write(re.search(r'<script>(.*)</script>', html, re.S).group(1))" && node --check /tmp/game.js && echo "JS OK" && (pkill -f "http.server 8901" 2>/dev/null; true) && nohup python3 -m http.server 8901 >/tmp/http.log 2>&1 & sleep 1; curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8901/index.html
+JS OK
+000
+
+<shell_metadata>
+shell tool terminated command after exceeding timeout 30000 ms. If this command is expected to take longer and is not waiting for interactive input, retry with a larger timeout value in milliseconds.
+</shell_metadata>
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8901/index.html; echo curl-done
+000
+curl-done
+[0m
+[0m$ [0mls /tmp/http.log 2>/dev/null && tail -5 /tmp/http.log; ps aux | grep "http.server 8901" | grep -v grep | head -3; echo ---; pwd
+/tmp/http.log
+---
+/Users/runner/work/PlayGround/PlayGround
+[0m
+Server didn't start — retrying with a cleaner launch.
+[0m$ [0mnohup python3 -m http.server 8901 --directory /Users/runner/work/PlayGround/PlayGround > /tmp/http.log 2>&1 & echo started
+started
+[0m
+[0m$ [0msleep 2; curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8901/index.html
+000
+[0m
+[0m$ [0mcat /tmp/http.log; ps aux | grep http.server | grep -v grep; echo ---; curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8901/ || true
+runner           47258   0.0  0.3 435279728  25056   ??  S<    1:08AM   0:00.07 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python -m http.server 8901 --directory /Users/runner/work/PlayGround/PlayGround
+---
+
+
+<shell_metadata>
+shell tool terminated command after exceeding timeout 20000 ms. If this command is expected to take longer and is not waiting for interactive input, retry with a larger timeout value in milliseconds.
+</shell_metadata>
+[0m
+[0m$ [0mcurl -s --max-time 5 -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8901/; echo exit=$?
+000
+exit=28
+[0m
+Loopback HTTP is blocked in this sandbox, so I'll verify via `file://` + real Chrome screenshots instead.
+[0m$ [0mkill 47258 2>/dev/null; mkdir -p /tmp/shot && cd /tmp/shot && npm init -y >/dev/null 2>&1 && npm i playwright-core@1.63.0 2>&1 | tail -2
+found 0 vulnerabilities
+[0m
+[0m← [0mWrite /tmp/shot/shot.js
+Wrote file successfully.
+[0m
+[0m$ [0mnode shot.js
+STATE: {"state":"play","wave":1,"kills":0,"score":0,"enemies":5,"hp":100,"mag":27}
+ERRORS: none
+[0m
+Game runs clean in real Chrome. Looking at the screenshots now.
+[0m→ [0mRead /tmp/shot/menu.png
+[0m→ [0mRead /tmp/shot/gameplay.png
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -366,32 +366,34 @@
+   ctx.lineTo(mx+(player.x+Math.cos(player.angle)*60)*sx,my+(player.y+Math.sin(player.angle)*60)*sy); ctx.stroke();
+   ctx.fillStyle='#9aa4b2'; ctx.font='10px Arial'; ctx.textAlign='left'; ctx.fillText('TAC-MAP',mx+4,my+11);
+ }
+ function drawWeapon(){
+-  // bottom-center rifle viewmodel with recoil + ADS centering
+-  const cx=W/2, by=H+6-recoil*14-adsF*26;
++  // compact bottom-center rifle viewmodel with recoil + ADS centering
++  const cx=W/2, by=H+4-recoil*8-adsF*14;
+   ctx.save(); ctx.translate(cx,by);
+-  const sway=Math.sin(timeSec*2)*2;
+-  // gun body
+-  ctx.fillStyle='#151310';
+-  ctx.fillRect(-14+sway*0.3,-120+recoil*8,28,120);           // receiver
+-  ctx.fillStyle='#23211c'; ctx.fillRect(-11+sway*0.3,-150+recoil*8,22,34); // barrel shroud
+-  ctx.fillStyle='#0c0b09'; ctx.fillRect(-4+sway*0.3,-168+recoil*8,8,20);   // barrel tip
+-  ctx.fillStyle='#3a2f1d'; ctx.fillRect(-16+sway*0.3,-96+recoil*8,32,26);  // wood grip
+-  // rear sight when ADS
+-  if(adsF>0.5){ ctx.strokeStyle='#000'; ctx.lineWidth=3; ctx.strokeRect(-16,-140,32,20); }
++  const sway=Math.sin(timeSec*2)*1.5;
++  const s=0.62; // viewmodel scale — keep it compact, never a screen-dominating bar
++  ctx.scale(s,s);
++  ctx.translate(sway*0.3,0);
++  // stock + receiver
++  ctx.fillStyle='#171410'; ctx.fillRect(-11,-78+recoil*6,22,78);          // receiver
++  ctx.fillStyle='#26221b'; ctx.fillRect(-9,-96+recoil*6,18,20);           // top rail
++  ctx.fillStyle='#0c0b09'; ctx.fillRect(-3,-112+recoil*6,6,18);           // barrel tip
++  ctx.fillStyle='#4a3820'; ctx.fillRect(-13,-58+recoil*6,26,20);          // wooden foregrip
++  ctx.fillStyle='#33291a'; ctx.fillRect(-8,-38+recoil*6,16,14);           // magazine
++  // front + rear sights
++  ctx.fillStyle='#000'; ctx.fillRect(-2,-118+recoil*6,4,6);
++  if(adsF>0.5){ ctx.strokeStyle='#000'; ctx.lineWidth=3; ctx.strokeRect(-13,-94+recoil*6,26,14); }
+   // hands
+-  ctx.fillStyle='#c9a06a'; ctx.fillRect(-20+sway*0.3,-104+recoil*8,12,16); ctx.fillRect(8+sway*0.3,-128+recoil*8,12,16);
+-  // muzzle flash
++  ctx.fillStyle='#c9a06a'; ctx.fillRect(-17,-62+recoil*6,10,13); ctx.fillRect(7,-80+recoil*6,10,13);
++  // muzzle flash (compact star)
+   if(muzzle>0){
+     const f=muzzle*(0.7+Math.random()*0.5);
+     ctx.fillStyle='rgba(255,220,100,'+(0.9*f)+')';
++    const tipY=-112+recoil*6;
+     ctx.beginPath();
+-    ctx.moveTo(-4+sway*0.3,-168+recoil*8);
+-    ctx.lineTo(-22+sway*0.3,-196*f-168+recoil*8+196*(1-f)*0.2);
+-    ctx.lineTo(0+sway*0.3,-214*f-168+recoil*8+214*(1-f)*0.2);
+-    ctx.lineTo(22+sway*0.3,-196*f-168+recoil*8+196*(1-f)*0.2);
+-    ctx.lineTo(4+sway*0.3,-168+recoil*8);
++    ctx.moveTo(-3,tipY); ctx.lineTo(-13,tipY-26*f); ctx.lineTo(0,tipY-34*f);
++    ctx.lineTo(13,tipY-26*f); ctx.lineTo(3,tipY);
+     ctx.fill();
+   }
+   ctx.restore();
+ }
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -398,14 +398,19 @@
+   ctx.restore();
+ }
+ function drawCrosshair(){
+   const x=mouse.x, y=mouse.y;
+-  const gap=10+adsF*-4+recoil*10, len=9;
+-  ctx.strokeStyle=mouse.ads?'#57ff57':'#fff'; ctx.lineWidth=2;
++  const gap=10+adsF*-4+recoil*10, len=10;
++  ctx.lineWidth=4; ctx.strokeStyle='rgba(0,0,0,0.8)';
+   ctx.beginPath();
+   ctx.moveTo(x-gap-len,y);ctx.lineTo(x-gap,y); ctx.moveTo(x+gap,y);ctx.lineTo(x+gap+len,y);
+   ctx.moveTo(x,y-gap-len);ctx.lineTo(x,y-gap); ctx.moveTo(x,y+gap);ctx.lineTo(x,y+gap+len);
+   ctx.stroke();
++  ctx.lineWidth=2; ctx.strokeStyle=mouse.ads?'#57ff57':'#fff';
++  ctx.beginPath();
++  ctx.moveTo(x-gap-len,y);ctx.lineTo(x-gap,y); ctx.moveTo(x+gap,y);ctx.lineTo(x+gap+len,y);
++  ctx.moveTo(x,y-gap-len);ctx.lineTo(x,y-gap); ctx.moveTo(x,y+gap);ctx.lineTo(x,y+gap+len);
++  ctx.stroke();
+   ctx.fillStyle=mouse.ads?'#57ff57':'#fff'; ctx.fillRect(x-1,y-1,2,2);
+   if(player&&player.reloading){ ctx.fillStyle='#ffd75e'; ctx.font='bold 11px Arial'; ctx.textAlign='center'; ctx.fillText('RELOADING',x,y+24); }
+ }
+ 
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -540,10 +540,11 @@
+   ctx.globalAlpha=1;
+   // wave banner
+   if(waveBanner>0&&state==='play'){
+     ctx.globalAlpha=Math.min(1,waveBanner);
+-    ctx.fillStyle='#ffd75e'; ctx.font='bold 34px "Arial Black",Arial'; ctx.textAlign='center';
+-    ctx.fillText(waveBannerText,W/2,H/2-40);
++    ctx.font='bold 34px "Arial Black",Arial'; ctx.textAlign='center';
++    ctx.fillStyle='#000'; ctx.fillText(waveBannerText,W/2+2,H/2-38);
++    ctx.fillStyle='#ffd75e'; ctx.fillText(waveBannerText,W/2,H/2-40);
+     ctx.globalAlpha=1;
+   }
+   if(paused){ ctx.fillStyle='rgba(0,0,0,.65)'; ctx.fillRect(0,0,W,H); ctx.fillStyle='#ffd75e'; ctx.font='bold 44px "Arial Black",Arial'; ctx.textAlign='center'; ctx.fillText('PAUSED',W/2,H/2); }
+ }
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -556,9 +556,9 @@
+   else draw();
+   requestAnimationFrame(loop);
+ }
+ reset(); draw();
+-window.__game={reset,spawnWave,startReload,startGame,getState:()=>({state,wave,kills,score,player,enemyCount:enemies.length})};
++window.__game={reset,spawnWave,startReload,startGame,getState:()=>({state,wave,kills,score,player,enemyCount:enemies.length,enemies:enemies.map(e=>({x:Math.round(e.x),y:Math.round(e.y),hp:Math.round(e.hp)}))})};
+ })();
+ </script>
+ </body>
+ </html>
+
+[0m
+[0m← [0mWrite /tmp/shot/killtest.js
+Wrote file successfully.
+[0m
+[0m$ [0mnode killtest.js
+RESULT: {"state":"play","wave":1,"kills":3,"score":330,"enemies":2,"hp":100,"mag":25,"reserve":90}
+KILLCHECK: PASS (enemies killed, score/waves progress)
+ERRORS: none
+[0m
+Core loop verified — 3 kills, score progressing, zero errors. Checking the fixed visuals.
+[0m→ [0mRead /tmp/shot/combat.png
+[0m
+[0m← [0mWrite /tmp/shot/wave2test.js
+Wrote file successfully.
+[0m
+[0m$ [0mnode wave2test.js
+RESULT: {"state":"play","wave":1,"kills":3,"score":330,"enemies":2}
+WAVECHECK: FAIL
+ERRORS: none
+[0m
+Wave didn't clear — 2 enemies unkillable in 45s. Inspecting the battlefield to see if it's a test limitation or a real bug.
+[0m→ [0mRead /tmp/shot/wave2.png
+[0m→ [0mRead /tmp/shot/ads.png
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -160,14 +160,16 @@
+ })();
+ 
+ // ---------- State ----------
+ let state='menu', paused=false;
+-let player, bullets, ebullets, enemies, particles, casings, hitmarkers, corpses, bloodPools, tracers, killfeed, hitdirs;
++let player, bullets, ebullets, enemies, particles, casings, hitmarkers, corpses, bloodPools, tracers, killfeed, hitdirs, floaters;
+ let wave, kills, score, waveBanner=0, waveBannerText='';
+ let mouse={x:W/2,y:H/2-100,down:false,ads:false};
+ let keys={};
+ let lastTime=0, lastDamage=-9999, shake=0, muzzle=0, recoil=0, adsF=0, timeSec=0;
+ 
++function addFloater(x,y,text,color){ floaters.push({x,y,text,color:color||'#ffd75e',life:1.4}); if(floaters.length>12) floaters.shift(); }
++
+ function reset(){
+   player={x:W/2,y:H/2+140,r:14,hp:100,maxHp:100,speed:215,angle:-Math.PI/2,
+     mag:30,magSize:30,reserve:150,reloading:false,reloadT:0,fireCd:0};
+   bullets=[];ebullets=[];enemies=[];particles=[];casings=[];hitmarkers=[];corpses=[];bloodPools=[];tracers=[];killfeed=[];hitdirs=[];
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -171,9 +171,9 @@
+ 
+ function reset(){
+   player={x:W/2,y:H/2+140,r:14,hp:100,maxHp:100,speed:215,angle:-Math.PI/2,
+     mag:30,magSize:30,reserve:150,reloading:false,reloadT:0,fireCd:0};
+-  bullets=[];ebullets=[];enemies=[];particles=[];casings=[];hitmarkers=[];corpses=[];bloodPools=[];tracers=[];killfeed=[];hitdirs=[];
++  bullets=[];ebullets=[];enemies=[];particles=[];casings=[];hitmarkers=[];corpses=[];bloodPools=[];tracers=[];killfeed=[];hitdirs=[];floaters=[];
+   wave=1;kills=0;score=0;shake=0;muzzle=0;recoil=0;adsF=0;timeSec=0;lastDamage=-9999;
+   waveBanner=2.2; waveBannerText='WAVE 1 — ENEMY CONTACT';
+   spawnWave(wave);
+ }
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -240,8 +240,13 @@
+ player.angle=Math.atan2(mouse.y-player.y,mouse.x-player.x);
+ // reload + fire
+ if(player.reloading){ player.reloadT-=dt; if(player.reloadT<=0){ const need=player.magSize-player.mag,take=Math.min(need,player.reserve); player.mag+=take; player.reserve-=take; player.reloading=false; } }
+ player.fireCd-=dt; recoil=Math.max(0,recoil-dt*6); muzzle=Math.max(0,muzzle-dt*10);
++// anti-softlock scavenger: never leave the player with zero total ammo
++if(player.mag===0&&player.reserve===0&&!player.reloading){
++  player.scavT=(player.scavT||0)+dt;
++  if(player.scavT>2){ player.scavT=0; player.reserve+=12; addFloater(player.x,player.y-30,'SCAVENGED 12 ROUNDS','#57ff57'); startReload(); }
++} else player.scavT=0;
+ const spreadBase=0.055*(1-adsF*0.75);
+ if(mouse.down&&!player.reloading&&player.fireCd<=0&&state==='play'&&!paused){
+   if(player.mag>0){
+     player.mag--; player.fireCd=mouse.ads?0.15:0.125; recoil=1; muzzle=1;
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -293,8 +293,10 @@
+ hitmarkers.push({x:e.x,y:e.y,life:0.25,kill:e.hp<=0});
+ bloodBurst(b.x,b.y,6);
+ if(e.hp<=0){
+   enemies.splice(j,1); kills++; const pts=100+wave*10; score+=pts;
++  player.reserve=Math.min(300,player.reserve+20); // scavenger: kills feed ammo
++  addFloater(e.x,e.y-20,'+'+pts,'#ffd75e');
+   corpses.push({x:e.x,y:e.y,angle:Math.atan2(player.y-e.y,player.x-e.x),life:4});
+   bloodPools.push({x:e.x,y:e.y,r:10+Math.random()*10,life:12});
+   if(bloodPools.length>25) bloodPools.shift();
+   if(corpses.length>20) corpses.shift();
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -332,9 +332,10 @@
+ hitdirs=hitdirs.filter(h=>(h.life-=dt)>0);
+ if(waveBanner>0) waveBanner-=dt;
+ 
+ if(player.hp<=0){ player.hp=0; gameOver(); }
+-else if(enemies.length===0){ wave++; score+=250; player.reserve+=40;
++else if(enemies.length===0){ wave++; score+=250; player.reserve=Math.min(300,player.reserve+40);
++  addFloater(player.x,player.y-34,'WAVE CLEARED +250','#57ff57');
+   waveBanner=2.2; waveBannerText='WAVE '+wave+' — HOSTILES INBOUND'; waveHorn(); spawnWave(wave); }
+ 
+ healthfill.style.width=(player.hp/player.maxHp*100)+'%';
+ healthfill.style.background=player.hp>60?'linear-gradient(90deg,#57ff57,#b6ff57)':player.hp>30?'linear-gradient(90deg,#ffaa00,#ffdd55)':'linear-gradient(90deg,#ff2222,#ff7777)';
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -329,8 +329,9 @@
+ corpses=corpses.filter(c=>(c.life-=dt)>0);
+ bloodPools=bloodPools.filter(b=>(b.life-=dt)>0);
+ killfeed=killfeed.filter(k=>(k.life-=dt)>0);
+ hitdirs=hitdirs.filter(h=>(h.life-=dt)>0);
++floaters=floaters.filter(f=>{ f.y-=28*dt; return (f.life-=dt)>0; });
+ if(waveBanner>0) waveBanner-=dt;
+ 
+ if(player.hp<=0){ player.hp=0; gameOver(); }
+ else if(enemies.length===0){ wave++; score+=250; player.reserve=Math.min(300,player.reserve+40);
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -506,8 +506,14 @@
+ for(const h of hitmarkers){ const s=9*(0.3+h.life/0.25);
+   ctx.strokeStyle=h.kill?'#ff2222':'#fff'; ctx.beginPath();
+   ctx.moveTo(h.x-s,h.y-s);ctx.lineTo(h.x-s+5,h.y-s+5); ctx.moveTo(h.x+s,h.y-s);ctx.lineTo(h.x+s-5,h.y-s+5);
+   ctx.moveTo(h.x-s,h.y+s);ctx.lineTo(h.x-s+5,h.y+s-5); ctx.moveTo(h.x+s,h.y+s);ctx.lineTo(h.x+s-5,h.y+s-5); ctx.stroke(); }
++// floating combat text
++ctx.font='bold 14px Arial'; ctx.textAlign='center';
++for(const f of floaters){ ctx.globalAlpha=Math.min(1,f.life);
++  ctx.fillStyle='#000'; ctx.fillText(f.text,f.x+1,f.y+1);
++  ctx.fillStyle=f.color; ctx.fillText(f.text,f.x,f.y); }
++ctx.globalAlpha=1;
+ // muzzle light + player light
+ const lx=player?player.x:0, ly=player?player.y:0;
+ let light=ctx.createRadialGradient(lx,ly,10,lx,ly,220);
+ light.addColorStop(0,'rgba(255,240,180,0.10)'); light.addColorStop(1,'rgba(0,0,0,0)');
+
+[0m
+[0m$ [0mpython3 -c "import re; html=open('index.html').read(); open('/tmp/game.js','w').write(re.search(r'<script>(.*)</script>', html, re.S).group(1))" && node --check /tmp/game.js && echo "JS OK"
+JS OK
+[0m
+[0m← [0mWrite /tmp/shot/finaltest.js
+Wrote file successfully.
+[0m
+[0m$ [0mnode finaltest.js
+RESULT: {"state":"play","wave":2,"kills":5,"score":800,"enemies":7,"hp":93,"mag":15,"reserve":260}
+WAVECHECK: PASS
+ERRORS: none
+[0m
+Wave progression passes with the ammo economy fixed. Final visual check.
+[0m→ [0mRead /tmp/shot/final.png
+[0m→ [0mRead README.md
+[0m
+[0m← [0mEdit README.md
+Index: /Users/runner/work/PlayGround/PlayGround/README.md
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/README.md
++++ /Users/runner/work/PlayGround/PlayGround/README.md
+@@ -1,2 +1,8 @@
+ # PlayGround
+-Playground for browser game experiments
++Playground for browser game experiments.
++
++## Playground Ops (Call of Duty–inspired arena shooter)
++Open `index.html` in a browser (no build step, no external assets).
++
++WASD move · mouse aim · click/Space fire · right-mouse ADS · R reload · Shift sprint · P pause.
++Survive endless waves with CoD-style health regen, killfeed, tac-map, compass, and scavenger ammo economy.
+
+[0m
+[0m$ [0mgit diff --check && echo "DIFF CLEAN"; git status --short; ls -la index.html
+DIFF CLEAN
+ M README.md
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+-rw-r--r--  1 runner  staff  31500 Sep  7 01:16 index.html
+[0m
+[0m# [0mTodos
+[✓] Upgrade index.html to v2 (ADS, killfeed, minimap, viewmodel, lighting, blood, animated enemies)
+[✓] Screenshot-verify in real browser, critique and fix
+[✓] Final syntax + smoke verification
+[0m
+All verification passed; the game is complete and playable.
+
+[goal:evidence] index.html (31.5KB single-file, zero-dependency) implements a CoD-inspired arena shooter: WASD+mouse, sprint, RMB ADS (tighter spread, green crosshair), reload, CoD-style health regen, strafing enemy AI with line-of-sight, cover system, compass, tac-map minimap, killfeed, floating score text, wave banners, hitmarkers, hit-direction arcs, blood pools/corpses, shell casings, tracers, muzzle-flash lighting, screenshake, weapon viewmodel, pause and game-over/redeploy, synthesized WebAudio SFX, plus scavenger ammo economy (kills +20 reserve, emergency scavenging) fixing a found 0/0-ammo soft-lock. Verified in real Google Chrome via playwright-core: menu/gameplay/ADS/pause/combat screenshots reviewed (fixed oversized viewmodel, weak crosshair, banner readability), scripted aimbot achieved 5 kills → wave 2 with score 800 and zero console/page errors; node --check clean; git diff --check clean; README documents the game.
+[goal:complete]

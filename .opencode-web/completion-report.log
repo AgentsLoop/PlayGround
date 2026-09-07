@@ -1,0 +1,108 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+On it — checking branch state and issue #38, then capturing fresh screenshots against the public URL.
+[0m$ [0mgit branch --show-current; git status --short | head -20; echo ---; ls -la screenshots/ 2>/dev/null
+opencode/34071363436
+ M README.md
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? screenshots/
+---
+total 1480
+drwxr-xr-x   4 runner  staff     128 Sep  7 01:20 .
+drwxr-xr-x  16 runner  staff     512 Sep  7 01:19 ..
+-rw-r--r--   1 runner  staff  401794 Sep  7 01:21 final-gameplay.png
+-rw-r--r--   1 runner  staff  349222 Sep  7 01:20 final-menu.png
+[0m
+[0m$ [0mgh issue view 38 --json title,body,labels,state --jq '{title, state, labels: [.labels[].name], body: .body[:800]}'
+{"body":"call of duty","labels":["OpenCode","Goal","validating"],"state":"OPEN","title":"call of duty"}
+[0m
+[0m← [0mWrite /tmp/shot/publictest.js
+Wrote file successfully.
+[0m
+[0m$ [0mnode /tmp/shot/publictest.js
+TITLE: Call of Duty: Playground Ops — Browser Experiment
+RESULT: {"state":"play","wave":2,"kills":5,"score":800,"enemies":7}
+ERRORS: none
+[0m
+Public deployment plays clean (wave 2, 5 kills, no errors). Verifying the new screenshots visually.
+[0m→ [0mRead screenshots/final-public-menu.png
+[0m→ [0mRead screenshots/final-public-gameplay.png
+Screenshots confirmed. Committing game + screenshots and pushing.
+[0m
+[0m$ [0mgit diff --check && git add index.html README.md screenshots/ && git status --short && git commit -m "Playground Ops: CoD-inspired playable browser shooter with final screenshots" && git push origin opencode/34071363436 && git log --oneline -2 && git rev-parse --short HEAD
+M  README.md
+A  index.html
+A  screenshots/final-gameplay.png
+A  screenshots/final-menu.png
+A  screenshots/final-public-gameplay.png
+A  screenshots/final-public-menu.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+[opencode/34071363436 0a23bb3] Playground Ops: CoD-inspired playable browser shooter with final screenshots
+ 6 files changed, 589 insertions(+), 1 deletion(-)
+ create mode 100644 index.html
+ create mode 100644 screenshots/final-gameplay.png
+ create mode 100644 screenshots/final-menu.png
+ create mode 100644 screenshots/final-public-gameplay.png
+ create mode 100644 screenshots/final-public-menu.png
+remote: 
+remote: Create a pull request for 'opencode/34071363436' on GitHub by visiting:        
+remote:      https://github.com/AgentsLoop/PlayGround/pull/new/opencode/34071363436        
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34071363436 -> opencode/34071363436
+0a23bb3 Playground Ops: CoD-inspired playable browser shooter with final screenshots
+b4fe44a Grant reusable OpenCode workflow Pages permission
+0a23bb3
+[0m
+Pushed as `0a23bb3`. Posting the final completion comment to #38.
+[0m$ [0mgh issue comment 38 --body "## ✅ Complete — Playground Ops (CoD-inspired browser shooter)
+
+**🎮 Public game URL:** https://reported-audio-male-francisco.trycloudflare.com
+
+**Screenshots (captured against the public URL, committed under \`screenshots/\`):**
+
+Menu:
+![final-public-menu](https://github.com/AgentsLoop/PlayGround/blob/opencode/34071363436/screenshots/final-public-menu.png?raw=true)
+
+Live wave-2 combat (killfeed, score floaters, tac-map, HUD):
+![final-public-gameplay](https://github.com/AgentsLoop/PlayGround/blob/opencode/34071363436/screenshots/final-public-gameplay.png?raw=true)
+
+**Final commit:** \`0a23bb3\` — *Playground Ops: CoD-inspired playable browser shooter with final screenshots* on branch \`opencode/34071363436\` (pushed; no PR created per instructions — workflow handles it).
+
+**Deployment status:**
+- Local: \`./index.html\` served from tmux session \`app-server\` on port 3000 (Node static server; Python http.server could not reach LISTEN in this sandbox) — HTTP 200, content-matched.
+- Public: Cloudflare URL above serves the same game, verified playable end-to-end.
+
+**Test status (real Chrome/Playwright, all PASS, zero console/page errors):**
+- Page load + title, DEPLOY start, firing (ammo depletes/reloads), 5 kills / score 800, wave 1 → wave 2 progression, ADS, pause, health regen, scavenger ammo economy.
+- One failure found and fixed during verification: favicon 404s → added inline SVG favicon, re-tested clean. Also fixed an ammo-exhaustion soft-lock (kills grant +20 reserve, emergency scavenging) and an oversized weapon viewmodel found via screenshot review.
+
+**Known limitations:**
+- 2D top-down arena homage, not a 3D FPS; all art/audio are procedural originals (no CoD assets).
+- No mobile/touch controls; keyboard + mouse required.
+- Balance tuned for desktop Chrome; other browsers untested.
+- Private key (\`opencode-agentsweb-id_ed25519\`) and runtime dirs (\`.opencode-web/\`, etc.) intentionally left uncommitted." && echo COMMENT-POSTED
+https://github.com/AgentsLoop/PlayGround/issues/38#issuecomment-5563712188
+COMMENT-POSTED
+[0m
+Done. All steps completed:
+
+- **Screenshots:** captured fresh against the public URL (`final-public-menu.png`, `final-public-gameplay.png`, wave-2 combat verified: 5 kills, score 800, zero errors) alongside the existing `final-menu.png` / `final-gameplay.png` — all under `screenshots/` with `final-*` names, visually reviewed.
+- **Commit & push:** `0a23bb3` on `opencode/34071363436`, pushed (game + README + 4 screenshots; private key and runtime dirs excluded).
+- **Issue #38:** final completion comment posted with public game URL, embedded screenshots, final commit, deployment/test status, and known limitations. No PR created.
