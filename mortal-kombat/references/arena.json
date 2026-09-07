@@ -1,0 +1,47 @@
+{
+  "query": "fighting game arena stage temple dark",
+  "timestamp": "2026-09-07T13:55:36.897249",
+  "total_results": 4,
+  "results": [
+    {
+      "title": "60 4k Backgrounds for Fighting Arenas. Pack 4 in 2D Assets - UE Marketplace",
+      "image": "https://cdn1.epicgames.com/ue/product/Screenshot/Frame+40-1920x1080-256388e89532c716fbaa2468e935e6b1.jpg?resize=1&w=1920",
+      "thumbnail": "https://ts3.mm.bing.net/th?id=OIP.SDnOGVGRmQjIGr2ueb2mIwHaEK&pid=15.1",
+      "url": "https://www.unrealengine.com/marketplace/en-US/product/bb111d8616aa42b9a0247da3d4af5507/questions",
+      "source": "unrealengine.com",
+      "width": "1920",
+      "height": "1080",
+      "local_path": "mortal-kombat/references/image_001.jpg"
+    },
+    {
+      "title": "ArtStation - Fighting Stage Environment | Game Assets",
+      "image": "https://cdna.artstation.com/p/marketplace/presentation_assets/002/777/920/large/file.jpg?1686556647",
+      "thumbnail": "https://ts2.mm.bing.net/th?id=OIP.Ii_aXL16tL0XCxFpEbWC2gHaEK&pid=15.1",
+      "url": "https://www.artstation.com/marketplace/p/PmVL7/fighting-stage-environment",
+      "source": "artstation.com",
+      "width": "1800",
+      "height": "1013",
+      "local_path": "mortal-kombat/references/image_002.jpg"
+    },
+    {
+      "title": "1,093,294 Arena Royalty-Free Images, Stock Photos & Pictures | Shutterstock",
+      "image": "https://www.shutterstock.com/image-photo/mortal-kombat-dark-fighting-arena-600nw-2672814147.jpg",
+      "thumbnail": "https://ts3.mm.bing.net/th?id=OIP.LMxj4heOpkLdqYFR_xXmswHaHa&pid=15.1",
+      "url": "https://www.shutterstock.com/search/arena",
+      "source": "Shutterstock",
+      "width": "600",
+      "height": "600",
+      "local_path": "mortal-kombat/references/image_003.webp"
+    },
+    {
+      "title": "Dramatic fantasy battle arena with two sets of fighters, lightning, fire, and a giant central ...",
+      "image": "https://media.craiyon.com/2025-05-28/XblZEbXgQh2Bin2_0hQbRQ.webp",
+      "thumbnail": "https://ts1.mm.bing.net/th?id=OIP.0bGF1cyNqgRDgvP5Wdr-igHaEC&pid=15.1",
+      "url": "https://www.craiyon.com/image/xB-7YDK7Rq-Xhe2LhPB3Sw",
+      "source": "craiyon.com",
+      "width": "1408",
+      "height": "768",
+      "local_path": "mortal-kombat/references/image_004.webp"
+    }
+  ]
+}

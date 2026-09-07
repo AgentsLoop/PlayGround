@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "playwright": {
+      "source": "secondsky/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/playwright/skills/playwright/SKILL.md",
+      "computedHash": "a4d3bdb9bdee41a841c59e1360afec67d44b6770c291fd9c244021fa51f1d813"
+    }
+  }
+}
