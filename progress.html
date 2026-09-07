@@ -1,0 +1,27 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Progress — Turbo Ball</title>
+<style>body{font-family:Arial;background:#0d1526;color:#eee;max-width:900px;margin:20px auto;padding:0 16px}
+li.done{color:#7CFC00}a{color:#66b3ff}img{max-width:100%;border-radius:8px;border:1px solid #444}
+.shot{display:grid;grid-template-columns:1fr 1fr;gap:12px}figure{margin:8px 0}figcaption{font-size:13px;opacity:.85}</style></head>
+<body><h1>Turbo Ball — live progress</h1>
+<p><b>Reference:</b> real in-game <b>DFH Stadium (Day)</b> vista (<a href="ref-dfh-day.jpg">ref-dfh-day.jpg</a>: packed blue/orange stands, glowing halo ring, green pitch) — chosen because it is the default launch-arena view every Rocket League player recognizes, and its blue/orange/green/white color language is exactly what our 2D clone mirrors.</p>
+<p><b>Game:</b> <a href="index.html">Play index.html</a> — drive (WASD/arrows), boost (Shift/Space, meter + pads + flame), hit ball into ORANGE goal (right), GOAL! banner + scoreboard + particles, R kickoff / button full-restart, 3:00 timer, AI opponent.</p>
+<h2>Lead-split pieces (smallest judgeable) + builder/critic verdicts</h2>
+<ul>
+<li class="done">P1 Arena+goals — builder snippet integrated; critic PASS after v2 (stands bowl, halo ring, recessed nets w/ team tint + posts).</li>
+<li class="done">P2 Car driving — PASS (ACC/TURN/friction/caps verified in code).</li>
+<li class="done">P3 Ball physics+collision — PASS (friction 0.992, bounce 0.8, impulse j=-(1+0.95)vn).</li>
+<li class="done">P4 Boost — PASS after fix (empty-tank top-speed clamp).</li>
+<li class="done">P5 Scoring/feedback+reset — PASS (GOAL! banner, scoreboard, confetti, shake/flash, R + button, timer).</li>
+<li class="done">P6 Opponent AI — PASS (chase-ball steering + boost).</li>
+<li class="done">P7 Browser verification — real Chrome headless screenshots below; fresh harsh visual critic FAIL&rarr;fixed (grey bands, crowd side-tint, goal fills); final gameplay critic 6/6 PASS, no load-bearing bugs.</li>
+</ul>
+<h2>A/B evidence (reference vs actual, real browser output)</h2>
+<div class="shot">
+<figure><img src="ref-dfh-day.jpg" alt="DFH Stadium Day reference"><figcaption>REF: real DFH Stadium (Day)</figcaption></figure>
+<figure><img src="shots/v4-kickoff.png" alt="v4 kickoff"><figcaption>v4 kickoff — stands bowl, halo, nets, HUD</figcaption></figure>
+<figure><img src="shots/v2-boost.png" alt="boost"><figcaption>Boost — flame cone, trail, draining meter</figcaption></figure>
+<figure><img src="shots/v4-goal-orange.png" alt="orange goal"><figcaption>GOAL! ORANGE SCORES! — banner, confetti, ball in net, score updated</figcaption></figure>
+</div>
+<p>Earlier iterations: <a href="shots/v1-kickoff.png">v1</a>, <a href="shots/v2-kickoff.png">v2</a>, <a href="shots/v3-kickoff.png">v3</a>, <a href="shots/v2-goal-blue.png">goal-blue</a>.</p>
+<p id="stamp">Updated: 2026-09-07 — v4 verified in Chrome; all criteria PASS.</p>
+</body></html>
