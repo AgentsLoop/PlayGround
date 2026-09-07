@@ -1,0 +1,27 @@
+## Objective
+
+Deliver a production-quality browser real-time strategy game inspired by StarCraft 2 for players who expect a recognizable sci-fi base-building and tactical combat experience. Preserve the real web-game surface and the core interaction model: selectable units and buildings, resource gathering, construction, production queues, combat, fog of war or a meaningful visibility model, camera pan/zoom, and a complete playable match loop.
+
+## Quality bar
+
+- Research StarCraft 2's official materials plus representative gameplay footage and interface screenshots before coding. Record at least six high-signal reference URLs and explain the visual, interaction, or systems purpose of each.
+- Build a distinct original presentation that captures the target's readable sci-fi RTS language without copying protected assets.
+- Inspect the actual running game with browser captures and compare it against the acceptance bar, including desktop layout, combat readability, selection feedback, economy, build flow, and end states.
+- Deliver complete player-facing states: loading, onboarding, faction or scenario choice, active match, pause/restart, victory, defeat, invalid actions, insufficient resources, and recovery from common errors.
+- Make the game operable with keyboard and mouse, responsive at practical desktop viewport sizes, visually polished, and understandable without developer tools.
+
+## Execution
+
+- Have the lead choose the implementation route and divide the project into independently judgeable pieces.
+- Give every important piece a builder and a fresh-context critic or verifier. The verifier must inspect the real artifact, identify the largest remaining gap, and send the work back for improvement.
+- Work across as many sessions as necessary to reach the production bar. Do not stop at a mockup, static demo, or first smoke test.
+
+## Verification
+
+- Exercise a fresh match from start to finish and verify resource collection, construction, unit production, selection, movement, attack, damage, defeat, and victory in the browser.
+- Fix the largest remaining gap and repeat the build/inspect/critic/improve loop until the acceptance bar is met or the run is stopped with explicit evidence.
+- Record concrete evidence for research, visual inspection, gameplay behavior, accessibility/operability, and delivery.
+
+## Progress
+
+Maintain a resumable live progress page containing reference URLs, decisions, completed work, evidence, blockers, current gaps, and the next exact action so another agent can continue without losing context.

@@ -1,0 +1,927 @@
+# OpenCode blocked Goal evidence
+
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Building your StarCraft-style RTS — starting with research and a playable prototype.
+[0m→ [0mRead .
+[0m→ [0mRead README.md
+[0m
+[0m$ [0mpwd; ls -la; cat Agents.md 2>/dev/null | head -n 100
+/home/runner/work/PlayGround/PlayGround
+total 56
+drwxr-xr-x 10 runner runner 4096 Sep  7 06:36 .
+drwxr-xr-x  3 runner runner 4096 Sep  7 06:34 ..
+drwxr-xr-x  5 runner runner 4096 Sep  7 06:34 .agents
+drwxr-xr-x  4 runner runner 4096 Sep  7 06:34 .agentsweb
+drwxr-xr-x  7 runner runner 4096 Sep  7 06:36 .git
+drwxr-xr-x  3 runner runner 4096 Sep  7 06:34 .github
+drwxr-xr-x  9 runner runner 4096 Sep  7 06:34 .omgithub-runtime
+drwx------  3 runner runner 4096 Sep  7 06:36 .opencode
+drwx------  2 runner runner 4096 Sep  7 06:35 .opencode-ssh
+drwx------  3 runner runner 4096 Sep  7 06:36 .opencode-web
+-rw-r--r--  1 runner runner  357 Sep  7 06:34 Agents.md
+-rw-r--r--  1 runner runner   53 Sep  7 06:34 README.md
+-rw-------  1 runner runner  411 Sep  7 06:35 opencode-agentsweb-id_ed25519
+-rw-r--r--  1 runner runner  102 Sep  7 06:35 opencode-agentsweb-id_ed25519.pub
+
+## Goal-mode continuation policy
+
+When running in Goal mode, use `[goal:blocked]` only when concrete user input
+is required. Do not mark the goal blocked merely because the task is difficult,
+large, expensive, or impossible to match perfectly. Continue with the best
+achievable implementation until the configured time, token, or turn budget is
+exhausted.
+[0m
+[0m# [0mTodos
+[•] Research SC2 official materials + gameplay/UI (6+ reference URLs)
+[ ] Create live progress page (PROGRESS.md)
+[ ] Build RTS game: core loop, selection, economy, build, combat, fog, camera
+[ ] Player-facing states: loading, onboarding, faction, pause/restart, victory/defeat, errors
+[ ] Browser verification: captures, gameplay exercise, critic loop
+[0m
+[0m◈ [0mExa Web Search "StarCraft 2 Terran build order command center barracks strategy"
+[0m◈ [0mExa Web Search "StarCraft 2 official site Blizzard 2026"
+[0m◈ [0mExa Web Search "StarCraft 2 gameplay UI interface minerals gas supply guide"
+[0m◈ [0mExa Web Search "StarCraft 2 fog of war minimap camera controls hotkeys"
+[0m
+[0m$ [0mwhich python3 node npx chromium google-chrome 2>&1; python3 -c "import playwright" 2>&1; npx playwright --version 2>&1 | head -n 5; ls /tmp/opencode 2>&1 | head
+/usr/bin/python3
+/usr/local/bin/node
+/usr/local/bin/npx
+/usr/bin/chromium
+/usr/bin/google-chrome
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'playwright'
+npm warn exec The following package was not found and will be installed: playwright@1.63.0
+Version 1.63.0
+[0m
+Research is solid — now laying down the game foundation.
+[0m# [0mTodos
+[✓] Research SC2 official materials + gameplay/UI (6+ reference URLs)
+[•] Create live progress page (PROGRESS.md)
+[ ] Build RTS game: core loop, selection, economy, build, combat, fog, camera
+[ ] Player-facing states: loading, onboarding, faction, pause/restart, victory/defeat, errors
+[ ] Browser verification: captures, gameplay exercise, critic loop
+[0m
+[0m← [0mWrite PROGRESS.md
+Wrote file successfully.
+[0m
+[0m# [0mTodos
+[✓] Research SC2 official materials + gameplay/UI (6+ reference URLs)
+[ ] Create live progress page (PROGRESS.md)
+[•] Build RTS game: core loop, selection, economy, build, combat, fog, camera
+[ ] Player-facing states: loading, onboarding, faction, pause/restart, victory/defeat, errors
+[ ] Browser verification: captures, gameplay exercise, critic loop
+[0m
+[0m← [0mWrite rts/index.html
+Wrote file successfully.
+[0m
+[0m← [0mWrite rts/style.css
+Wrote file successfully.
+[0m
+Shell and styling are in — now writing the full game simulation.
+[0m← [0mWrite rts/game.js
+Wrote file successfully.
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -1217,15 +1217,21 @@
+ dt=Math.min(dt,0.1);
+ if(G.phase!=='game'||G.paused||G.over){ if(G.phase==='game'){render();renderMinimap();} return; }
+ try{
+   G.time+=dt;
+-  // camera keys + edge pan
++  // camera: arrows + edge pan (WASD reserved for commands)
+   const sp=520/G.cam.z*dt;
+-  if(keys['w']||keys['arrowup'])G.cam.y-=sp;
+-  if(keys['s']&&!selList().length||keys['arrowdown'])G.cam.y+=sp;
+-  if(keys['a']&&G.attackMode){} else if(keys['a']||keys['arrowleft'])G.cam.x-=sp;
+-  if(keys['d']||keys['arrowright'])G.cam.x+=sp;
+-  // note: A also = attack hotkey; camera uses arrows/WASD but WASD conflicts when typing? fine
++  if(keys['arrowup'])G.cam.y-=sp;
++  if(keys['arrowdown'])G.cam.y+=sp;
++  if(keys['arrowleft'])G.cam.x-=sp;
++  if(keys['arrowright'])G.cam.x+=sp;
++  if(mouseEdge.x>=0){
++    const r=cv.getBoundingClientRect(),m=26,sp2=620/G.cam.z*dt;
++    if(mouseEdge.x<r.left+m)G.cam.x-=sp2;
++    if(mouseEdge.x>r.right-m)G.cam.x+=sp2;
++    if(mouseEdge.y<r.top+m)G.cam.y-=sp2;
++    if(mouseEdge.y>r.bottom-m)G.cam.y+=sp2;
++  }
+   G.cam.x=clamp(G.cam.x,0,WORLD);G.cam.y=clamp(G.cam.y,0,WORLD);
+   for(const e of G.entities){if(e.hp>0)updateUnit(e,dt);}
+   G.entities=G.entities.filter(e=>e.hp>0||e.owner===-1);
+   updateProduction(dt);
+
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -762,8 +762,10 @@
+ },{passive:false});
+ 
+ /* keyboard */
+ const keys={};
++const mouseEdge={x:-1,y:-1};
++window.addEventListener('mousemove',e=>{mouseEdge.x=e.clientX;mouseEdge.y=e.clientY;});
+ window.addEventListener('keydown',e=>{
+   if(G.phase!=='game')return;
+   const k=e.key;
+   keys[k.toLowerCase()]=true;
+
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -451,9 +451,11 @@
+     u._lastNode=null;u._lastGas=true;
+     const ventUnder=G.entities.find(e=>e.owner===-1&&e.kind==='vent'&&dist(e.x,e.y,target.x,target.y)<55);
+     u._gasTarget=target.id;
+     if(dist(u.x,u.y,target.x,target.y)>target.r+16){moveToward(u,target.x,target.y,dt);}
+-    else{u.harvestT+=dt; if(u.harvestT>=1.2){u.harvestT=0;const take=4;u.carry={type:'p',amt:take};G.stats[u.owner].minedP+=0;}}
++    else{u.harvestT+=dt; if(u.harvestT>=1.2){u.harvestT=0;const take=4;
++      if(ventUnder&&ventUnder.amount>0)ventUnder.amount=Math.max(0,ventUnder.amount-take);
++      u.carry={type:'p',amt:take};}}
+   }
+ }
+ function pushIncome(o,t,amt){
+   const h=G.incomeHist[o]; h.push({t:G.time,amt,type:t});
+
+[0m
+[0m← [0mEdit rts/index.html
+Index: /home/runner/work/PlayGround/PlayGround/rts/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/index.html
++++ /home/runner/work/PlayGround/PlayGround/rts/index.html
+@@ -66,9 +66,9 @@
+ <div class="controls-grid">
+   <div><kbd>Left-drag</kbd> select · <kbd>Right-click</kbd> order</div>
+   <div><kbd>A</kbd> attack · <kbd>S</kbd> stop · <kbd>H</kbd> hold</div>
+   <div><kbd>Ctrl</kbd>+<kbd>1–0</kbd> group · <kbd>F1</kbd> idle worker</div>
+-  <div><kbd>WASD</kbd>/arrows/edge pan · wheel zoom</div>
++  <div><kbd>←↑↓→</kbd>/edge/minimap pan · wheel zoom</div>
+   <div><kbd>Space</kbd> last alert · <kbd>⌫</kbd> cycle bases</div>
+ </div>
+ <div class="menu-actions">
+   <button id="btn-start" class="btn primary">▶ Deploy</button>
+
+[0m
+Core game is written — now verifying it runs in a real browser.
+[0m$ [0mnode -e "new Function(require('fs').readFileSync('rts/game.js','utf8')); console.log('syntax OK')"
+syntax OK
+[0m
+[0m$ [0mnohup python3 -m http.server 8901 >/tmp/opencode/http.log 2>&1 & sleep 1; curl -s -o /dev/null -w "%{http_code}" http://localhost:8901/rts/index.html
+200
+[0m
+[0m← [0mWrite /tmp/opencode/verify.js
+Wrote file successfully.
+[0m
+[0m$ [0mnpm ls playwright 2>/dev/null | head -3; ls node_modules 2>/dev/null | head -3; npm i -y playwright-core 2>&1 | tail -2
+/tmp/opencode
+└── (empty)
+
+
+added 1 package in 577ms
+[0m
+[0m$ [0msed -i "s#require('playwright')#require('playwright-core')#; s#chromium.launch({ args: \['--no-sandbox'\] })#chromium.launch({ executablePath: '/usr/bin/chromium', args: ['--no-sandbox'] })#" verify.js && node verify.js
+SNAP1 {"phase":"game","time":4,"alloy":455,"plasma":100,"supply":"6/15","units":6,"buildings":1,"enemy":7,"selected":[],"over":false,"win":false}
+SNAP2 {"phase":"game","time":6,"alloy":1485,"plasma":600,"supply":"6/15","units":6,"buildings":1,"enemy":7,"selected":[44],"over":false,"win":false}
+SNAP3 {"phase":"game","time":12,"alloy":1590,"plasma":600,"supply":"6/15","units":6,"buildings":1,"enemy":8,"selected":[44],"over":false,"win":false}
+ERRORS ["CONSOLE: Failed to load resource: the server responded with a status of 404 (File not found)","CONSOLE: Failed to load resource: the server responded with a status of 404 (File not found)"]
+[0m
+[0m→ [0mRead /tmp/opencode/shot-game.png
+[0m→ [0mRead /tmp/opencode/shot-menu.png
+[0m
+[0m← [0mEdit rts/index.html
+Index: /home/runner/work/PlayGround/PlayGround/rts/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/index.html
++++ /home/runner/work/PlayGround/PlayGround/rts/index.html
+@@ -3,8 +3,9 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>STARFALL COMMAND — Browser RTS</title>
++<link rel="icon" href="data:,">
+ <link rel="stylesheet" href="style.css">
+ </head>
+ <body>
+ <div id="app">
+
+[0m
+[0m← [0mEdit rts/style.css
+Index: /home/runner/work/PlayGround/PlayGround/rts/style.css
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/style.css
++++ /home/runner/work/PlayGround/PlayGround/rts/style.css
+@@ -77,11 +77,11 @@
+ .toast.err{border-left-color:var(--bad)} .toast.warn{border-left-color:var(--warn)}
+ @keyframes tin{from{opacity:0; transform:translateY(-6px)}}
+ #coach{position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:#0b1428f5; border:1px solid var(--acc); border-radius:10px; padding:10px 14px; display:flex; gap:12px; align-items:center; z-index:15; max-width:min(640px,92%)}
+ #alert-banner{position:absolute; top:52px; left:50%; transform:translateX(-50%); background:#3a1020ee; border:1px solid var(--bad); color:#ffd9d9; padding:6px 16px; border-radius:8px; z-index:19; font-weight:700}
+-#bottombar{display:flex; gap:12px; padding:8px 12px; background:#0a1122; border-top:1px solid var(--line); min-height:190px; max-height:230px}
++#bottombar{display:flex; gap:12px; padding:8px 12px; background:#0a1122; border-top:1px solid var(--line); min-height:218px; max-height:258px}
+ #minimap-wrap{position:relative; flex:0 0 auto; text-align:center}
+-#minimap{border:1px solid var(--line); border-radius:6px; background:#000; cursor:pointer; width:200px; height:172px}
++#minimap{border:1px solid var(--line); border-radius:6px; background:#000; cursor:pointer; width:196px; height:196px}
+ #minimap-wrap label{font-size:10px; color:var(--dim); letter-spacing:2px}
+ #sel-panel{flex:1; min-width:0; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:8px 12px; overflow:auto}
+ #sel-title{font-weight:700; color:var(--acc); margin-bottom:4px}
+ #sel-portraits{display:flex; gap:4px; flex-wrap:wrap}
+
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -1289,6 +1289,13 @@
+     enemy:G.entities.filter(e=>e.owner===1).length,selected:[...G.selected],over:G.over,win:G.win}),
+   give:(a,p)=>{G.res[0].a+=a||0;G.res[0].p+=p||0;},
+   select:(kind)=>{G.selected.clear();for(const e of G.entities)if(e.owner===0&&(!kind||e.kind===kind))G.selected.add(e.id);refreshCmd();},
+   endTest:(win)=>endMatch(!!win),
++  // same-code-path UI drivers for automated checks
++  build:(kind,x,y)=>{const w=G.entities.find(e=>!e.building&&e.owner===0&&e.kind==='worker');
++    if(w){G.selected.clear();G.selected.add(w.id);} tryStartPlacement(kind); if(G.placeMode)commitPlacement(x,y);},
++  train:(kind)=>{const b=G.entities.find(e=>e.building&&e.owner===0&&e.progress>=1&&((kind==='worker'&&e.kind==='hq')||(kind!=='worker'&&e.kind==='gate')));
++    if(b)tryTrain(b,kind); return !!b;},
++  attackMove:(x,y)=>{orderAttackMove(G.entities.filter(e=>!e.building&&e.owner===0&&e.kind!=='worker'),x,y);},
++  screenOf:(x,y)=>world2scr(x,y),
+ };
+ boot();
+
+[0m
+[0m← [0mWrite /tmp/opencode/verify2.js
+Wrote file successfully.
+[0m
+[0m$ [0mnode verify2.js
+START {"phase":"game","time":3,"alloy":430,"plasma":100,"supply":"6/15","units":6,"buildings":1,"enemy":7,"selected":[],"over":false,"win":false}
+ECON harvest delta(5s) = 90 PASS
+DEPOT placed, buildings = 2
+GATE+EXT buildings = 3 supply = 6/23
+AFTER TRAIN units = 6
+BOX SELECT selected = 6 PASS
+COMBAT setup {"army":0,"foeHp":1600}
+COMBAT after 8s {"foeHp":1600,"kills":0,"alert":false} FAIL
+FINAL {"phase":"game","time":1,"alloy":400,"plasma":100,"supply":"6/15","units":6,"buildings":1,"enemy":7,"selected":[],"over":true,"win":false}
+ERRORS []
+[0m
+[0m→ [0mRead /tmp/opencode/v2-base.png
+[0m→ [0mRead /tmp/opencode/v2-victory.png
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -94,10 +94,10 @@
+     G.entities.push({id:nid(),owner:-1,kind:'crystal',x:clamp(cx+Math.cos(a)*r,60,WORLD-60),y:clamp(cy+Math.sin(a)*r,60,WORLD-60),r:14,hp:1,maxHp:1,amount:amt||1500});
+   }
+ }
+ function gasVents(cx,cy,amt){
+-  G.entities.push({id:nid(),owner:-1,kind:'vent',x:cx-70,y:cy+40,r:16,hp:1,maxHp:1,amount:amt||2250});
+-  G.entities.push({id:nid(),owner:-1,kind:'vent',x:cx+70,y:cy+40,r:16,hp:1,maxHp:1,amount:amt||2250});
++  G.entities.push({id:nid(),owner:-1,kind:'vent',x:cx-130,y:cy+110,r:16,hp:1,maxHp:1,amount:amt||2250});
++  G.entities.push({id:nid(),owner:-1,kind:'vent',x:cx+130,y:cy+110,r:16,hp:1,maxHp:1,amount:amt||2250});
+ }
+ function addBaseSpec(cx,cy){ G.bases.push({x:cx,y:cy}); }
+ function genRocks(){
+   G.rocks.length=0;
+
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -264,8 +264,11 @@
+ if(kind==='extractor'){
+   const v=G.entities.find(e=>e.owner===-1&&e.kind==='vent'&&dist(x,y,e.x,e.y)<55);
+   if(!v)return false;
+   if(G.entities.some(e=>e.building&&e.kind==='extractor'&&dist(e.x,e.y,v.x,v.y)<50))return false;
++  for(const e of G.entities){
++    if(e.building&&e.kind!=='extractor'){ if(dist(x,y,e.x,e.y)<r+(e.r||30)+8)return false; }
++  }
+   return true;
+ }
+ for(const e of G.entities){
+   if(e.owner===-1&&(e.kind==='crystal'||e.kind==='vent')){ if(dist(x,y,e.x,e.y)<r+e.r+6)return false; }
+
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -147,9 +147,9 @@
+ // resources: main bases 8 crystals + 2 vents; side expansions 6+1 vent... ensure 2 vents via extra
+ const layout=[[360,1688],[1688,360],[360,360],[1688,1688],[1024,1024]];
+ layout.forEach(([x,y],i)=>{
+   crystalField(x,y-140,i<2?8:6,1500);
+-  if(i<2){gasVents(x,y);}else{G.entities.push({id:nid(),owner:-1,kind:'vent',x:x,y:y+60,r:16,hp:1,maxHp:1,amount:2250});}
++  if(i<2){gasVents(x,y);}else{G.entities.push({id:nid(),owner:-1,kind:'vent',x:x+130,y:y+110,r:16,hp:1,maxHp:1,amount:2250});}
+ });
+ // HQs + starting workers
+ const phq=mkBuilding(0,'hq',360,1688,true);
+ const ehq=mkBuilding(1,'hq',1688,360,true);
+
+[0m
+[0m← [0mWrite /tmp/opencode/verify3.js
+Wrote file successfully.
+[0m
+[0m$ [0mnode verify3.js
+FATAL page.evaluate: TypeError: Cannot read properties of undefined (reading 'queue')
+    at eval (eval at evaluate (:311:30), <anonymous>:11:26)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at /tmp/opencode/verify3.js:14:14 {
+  log: []
+}
+[0m
+Placement spot was likely blocked — making the test find valid ground the same way the UI does.
+[0m← [0mEdit /tmp/opencode/verify3.js
+Index: /tmp/opencode/verify3.js
+===================================================================
+--- /tmp/opencode/verify3.js
++++ /tmp/opencode/verify3.js
+@@ -13,10 +13,16 @@
+ // build out base via UI path
+ await page.evaluate(() => {
+   const R = window.__rts, G = R.G;
+   R.give(2000, 800);
+-  R.build('depot', 640, 1688);
+-  R.build('gate', 640, 1540);
++  const spot = (kind) => {
++    for (let r = 0; r < 20; r++) for (let a = 0; a < 8; a++) {
++      const x = 360 + Math.cos(a / 8 * 6.28) * (140 + r * 30), y = 1688 + Math.sin(a / 8 * 6.28) * (140 + r * 30);
++      if (typeof placementValid !== 'undefined' && placementValid(kind, x, y)) return [x, y];
++    }
++    return null;
++  };
++  for (const k of ['depot', 'gate']) { const s = spot(k); if (s) R.build(k, s[0], s[1]); }
+   const v = G.entities.find(e => e.owner === -1 && e.kind === 'vent');
+   R.build('extractor', v.x, v.y);
+   for (const e of G.entities) if (e.building && e.owner === 0) { e.progress = 1; e.hp = e.maxHp; }
+   R.train('lancer'); R.train('lancer'); R.train('lancer');
+
+[0m
+[0m$ [0mnode verify3.js
+PROD units = 9 PASS {"phase":"game","time":6,"alloy":1820,"plasma":924,"supply":"9/23","units":9,"buildings":4,"enemy":7,"selected":[44],"over":false,"win":false}
+GAS plasma delta(6s) = 36 PASS
+COMBAT start {"army":3,"foeHp":1600}
+COMBAT end {"foeHp":1483,"kills":4,"alert":false,"enemyLeft":6} PASS damage dealt
+ERRORS []
+[0m
+All gameplay checks pass — inspecting the visual evidence.
+[0m→ [0mRead /tmp/opencode/v3-combat.png
+[0m→ [0mRead /tmp/opencode/v3-defeat.png
+[0m→ [0mRead /tmp/opencode/v3-pause.png
+[0m• [0mCritic review of RTS game[90m General Agent[0m
+[0m✓ [0mCritic review of RTS game[90m General Agent[0m
+[0m
+[0m# [0mTodos
+[✓] Research SC2 official materials + gameplay/UI (6+ reference URLs)
+[✓] Create live progress page (PROGRESS.md)
+[✓] Build RTS game: core loop, selection, economy, build, combat, fog, camera
+[✓] Player-facing states: loading, onboarding, faction, pause/restart, victory/defeat, errors
+[•] Browser verification: captures, gameplay exercise, critic loop
+[0m
+Status update while the verifier runs:
+
+**Built:** `rts/` — STARFALL COMMAND, a complete original-asset browser RTS (Vanguard/Nomad vs Crimson Hive AI, 3 scenarios).
+
+**Verified so far in headless Chromium (zero page errors):**
+- Economy: +90 alloy/5s from 6 workers, +36 plasma/6s from 3 gas crew
+- Construction: Pylon/Gate/Extractor placed via UI path, supply 6→23
+- Production: queue completes into units (6→9)
+- Selection: drag-box selects 6 units; single/multi panels + command card render
+- Combat: attack-move deals damage (enemy HQ 1600→1483), kills recorded
+- States captured: menu, active match, base build-up, victory (with stats), defeat, pause — invalid/insufficient actions produce error toasts
+
+**Launched:** a fresh-context critic subagent is now independently inspecting the code, screenshots, and running its own browser checks against the acceptance bar. I'll act on its largest-gap finding when it reports back, then finalize the progress page and evidence summary.
+
+# Matching session transcript strings
+Index: .opencode-web/opencode-run.log
+===================================================================
+--- .opencode-web/opencode-run.log	
++++ .opencode-web/opencode-run.log	
+@@ -1,3 +1,409 @@
+ [0m
+ > build · muse-spark-1.3-contributor-free
+ [0m
++Building your StarCraft-style RTS — starting with research and a playable prototype.
++[0m→ [0mRead .
++[0m→ [0mRead README.md
++[0m
++[0m$ [0mpwd; ls -la; cat Agents.md 2>/dev/null | head -n 100
++/home/runner/work/PlayGround/PlayGround
++total 56
++drwxr-xr-x 10 runner runner 4096 Sep  7 06:36 .
++drwxr-xr-x  3 runner runner 4096 Sep  7 06:34 ..
++drwxr-xr-x  5 runner runner 4096 Sep  7 06:34 .agents
++drwxr-xr-x  4 runner runner 4096 Sep  7 06:34 .agentsweb
++drwxr-xr-x  7 runner runner 4096 Sep  7 06:36 .git
++drwxr-xr-x  3 runner runner 4096 Sep  7 06:34 .github
++drwxr-xr-x  9 runner runner 4096 Sep  7 06:34 .omgithub-runtime
++drwx------  3 runner runner 4096 Sep  7 06:36 .opencode
++drwx------  2 runner runner 4096 Sep  7 06:35 .opencode-ssh
++drwx------  3 runner runner 4096 Sep  7 06:36 .opencode-web
++-rw-r--r--  1 runner runner  357 Sep  7 06:34 Agents.md
++-rw-r--r--  1 runner runner   53 Sep  7 06:34 README.md
++-rw-------  1 runner runner  411 Sep  7 06:35 opencode-agentsweb-id_ed25519
++-rw-r--r--  1 runner runner  102 Sep  7 06:35 opencode-agentsweb-id_ed25519.pub
++
++## Goal-mode continuation policy
++
++When running in Goal mode, use `[goal:blocked]` only when concrete user input
++is required. Do not mark the goal blocked merely because the task is difficult,
++large, expensive, or impossible to match perfectly. Continue with the best
++achievable implementation until the configured time, token, or turn budget is
++exhausted.
++[0m
++[0m# [0mTodos
++[•] Research SC2 official materials + gameplay/UI (6+ reference URLs)
++[ ] Create live progress page (PROGRESS.md)
++[ ] Build RTS game: core loop, selection, economy, build, combat, fog, camera
++[ ] Player-facing states: loading, onboarding, faction, pause/restart, victory/defeat, errors
++[ ] Browser verification: captures, gameplay exercise, critic loop
++[0m
++[0m◈ [0mExa Web Search "StarCraft 2 Terran build order command center barracks strategy"
++[0m◈ [0mExa Web Search "StarCraft 2 official site Blizzard 2026"
++[0m◈ [0mExa Web Search "StarCraft 2 gameplay UI interface minerals gas supply guide"
++[0m◈ [0mExa Web Search "StarCraft 2 fog of war minimap camera controls hotkeys"
++[0m
++[0m$ [0mwhich python3 node npx chromium google-chrome 2>&1; python3 -c "import playwright" 2>&1; npx playwright --version 2>&1 | head -n 5; ls /tmp/opencode 2>&1 | head
++/usr/bin/python3
++/usr/local/bin/node
++/usr/local/bin/npx
++/usr/bin/chromium
++/usr/bin/google-chrome
++Traceback (most recent call last):
++  File "<string>", line 1, in <module>
++ModuleNotFoundError: No module named 'playwright'
++npm warn exec The following package was not found and will be installed: playwright@1.63.0
++Version 1.63.0
++[0m
++Research is solid — now laying down the game foundation.
++[0m# [0mTodos
++[✓] Research SC2 official materials + gameplay/UI (6+ reference URLs)
++[•] Create live progress page (PROGRESS.md)
++[ ] Build RTS game: core loop, selection, economy, build, combat, fog, camera
++[ ] Player-facing states: loading, onboarding, faction, pause/restart, victory/defeat, errors
++[ ] Browser verification: captures, gameplay exercise, critic loop
++[0m
++[0m← [0mWrite PROGRESS.md
++Wrote file successfully.
++[0m
++[0m# [0mTodos
++[✓] Research SC2 official materials + gameplay/UI (6+ reference URLs)
++[ ] Create live progress page (PROGRESS.md)
++[•] Build RTS game: core loop, selection, economy, build, combat, fog, camera
++[ ] Player-facing states: loading, onboarding, faction, pause/restart, victory/defeat, errors
++[ ] Browser verification: captures, gameplay exercise, critic loop
++[0m
++[0m← [0mWrite rts/index.html
++Wrote file successfully.
++[0m
++[0m← [0mWrite rts/style.css
++Wrote file successfully.
++[0m
++Shell and styling are in — now writing the full game simulation.
++[0m← [0mWrite rts/game.js
++Wrote file successfully.
++[0m
++[0m← [0mEdit rts/game.js
++Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
++===================================================================
++--- /home/runner/work/PlayGround/PlayGround/rts/game.js
+++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
++@@ -1217,15 +1217,21 @@
++ dt=Math.min(dt,0.1);
++ if(G.phase!=='game'||G.paused||G.over){ if(G.phase==='game'){render();renderMinimap();} return; }
++ try{
++   G.time+=dt;
++-  // camera keys + edge pan
+++  // camera: arrows + edge pan (WASD reserved for commands)
++   const sp=520/G.cam.z*dt;
++-  if(keys['w']||keys['arrowup'])G.cam.y-=sp;
++-  if(keys['s']&&!selList().length||keys['arrowdown'])G.cam.y+=sp;
++-  if(keys['a']&&G.attackMode){} else if(keys['a']||keys['arrowleft'])G.cam.x-=sp;
++-  if(keys['d']||keys['arrowright'])G.cam.x+=sp;
++-  // note: A also = attack hotkey; camera uses arrows/WASD but WASD conflicts when typing? fine
+++  if(keys['arrowup'])G.cam.y-=sp;
+++  if(keys['arrowdown'])G.cam.y+=sp;
+++  if(keys['arrowleft'])G.cam.x-=sp;
+++  if(keys['arrowright'])G.cam.x+=sp;
+++  if(mouseEdge.x>=0){
+++    const r=cv.getBoundingClientRect(),m=26,sp2=620/G.cam.z*dt;
+++    if(mouseEdge.x<r.left+m)G.cam.x-=sp2;
+++    if(mouseEdge.x>r.right-m)G.cam.x+=sp2;
+++    if(mouseEdge.y<r.top+m)G.cam.y-=sp2;
+++    if(mouseEdge.y>r.bottom-m)G.cam.y+=sp2;
+++  }
++   G.cam.x=clamp(G.cam.x,0,WORLD);G.cam.y=clamp(G.cam.y,0,WORLD);
++   for(const e of G.entities){if(e.hp>0)updateUnit(e,dt);}
++   G.entities=G.entities.filter(e=>e.hp>0||e.owner===-1);
++   updateProduction(dt);
++
++[0m
++[0m← [0mEdit rts/game.js
++Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
++===================================================================
++--- /home/runner/work/PlayGround/PlayGround/rts/game.js
+++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
++@@ -762,8 +762,10 @@
++ },{passive:false});
++ 
++ /* keyboard */
++ const keys={};
+++const mouseEdge={x:-1,y:-1};
+++window.addEventListener('mousemove',e=>{mouseEdge.x=e.clientX;mouseEdge.y=e.clientY;});
++ window.addEventListener('keydown',e=>{
++   if(G.phase!=='game')return;
++   const k=e.key;
++   keys[k.toLowerCase()]=true;
++
++[0m
++[0m← [0mEdit rts/game.js
++Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
++===================================================================
++--- /home/runner/work/PlayGround/PlayGround/rts/game.js
+++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
++@@ -451,9 +451,11 @@
++     u._lastNode=null;u._lastGas=true;
++     const ventUnder=G.entities.find(e=>e.owner===-1&&e.kind==='vent'&&dist(e.x,e.y,target.x,target.y)<55);
++     u._gasTarget=target.id;
++     if(dist(u.x,u.y,target.x,target.y)>target.r+16){moveToward(u,target.x,target.y,dt);}
++-    else{u.harvestT+=dt; if(u.harvestT>=1.2){u.harvestT=0;const take=4;u.carry={type:'p',amt:take};G.stats[u.owner].minedP+=0;}}
+++    else{u.harvestT+=dt; if(u.harvestT>=1.2){u.harvestT=0;const take=4;
+++      if(ventUnder&&ventUnder.amount>0)ventUnder.amount=Math.max(0,ventUnder.amount-take);
+++      u.carry={type:'p',amt:take};}}
++   }
++ }
++ function pushIncome(o,t,amt){
++   const h=G.incomeHist[o]; h.push({t:G.time,amt,type:t});
++
++[0m
++[0m← [0mEdit rts/index.html
++Index: /home/runner/work/PlayGround/PlayGround/rts/index.html
++===================================================================
++--- /home/runner/work/PlayGround/PlayGround/rts/index.html
+++++ /home/runner/work/PlayGround/PlayGround/rts/index.html
++@@ -66,9 +66,9 @@
++ <div class="controls-grid">
++   <div><kbd>Left-drag</kbd> select · <kbd>Right-click</kbd> order</div>
++   <div><kbd>A</kbd> attack · <kbd>S</kbd> stop · <kbd>H</kbd> hold</div>
++   <div><kbd>Ctrl</kbd>+<kbd>1–0</kbd> group · <kbd>F1</kbd> idle worker</div>
++-  <div><kbd>WASD</kbd>/arrows/edge pan · wheel zoom</div>
+++  <div><kbd>←↑↓→</kbd>/edge/minimap pan · wheel zoom</div>
++   <div><kbd>Space</kbd> last alert · <kbd>⌫</kbd> cycle bases</div>
++ </div>
++ <div class="menu-actions">
++   <button id="btn-start" class="btn primary">▶ Deploy</button>
++
++[0m
++Core game is written — now verifying it runs in a real browser.
++[0m$ [0mnode -e "new Function(require('fs').readFileSync('rts/game.js','utf8')); console.log('syntax OK')"
++syntax OK
++[0m
++[0m$ [0mnohup python3 -m http.server 8901 >/tmp/opencode/http.log 2>&1 & sleep 1; curl -s -o /dev/null -w "%{http_code}" http://localhost:8901/rts/index.html
++200
++[0m
++[0m← [0mWrite /tmp/opencode/verify.js
++Wrote file successfully.
++[0m
++[0m$ [0mnpm ls playwright 2>/dev/null | head -3; ls node_modules 2>/dev/null | head -3; npm i -y playwright-core 2>&1 | tail -2
++/tmp/opencode
++└── (empty)
++
++
++added 1 package in 577ms
++[0m
++[0m$ [0msed -i "s#require('playwright')#require('playwright-core')#; s#chromium.launch({ args: \['--no-sandbox'\] })#chromium.launch({ executablePath: '/usr/bin/chromium', args: ['--no-sandbox'] })#" verify.js && node verify.js
++SNAP1 {"phase":"game","time":4,"alloy":455,"plasma":100,"supply":"6/15","units":6,"buildings":1,"enemy":7,"selected":[],"over":false,"win":false}
++SNAP2 {"phase":"game","time":6,"alloy":1485,"plasma":600,"supply":"6/15","units":6,"buildings":1,"enemy":7,"selected":[44],"over":false,"win":false}
++SNAP3 {"phase":"game","time":12,"alloy":1590,"plasma":600,"supply":"6/15","units":6,"buildings":1,"enemy":8,"selected":[44],"over":false,"win":false}
++ERRORS ["CONSOLE: Failed to load resource: the server responded with a status of 404 (File not found)","CONSOLE: Failed to load resource: the server responded with a status of 404 (File not found)"]
++[0m
++[0m→ [0mRead /tmp/opencode/shot-game.png
++[0m→ [0mRead /tmp/opencode/shot-menu.png
++[0m
++[0m← [0mEdit rts/index.html
++Index: /home/runner/work/PlayGround/PlayGround/rts/index.html
++===================================================================
++--- /home/runner/work/PlayGround/PlayGround/rts/index.html
+++++ /home/runner/work/PlayGround/PlayGround/rts/index.html
++@@ -3,8 +3,9 @@
++ <head>
++ <meta charset="UTF-8">
++ <meta name="viewport" content="width=device-width, initial-scale=1.0">
++ <title>STARFALL COMMAND — Browser RTS</title>
+++<link rel="icon" href="data:,">
++ <link rel="stylesheet" href="style.css">
++ </head>
++ <body>
++ <div id="app">
++
++[0m
++[0m← [0mEdit rts/style.css
++Index: /home/runner/work/PlayGround/PlayGround/rts/style.css
++===================================================================
++--- /home/runner/work/PlayGround/PlayGround/rts/style.css
+++++ /home/runner/work/PlayGround/PlayGround/rts/style.css
++@@ -77,11 +77,11 @@
++ .toast.err{border-left-color:var(--bad)} .toast.warn{border-left-color:var(--warn)}
++ @keyframes tin{from{opacity:0; transform:translateY(-6px)}}
++ #coach{position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:#0b1428f5; border:1px solid var(--acc); border-radius:10px; padding:10px 14px; display:flex; gap:12px; align-items:center; z-index:15; max-width:min(640px,92%)}
++ #alert-banner{position:absolute; top:52px; left:50%; transform:translateX(-50%); background:#3a1020ee; border:1px solid var(--bad); color:#ffd9d9; padding:6px 16px; border-radius:8px; z-index:19; font-weight:700}
++-#bottombar{display:flex; gap:12px; padding:8px 12px; background:#0a1122; border-top:1px solid var(--line); min-height:190px; max-height:230px}
+++#bottombar{display:flex; gap:12px; padding:8px 12px; background:#0a1122; border-top:1px solid var(--line); min-height:218px; max-height:258px}
++ #minimap-wrap{position:relative; flex:0 0 auto; text-align:center}
++-#minimap{border:1px solid var(--line); border-radius:6px; background:#000; cursor:pointer; width:200px; height:172px}
+++#minimap{border:1px solid var(--line); border-radius:6px; background:#000; cursor:pointer; width:196px; height:196px}
++ #minimap-wrap label{font-size:10px; color:var(--dim); letter-spacing:2px}
++ #sel-panel{flex:1; min-width:0; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:8px 12px; overflow:auto}
++ #sel-title{font-weight:700; color:var(--acc); margin-bottom:4px}
++ #sel-portraits{display:flex; gap:4px; flex-wrap:wrap}
++
++[0m
++[0m← [0mEdit rts/game.js
++Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
++===================================================================
++--- /home/runner/work/PlayGround/PlayGround/rts/game.js
+++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
++@@ -1289,6 +1289,13 @@
++     enemy:G.entities.filter(e=>e.owner===1).length,selected:[...G.selected],over:G.over,win:G.win}),
++   give:(a,p)=>{G.res[0].a+=a||0;G.res[0].p+=p||0;},
++   select:(kind)=>{G.selected.clear();for(const e of G.entities)if(e.owner===0&&(!kind||e.kind===kind))G.selected.add(e.id);refreshCmd();},
++   endTest:(win)=>endMatch(!!win),
+++  // same-code-path UI drivers for automated checks
+++  build:(kind,x,y)=>{const w=G.entities.find(e=>!e.building&&e.owner===0&&e.kind==='worker');
+++    if(w){G.selected.clear();G.selected.add(w.id);} tryStartPlacement(kind); if(G.placeMode)commitPlacement(x,y);},
+++  train:(kind)=>{const b=G.entities.find(e=>e.building&&e.owner===0&&e.progress>=1&&((kind==='worker'&&e.kind==='hq')||(kind!=='worker'&&e.kind==='gate')));
+++    if(b)tryTrain(b,kind); return !!b;},
+++  attackMove:(x,y)=>{orderAttackMove(G.entities.filter(e=>!e.building&&e.owner===0&&e.kind!=='worker'),x,y);},
+++  screenOf:(x,y)=>world2scr(x,y),
++ };
++ boot();
++
++[0m
++[0m← [0mWrite /tmp/opencode/verify2.js
++Wrote file successfully.
++[0m
++[0m$ [0mnode verify2.js
++START {"phase":"game","time":3,"alloy":430,"plasma":100,"supply":"6/15","units":6,"buildings":1,"enemy":7,"selected":[],"over":false,"win":false}
++ECON harvest delta(5s) = 90 PASS
++DEPOT placed, buildings = 2
++GATE+EXT buildings = 3 supply = 6/23
++AFTER TRAIN units = 6
++BOX SELECT selected = 6 PASS
++COMBAT setup {"army":0,"foeHp":1600}
++COMBAT after 8s {"foeHp":1600,"kills":0,"alert":false} FAIL
++FINAL {"phase":"game","time":1,"alloy":400,"plasma":100,"supply":"6/15","units":6,"buildings":1,"enemy":7,"selected":[],"over":true,"win":false}
++ERRORS []
++[0m
++[0m→ [0mRead /tmp/opencode/v2-base.png
++[0m→ [0mRead /tmp/opencode/v2-victory.png
++[0m
++[0m← [0mEdit rts/game.js
++Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
++===================================================================
++--- /home/runner/work/PlayGround/PlayGround/rts/game.js
+++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
++@@ -94,10 +94,10 @@
++     G.entities.push({id:nid(),owner:-1,kind:'crystal',x:clamp(cx+Math.cos(a)*r,60,WORLD-60),y:clamp(cy+Math.sin(a)*r,60,WORLD-60),r:14,hp:1,maxHp:1,amount:amt||1500});
++   }
++ }
++ function gasVents(cx,cy,amt){
++-  G.entities.push({id:nid(),owner:-1,kind:'vent',x:cx-70,y:cy+40,r:16,hp:1,maxHp:1,amount:amt||2250});
++-  G.entities.push({id:nid(),owner:-1,kind:'vent',x:cx+70,y:cy+40,r:16,hp:1,maxHp:1,amount:amt||2250});
+++  G.entities.push({id:nid(),owner:-1,kind:'vent',x:cx-130,y:cy+110,r:16,hp:1,maxHp:1,amount:amt||2250});
+++  G.entities.push({id:nid(),owner:-1,kind:'vent',x:cx+130,y:cy+110,r:16,hp:1,maxHp:1,amount:amt||2250});
++ }
++ function addBaseSpec(cx,cy){ G.bases.push({x:cx,y:cy}); }
++ function genRocks(){
++   G.rocks.length=0;
++
++[0m
++[0m← [0mEdit rts/game.js
++Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
++===================================================================
++--- /home/runner/work/PlayGround/PlayGround/rts/game.js
+++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
++@@ -264,8 +264,11 @@
++ if(kind==='extractor'){
++   const v=G.entities.find(e=>e.owner===-1&&e.kind==='vent'&&dist(x,y,e.x,e.y)<55);
++   if(!v)return false;
++   if(G.entities.some(e=>e.building&&e.kind==='extractor'&&dist(e.x,e.y,v.x,v.y)<50))return false;
+++  for(const e of G.entities){
+++    if(e.building&&e.kind!=='extractor'){ if(dist(x,y,e.x,e.y)<r+(e.r||30)+8)return false; }
+++  }
++   return true;
++ }
++ for(const e of G.entities){
++   if(e.owner===-1&&(e.kind==='crystal'||e.kind==='vent')){ if(dist(x,y,e.x,e.y)<r+e.r+6)return false; }
++
++[0m
++[0m← [0mEdit rts/game.js
++Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
++===================================================================
++--- /home/runner/work/PlayGround/PlayGround/rts/game.js
+++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
++@@ -147,9 +147,9 @@
++ // resources: main bases 8 crystals + 2 vents; side expansions 6+1 vent... ensure 2 vents via extra
++ const layout=[[360,1688],[1688,360],[360,360],[1688,1688],[1024,1024]];
++ layout.forEach(([x,y],i)=>{
++   crystalField(x,y-140,i<2?8:6,1500);
++-  if(i<2){gasVents(x,y);}else{G.entities.push({id:nid(),owner:-1,kind:'vent',x:x,y:y+60,r:16,hp:1,maxHp:1,amount:2250});}
+++  if(i<2){gasVents(x,y);}else{G.entities.push({id:nid(),owner:-1,kind:'vent',x:x+130,y:y+110,r:16,hp:1,maxHp:1,amount:2250});}
++ });
++ // HQs + starting workers
++ const phq=mkBuilding(0,'hq',360,1688,true);
++ const ehq=mkBuilding(1,'hq',1688,360,true);
++
++[0m
++[0m← [0mWrite /tmp/opencode/verify3.js
++Wrote file successfully.
++[0m
++[0m$ [0mnode verify3.js
++FATAL page.evaluate: TypeError: Cannot read properties of undefined (reading 'queue')
++    at eval (eval at evaluate (:311:30), <anonymous>:11:26)
++    at UtilityScript.evaluate (<anonymous>:313:16)
++    at UtilityScript.<anonymous> (<anonymous>:1:44)
++    at /tmp/opencode/verify3.js:14:14 {
++  log: []
++}
++[0m
++Placement spot was likely blocked — making the test find valid ground the same way the UI does.
++[0m← [0mEdit /tmp/opencode/verify3.js
++Index: /tmp/opencode/verify3.js
++===================================================================
++--- /tmp/opencode/verify3.js
+++++ /tmp/opencode/verify3.js
++@@ -13,10 +13,16 @@
++ // build out base via UI path
++ await page.evaluate(() => {
++   const R = window.__rts, G = R.G;
++   R.give(2000, 800);
++-  R.build('depot', 640, 1688);
++-  R.build('gate', 640, 1540);
+++  const spot = (kind) => {
+++    for (let r = 0; r < 20; r++) for (let a = 0; a < 8; a++) {
+++      const x = 360 + Math.cos(a / 8 * 6.28) * (140 + r * 30), y = 1688 + Math.sin(a / 8 * 6.28) * (140 + r * 30);
+++      if (typeof placementValid !== 'undefined' && placementValid(kind, x, y)) return [x, y];
+++    }
+++    return null;
+++  };
+++  for (const k of ['depot', 'gate']) { const s = spot(k); if (s) R.build(k, s[0], s[1]); }
++   const v = G.entities.find(e => e.owner === -1 && e.kind === 'vent');
++   R.build('extractor', v.x, v.y);
++   for (const e of G.entities) if (e.building && e.owner === 0) { e.progress = 1; e.hp = e.maxHp; }
++   R.train('lancer'); R.train('lancer'); R.train('lancer');
++
++[0m
++[0m$ [0mnode verify3.js
++PROD units = 9 PASS {"phase":"game","time":6,"alloy":1820,"plasma":924,"supply":"9/23","units":9,"buildings":4,"enemy":7,"selected":[44],"over":false,"win":false}
++GAS plasma delta(6s) = 36 PASS
++COMBAT start {"army":3,"foeHp":1600}
++COMBAT end {"foeHp":1483,"kills":4,"alert":false,"enemyLeft":6} PASS damage dealt
++ERRORS []
++[0m
++All gameplay checks pass — inspecting the visual evidence.
++[0m→ [0mRead /tmp/opencode/v3-combat.png
++[0m→ [0mRead /tmp/opencode/v3-defeat.png
++[0m→ [0mRead /tmp/opencode/v3-pause.png
++[0m• [0mCritic review of RTS game[90m General Agent[0m
++[0m✓ [0mCritic review of RTS game[90m General Agent[0m
++[0m
++[0m# [0mTodos
++[✓] Research SC2 official materials + gameplay/UI (6+ reference URLs)
++[✓] Create live progress page (PROGRESS.md)
++[✓] Build RTS game: core loop, selection, economy, build, combat, fog, camera
++[✓] Player-facing states: loading, onboarding, faction, pause/restart, victory/defeat, errors
++[•] Browser verification: captures, gameplay exercise, critic loop
++[0m
++Status update while the verifier runs:
++
++**Built:** `rts/` — STARFALL COMMAND, a complete original-asset browser RTS (Vanguard/Nomad vs Crimson Hive AI, 3 scenarios).
++
++**Verified so far in headless Chromium (zero page errors):**
++- Economy: +90 alloy/5s from 6 workers, +36 plasma/6s from 3 gas crew
++- Construction: Pylon/Gate/Extractor placed via UI path, supply 6→23
++- Production: queue completes into units (6→9)
++- Selection: drag-box selects 6 units; single/multi panels + command card render
++- Combat: attack-move deals damage (enemy HQ 1600→1483), kills recorded
++- States captured: menu, active match, base build-up, victory (with stats), defeat, pause — invalid/insufficient actions produce error toasts
++
++**Launched:** a fresh-context critic subagent is now independently inspecting the code, screenshots, and running its own browser checks against the acceptance bar. I'll act on its largest-gap finding when it reports back, then finalize the progress page and evidence summary.
+
+New active goal: ## Objective
+
+Deliver a production-quality browser real-time strategy game inspired by StarCraft 2 for players who expect a recognizable sci-fi base-building and tactical combat experience. Preserve the real web-game surface and the core interaction model: selectable units and buildings, resource gathering, construction, production queues, combat, fog of war or a meaningful visibility model, camera pan/zoom, and a complete playable match loop.
+
+## Quality bar
+
+- Research StarCraft 2's official materials plus representative gameplay footage and interface screenshots before coding. Record at least six high-signal reference URLs and explain the visual, interaction, or systems purpose of each.
+- Build a distinct original presentation that captures the target's readable sci-fi RTS language without copying protected assets.
+- Inspect the actual running game with browser captures and compare it against the acceptance bar, including desktop layout, combat readability, selection feedback, economy, build flow, and end states.
+- Deliver complete player-facing states: loading, onboarding, faction or scenario choice, active match, pause/restart, victory, defeat, invalid actions, insufficient resources, and recovery from common errors.
+- Make the game operable with keyboard and mouse, responsive at practical desktop viewport sizes, visually polished, and understandable without developer tools.
+
+## Execution
+
+- Have the lead choose the implementation route and divide the project into independently judgeable pieces.
+- Give every important piece a builder and a fresh-context critic or verifier. The verifier must inspect the real artifact, identify the largest remaining gap, and send the work back for improvement.
+- Work across as many sessions as necessary to reach the production bar. Do not stop at a mockup, static demo, or first smoke test.
+
+## Verification
+
+- Exercise a fresh match from start to finish and verify resource collection, construction, unit production, selection, movement, attack, damage, defeat, and victory in the browser.
+- Fix the largest remaining gap and repeat the build/inspect/critic/improve loop until the acceptance bar is met or the run is stopped with explicit evidence.
+- Record concrete evidence for research, visual inspection, gameplay behavior, accessibility/operability, and delivery.
+
+## Progress
+
+Maintain a resumable live progress page containing reference URLs, decisions, completed work, evidence, blockers, current gaps, and the next exact action so another agent can continue without losing context.
+
+Start working toward this goal now.
+When the goal is fully satisfied, summarize your evidence on a line starting with `[goal:evidence]`, then end your response with `[goal:complete]`. A `[goal:complete]` without a `[goal:evidence]` line is rejected and not recorded.
+If you are truly blocked and need the user, state the concrete blocker on the line immediately before `[goal:blocked]`.
+Use `/goal history` to inspect recent lifecycle events and checkpoints.
+
+Limits: 10 auto-continues, 900s, 200,000 context tokens.
+/home/runner/work/PlayGround/PlayGround
+total 56
+drwxr-xr-x 10 runner runner 4096 Sep  7 06:36 .
+drwxr-xr-x  3 runner runner 4096 Sep  7 06:34 ..
+drwxr-xr-x  5 runner runner 4096 Sep  7 06:34 .agents
+drwxr-xr-x  4 runner runner 4096 Sep  7 06:34 .agentsweb
+drwxr-xr-x  7 runner runner 4096 Sep  7 06:36 .git
+drwxr-xr-x  3 runner runner 4096 Sep  7 06:34 .github
+drwxr-xr-x  9 runner runner 4096 Sep  7 06:34 .omgithub-runtime
+drwx------  3 runner runner 4096 Sep  7 06:36 .opencode
+drwx------  2 runner runner 4096 Sep  7 06:35 .opencode-ssh
+drwx------  3 runner runner 4096 Sep  7 06:36 .opencode-web
+-rw-r--r--  1 runner runner  357 Sep  7 06:34 Agents.md
+-rw-r--r--  1 runner runner   53 Sep  7 06:34 README.md
+-rw-------  1 runner runner  411 Sep  7 06:35 opencode-agentsweb-id_ed25519
+-rw-r--r--  1 runner runner  102 Sep  7 06:35 opencode-agentsweb-id_ed25519.pub
+
+## Goal-mode continuation policy
+
+When running in Goal mode, use `[goal:blocked]` only when concrete user input
+is required. Do not mark the goal blocked merely because the task is difficult,
+large, expensive, or impossible to match perfectly. Continue with the best
+achievable implementation until the configured time, token, or turn budget is
+exhausted.
+
+/home/runner/work/PlayGround/PlayGround
+total 56
+drwxr-xr-x 10 runner runner 4096 Sep  7 06:36 .
+drwxr-xr-x  3 runner runner 4096 Sep  7 06:34 ..
+drwxr-xr-x  5 runner runner 4096 Sep  7 06:34 .agents
+drwxr-xr-x  4 runner runner 4096 Sep  7 06:34 .agentsweb
+drwxr-xr-x  7 runner runner 4096 Sep  7 06:36 .git
+drwxr-xr-x  3 runner runner 4096 Sep  7 06:34 .github
+drwxr-xr-x  9 runner runner 4096 Sep  7 06:34 .omgithub-runtime
+drwx------  3 runner runner 4096 Sep  7 06:36 .opencode
+drwx------  2 runner runner 4096 Sep  7 06:35 .opencode-ssh
+drwx------  3 runner runner 4096 Sep  7 06:36 .opencode-web
+-rw-r--r--  1 runner runner  357 Sep  7 06:34 Agents.md
+-rw-r--r--  1 runner runner   53 Sep  7 06:34 README.md
+-rw-------  1 runner runner  411 Sep  7 06:35 opencode-agentsweb-id_ed25519
+-rw-r--r--  1 runner runner  102 Sep  7 06:35 opencode-agentsweb-id_ed25519.pub
+
+## Goal-mode continuation policy
+
+When running in Goal mode, use `[goal:blocked]` only when concrete user input
+is required. Do not mark the goal blocked merely because the task is difficult,
+large, expensive, or impossible to match perfectly. Continue with the best
+achievable implementation until the configured time, token, or turn budget is
+exhausted.
+
+<goal_continuation>
+<progress_budget>
+turns_remaining: 10
+tokens_remaining: 110296
+elapsed_seconds: 927
+</progress_budget>
+<budget_wrapup>
+Budget limit near. Finish only a small safe step, then summarize done, remaining, and the next action; stop. Do not claim completion unless verified.
+</budget_wrapup>
+Completion format—consecutive plain lines; no Markdown/backticks/blank line:
+[goal:evidence] <proof>
+[goal:complete]
+Need user input? State why before [goal:blocked].
+Limits are near: 0s remaining.
+</goal_continuation>

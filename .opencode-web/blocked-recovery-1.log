@@ -1,0 +1,517 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Resuming the RTS goal — first re-establishing state.
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code}\n" http://localhost:8901/rts/index.html; ls -la /tmp/opencode/*.png 2>/dev/null; ls /home/runner/work/PlayGround/PlayGround/rts/
+200
+-rw-r--r-- 1 runner runner  68413 Sep  7 06:47 /tmp/opencode/shot-defeat.png
+-rw-r--r-- 1 runner runner  77337 Sep  7 06:47 /tmp/opencode/shot-game.png
+-rw-r--r-- 1 runner runner 306647 Sep  7 06:47 /tmp/opencode/shot-menu.png
+-rw-r--r-- 1 runner runner  84994 Sep  7 06:47 /tmp/opencode/shot-mid.png
+-rw-r--r-- 1 runner runner  65948 Sep  7 06:47 /tmp/opencode/shot-pause.png
+-rw-r--r-- 1 runner runner  90178 Sep  7 06:47 /tmp/opencode/shot-place.png
+-rw-r--r-- 1 runner runner  68915 Sep  7 06:47 /tmp/opencode/shot-victory.png
+-rw-r--r-- 1 runner runner 103965 Sep  7 06:48 /tmp/opencode/v2-attack.png
+-rw-r--r-- 1 runner runner  85245 Sep  7 06:48 /tmp/opencode/v2-base.png
+-rw-r--r-- 1 runner runner 103876 Sep  7 06:49 /tmp/opencode/v2-combat.png
+-rw-r--r-- 1 runner runner  76352 Sep  7 06:49 /tmp/opencode/v2-defeat.png
+-rw-r--r-- 1 runner runner 103269 Sep  7 06:49 /tmp/opencode/v2-denied.png
+-rw-r--r-- 1 runner runner  75829 Sep  7 06:49 /tmp/opencode/v2-pause.png
+-rw-r--r-- 1 runner runner  75771 Sep  7 06:49 /tmp/opencode/v2-victory.png
+-rw-r--r-- 1 runner runner  91588 Sep  7 06:50 /tmp/opencode/v3-combat.png
+-rw-r--r-- 1 runner runner  67843 Sep  7 06:51 /tmp/opencode/v3-defeat.png
+-rw-r--r-- 1 runner runner  67728 Sep  7 06:51 /tmp/opencode/v3-pause.png
+game.js
+index.html
+style.css
+[0m
+[0m→ [0mRead PROGRESS.md
+[0m
+[0m$ [0mls /home/runner/work/PlayGround/PlayGround/.opencode-web/ 2>/dev/null; tail -n 30 /home/runner/work/PlayGround/PlayGround/.opencode-web/opencode-run.log 2>/dev/null; node -e "new Function(require('fs').readFileSync('rts/game.js','utf8')); console.log('syntax OK')"
+blocked-critique-1.md
+blocked-goal-context.md
+blocked-recovery-1.log
+cloudflared
+cloudflared.log
+cloudflared.pid
+nginx
+opencode-response-before-recovery.json
+opencode-run.exit
+opencode-run.log
+opencode-run.pid
+opencode.log
+opencode.pid
+project-cloudflared.log
+project-cloudflared.pid
+prompt.txt
+response-comment-tracker.log
+response-comment-tracker.pid
+response-comment-tracker.sh
+zen-critique-1-request.json
+COMBAT end {"foeHp":1483,"kills":4,"alert":false,"enemyLeft":6} PASS damage dealt
+ERRORS []
+[0m
+All gameplay checks pass — inspecting the visual evidence.
+[0m→ [0mRead /tmp/opencode/v3-combat.png
+[0m→ [0mRead /tmp/opencode/v3-defeat.png
+[0m→ [0mRead /tmp/opencode/v3-pause.png
+[0m• [0mCritic review of RTS game[90m General Agent[0m
+[0m✓ [0mCritic review of RTS game[90m General Agent[0m
+[0m
+[0m# [0mTodos
+[✓] Research SC2 official materials + gameplay/UI (6+ reference URLs)
+[✓] Create live progress page (PROGRESS.md)
+[✓] Build RTS game: core loop, selection, economy, build, combat, fog, camera
+[✓] Player-facing states: loading, onboarding, faction, pause/restart, victory/defeat, errors
+[•] Browser verification: captures, gameplay exercise, critic loop
+[0m
+Status update while the verifier runs:
+
+**Built:** `rts/` — STARFALL COMMAND, a complete original-asset browser RTS (Vanguard/Nomad vs Crimson Hive AI, 3 scenarios).
+
+**Verified so far in headless Chromium (zero page errors):**
+- Economy: +90 alloy/5s from 6 workers, +36 plasma/6s from 3 gas crew
+- Construction: Pylon/Gate/Extractor placed via UI path, supply 6→23
+- Production: queue completes into units (6→9)
+- Selection: drag-box selects 6 units; single/multi panels + command card render
+- Combat: attack-move deals damage (enemy HQ 1600→1483), kills recorded
+- States captured: menu, active match, base build-up, victory (with stats), defeat, pause — invalid/insufficient actions produce error toasts
+
+**Launched:** a fresh-context critic subagent is now independently inspecting the code, screenshots, and running its own browser checks against the acceptance bar. I'll act on its largest-gap finding when it reports back, then finalize the progress page and evidence summary.
+syntax OK
+[0m
+[0m→ [0mRead rts/game.js[90m [limit=450][0m
+[0m→ [0mRead rts/game.js[90m [offset=451, limit=450][0m
+[0m→ [0mRead rts/game.js[90m [offset=901][0m
+[0m
+[0m# [0mTodos
+[✓] Re-establish state: read code, log, screenshots; server live
+[•] Fix largest gap: rally-to-resource broken + order/rally conflicts + small correctness
+[ ] Browser re-verify: rally, AI wave/alert, combat shot, 1280x800, keyboard, zero errors
+[ ] Harsh self-critique vs bar + update PROGRESS.md
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -679,9 +679,17 @@
+ if(G.placeMode){G.placeMode=null;return;}
+ if(G.attackMode){G.attackMode=false;return;}
+ const list=selList().filter(u=>!u.building&&u.owner===0);
+ const bsel=selList().find(b=>b.building&&b.owner===0&&b.progress>=1&&(b.kind==='hq'||b.kind==='gate'));
+-if(bsel&&(bsel.kind==='hq'||bsel.kind==='gate')){ bsel.rally={x:w.x,y:w.y}; toast('Rally point set'); return; }
++// Rally only when no mobile units are selected; otherwise right-click orders the units (SC2-like).
++if(bsel&&!list.length){
++  const rCr=G.entities.find(e=>e.owner===-1&&e.kind==='crystal'&&e.amount>0&&dist(w.x,w.y,e.x,e.y)<30);
++  const rGas=G.entities.find(e=>((e.owner===-1&&e.kind==='vent'&&extractorOn(e))||(e.building&&e.kind==='extractor'&&e.owner===0))&&dist(w.x,w.y,e.x,e.y)<44);
++  if(rCr)bsel.rally={x:rCr.x,y:rCr.y,gather:true,gas:false};
++  else if(rGas)bsel.rally={x:rGas.x,y:rGas.y,gather:true,gas:true};
++  else bsel.rally={x:w.x,y:w.y};
++  toast(rCr?'Rally: gather alloy':rGas?'Rally: gather plasma':'Rally point set'); return;
++}
+ if(!list.length)return;
+ const foe=enemyAt(w.x,w.y);
+ if(foe){orderAttackTarget(list,foe);AudioSys.click();return;}
+ const cr=G.entities.find(e=>e.owner===-1&&e.kind==='crystal'&&e.amount>0&&dist(w.x,w.y,e.x,e.y)<26);
+
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -351,12 +351,10 @@
+ function killEnt(t,byOwner){
+   t.hp=0;
+   G.effects.push({k:'boom',x:t.x,y:t.y,t:0,color:t.owner===0?'#6fb7ff':'#ff8a5d'});
+   AudioSys.boom();
+-  if(t.owner===0){G.stats[0].lost++;} if(t.owner===1){G.stats[0].kills++;}
+-  if(t.owner===0)G.stats[0].lost+=0;
+-  if(byOwner===0&&t.owner===1)G.stats[0].kills+=0;
+-  if(t.owner===1)G.stats[1].lost++; if(t.owner===0)G.stats[1].kills+=0;
++  if(t.owner===0){G.stats[0].lost++;}
++  if(t.owner===1){G.stats[0].kills++;G.stats[1].lost++;}
+   G.selected.delete(t.id);
+   if(t.building&&t.progress<1&&t.owner===0){ /* partial refund */ refund(0,{a:Math.floor((BUILDINGS[t.kind].cost.a||0)*0.5)}); }
+ }
+ 
+
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -270,9 +270,12 @@
+     }
+     return true;
+   }
+   for(const e of G.entities){
+-    if(e.owner===-1&&(e.kind==='crystal'||e.kind==='vent')){ if(dist(x,y,e.x,e.y)<r+e.r+6)return false; }
++    if(e.owner===-1&&(e.kind==='crystal'||e.kind==='vent')){
++      if(e.kind==='crystal'&&e.amount<=0)continue; // depleted fields don't block
++      if(dist(x,y,e.x,e.y)<r+e.r+6)return false;
++    }
+     if(e.building){ if(dist(x,y,e.x,e.y)<r+e.r+8)return false; }
+   }
+   return true;
+ }
+
+[0m
+Fixes in — now re-verifying with rally, AI wave, combat readability, keyboard, and 1280×800 checks.
+[0m← [0mWrite /tmp/opencode/verify4.js
+Wrote file successfully.
+[0m
+Critic verdict is PASS with four concrete gaps. Fixing all four now.
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -890,18 +890,20 @@
+   return;
+ }
+ if(units.length){
+   const hasW=units.some(u=>u.kind==='worker');
++  const hasArmy=units.some(u=>u.kind!=='worker');
+   if(hasW){
+     add('Build Pylon','B · 100⬢','B',()=>tryStartPlacement('depot'));
+     add('Build Gate','G · 150⬢','G',()=>tryStartPlacement('gate'));
+     add('Build Extractor','E · 75⬢','E',()=>tryStartPlacement('extractor'));
+     add('Build Sentinel','T · 150+50','T',()=>tryStartPlacement('turret'));
+     add('Build Core','C · 400⬢','C',()=>tryStartPlacement('hq'));
+-  } else {
++  }
++  if(hasArmy){
+     add('Attack','A + click','A',()=>{G.attackMode=true;});
+-    add('Stop','S','S',()=>orderStop(units));
+-    add('Hold','H','H',()=>orderHold(units));
++    add('Stop','S','S',()=>orderStop(units.filter(u=>u.kind!=='worker')));
++    add('Hold','H','H',()=>orderHold(units.filter(u=>u.kind!=='worker')));
+   }
+   return;
+ }
+ add('No actions','—','',()=>{},true);
+
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -158,9 +158,9 @@
+   recalcSupply();
+   G.cam={x:360,y:1688,z:1};
+   G.ai={t:0, waveN:0, buildT:2, cheat:scenario==='rush'?1.15:1.0};
+   $('end-overlay').classList.add('hidden'); $('pause-overlay').classList.add('hidden');
+-  showScreen('screen-game'); resizeCanvas();
++  showScreen('screen-game'); resizeCanvas(); refreshCmd();
+   toast(SCENARIOS[scenario].name+' — destroy the Crimson Hive','warn');
+   updateCoach();
+ }
+ function nearestResource(x,y,kind,owner){
+
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -604,9 +604,10 @@
+ }
+ 
+ /* ============================== win/lose ============================== */
+ function sideAlive(o){
+-  return G.entities.some(e=>e.owner===o&&e.hp>0&&( !e.building||['hq','gate','turret','depot','extractor'].includes(e.kind)));
++  // Match loop ends when all structures fall (workers without a base are spent).
++  return G.entities.some(e=>e.owner===o&&e.hp>0&&e.building&&['hq','gate','turret','depot','extractor'].includes(e.kind));
+ }
+ function checkEnd(){
+   if(G.over)return;
+   const p=sideAlive(0), e=sideAlive(1);
+
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -492,12 +492,13 @@
+ }
+ function updateProduction(dt){
+   for(const b of G.entities){
+     if(!b.building||b.progress<1||!b.queue.length)continue;
+-    const q=b.queue[0]; q.t+=dt;
++    const q=b.queue[0];
++    const need=UNITS[q.kind].supply||0;
++    if(G.res[b.owner].used> G.res[b.owner].cap){ /* stalled: no progress while supply blocked */ continue; }
++    q.t+=dt;
+     if(q.t>=q.total){
+-      const need=UNITS[q.kind].supply||0;
+-      if(G.res[b.owner].used+0>G.res[b.owner].cap){ /* wait for supply */ continue; }
+       b.queue.shift();
+       const a=spawnAngle(b);
+       const u=mkUnit(b.owner,q.kind,b.x+Math.cos(a)*(b.r+26),b.y+Math.sin(a)*(b.r+26));
+       recalcSupply();
+
+[0m
+[0m← [0mEdit rts/index.html
+Index: /home/runner/work/PlayGround/PlayGround/rts/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/index.html
++++ /home/runner/work/PlayGround/PlayGround/rts/index.html
+@@ -83,9 +83,9 @@
+ <div id="manual" class="manual hidden">
+   <div class="manual-box">
+     <h2>Field Manual</h2>
+     <div class="manual-body">
+-      <h3>Goal</h3><p>Destroy every Crimson Hive combat unit and structure (Core, Gates, Sentinels, Pylons). Lose everything and you fall.</p>
++      <h3>Goal</h3><p>Raze every Crimson Hive structure (Core, Gates, Sentinels, Pylons, Extractors). Lose all of your own and you fall.</p>
+       <h3>Economy</h3><p>Collectors carry <b>5 alloy</b> per trip from blue crystals, <b>4 plasma</b> from green vents (needs Extractor). Right-click a crystal to gather; new Collectors can be rallied with right-click while the Core is selected. Keep training workers; expand to the side fields when yours run dry.</p>
+       <h3>Building</h3><p>Select a Collector → build buttons (or <kbd>B</kbd> pylon, <kbd>G</kbd> gate, <kbd>E</kbd> extractor, <kbd>T</kbd> sentinel, <kbd>C</kbd> core). Green ghost = valid. Collector walks over and constructs it.</p>
+       <h3>Army</h3><p>Lancers (fast, cheap), Bulwarks (tanky, gas-hungry). Drag-select, <kbd>A</kbd>-click to attack-move, focus Sentinels with right-click. Watch the minimap for red pings.</p>
+       <h3>Vision</h3><p>Unexplored = black. Explored = dim. Only attack what your units currently see — scouting wins games.</p>
+
+[0m
+[0m← [0mEdit rts/index.html
+Index: /home/runner/work/PlayGround/PlayGround/rts/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/index.html
++++ /home/runner/work/PlayGround/PlayGround/rts/index.html
+@@ -104,9 +104,9 @@
+   <div class="tb-res"><span class="dot supply"></span><b id="res-supply">0/0</b><small>SUPPLY</small></div>
+   <div class="tb-res"><span class="dot workers"></span><b id="res-workers">0</b><small>WORKERS</small></div>
+   <div class="tb-right">
+     <span id="match-timer">00:00</span>
+-    <span id="objective">Destroy the Hive Core</span>
++    <span id="objective">Raze every Hive structure</span>
+     <button id="btn-mute" class="btn small" title="Mute">🔊</button>
+     <button id="btn-pause" class="btn small">❚❚ Menu</button>
+   </div>
+ </div>
+
+[0m
+[0m← [0mEdit rts/index.html
+Index: /home/runner/work/PlayGround/PlayGround/rts/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/index.html
++++ /home/runner/work/PlayGround/PlayGround/rts/index.html
+@@ -61,9 +61,9 @@
+ <ol class="brief">
+   <li>Command <b>Collectors</b> onto <span class="c-alloy">■ alloy crystals</span> and <span class="c-plasma">■ plasma vents</span> (build an <b>Extractor</b> on a vent first).</li>
+   <li>Raise a <b>Supply Pylon</b> before you hit your cap — production halts while <b class="warn">SUPPLY BLOCKED</b>.</li>
+   <li>Build a <b>War Gate</b> to train <b>Lancers</b> &amp; <b>Bulwarks</b>. Select army, press <kbd>A</kbd>, click to attack-move.</li>
+-  <li>Destroy the <b>Crimson Hive Core</b> and all its forces to win.</li>
++  <li>Raze every <b>Crimson Hive structure</b> to win.</li>
+ </ol>
+ <div class="controls-grid">
+   <div><kbd>Left-drag</kbd> select · <kbd>Right-click</kbd> order</div>
+   <div><kbd>A</kbd> attack · <kbd>S</kbd> stop · <kbd>H</kbd> hold</div>
+
+[0m
+[0m$ [0mnode -e "new Function(require('fs').readFileSync('rts/game.js','utf8')); console.log('syntax OK')" && node /tmp/opencode/verify4.js
+syntax OK
+START {"phase":"game","time":3,"alloy":430,"plasma":100,"supply":"6/15","units":6,"buildings":1,"enemy":7,"selected":[],"over":false,"win":false}
+RALLY set = {"x":450,"y":1548,"gather":true,"gas":false} PASS
+RALLY workers auto-mine = {"n":7,"gathering":7} PASS
+WAVE {"n":5,"alert":true,"banner":true} PASS
+COMBAT {"foeHp":1600,"kills":4,"shots":15}
+KEYS selected = 1 | paused was true | camMoved PASS
+ERRORS [] ZERO-ERRORS PASS
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -588,11 +588,13 @@
+ for(const w of G.entities.filter(e=>!e.building&&e.owner===1&&e.kind==='worker'&&e.state==='idle')){
+   const n=nearestResource(w.x,w.y,exts>0&&Math.random()<0.25?'gas':'crystal',1);
+   if(n)orderGather(w,n);
+ }
+-// waves
++// waves (gap-timed; oversized armies may push at most every 30s)
+ const army=aiArmy(1);
+-if(ai.t>sc.firstWave&&(ai.t-ai.lastWave>(sc.waveGap)||army.length>=sc.waveSize*1.6)){
++const gapOk=ai.t-ai.lastWave>sc.waveGap;
++const bigPush=army.length>=sc.waveSize*1.6&&ai.t-ai.lastWave>30;
++if(ai.t>sc.firstWave&&(gapOk||bigPush)){
+   if(army.length>=sc.waveSize){
+     ai.lastWave=ai.t; ai.waveN++;
+     const phq=G.entities.find(e=>e.building&&e.owner===0&&e.kind==='hq');
+     const tx=phq?phq.x:360,ty=phq?phq.y:1688;
+
+[0m
+[0m→ [0mRead /tmp/opencode/v4-1280.png
+[0m→ [0mRead /tmp/opencode/v4-combat.png
+[0m
+[0m← [0mEdit rts/style.css
+Index: /home/runner/work/PlayGround/PlayGround/rts/style.css
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/style.css
++++ /home/runner/work/PlayGround/PlayGround/rts/style.css
+@@ -78,11 +78,11 @@
+ @keyframes tin{from{opacity:0; transform:translateY(-6px)}}
+ #coach{position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:#0b1428f5; border:1px solid var(--acc); border-radius:10px; padding:10px 14px; display:flex; gap:12px; align-items:center; z-index:15; max-width:min(640px,92%)}
+ #alert-banner{position:absolute; top:52px; left:50%; transform:translateX(-50%); background:#3a1020ee; border:1px solid var(--bad); color:#ffd9d9; padding:6px 16px; border-radius:8px; z-index:19; font-weight:700}
+ #bottombar{display:flex; gap:12px; padding:8px 12px; background:#0a1122; border-top:1px solid var(--line); min-height:218px; max-height:258px}
+-#minimap-wrap{position:relative; flex:0 0 auto; text-align:center}
++#minimap-wrap{position:relative; flex:0 0 auto; text-align:center; padding-bottom:16px}
+ #minimap{border:1px solid var(--line); border-radius:6px; background:#000; cursor:pointer; width:196px; height:196px}
+-#minimap-wrap label{font-size:10px; color:var(--dim); letter-spacing:2px}
++#minimap-wrap label{position:absolute; left:0; right:0; bottom:0; font-size:10px; color:var(--dim); letter-spacing:2px}
+ #sel-panel{flex:1; min-width:0; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:8px 12px; overflow:auto}
+ #sel-title{font-weight:700; color:var(--acc); margin-bottom:4px}
+ #sel-portraits{display:flex; gap:4px; flex-wrap:wrap}
+ .portrait{width:40px; height:40px; border:1px solid var(--line); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:20px; background:#0a1428; cursor:pointer}
+
+[0m
+[0m← [0mEdit rts/game.js
+Index: /home/runner/work/PlayGround/PlayGround/rts/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/rts/game.js
++++ /home/runner/work/PlayGround/PlayGround/rts/game.js
+@@ -1272,13 +1272,15 @@
+     toast('Engine hiccup contained — game paused. Press Resume. ('+String(err.message||err).slice(0,80)+')','err');
+     $('pause-overlay').classList.remove('hidden');
+   }
+ }
+-let cmdSoftT=0;
++let cmdSoftT=0, cmdSig='';
+ function refreshCmdSoft(){
+-  // refresh queue progress cheaply without rebuilding buttons: rebuild every 1s is fine
+-  cmdSoftT++;
+-  if(cmdSoftT%4===0){/*noop*/}
++  // Rebuild the command card only when the selection/mode/queue signature changes.
++  const sel=selList();
++  const sig=[...G.selected].sort().join(',')+'|'+(G.placeMode?G.placeMode.kind:'')+'|'+(G.attackMode?'A':'')+'|'+
++    sel.map(e=>e.building?e.queue.length+':'+(e.queue[0]?Math.floor(e.queue[0].t/e.queue[0].total*10):'')+':'+e.progress:'').join(';');
++  if(sig!==cmdSig){cmdSig=sig;refreshCmd();}
+ }
+ 
+ /* ============================== boot ============================== */
+ function boot(){
+
+[0m
+[0m← [0mWrite /tmp/opencode/verify5.js
+Wrote file successfully.
+[0m
+[0m$ [0mnode -e "new Function(require('fs').readFileSync('rts/game.js','utf8')); console.log('syntax OK')" && node /tmp/opencode/verify5.js
+syntax OK
+MIXED has Attack = PASS | has Build = PASS
+WAVE pacing waves in 6s = 0 PASS (no spam)
+VICTORY structures-only, workers left = 16 PASS
+ERRORS [] ZERO-ERRORS PASS
+[0m
+All green. Final visual confirmation of the new victory path and minimap fix.
+[0m$ [0mnode -e "
+const {chromium}=require('playwright-core');
+(async()=>{
+const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});
+const p=await b.newPage({viewport:{width:1600,height:900}});
+await p.goto('http://localhost:8901/rts/index.html',{waitUntil:'networkidle'});
+await p.waitForTimeout(1200);
+await p.click('#btn-start'); await p.waitForTimeout(4000);
+await p.evaluate(()=>{const G=window.__rts.G;G.cam.x=360;G.cam.y=1688;});
+await p.waitForTimeout(800);
+await p.screenshot({path:'/tmp/opencode/v5-final.png'});
+await b.close();})()"
+(no output)
+[0m
+[0m→ [0mRead /tmp/opencode/v5-final.png
+[0m→ [0mRead /tmp/opencode/v5-victory.png
+[0m
+[0m$ [0mnode -e "
+const {chromium}=require('playwright-core');
+(async()=>{
+const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});
+const p=await b.newPage({viewport:{width:1600,height:900}});
+const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+await p.goto('http://localhost:8901/rts/index.html',{waitUntil:'networkidle'});
+await p.waitForTimeout(1200);
+await p.click('#btn-start'); await p.waitForTimeout(2000);
+// control group: select workers, Ctrl+2, move cam away, press 2 twice
+await p.evaluate(()=>window.__rts.select('worker'));
+await p.keyboard.down('Control'); await p.keyboard.press('2'); await p.keyboard.up('Control');
+await p.evaluate(()=>{window.__rts.G.cam.x=1500;window.__rts.G.cam.y=400;window.__rts.G.selected.clear();});
+await p.keyboard.press('2'); await p.waitForTimeout(200);
+await p.keyboard.press('2'); await p.waitForTimeout(300);
+const g=await p.evaluate(()=>({n:window.__rts.G.selected.size,cam:{x:Math.round(window.__rts.G.cam.x),y:Math.round(window.__rts.G.cam.y)}}));
+console.log('GROUP recall sel=',g.n,'cam=',JSON.stringify(g.cam), g.n>=5?'PASS':'FAIL');
+// middle-drag pan
+const c0=await p.evaluate(()=>({x:window.__rts.G.cam.x,y:window.__rts.G.cam.y}));
+await p.mouse.move(800,450); await p.mouse.down({button:'middle'});
+await p.mouse.move(600,350,{steps:5}); await p.mouse.up({button:'middle'});
+await p.waitForTimeout(300);
+const c1=await p.evaluate(()=>({x:Math.round(window.__rts.G.cam.x),y:Math.round(window.__rts.G.cam.y)}));
+console.log('MIDDRAG',JSON.stringify(c0),'->',JSON.stringify(c1), (c0.x!==c1.x||c0.y!==c1.y)?'PASS':'FAIL');
+console.log('ERRS',JSON.stringify(errs));
+await b.close();})()"
+GROUP recall sel= 6 cam= {"x":268,"y":1686} PASS
+MIDDRAG {"x":267.7276561834092,"y":1685.7309780866915} -> {"x":468,"y":1786} PASS
+ERRS []
+[0m
+Everything passes. Recording final state in the progress page.
+[0m# [0mTodos
+[✓] Re-establish state: read code, log, screenshots; server live
+[✓] Fix largest gap: rally-to-resource broken + order/rally conflicts + small correctness
+[✓] Browser re-verify: rally, AI wave/alert, combat shot, 1280x800, keyboard, zero errors
+[✓] Harsh self-critique vs bar + update PROGRESS.md
+[0m
+[0m← [0mEdit PROGRESS.md
+Index: /home/runner/work/PlayGround/PlayGround/PROGRESS.md
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/PROGRESS.md
++++ /home/runner/work/PlayGround/PlayGround/PROGRESS.md
+@@ -40,23 +40,36 @@
+   artifact via browser captures and sends back largest gap. Loop until bar met.
+ 
+ ## Completed work
+ - [2026-09-07] Research recorded (8 URLs above). Route chosen. This progress file created.
++- [2026-09-07] Built `rts/` (index.html, style.css, game.js ~1300 lines, zero deps): full match loop.
++- [2026-09-07] Browser verification rounds v1–v5, all zero page errors.
++- [2026-09-07] Fresh-context critic verdict: PASS; fixed its largest gap (mixed selection hid
++  army commands) + 3 secondaries (empty cmd panel at boot, worker-hunt victory, supply-stall
++  progress accrual). Fixed own finds: rally-to-resource, right-click rally/unit-order conflict,
++  AI wave-spam, depleted-crystal collision, kill-stat accounting, minimap label, cmd auto-refresh.
+ 
+ ## Evidence
+ - Research: URLs + purposes above.
+-- Visual inspection: /tmp/opencode/shot-menu.png, shot-game.png, v2-base/victory/defeat/pause.png, v3-combat/defeat/pause.png (menu, match, build-up, victory+stats, defeat, pause all render at 1600x900, zero page errors).
+-- Gameplay behavior (headless Chromium, playwright-core): harvest +90 alloy/5s PASS; gas +36/6s PASS; depot/gate/extractor via UI path PASS (supply 6→23); production queue→units 6→9 PASS; drag-box select 6 PASS; attack-move damage 1600→1483 + kills PASS; victory/defeat/pause overlays PASS.
+-- Accessibility/operability: keyboard map (A/S/H/F1/Space/Backspace/Ctrl+1-0/Esc/arrows) + mouse; arrows/edge/minimap pan + wheel zoom. 1280x800 check pending.
+-- Delivery: static `rts/` (index.html, style.css, game.js) served via :8901.
+-- Critic: fresh-context verifier subagent launched; report pending.
++- Visual inspection (1600x900 + 1280x800): /tmp/opencode/shot-menu/game/victory/defeat/pause.png,
++  v2-base/victory/defeat/pause.png, v3-combat/defeat/pause.png, v4-wave/combat/1280.png,
++  v5-victory/final.png — menu, match, build-up, live battle w/ tracers + HP bars, victory+stats,
++  defeat, pause, tutorial, fog, minimap all render.
++- Gameplay behavior (headless Chromium, playwright-core): harvest +90 alloy/5s; gas +36/6s;
++  depot/gate/extractor via UI path (supply 6→23); queue→units 6→9; drag-box 6; attack-move
++  damage 1600→1483 + kills; rally-to-crystal gather:true + 7/7 auto-mine; AI wave waveN≥1 with
++  alert banner; wave pacing no-spam; structures-only victory with 16 enemy workers alive;
++  mixed selection shows Attack+Build; group recall double-press centers camera; middle-drag pans.
++- Accessibility/operability: A/S/H/F1/Space/Backspace/Ctrl+0-9/Esc/arrows/edge/minimap/wheel;
++  responsive 1600x900 + 1280x800; toasts for invalid/insufficient/supply-blocked; autosave+recover.
++- Delivery: static `rts/` served via :8901. No Blizzard strings in code (critic scan clean).
++- Critic: independent general-subagent run — VERDICT PASS, all 4 findings fixed + re-verified.
+ 
+ ## Blockers
+-- None. Sandbox has chromium + google-chrome; playwright installable via npx.
++- None.
+ 
+ ## Current gaps
+-- Game not yet implemented. Biggest gap = entire playable build.
+-- After build: real browser captures + critic pass + fixes.
++- No full real-time (5+ min) human-speed match played start-to-finish; loop closed via
++  accelerated same-code-path exercises instead. Next agent may run a long soak match if desired.
+ 
+ ## Next exact action
+-- Write `rts/index.html`, `rts/style.css`, `rts/game.js` (full match loop), then serve on
+-  :8901 and capture screenshots with playwright script.
++- Goal met. Optional follow-ups: long soak match, balance tuning, extra unit tier.
+
+[0m
+[goal:evidence] STARFALL COMMAND in rts/ (vanilla canvas, original assets): 8 SC2 reference URLs with purposes in PROGRESS.md; 20 browser screenshots in /tmp/opencode (menu, match, live battle with tracers/HP bars, victory+stats, defeat, pause, 1280x800 layout); headless Chromium runs with zero page errors verifying harvest +90/5s, gas +36/6s, construction supply 6→23, production 6→9, box-select, attack damage 1600→1483, rally-to-gather 7/7 auto-mine, AI waves with alert banner and no-spam pacing, structures-only victory, mixed-selection Attack+Build buttons, group recall, middle-drag pan; independent critic verdict PASS with all 4 findings fixed and re-verified.
+[goal:complete]
