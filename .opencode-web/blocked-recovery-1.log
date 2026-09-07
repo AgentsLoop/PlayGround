@@ -1,0 +1,522 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Resuming the sprint — inspecting current state before the polish pass.
+[0m→ [0mRead index.html
+[0m
+[0m$ [0mgit status --short; git branch --show-current; git log --oneline -5; ls screenshots/; gh issue view 35 --repo AgentsLoop/PlayGround --comments 2>&1 | head -60
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+opencode/34067964973
+d777ac0 Add Neon Courier: Signal Sprint playable browser game
+b4fe44a Grant reusable OpenCode workflow Pages permission
+final-gameplay.png
+final-lose.png
+final-start.png
+final-win.png
+author:	github-actions
+association:	none
+edited:	true
+status:	none
+--
+
+🟡 **OpenCode progress (live)**
+
+Updated: 2026-09-06 23:58:40 UTC
+
+🌐 **OpenCode Web UI:** https://exception-physician-harvest-drag.trycloudflare.com/L1VzZXJzL3J1bm5lci93b3JrL1BsYXlHcm91bmQvUGxheUdyb3VuZA/session/ses_f86ddd37bffeM47s4U4YBXGnpy
+
+📁 **Project files:** https://buttons-idaho-researcher-salary.trycloudflare.com
+
+
+
+- Elapsed: 7m
+- Token count: 571181
+- Speed score: 1298.1 tokens/s
+- Tool calls: 28
+- Active tool calls: 0
+- Active subagents: 0
+- Total subagents executed: 0
+- Total failed subagents: 0
+- Image-context model calls: 9
+- Changed workspace files: 8
+
+This opens the currently running OpenCode session directly. Access remains available while OpenCode runs and for 5 hours afterwards.
+
+_Image-context model calls are inferred from image attachments in the session transcript. Message contents and tool details are hidden. Full logs are published in the completion release._
+--
+author:	github-actions
+association:	none
+edited:	false
+status:	none
+--
+## Neon Courier: Signal Sprint — complete
+
+**Summary:** Built a single-file canvas browser game (`index.html`, no dependencies). Pilot a neon courier drone with WASD/arrows (+ touch D-pad), collect 8 signal orbs in 60s, dodge 5 patrolling magenta blockers (3-hull lives, speed ramps per orb), solid building obstacles, score/timer/orbs/hull HUD, restart button + R/Space restart, win/lose overlays with time bonus, particle/trail/shake polish and tiny WebAudio synth.
+
+**Public game link:** open `index.html` from this branch (no build step): https://github.com/AgentsLoop/PlayGround/blob/d777ac0fbda68db1968e7e677a6fffb7352ff9e8/index.html
+
+**Final commit:** https://github.com/AgentsLoop/PlayGround/commit/d777ac0fbda68db1968e7e677a6fffb7352ff9e8
+
+**Deployment and test status:** No deployment configured (static file, runs by opening index.html). Verified in real headless Chromium via Playwright: start overlay, gameplay movement, forced full orb collection → win state (8/8, score 1390), forced blocker hit at 1 hull → lose state, restart resets to playing — zero page errors.
+
+**Known limitations:** None
+
+<details>
+<summary>Screenshot — gameplay</summary>
+<img src="https://raw.githubusercontent.com/AgentsLoop/PlayGround/d777ac0fbda68db1968e7e677a6fffb7352ff9e8/screenshots/final-gameplay.png" alt="Neon Courier active gameplay with drone, orbs, blockers and HUD">
+</details>
+
+<details>
+<summary>Screenshot — win state</summary>
+<img src="https://raw.githubusercontent.com/AgentsLoop/PlayGround/d777ac0fbda68db1968e7e677a6fffb7352ff9e8/screenshots/final-win.png" alt="Neon Courier win overlay showing Delivery Complete">
+</details>
+--
+[0m
+[0m# [0mTodos
+[•] Harsh critique + implement fixes (blocker lanes, orb fairness, pause, README, aria)
+[ ] Verify in headless Chromium (desktop+mobile, win/lose/restart/pause, no errors) + fresh final screenshots
+[ ] Commit, push, post issue #35 update
+[0m
+Critique done. Findings: (1) three blocker patrol lanes visually cut through "solid" buildings; (2) orbs can spawn on blocker home positions; (3) no pause; (4) README documents nothing; (5) canvas has no accessible label; (6) convoluted key handler. Fixing all five now.
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -138,15 +138,17 @@
+ 
+ const keys = {};
+ addEventListener('keydown', e => {
+   const k = e.key.toLowerCase();
+-  if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k === ' ' ? ' ' : k) || k.startsWith('arrow')) e.preventDefault();
++  if (k.startsWith('arrow') || k === ' ') e.preventDefault();
+   keys[k] = true;
+   if (k === 'arrowup') keys['w'] = true;
+   if (k === 'arrowdown') keys['s'] = true;
+   if (k === 'arrowleft') keys['a'] = true;
+   if (k === 'arrowright') keys['d'] = true;
++  if ((k === 'p' || k === 'escape') && state === 'playing') { togglePause(); return; }
+   if ((k === 'r' || k === ' ' || k === 'enter') && state !== 'playing') startGame();
++  else if ((k === 'r' || k === ' ' || k === 'enter') && paused) togglePause();
+ });
+ addEventListener('keyup', e => {
+   const k = e.key.toLowerCase();
+   keys[k] = false;
+@@ -154,8 +156,13 @@
+   if (k === 'arrowdown') keys['s'] = false;
+   if (k === 'arrowleft') keys['a'] = false;
+   if (k === 'arrowright') keys['d'] = false;
+ });
++addEventListener('blur', () => {
++  for (const k in keys) keys[k] = false;
++  touchActive = false; touchDir.x = 0; touchDir.y = 0;
++  if (state === 'playing' && !paused) togglePause(true);
++});
+ // touch dpad
+ document.querySelectorAll('#dpad button').forEach(b => {
+   const dx = +b.dataset.dx, dy = +b.dataset.dy;
+   const on = e => { e.preventDefault(); touchDir.x = dx; touchDir.y = dy; touchActive = true; };
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -131,8 +131,9 @@
+   {x:330, y:220, w:100, h:80},
+ ];
+ 
+ let state = 'ready'; // ready | playing | won | lost
++let paused = false;
+ let player, orbs, blockers, particles, trail;
+ let score = 0, lives = MAX_LIVES, timeLeft = TIME_LIMIT, collected = 0;
+ let elapsed = 0, shake = 0, flashT = 0, boostT = 0, invulnT = 0;
+ 
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -177,14 +177,15 @@
+ 
+ startBtn.addEventListener('click', startGame);
+ restartBtn.addEventListener('click', startGame);
+ 
+-function randFreeSpot(margin, avoidR) {
++function randFreeSpot(margin, avoidR, avoidPts) {
+   for (let i = 0; i < 200; i++) {
+     const x = margin + Math.random() * (W - margin * 2);
+     const y = margin + Math.random() * (H - margin * 2);
+     if (rectHit(x, y, 14, BUILDINGS)) continue;
+     if (avoidR && Math.hypot(x - avoidR.x, y - avoidR.y) < 120) continue;
++    if (avoidPts && avoidPts.some(p => Math.hypot(x - p.x, y - p.y) < 90)) continue;
+     return {x, y};
+   }
+   return {x: W/2, y: 80};
+ }
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -213,28 +213,43 @@
+ function startGame() {
+   player = {x: W/2, y: H - 50, r: 12, vx: 0, vy: 0, angle: -Math.PI/2};
+   score = 0; lives = MAX_LIVES; timeLeft = TIME_LIMIT; collected = 0;
+   elapsed = 0; shake = 0; flashT = 0; boostT = 0; invulnT = 0;
++  paused = false;
+   particles = []; trail = [];
++  // 5 patrolling blockers on lanes that steer clear of solid buildings
++  blockers = [
++    mkBlocker('h', 90, 250, 200, 130),
++    mkBlocker('v', 300, 90, 160, 240),
++    mkBlocker('h', 540, 262, 220, 110),
++    mkBlocker('v', 695, 300, 150, 280),
++    mkBlocker('h', 170, 312, 260, 280),
++  ];
+   orbs = [];
++  const homes = blockers.map(b => ({x: b.hx, y: b.hy}));
+   for (let i = 0; i < TOTAL_ORBS; i++) {
+-    const s = randFreeSpot(40, player);
++    const s = randFreeSpot(40, player, homes);
+     orbs.push({x: s.x, y: s.y, r: 10, phase: Math.random() * Math.PI * 2, taken: false});
+   }
+-  // 5 patrolling blockers: mix of horizontal / vertical
+-  blockers = [
+-    mkBlocker('h', 90, 250, 200, 130),
+-    mkBlocker('v', 380, 90, 160, 300),
+-    mkBlocker('h', 480, 260, 220, 120),
+-    mkBlocker('v', 640, 300, 150, 280),
+-    mkBlocker('h', 200, 300, 260, 380),
+-  ];
+   state = 'playing';
+   overlay.classList.add('hidden');
+   updateHUD();
+   beep(520, .08, 'square', .12);
+ }
+ 
++function togglePause(force) {
++  paused = force === true ? true : !paused;
++  if (paused) {
++    ovTitle.textContent = 'PAUSED ❚❚';
++    ovText.innerHTML = `Courier holding position. Score <b>${score}</b> · Orbs <b>${collected}/${TOTAL_ORBS}</b> · <b>${Math.ceil(timeLeft)}s</b> left.<br>` +
++      `<span class="keys"><kbd>P</kbd> / <kbd>Esc</kbd> to resume</span>`;
++    startBtn.textContent = '▶ RESUME';
++    overlay.classList.remove('hidden');
++  } else {
++    overlay.classList.add('hidden');
++  }
++}
++
+ function mkBlocker(axis, x, y, speed, range) {
+   return {axis, hx: x, hy: y, x, y, r: 14, speed, range, t: Math.random() * 10, hue: 320};
+ }
+ 
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -174,9 +174,12 @@
+ });
+ const touchDir = {x:0, y:0};
+ let touchActive = false;
+ 
+-startBtn.addEventListener('click', startGame);
++startBtn.addEventListener('click', () => {
++  if (state === 'playing' && paused) togglePause();
++  else startGame();
++});
+ restartBtn.addEventListener('click', startGame);
+ 
+ function randFreeSpot(margin, avoidR, avoidPts) {
+   for (let i = 0; i < 200; i++) {
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -265,8 +265,9 @@
+ }
+ 
+ function endGame(win) {
+   state = win ? 'won' : 'lost';
++  paused = false;
+   overlay.classList.remove('hidden');
+   if (win) {
+     const bonus = Math.ceil(timeLeft) * 10;
+     score += bonus;
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -310,9 +310,9 @@
+ let last = performance.now();
+ function loop(now) {
+   const dt = Math.min(.033, (now - last) / 1000);
+   last = now;
+-  if (state === 'playing') update(dt);
++  if (state === 'playing' && !paused) update(dt);
+   render(now / 1000);
+   requestAnimationFrame(loop);
+ }
+ 
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -85,9 +85,9 @@
+   <div class="pill" style="display:flex;align-items:center"><button id="restartBtn" aria-label="Restart game">↻ RESTART</button></div>
+ </div>
+ 
+ <div id="wrap">
+-  <canvas id="game" width="760" height="520"></canvas>
++  <canvas id="game" width="760" height="520" role="img" aria-label="Neon city grid where the courier drone collects signal orbs and dodges patrol blockers"></canvas>
+   <div id="overlay">
+     <h2 id="ovTitle">SIGNAL SPRINT</h2>
+     <p id="ovText">Pilot the cyan courier drone. Grab <b style="color:#a6ff00">8 signal orbs</b> in 60 seconds.
+       Magenta patrol blockers drain your hull on contact — you have 3 hits.</p>
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -90,9 +90,9 @@
+   <div id="overlay">
+     <h2 id="ovTitle">SIGNAL SPRINT</h2>
+     <p id="ovText">Pilot the cyan courier drone. Grab <b style="color:#a6ff00">8 signal orbs</b> in 60 seconds.
+       Magenta patrol blockers drain your hull on contact — you have 3 hits.</p>
+-    <p class="keys"><kbd>WASD</kbd> / <kbd>←↑↓→</kbd> to fly &nbsp;•&nbsp; <kbd>R</kbd> / <kbd>Space</kbd> to restart</p>
++    <p class="keys"><kbd>WASD</kbd> / <kbd>←↑↓→</kbd> to fly &nbsp;•&nbsp; <kbd>P</kbd> to pause &nbsp;•&nbsp; <kbd>R</kbd> / <kbd>Space</kbd> to restart</p>
+     <button id="startBtn">▶ START DELIVERY</button>
+   </div>
+ </div>
+ 
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -100,9 +100,9 @@
+   <span></span><button data-dx="0" data-dy="-1">▲</button><span></span>
+   <button data-dx="-1" data-dy="0">◀</button><button data-dx="0" data-dy="1">▼</button><button data-dx="1" data-dy="0">▶</button>
+ </div>
+ 
+-<div id="hint">Tip: blockers speed up as you collect orbs. Grab an orb to get +100 and a brief speed boost. Buildings are solid — route around them.</div>
++<div id="hint">Tip: blockers speed up as you collect orbs. Grab an orb to get +100 and a brief speed boost. Buildings are solid — route around them. Press <kbd>P</kbd> to pause.</div>
+ <footer>Neon Courier · single-file canvas game · no dependencies</footer>
+ 
+ <script>
+ "use strict";
+
+[0m
+[0m→ [0mRead README.md
+[0m
+[0m← [0mEdit README.md
+Index: /Users/runner/work/PlayGround/PlayGround/README.md
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/README.md
++++ /Users/runner/work/PlayGround/PlayGround/README.md
+@@ -1,2 +1,13 @@
+ # PlayGround
+ Playground for browser game experiments
++
++## Neon Courier: Signal Sprint
++Pilot a neon courier drone through a compact city grid, collect all 8
++signal orbs before the 60-second timer runs out, and dodge the patrolling
++blockers (3 hull hits).
++
++No build step, no dependencies — open `index.html` in any browser, or serve
++the folder (e.g. `python3 -m http.server`) and visit the local URL.
++
++- Move: `WASD` / arrow keys (touch D-pad on mobile)
++- Pause: `P` / `Esc` · Restart: `↻ RESTART` button or `R` / `Space`
+
+[0m
+Fixes in — now verifying everything in a real browser.
+[0m$ [0mnpm init -y >/dev/null 2>&1; npm i -D playwright@1.63.0 2>&1 | tail -1
+found 0 vulnerabilities
+[0m
+[0m$ [0mnode -e "
+const {chromium}=require('playwright');
+(async()=>{
+const b=await chromium.launch();
+const errs=[];
+const p=await b.newPage({viewport:{width:900,height:750}});
+p.on('pageerror',e=>errs.push('PAGEERROR: '+e.message));
+await p.goto('file:///Users/runner/work/PlayGround/PlayGround/index.html');
+await p.waitForTimeout(900);
+console.log('initial HUD:', await p.textContent('#hud').then(s=>s.replace(/\s+/g,' ').trim()));
+await p.screenshot({path:'screenshots/final-start.png'});
+// start + move with keyboard
+await p.click('#startBtn');
+await p.waitForTimeout(600);
+await p.keyboard.down('a'); await p.waitForTimeout(500); await p.keyboard.up('a');
+await p.keyboard.down('w'); await p.waitForTimeout(700); await p.keyboard.up('w');
+const pos=await p.evaluate(()=>({x:Math.round(player.x),y:Math.round(player.y)}));
+console.log('moved pos (expect x<380,y<470):', JSON.stringify(pos));
+await p.screenshot({path:'screenshots/final-gameplay.png'});
+// pause via P
+await p.keyboard.press('p'); await p.waitForTimeout(300);
+console.log('paused:', await p.evaluate(()=>({paused, title: document.getElementById('ovTitle').textContent})));
+await p.screenshot({path:'screenshots/final-pause.png'});
+await p.keyboard.press('p'); await p.waitForTimeout(300);
+console.log('resumed:', await p.evaluate(()=>({paused, state})));
+// orb fairness: min dist orb->blocker home over several restarts
+const fair=await p.evaluate(()=>{ let m=1e9; for(let r=0;r<8;r++){ startGame(); for(const o of orbs) for(const bl of blockers) m=Math.min(m, Math.hypot(o.x-bl.hx,o.y-bl.hy)); } return Math.round(m); });
+console.log('min orb->blocker-home dist over 8 restarts (expect >=90 or fallback):', fair);
+// blocker lanes vs buildings overlap check
+const overlap=await p.evaluate(()=>{ startGame(); let bad=0; for(let i=0;i<600;i++){ for(const bl of blockers){ bl.t+=0.05; const off=Math.sin(bl.t*bl.speed/130)*bl.range/2; const x=bl.axis==='h'?bl.hx+off:bl.hx, y=bl.axis==='h'?bl.hy:bl.hy+off; const nx=Math.max(0,0); } } return 'sim-skipped'; });
+console.log('lane check: geometric (see python below)');
+// forced win
+await p.evaluate(()=>{ startGame(); });
+for(let i=0;i<14;i++){ await p.evaluate(()=>{ const o=orbs.find(o=>!o.taken); if(o){player.x=o.x; player.y=o.y;} }); await p.waitForTimeout(220); if((await p.evaluate(()=>state))==='won') break; }
+console.log('win:', await p.evaluate(()=>({state,collected,score})), '| title:', await p.textContent('#ovTitle'));
+await p.screenshot({path:'screenshots/final-win.png'});
+// forced lose
+await p.click('#startBtn'); await p.waitForTimeout(400);
+await p.evaluate(()=>{ lives=1; invulnT=0; const bl=blockers[0]; player.x=bl.x; player.y=bl.y; });
+await p.waitForTimeout(600);
+console.log('lose:', await p.evaluate(()=>({state,lives})), '| title:', await p.textContent('#ovTitle'));
+await p.screenshot({path:'screenshots/final-lose.png'});
+// restart resets
+await p.click('#startBtn'); await p.waitForTimeout(400);
+console.log('restart:', await p.evaluate(()=>({state,score,lives,collected,paused})));
+// mobile viewport
+const m=await b.newPage({viewport:{width:390,height:844}, hasTouch:true, isMobile:true});
+m.on('pageerror',e=>errs.push('MOBILE PAGEERROR: '+e.message));
+await m.goto('file:///Users/runner/work/PlayGround/PlayGround/index.html');
+await m.waitForTimeout(800);
+await m.screenshot({path:'screenshots/final-mobile.png'});
+console.log('mobile dpad visible:', await m.isVisible('#dpad'));
+console.log('errors:', errs.length?errs:'none');
+await b.close();
+})()"
+initial HUD: SCORE0 ORBS0/8 TIME60 HULL♥♥♥ ↻ RESTART
+moved pos (expect x<380,y<470): {"x":282,"y":335}
+paused: { paused: true, title: 'PAUSED ❚❚' }
+resumed: { paused: false, state: 'playing' }
+min orb->blocker-home dist over 8 restarts (expect >=90 or fallback): 94
+lane check: geometric (see python below)
+win: { state: 'won', collected: 8, score: 1400 } | title: DELIVERY COMPLETE ✓
+lose: { state: 'lost', lives: 0 } | title: DRONE DOWN ✕
+restart: { state: 'playing', score: 0, lives: 3, collected: 0, paused: false }
+mobile dpad visible: true
+errors: none
+[0m
+[0m→ [0mRead screenshots/final-gameplay.png
+[0m
+[0m$ [0mpython3 -c "
+import math
+B=[(130,110,120,90),(510,100,130,100),(130,340,140,100),(490,330,150,110),(330,220,100,80)]
+L=[('h',90,250,200,130),('v',300,90,160,240),('h',540,262,220,110),('v',695,300,150,280),('h',170,312,260,280)]
+def overlap(x,y,r=14):
+    for bx,by,w,h in B:
+        nx=min(max(x,bx),bx+w); ny=min(max(y,by),by+h)
+        if (x-nx)**2+(y-ny)**2 < r**2: return (bx,by,w,h)
+    return None
+bad=0
+for ax,hx,hy,sp,rng in L:
+    for i in range(400):
+        t=i*0.05; off=math.sin(t*sp/130)*rng/2
+        x=hx+off if ax=='h' else hx; y=hy if ax=='h' else hy+off
+        x=min(max(x,30),730); y=min(max(y,30),490)
+        hit=overlap(x,y)
+        if hit: bad+=1; print('OVERLAP',ax,hx,hy,'t=',round(t,2),'at',round(x),round(y),'bldg',hit); break
+print('lanes with building overlap:',bad,'/5')
+"
+lanes with building overlap: 0 /5
+[0m
+[0m→ [0mRead screenshots/final-mobile.png
+[0m→ [0mRead screenshots/final-pause.png
+Pause and mobile layouts verified clean. Committing and publishing.
+[0m
+[0m$ [0mrm -rf node_modules package.json package-lock.json && git add index.html README.md screenshots/ && git status --short && git commit -m "Polish Signal Sprint: fair blocker lanes, orb spawn fairness, pause, README, aria" && git push origin opencode/34067964973 2>&1 | tail -2 && git rev-parse HEAD
+M  README.md
+M  index.html
+M  screenshots/final-gameplay.png
+M  screenshots/final-lose.png
+A  screenshots/final-mobile.png
+A  screenshots/final-pause.png
+M  screenshots/final-start.png
+M  screenshots/final-win.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+[opencode/34067964973 c5d71db] Polish Signal Sprint: fair blocker lanes, orb spawn fairness, pause, README, aria
+ 8 files changed, 55 insertions(+), 16 deletions(-)
+ create mode 100644 screenshots/final-mobile.png
+ create mode 100644 screenshots/final-pause.png
+To https://github.com/AgentsLoop/PlayGround
+   d777ac0..c5d71db  opencode/34067964973 -> opencode/34067964973
+c5d71db01bca053658f0aa93dd0b52a785faa293
+[0m
+[0m$ [0mgh issue comment 35 --repo AgentsLoop/PlayGround --body "## Neon Courier: Signal Sprint — polish pass (c5d71db)
+
+**Harsh-critique fixes applied:**
+- Patrol lanes no longer cut through solid buildings — all 5 lanes re-routed into open corridors (geometrically simulated 0/5 overlaps over full patrol cycles).
+- Fair spawns: orbs now avoid blocker home positions (min 90px; measured min 94px over 8 restarts) and the player start.
+- New pause: \`P\`/\`Esc\`, Resume button, auto-pause + key reset on window blur.
+- README now documents how to run (open \`index.html\`, zero build/deps); canvas has \`role\`/\`aria-label\`; simplified arrow/space key handling.
+
+**Verification (headless Chromium, zero page errors):** start HUD \`0 / 0/8 / 60 / ♥♥♥\`, keyboard movement confirmed by position delta, pause→resume round-trip, forced 8-orb collection → win (score 1400), forced blocker hit at 1 hull → lose, restart resets to playing, mobile 390px shows touch D-pad and wrapped HUD.
+
+**Game link:** https://github.com/AgentsLoop/PlayGround/blob/c5d71db01bca053658f0aa93dd0b52a785faa293/index.html
+**Commit:** https://github.com/AgentsLoop/PlayGround/commit/c5d71db01bca053658f0aa93dd0b52a785faa293
+**Deploy/test:** no Pages deployment (static single file); Playwright suite above all passed, no console errors.
+**Limitations:** None
+
+<details>
+<summary>Screenshot — gameplay (fair lanes)</summary>
+<img src=\"https://raw.githubusercontent.com/AgentsLoop/PlayGround/c5d71db01bca053658f0aa93dd0b52a785faa293/screenshots/final-gameplay.png\" alt=\"Gameplay with blockers patrolling clear of buildings\">
+</details>
+
+<details>
+<summary>Screenshot — pause overlay</summary>
+<img src=\"https://raw.githubusercontent.com/AgentsLoop/PlayGround/c5d71db01bca053658f0aa93dd0b52a785faa293/screenshots/final-pause.png\" alt=\"Pause overlay with resume button\">
+</details>
+
+<details>
+<summary>Screenshot — mobile layout</summary>
+<img src=\"https://raw.githubusercontent.com/AgentsLoop/PlayGround/c5d71db01bca053658f0aa93dd0b52a785faa293/screenshots/final-mobile.png\" alt=\"Mobile layout with touch D-pad and wrapped HUD\">
+</details>" 2>&1
+https://github.com/AgentsLoop/PlayGround/issues/35#issuecomment-5563211501
+[0m
+[0m# [0mTodos
+[✓] Harsh critique + implement fixes (blocker lanes, orb fairness, pause, README, aria)
+[✓] Verify in headless Chromium (desktop+mobile, win/lose/restart/pause, no errors) + fresh final screenshots
+[✓] Commit, push, post issue #35 update
+[0m
+[goal:evidence] Polish pass committed as c5d71db on opencode/34067964973 and posted to issue #35 (comment 5563211501): re-routed all 5 blocker lanes to 0/5 building overlaps (simulated), orb spawns avoid blocker homes (min 94px), added P/Esc pause + blur auto-pause, README run docs, canvas aria-label. Playwright headless-Chromium suite passed with zero page errors — movement delta, pause/resume, forced win (8/8, 1400), forced lose, restart reset, mobile 390px D-pad — with fresh screenshots final-start/gameplay/win/lose/pause/mobile viewed and committed.
+[goal:complete]
