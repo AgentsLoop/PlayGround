@@ -1,0 +1,71 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Capturing final evidence against the public build, then pushing and posting completion.
+[0m$ [0mgit branch --show-current; git status --short | head -n 15; curl -s -o /dev/null -w "public:%{http_code}\n" --max-time 15 "https://providence-webcast-sic-conjunction.trycloudflare.com/index.html"; ls -lh screenshots/
+opencode/34168682096
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? screenshots/
+?? twisted-metal/
+public:200
+total 416K
+-rw-r--r-- 1 runner runner 106K Sep  7 23:41 final-combat.png
+-rw-r--r-- 1 runner runner 308K Sep  7 23:41 final-title.png
+[0m
+[0m$ [0mPUB="https://providence-webcast-sic-conjunction.trycloudflare.com"
+chromium --headless --disable-gpu --no-sandbox --window-size=1280,800 --virtual-time-budget=4000 --screenshot=screenshots/final-title.png "$PUB/index.html" 2>/dev/null; ls -lh screenshots/final-title.png
+chromium --headless --disable-gpu --no-sandbox --window-size=1280,800 --virtual-time-budget=5000 --screenshot=screenshots/final-combat.png "$PUB/index.html?auto=combat&arena=rustyard" 2>/dev/null; ls -lh screenshots/final-combat.png
+-rw-r--r-- 1 runner runner 313K Sep  7 23:42 screenshots/final-title.png
+-rw-r--r-- 1 runner runner 131K Sep  7 23:42 screenshots/final-combat.png
+[0m
+[0m→ [0mRead screenshots/final-combat.png
+[0m→ [0mRead screenshots/final-title.png
+[0m
+[0m$ [0mgit add index.html screenshots/final-title.png screenshots/final-combat.png twisted-metal/ && git status --short | head -n 12 && git commit -m "RUSTCARNAGE: playable entrypoint, final public screenshots, delivery evidence" 2>&1 | tail -n 3 && git push -u origin opencode/34168682096 2>&1 | tail -n 4 && git rev-parse --short HEAD && git remote get-url origin
+A  index.html
+A  screenshots/final-combat.png
+A  screenshots/final-title.png
+A  twisted-metal/EVIDENCE.md
+A  twisted-metal/PROGRESS.md
+A  twisted-metal/README.md
+A  twisted-metal/evidence/01-title.png
+A  twisted-metal/evidence/02-select.png
+A  twisted-metal/evidence/03-combat-rustyard.png
+A  twisted-metal/evidence/04-combat-dustbowl.png
+A  twisted-metal/evidence/05-mobile.png
+A  twisted-metal/evidence/06-pause.png
+ create mode 100644 twisted-metal/reference-assets/07-junkyard-arena.jpg
+ create mode 100644 twisted-metal/reference-assets/PROVENANCE.md
+ create mode 100644 twisted-metal/style.css
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34168682096 -> opencode/34168682096
+branch 'opencode/34168682096' set up to track 'origin/opencode/34168682096'.
+91cc719
+https://github.com/AgentsLoop/PlayGround
+[0m
+[0m$ [0mgh issue comment 65 --body "## RUSTCARNAGE complete — final verification
+
+Play now: https://providence-webcast-sic-conjunction.trycloudflare.com
+
+![title](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34168682096/screenshots/final-title.png)
+![combat](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34168682096/screenshots/final-combat.png)
+
+- Final commit: 91cc719 on branch opencode/34168682096 (pushed). Entrypoint ./index.html serves the playable game (200 on / and /index.html, verified before and after every fix).
+- Deployment: public Cloudflare URL above returns 200; tmux app-server on :3000 serves the same build locally.
+- Tests: chromium headless title + auto-combat runs pass with vision-verified captures (title, select, combat x2 arenas, mobile 390px, pause overlay, game-over); console shows zero JS errors (only benign AudioContext-autoplay warnings). 3 fresh-context critics reviewed P1/P3/P4; their two largest gaps (pause overlay, bot-respawn starvation) were fixed and re-captured.
+- Evidence: twisted-metal/EVIDENCE.md, PROGRESS.md, evidence/ (7 shots), reference-assets/PROVENANCE.md (9 inspected refs), screenshots/final-*.png.
+- Known limitations: procedural canvas art only (no licensed TM assets); no engine-hum audio, gamepad, or multiplayer; best-score is a single localStorage value; Cloudflare tunnel URL is ephemeral." 2>&1 | tail -n 2
+https://github.com/AgentsLoop/PlayGround/issues/65#issuecomment-5576845018
+[0m
+[goal:evidence] Public build verified at https://providence-webcast-sic-conjunction.trycloudflare.com (200); screenshots/final-title.png and screenshots/final-combat.png recaptured against the public URL and vision-checked; branch opencode/34168682096 pushed with commit 91cc719; final completion comment with URL, embedded screenshots, commit, deployment/test status, and limitations posted to issue #65.
+[goal:complete]

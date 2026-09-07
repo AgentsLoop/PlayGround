@@ -1,0 +1,26 @@
+## twisted metal
+
+## Objective
+
+Deliver a production-quality browser game for players who want fast, readable vehicular combat. Use Twisted Metal as the fidelity target: preserve its recognizable post-apocalyptic arena-combat visual language, vehicle-focused interaction model, weapon pickups, destructive encounters, and high-energy presentation while creating original implementation and assets. Ship the real playable web experience, not a static mockup or flattened substitute.
+
+## Quality bar
+
+- Research the source and comparable games before coding. Search real screenshots, footage, and interface views; select at least six high-signal visual anchors; download every selected or used image into a clearly named local reference-assets directory, inspect those files directly, and record each source URL beside its local filename as provenance.
+- Implement complete gameplay states and workflows: start and restart, arena navigation, combat, weapons, damage and defeat, recovery, HUD feedback, pause or equivalent controls, and responsive operability.
+- Inspect the actual running artifact with vision and compare captures side by side or through blind A/B review wherever practical. Meet a production-quality bar for polish, accessibility, performance, error recovery, and delivery evidence.
+
+## Execution
+
+- Have the lead choose the route and divide the project into independently judgeable pieces.
+- Assign a separate builder and a fresh-context critic or verifier to every important piece. Each verifier must inspect the actual artifact, compare it with the bar, identify the largest remaining gap, and send the work back for improvement.
+- Continue sustained build, verify, and improve work across as many sessions as necessary.
+
+## Verification
+
+- Fix the largest remaining gap and repeat the build/verify/improve loop until the acceptance bar is met, or stop only with explicit evidence of what remains.
+- Record concrete evidence for gameplay behavior, visual quality, responsive operation, recovery behavior, and delivery.
+
+## Progress
+
+Maintain a canonical live progress page that another agent can resume. Track research references and local filenames, decisions, completed work, evidence, blockers, current gaps, and the next exact action.

@@ -1,0 +1,1199 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Building your Twisted Metal arena — research, prototype, and polish underway.
+[0m# [0mTodos
+[ ] Set up workspace, progress page, reference-assets dir
+[ ] Research Twisted Metal + comparables, select 6+ visual anchors, download refs with provenance
+[ ] Design game architecture and split into judgeable pieces
+[ ] Build playable game (states, combat, weapons, HUD, pause, responsive)
+[ ] Verify: playtest, screenshots, visual QA, performance/accessibility/recovery
+[ ] Delivery evidence + progress page finalization
+[0m
+[0m# [0mTodos
+[•] Set up workspace, progress page, reference-assets dir
+[ ] Research Twisted Metal + comparables, select 6+ visual anchors, download refs with provenance
+[ ] Design game architecture and split into judgeable pieces
+[ ] Build playable game (states, combat, weapons, HUD, pause, responsive)
+[ ] Verify: playtest, screenshots, visual QA, performance/accessibility/recovery
+[ ] Delivery evidence + progress page finalization
+[0m
+[0m→ [0mRead .
+[0m
+[0m$ [0mpwd; ls -la; cat README.md 2>/dev/null | head -n 100
+/home/runner/work/PlayGround/PlayGround
+total 56
+drwxr-xr-x 10 runner runner 4096 Sep  7 23:04 .
+drwxr-xr-x  3 runner runner 4096 Sep  7 23:02 ..
+drwxr-xr-x  5 runner runner 4096 Sep  7 23:02 .agents
+drwxr-xr-x  4 runner runner 4096 Sep  7 23:02 .agentsweb
+drwxr-xr-x  7 runner runner 4096 Sep  7 23:05 .git
+drwxr-xr-x  3 runner runner 4096 Sep  7 23:02 .github
+drwxr-xr-x  9 runner runner 4096 Sep  7 23:02 .omgithub-runtime
+drwx------  3 runner runner 4096 Sep  7 23:04 .opencode
+drwx------  2 runner runner 4096 Sep  7 23:03 .opencode-ssh
+drwx------  3 runner runner 4096 Sep  7 23:04 .opencode-web
+-rw-r--r--  1 runner runner 1914 Sep  7 23:02 Agents.md
+-rw-r--r--  1 runner runner   53 Sep  7 23:02 README.md
+-rw-------  1 runner runner  411 Sep  7 23:03 opencode-agentsweb-id_ed25519
+-rw-r--r--  1 runner runner  102 Sep  7 23:03 opencode-agentsweb-id_ed25519.pub
+# PlayGround
+Playground for browser game experiments
+[0m
+[0m$ [0mmkdir -p twisted-metal/reference-assets twisted-metal/assets && ls -R
+.:
+Agents.md
+README.md
+opencode-agentsweb-id_ed25519
+opencode-agentsweb-id_ed25519.pub
+twisted-metal
+
+./twisted-metal:
+assets
+reference-assets
+
+./twisted-metal/assets:
+
+./twisted-metal/reference-assets:
+[0m
+[0m# [0mTodos
+[✓] Set up workspace, progress page, reference-assets dir
+[•] Research Twisted Metal + comparables, select 6+ visual anchors, download refs with provenance
+[ ] Design game architecture and split into judgeable pieces
+[ ] Build playable game (states, combat, weapons, HUD, pause, responsive)
+[ ] Verify: playtest, screenshots, visual QA, performance/accessibility/recovery
+[ ] Delivery evidence + progress page finalization
+[0m
+Workspace ready — now digging into Twisted Metal's look and feel.
+[0m◈ [0mExa Web Search "vehicular combat games comparable Vigilante 8 Rogue Trip screenshots arena"
+[0m◈ [0mExa Web Search "Twisted Metal Black gameplay interface weapons pickups vehicles Sweet Tooth"
+[0m◈ [0mExa Web Search "Twisted Metal 2012 gameplay screenshots arena combat HUD"
+[0m% [0mWebFetch https://en.wikipedia.org/wiki/Twisted_Metal:_Black
+[0m
+[0m$ [0mls twisted-metal/reference-assets/; python3 -c "import urllib.request, json; print('py ok')"; curl -sL --max-time 20 "https://upload.wikimedia.org/wikipedia/en/9/9e/Twisted_Metal_Black.jpg" -o /tmp/test_cover.jpg && ls -lh /tmp/test_cover.jpg; file /tmp/test_cover.jpg
+py ok
+-rw-r--r-- 1 runner runner 16K Sep  7 23:06 /tmp/test_cover.jpg
+/tmp/test_cover.jpg: JPEG image data, JFIF standard 1.02, aspect ratio, density 100x100, segment length 16, baseline, precision 8, 211x300, components 3
+[0m
+[0m$ [0mpython3 -c "
+import urllib.request, json, urllib.parse
+queries=['demolition derby cars','ice cream truck','missile explosion','post apocalyptic city ruins','desert arena highway','monster truck']
+for q in queries:
+    url='https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrsearch='+urllib.parse.quote(q+' filetype:bitmap')+'&gsrlimit=3&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=800'
+    try:
+        with urllib.request.urlopen(url, timeout=20) as r:
+            d=json.loads(r.read().decode())
+        pages=d.get('query',{}).get('pages',{})
+        for pid,p in list(pages.items())[:2]:
+            print(q,'|',p.get('title'),'|',p.get('imageinfo',[{}])[0].get('thumburl','')[:200])
+    except Exception as e:
+        print(q,'ERR',e)
+"
+
+demolition derby cars ERR HTTP Error 403: Forbidden
+ice cream truck ERR HTTP Error 403: Forbidden
+missile explosion ERR HTTP Error 403: Forbidden
+post apocalyptic city ruins ERR HTTP Error 403: Forbidden
+desert arena highway ERR HTTP Error 403: Forbidden
+monster truck ERR HTTP Error 403: Forbidden
+[0m
+[0m$ [0mpython3 -c "
+import urllib.request, json, urllib.parse
+queries=['demolition derby','ice cream truck','explosion fire','abandoned city ruins','desert highway aerial','monster truck']
+UA={'User-Agent':'PlayGroundResearch/1.0 (research; contact: local)'}
+for q in queries:
+    url='https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrsearch='+urllib.parse.quote(q+' filetype:bitmap')+'&gsrlimit=3&prop=imageinfo&iiprop=url|size&iiurlwidth=800'
+    try:
+        req=urllib.request.Request(url, headers=UA)
+        with urllib.request.urlopen(req, timeout=20) as r:
+            d=json.loads(r.read().decode())
+        pages=d.get('query',{}).get('pages',{})
+        for pid,p in list(pages.items())[:2]:
+            ii=p.get('imageinfo',[{}])[0]
+            print(q,'|',p.get('title'),'|',ii.get('thumburl','')[:300],'|FULL:',ii.get('url','')[:300])
+    except Exception as e:
+        print(q,'ERR',e)
+"
+
+(no output)
+[0m
+Initial visual research is done — now gathering reference images.
+[0m$ [0mcurl -sL --max-time 20 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=demolition%20derby&srnamespace=6&srlimit=5" | head -c 2000; echo "---DONE---"
+{"batchcomplete":"","continue":{"sroffset":5,"continue":"-||"},"query":{"searchinfo":{"totalhits":711},"search":[{"ns":6,"title":"File:Demolition derby driver craze.png","pageid":128135267,"size":376,"wordcount":165,"snippet":"Attribution-Share Alike 4.0 truetrue English Alec &#039;Craze&#039; Zammitt - <span class=\"searchmatch\">Demolition</span> <span class=\"searchmatch\">Derby</span> Sydney Speedway author name string: Bruzzie Wikimedia username: Bruzzie","timestamp":"2026-06-24T14:35:57Z"},{"ns":6,"title":"File:Cazamedusas de Patricio - Parque de Atracciones de Madrid.jpg","pageid":110856147,"size":391,"wordcount":174,"snippet":"I, the copyright holder of this work, hereby publish it under the following license: This file is licensed under the Creative Commons Attribution-Share","timestamp":"2024-12-18T08:16:19Z"},{"ns":6,"title":"File:Pattaya Park Demolition Derby.jpg","pageid":86744532,"size":473,"wordcount":152,"snippet":"DescriptionPattaya Park <span class=\"searchmatch\">Demolition</span> <span class=\"searchmatch\">Derby</span>.jpg \u0e44\u0e17\u0e22: \u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e40\u0e25\u0e48\u0e19 <span class=\"searchmatch\">Demolition</span> <span class=\"searchmatch\">Derby</span> \u0e20\u0e32\u0e22\u0e43\u0e19\u0e2a\u0e27\u0e19\u0e2a\u0e38\u0e01\u0e1e\u0e31\u0e17\u0e22\u0e32\u0e1b\u0e32\u0e23\u0e4c\u0e04 \u0e2d\u0e2d\u0e01\u0e41\u0e1a\u0e1a\u0e42\u0e14\u0e22\u0e1a\u0e23\u0e34\u0e29\u0e31\u0e17 Zamperla \u0e08\u0e32\u0e01\u0e1b\u0e23\u0e30\u0e40\u0e17\u0e28\u0e2d\u0e34\u0e15\u0e32\u0e25\u0e35 Date 25 December","timestamp":"2024-12-18T08:16:17Z"},{"ns":6,"title":"File:Wyscigzlomow.jpg","pageid":145374409,"size":276,"wordcount":54,"snippet":"this work, hereby publish it under the following license: English <span class=\"searchmatch\">Demolition</span> <span class=\"searchmatch\">Derby</span> in Iganie (Poland) Polish Wy\u015bcig z\u0142om\u00f3w w Iganiach located in the administrative","timestamp":"2024-12-17T22:09:55Z"},{"ns":6,"tit---DONE---
+[0m
+[0m$ [0mfor q in "demolition derby cars" "ice cream truck" "explosion" "abandoned factory ruins" "desert highway" "monster truck" "radar HUD"; do enc=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$q"); echo "== $q =="; curl -sL --max-time 15 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=${enc}&srnamespace=6&srlimit=3" | python3 -c "import json,sys; d=json.load(sys.stdin); print('\n'.join([s['title'] for s in d.get('query',{}).get('search',[])]))"; done
+== demolition derby cars ==
+File:Demolition Derby Car.jpg
+File:Demolition Derby (208012361).jpeg
+File:Old Demolition Derby car (3466538675).jpg
+== ice cream truck ==
+File:Ice cream van, Helsinki (Helsingfors).JPG
+File:Ice cream truck beach.jpg
+File:Ice cream van in Vereeniging.jpg
+== explosion ==
+File:Challenger explosion.jpg
+File:Glühlampe explodiert.jpg
+File:Edward Duncan - The Explosion of the United States Steam Frigate Missouri.jpg
+== abandoned factory ruins ==
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+== desert highway ==
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+== monster truck ==
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+== radar HUD ==
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+[0m
+[0m$ [0mcd twisted-metal/reference-assets
+download() { name="$1"; fname="$2"; enc=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$name"); echo "== $name -> $fname"; curl -sL --max-time 25 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/wiki/Special:FilePath/${enc}?width=1200" -o "$fname" && ls -lh "$fname" && file "$fname" | head -c 300; echo; }
+download "Demolition Derby Car.jpg" "01-demolition-derby-contact.jpg"
+sleep 2
+download "Ice cream truck beach.jpg" "02-icecream-truck-archetype.jpg"
+sleep 2
+download "Twisted Metal Black.jpg" "00-tmblack-cover.jpg"
+ls -lh
+== Demolition Derby Car.jpg -> 01-demolition-derby-contact.jpg
+-rw-r--r-- 1 runner runner 324K Sep  7 23:08 01-demolition-derby-contact.jpg
+01-demolition-derby-contact.jpg: JPEG image data, baseline, precision 8, 1280x960, components 3
+
+== Ice cream truck beach.jpg -> 02-icecream-truck-archetype.jpg
+-rw-r--r-- 1 runner runner 178K Sep  7 23:08 02-icecream-truck-archetype.jpg
+02-icecream-truck-archetype.jpg: JPEG image data, baseline, precision 8, 1280x853, components 3
+
+== Twisted Metal Black.jpg -> 00-tmblack-cover.jpg
+-rw-r--r-- 1 runner runner 41K Sep  7 23:08 00-tmblack-cover.jpg
+00-tmblack-cover.jpg: HTML document, ASCII text, with very long lines (3814)
+
+total 548K
+-rw-r--r-- 1 runner runner  41K Sep  7 23:08 00-tmblack-cover.jpg
+-rw-r--r-- 1 runner runner 324K Sep  7 23:08 01-demolition-derby-contact.jpg
+-rw-r--r-- 1 runner runner 178K Sep  7 23:08 02-icecream-truck-archetype.jpg
+[0m
+[0m$ [0mcd twisted-metal/reference-assets
+rm -f 00-tmblack-cover.jpg
+curl -sL --max-time 20 -A "PlayGroundResearch/1.0" "https://upload.wikimedia.org/wikipedia/en/9/9e/Twisted_Metal_Black.jpg" -o "00-tmblack-cover-art.jpg" && file "00-tmblack-cover-art.jpg" && ls -lh
+download() { name="$1"; fname="$2"; enc=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$name"); echo "== $name -> $fname"; curl -sL --max-time 25 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/wiki/Special:FilePath/${enc}?width=1200" -o "$fname" && ls -lh "$fname" && file "$fname" | head -c 300; echo; sleep 2; }
+download "M1 Abrams firing.jpg" "03-armor-firepower.jpg"
+download "Abandoned Packard automotive plant Detroit Michigan.jpg" "04-arena-ruins.jpg"
+download "Empty desert road.jpg" "05-desert-arena.jpg"
+download "Monster truck 01.jpg" "06-heavy-vehicle.jpg"
+ls -lh
+00-tmblack-cover-art.jpg: JPEG image data, JFIF standard 1.02, aspect ratio, density 100x100, segment length 16, baseline, precision 8, 211x300, components 3
+total 520K
+-rw-r--r-- 1 runner runner  16K Sep  7 23:08 00-tmblack-cover-art.jpg
+-rw-r--r-- 1 runner runner 324K Sep  7 23:08 01-demolition-derby-contact.jpg
+-rw-r--r-- 1 runner runner 178K Sep  7 23:08 02-icecream-truck-archetype.jpg
+== M1 Abrams firing.jpg -> 03-armor-firepower.jpg
+-rw-r--r-- 1 runner runner 41K Sep  7 23:08 03-armor-firepower.jpg
+03-armor-firepower.jpg: HTML document, ASCII text, with very long lines (3805)
+
+== Abandoned Packard automotive plant Detroit Michigan.jpg -> 04-arena-ruins.jpg
+-rw-r--r-- 1 runner runner 41K Sep  7 23:08 04-arena-ruins.jpg
+04-arena-ruins.jpg: HTML document, ASCII text, with very long lines (3910)
+
+== Empty desert road.jpg -> 05-desert-arena.jpg
+-rw-r--r-- 1 runner runner 41K Sep  7 23:08 05-desert-arena.jpg
+05-desert-arena.jpg: HTML document, ASCII text, with very long lines (3808)
+
+== Monster truck 01.jpg -> 06-heavy-vehicle.jpg
+-rw-r--r-- 1 runner runner 41K Sep  7 23:08 06-heavy-vehicle.jpg
+06-heavy-vehicle.jpg: HTML document, ASCII text, with very long lines (3805)
+
+total 696K
+-rw-r--r-- 1 runner runner  16K Sep  7 23:08 00-tmblack-cover-art.jpg
+-rw-r--r-- 1 runner runner 324K Sep  7 23:08 01-demolition-derby-contact.jpg
+-rw-r--r-- 1 runner runner 178K Sep  7 23:08 02-icecream-truck-archetype.jpg
+-rw-r--r-- 1 runner runner  41K Sep  7 23:08 03-armor-firepower.jpg
+-rw-r--r-- 1 runner runner  41K Sep  7 23:08 04-arena-ruins.jpg
+-rw-r--r-- 1 runner runner  41K Sep  7 23:08 05-desert-arena.jpg
+-rw-r--r-- 1 runner runner  41K Sep  7 23:08 06-heavy-vehicle.jpg
+[0m
+Two solid references saved — tracking down the remaining anchors.
+[0m$ [0msleep 3
+curl -sL --max-time 15 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=monster%20truck&srnamespace=6&srlimit=5" | python3 -c "import json,sys; d=json.load(sys.stdin); print('\n'.join([s['title'] for s in d.get('query',{}).get('search',[])]))"
+File:003707 - Monster truck (5132170430).jpg
+File:Red Dragon Monster Truck, Snetterton, September 2018 (43702465145).jpg
+File:HOT WHEELS MONSTER TRUCKS LIVE GLOW-N-FIRE 17.jpg
+File:HOT WHEELS MONSTER TRUCKS LIVE GLOW-N-FIRE 11.jpg
+File:HOT WHEELS MONSTER TRUCKS LIVE GLOW-N-FIRE 02.jpg
+[0m
+[0m$ [0mcd twisted-metal/reference-assets
+rm -f 03-armor-firepower.jpg 04-arena-ruins.jpg 05-desert-arena.jpg 06-heavy-vehicle.jpg
+download() { name="$1"; fname="$2"; enc=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$name"); echo "== $name -> $fname"; curl -sL --max-time 25 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/wiki/Special:FilePath/${enc}?width=1200" -o "$fname" && ls -lh "$fname" && file "$fname" | cut -c1-200; echo; sleep 3; }
+download "003707 - Monster truck (5132170430).jpg" "06-heavy-vehicle.jpg"
+== 003707 - Monster truck (5132170430).jpg -> 06-heavy-vehicle.jpg
+-rw-r--r-- 1 runner runner 254K Sep  7 23:09 06-heavy-vehicle.jpg
+06-heavy-vehicle.jpg: JPEG image data, baseline, precision 8, 1280x863, components 3
+[0m
+[0m$ [0mcurl -sL --max-time 15 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=explosion%20fire&srnamespace=6&srlimit=5" | python3 -c "import json,sys; d=json.load(sys.stdin); print('\n'.join([s['title'] for s in d.get('query',{}).get('search',[])]))"; echo "---"; sleep 2; curl -sL --max-time 15 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=abandoned%20factory&srnamespace=6&srlimit=5" | python3 -c "import json,sys; d=json.load(sys.stdin); print('\n'.join([s['title'] for s in d.get('query',{}).get('search',[])]))"
+File:Edward Duncan - The Explosion of the United States Steam Frigate Missouri.jpg
+File:Fireworks Explosion Leads to Fire in California (CIRA 2025-07-02).png
+File:Fireworks Explosion Leads to Fire in California (CIRA 2025-07-02 - nolabels).gif
+File:Fireworks Explosion Leads to Fire in California (CIRA 2025-07-02 - labels).webm
+File:Fireworks Explosion Leads to Fire in California (CIRA 2025-07-02 - nolabels).webm
+---
+File:Abandoned concrete factory mechanism.jpg
+File:Flooded interior of abandoned factory.jpg
+File:Common hop on former factory wall, Ursus (Warsaw), 2024-07-20.jpg
+File:Water plant in an abandoned steel factory in Oupeye, Belgium (DSCF3282).jpg
+File:Abandoned factory in Ljubljana.jpg
+[0m
+[0m$ [0mcd twisted-metal/reference-assets
+download() { name="$1"; fname="$2"; enc=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$name"); echo "== $name -> $fname"; curl -sL --max-time 25 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/wiki/Special:FilePath/${enc}?width=1200" -o "$fname" && ls -lh "$fname" && file "$fname" | cut -c1-200; echo; sleep 3; }
+download "Fireworks Explosion Leads to Fire in California (CIRA 2025-07-02).png" "03-explosion-fireball.png"
+download "Abandoned concrete factory mechanism.jpg" "04-arena-ruins.jpg"
+== Fireworks Explosion Leads to Fire in California (CIRA 2025-07-02).png -> 03-explosion-fireball.png
+-rw-r--r-- 1 runner runner 1.2M Sep  7 23:09 03-explosion-fireball.png
+03-explosion-fireball.png: PNG image data, 1280 x 720, 8-bit/color RGBA, non-interlaced
+
+== Abandoned concrete factory mechanism.jpg -> 04-arena-ruins.jpg
+-rw-r--r-- 1 runner runner 395K Sep  7 23:09 04-arena-ruins.jpg
+04-arena-ruins.jpg: JPEG image data, baseline, precision 8, 1280x858, components 3
+[0m
+[0m$ [0mcurl -sL --max-time 15 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=desert%20road%20aerial&srnamespace=6&srlimit=5" | python3 -c "import json,sys; d=json.load(sys.stdin); print('\n'.join([s['title'] for s in d.get('query',{}).get('search',[])]))"; echo "---"; sleep 2; curl -sL --max-time 15 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=junkyard%20cars&srnamespace=6&srlimit=5" | python3 -c "import json,sys; d=json.load(sys.stdin); print('\n'.join([s['title'] for s in d.get('query',{}).get('search',[])]))"
+File:Namib Desert - Sentinel-2.jpg
+File:Aerial view of Paranal and Atacama desert (eso9804e).jpg
+File:Aerial view of Paranal and Atacama desert (eso9804e).tiff
+File:Israel-2013-Aerial 09-Negev-Serpentine Road.jpg
+File:מכתש רמון - גלישת עננים (cropped).jpg
+---
+File:Old blue car sits in junkyard surrounded by other vehicles in disrepair.jpg
+File:STACKED CARS IN CITY JUNKYARD WILL BE USED FOR SCRAP - NARA - 552738.jpg
+File:Maters Junkyard Jamboree sign.jpg
+File:Mater's Junkyard Jamboree (9761223271).jpg
+File:Mater's Junkyard Jamboree (7476935978).jpg
+[0m
+[0m$ [0mcd twisted-metal/reference-assets
+download() { name="$1"; fname="$2"; enc=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$name"); echo "== $name -> $fname"; curl -sL --max-time 25 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/wiki/Special:FilePath/${enc}?width=1200" -o "$fname" && ls -lh "$fname" && file "$fname" | cut -c1-200; echo; sleep 3; }
+download "Israel-2013-Aerial 09-Negev-Serpentine Road.jpg" "05-desert-arena-road.jpg"
+download "Old blue car sits in junkyard surrounded by other vehicles in disrepair.jpg" "07-junkyard-arena.jpg"
+== Israel-2013-Aerial 09-Negev-Serpentine Road.jpg -> 05-desert-arena-road.jpg
+-rw-r--r-- 1 runner runner 526K Sep  7 23:09 05-desert-arena-road.jpg
+05-desert-arena-road.jpg: JPEG image data, baseline, precision 8, 1280x1650, components 3
+
+== Old blue car sits in junkyard surrounded by other vehicles in disrepair.jpg -> 07-junkyard-arena.jpg
+-rw-r--r-- 1 runner runner 271K Sep  7 23:09 07-junkyard-arena.jpg
+07-junkyard-arena.jpg: JPEG image data, Exif standard: [TIFF image data, big-endian, direntries=2, description=A blue car stands in a junkyard area filled with broken down vehicles. This car has missi
+[0m
+Reference collection complete — now designing the arena combat systems.
+[0m$ [0mls -lh twisted-metal/reference-assets/; du -h twisted-metal/reference-assets/*
+total 3.1M
+-rw-r--r-- 1 runner runner  16K Sep  7 23:08 00-tmblack-cover-art.jpg
+-rw-r--r-- 1 runner runner 324K Sep  7 23:08 01-demolition-derby-contact.jpg
+-rw-r--r-- 1 runner runner 178K Sep  7 23:08 02-icecream-truck-archetype.jpg
+-rw-r--r-- 1 runner runner 1.2M Sep  7 23:09 03-explosion-fireball.png
+-rw-r--r-- 1 runner runner 395K Sep  7 23:09 04-arena-ruins.jpg
+-rw-r--r-- 1 runner runner 526K Sep  7 23:09 05-desert-arena-road.jpg
+-rw-r--r-- 1 runner runner 254K Sep  7 23:09 06-heavy-vehicle.jpg
+-rw-r--r-- 1 runner runner 271K Sep  7 23:09 07-junkyard-arena.jpg
+16K	twisted-metal/reference-assets/00-tmblack-cover-art.jpg
+324K	twisted-metal/reference-assets/01-demolition-derby-contact.jpg
+180K	twisted-metal/reference-assets/02-icecream-truck-archetype.jpg
+1.2M	twisted-metal/reference-assets/03-explosion-fireball.png
+396K	twisted-metal/reference-assets/04-arena-ruins.jpg
+528K	twisted-metal/reference-assets/05-desert-arena-road.jpg
+256K	twisted-metal/reference-assets/06-heavy-vehicle.jpg
+272K	twisted-metal/reference-assets/07-junkyard-arena.jpg
+[0m
+[0m→ [0mRead twisted-metal/reference-assets/00-tmblack-cover-art.jpg
+[0m→ [0mRead twisted-metal/reference-assets/02-icecream-truck-archetype.jpg
+[0m→ [0mRead twisted-metal/reference-assets/01-demolition-derby-contact.jpg
+[0m→ [0mRead twisted-metal/reference-assets/03-explosion-fireball.png
+[0m
+[0m$ [0mcurl -sL --max-time 15 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=car%20fire%20explosion&srnamespace=6&srlimit=5" | python3 -c "import json,sys; d=json.load(sys.stdin); print('\n'.join([s['title'] for s in d.get('query',{}).get('search',[])]))"
+File:Destruction after fire and explosion in San Bruno.jpg
+File:Enemy Activities - Destruction by Enemy in U.S. - Kingsland munitions disaster. Scene of explosion of Canadian Car & Foundry Co., Kingsland, New Jersey - NARA - 31478126.jpg
+File:Enemy Activities - Destruction by Enemy in U.S. - Ammunition explosion, Black Tom Island, New Jersey. Fighting the fire which began in the explosion of a carload of dynamite, destroyed 100 cars loaded with shrapn(...) - NARA - 31478068.jpg
+File:Enemy Activities - Destruction by Enemy in U.S. - Munition explosion. Ruins of the Canadian Car and Foundry Ammunition plant at Kingsland, New Jersey - NARA - 31478122.jpg
+File:Enemy Activities - Destruction by Enemy in U.S. - Kingsland, New Jersey, disaster. Night photo of fire which followed the explosion in the plant of the Canadian Car and Foundry Co. at Kingsland, January 1917 - NARA - 31478078.jpg
+[0m
+[0m$ [0mcurl -sL --max-time 15 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=controlled%20explosion%20fireball&srnamespace=6&srlimit=5" | python3 -c "import json,sys; d=json.load(sys.stdin); print('\n'.join([s['title'] for s in d.get('query',{}).get('search',[])]))"
+File:'Breacher you have control!' 120110-M-WC184-004.jpg
+File:Touchdown, The Development of Propulsion Controlled Aircraft at NASA Dryden - NASA Monographs in Aerospace History, No. 16 (1999).pdf
+File:Firefighters from Oakham Fire Brigade near RAF Cottesmore fighting a controlled blaze at the RAF station during a joint training programme MOD 45147934.jpg
+File:Defense.gov photo essay 080620-F-9876D-295.jpg
+File:Navy & Marine Corps Medical News 01-24 (IA Med01024).pdf
+[0m
+[0m$ [0mcurl -sL --max-time 15 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=burning%20car&srnamespace=6&srlimit=6" | python3 -c "import json,sys; d=json.load(sys.stdin); print('\n'.join([s['title'] for s in d.get('query',{}).get('search',[])]))"
+File:Burning car in Grange Road - geograph.org.uk - 3748570.jpg
+File:Burning car on Isokaari 20241223.jpg
+File:Burning Man 2011 Art Car IMG 4697.jpg
+File:Burning Car in Lashio.jpg
+File:Burning Car 2000.jpg
+File:Burning car after Manchester riots.jpg
+[0m
+[0m$ [0mcd twisted-metal/reference-assets
+enc=$(python3 -c "import urllib.parse; print(urllib.parse.quote('Burning car on Isokaari 20241223.jpg'))")
+curl -sL --max-time 25 -A "PlayGroundResearch/1.0" "https://commons.wikimedia.org/wiki/Special:FilePath/${enc}?width=1200" -o "03b-burning-car.jpg" && file "03b-burning-car.jpg" | cut -c1-200; ls -lh
+03b-burning-car.jpg: JPEG image data, baseline, precision 8, 1280x1280, components 3
+total 3.5M
+-rw-r--r-- 1 runner runner  16K Sep  7 23:08 00-tmblack-cover-art.jpg
+-rw-r--r-- 1 runner runner 324K Sep  7 23:08 01-demolition-derby-contact.jpg
+-rw-r--r-- 1 runner runner 178K Sep  7 23:08 02-icecream-truck-archetype.jpg
+-rw-r--r-- 1 runner runner 1.2M Sep  7 23:09 03-explosion-fireball.png
+-rw-r--r-- 1 runner runner 399K Sep  7 23:10 03b-burning-car.jpg
+-rw-r--r-- 1 runner runner 395K Sep  7 23:09 04-arena-ruins.jpg
+-rw-r--r-- 1 runner runner 526K Sep  7 23:09 05-desert-arena-road.jpg
+-rw-r--r-- 1 runner runner 254K Sep  7 23:09 06-heavy-vehicle.jpg
+-rw-r--r-- 1 runner runner 271K Sep  7 23:09 07-junkyard-arena.jpg
+[0m
+[0m→ [0mRead twisted-metal/reference-assets/03b-burning-car.jpg
+[0m→ [0mRead twisted-metal/reference-assets/04-arena-ruins.jpg
+[0m→ [0mRead twisted-metal/reference-assets/06-heavy-vehicle.jpg
+[0m→ [0mRead twisted-metal/reference-assets/07-junkyard-arena.jpg
+[0m→ [0mRead twisted-metal/reference-assets/05-desert-arena-road.jpg
+All references inspected — now finalizing the design and building the playable game.
+[0m
+[0m# [0mTodos
+[✓] Set up workspace, progress page, reference-assets dir
+[✓] Research Twisted Metal + comparables, select 6+ visual anchors, download refs with provenance
+[•] Design game architecture and split into judgeable pieces
+[ ] Build playable game (states, combat, weapons, HUD, pause, responsive)
+[ ] Verify: playtest, screenshots, visual QA, performance/accessibility/recovery
+[ ] Delivery evidence + progress page finalization
+[0m
+[0m← [0mWrite twisted-metal/reference-assets/PROVENANCE.md
+Wrote file successfully.
+[0m
+[0m← [0mWrite twisted-metal/PROGRESS.md
+Wrote file successfully.
+[0m
+[0m# [0mTodos
+[✓] Set up workspace, progress page, reference-assets dir
+[✓] Research Twisted Metal + comparables, select 6+ visual anchors, download refs with provenance
+[✓] Design game architecture and split into judgeable pieces
+[•] Build playable game (states, combat, weapons, HUD, pause, responsive)
+[ ] Verify: playtest, screenshots, visual QA, performance/accessibility/recovery
+[ ] Delivery evidence + progress page finalization
+[0m
+[0m← [0mWrite twisted-metal/index.html
+Wrote file successfully.
+[0m
+[0m← [0mWrite twisted-metal/style.css
+Wrote file successfully.
+[0m
+Shell and styling done — now building the combat engine.
+[0m← [0mWrite twisted-metal/game.js
+Wrote file successfully.
+[0m
+[0m$ [0mnode --check twisted-metal/game.js && echo "SYNTAX OK"; python3 -m py_compile /dev/null 2>&1 | head; ls -lh twisted-metal/
+SYNTAX OK
+[Errno 13] Permission denied: '/dev/__pycache__'total 72K
+-rw-r--r-- 1 runner runner 3.9K Sep  7 23:13 PROGRESS.md
+drwxr-xr-x 2 runner runner 4.0K Sep  7 23:05 assets
+-rw-r--r-- 1 runner runner  42K Sep  7 23:21 game.js
+-rw-r--r-- 1 runner runner 4.9K Sep  7 23:14 index.html
+drwxr-xr-x 2 runner runner 4.0K Sep  7 23:12 reference-assets
+-rw-r--r-- 1 runner runner 6.1K Sep  7 23:16 style.css
+[0m
+[0m$ [0mwhich chromium chromium-browser google-chrome node npx python3 2>/dev/null; npx --yes playwright --version 2>&1 | head -n 5; ls /root/.cache/ms-playwright 2>/dev/null || echo "no pw cache"
+/usr/bin/chromium
+/usr/bin/chromium-browser
+/usr/bin/google-chrome
+/usr/local/bin/node
+/usr/local/bin/npx
+/usr/bin/python3
+Version 1.63.0
+no pw cache
+[0m
+[0m$ [0mpython3 -m http.server 8765 --directory twisted-metal >/tmp/http.log 2>&1 &
+echo $! > /tmp/http.pid; sleep 1; curl -s -o /dev/null -w "%{http_code}" http://localhost:8765/index.html; echo " served"
+200 served
+[0m
+[0m$ [0mchromium --headless --disable-gpu --no-sandbox --window-size=1280,800 --virtual-time-budget=4000 --screenshot=/tmp/shot_title.png http://localhost:8765/index.html 2>&1 | tail -n 5; ls -lh /tmp/shot_title.png
+[10177:10242:0907/232248.950786:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[10177:10177:0907/232248.981659:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[10177:10242:0907/232248.981740:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[10177:10177:0907/232248.989937:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+308943 bytes written to file /tmp/shot_title.png
+-rw-r--r-- 1 runner runner 302K Sep  7 23:22 /tmp/shot_title.png
+[0m
+[0m→ [0mRead /tmp/shot_title.png
+Title screen renders — fixing the runtime error spotted in the backdrop.
+[0m✱ [0mGrep "\bmd\b"[90m in twisted-metal · 0 matches[0m
+[0m
+[0m$ [0mnode -e "
+const {execSync}=require('child_process');
+" 2>&1; cat > /tmp/dump.js <<'EOF'
+const { chromium } = require('playwright');
+(async()=>{
+  const browser = await chromium.launch({args:['--no-sandbox']});
+  const page = await browser.newPage();
+  page.on('console',m=>console.log('CONSOLE',m.type(),m.text()));
+  page.on('pageerror',e=>console.log('PAGEERROR',e.message,'\n',e.stack));
+  await page.goto('http://localhost:8765/index.html');
+  await page.waitForTimeout(2500);
+  await browser.close();
+})();
+EOF
+npx --yes playwright --version >/dev/null 2>&1; NODE_PATH=$(npm root -g 2>/dev/null) node /tmp/dump.js 2>&1 | head -n 40 || node /tmp/dump.js 2>&1 | head -n 40
+node:internal/modules/cjs/loader:1433
+  throw err;
+  ^
+
+Error: Cannot find module 'playwright'
+Require stack:
+- /tmp/dump.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+    at Function._load (node:internal/modules/cjs/loader:1216:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Module.require (node:internal/modules/cjs/loader:1527:12)
+    at require (node:internal/modules/helpers:147:16)
+    at Object.<anonymous> (/tmp/dump.js:1:22)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [ '/tmp/dump.js' ]
+}
+
+Node.js v22.23.2
+[0m
+[0m$ [0mchromium --headless --disable-gpu --no-sandbox --enable-logging=stderr --v=0 --window-size=1280,800 --virtual-time-budget=3000 --dump-dom http://localhost:8765/index.html 2>/tmp/chrome_err.log >/tmp/dom.html; echo "dom bytes:"; wc -c /tmp/dom.html; grep -o "Error[^<]*" /tmp/dom.html | head; tail -n 20 /tmp/chrome_err.log
+dom bytes:
+6177 /tmp/dom.html
+Error: rnd is not defined — press ↻ to restart safely.
+[10857:10857:0907/232343.132457:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[10857:10857:0907/232343.134014:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[10857:10872:0907/232343.136232:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[10857:10857:0907/232343.162242:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files
+[10857:10857:0907/232343.162269:WARNING:dbus/property.cc:174] GetAll request failed for: org.freedesktop.UPower.Device
+[10857:10857:0907/232343.163088:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[10857:10872:0907/232343.163964:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[10857:10857:0907/232343.182394:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[10857:10872:0907/232343.184311:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[10857:10857:0907/232343.198895:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[10857:10857:0907/232343.198939:WARNING:ui/base/idle/idle_linux.cc:111] None of the known D-Bus ScreenSaver services could be used.
+[10967:10967:0907/232343.257455:WARNING:content/child/runtime_features.cc:563] SharedStorage cannot be enabled in this configuration. Use --enable-features=SharedStorageAPI in addition.
+[10967:10967:0907/232343.257566:WARNING:content/child/runtime_features.cc:573] AttributionReporting cannot be enabled in this configuration. Use --enable-features=ConversionMeasurement in addition.
+[10976:10976:0907/232343.277775:WARNING:content/child/runtime_features.cc:563] SharedStorage cannot be enabled in this configuration. Use --enable-features=SharedStorageAPI in addition.
+[10976:10976:0907/232343.281507:WARNING:content/child/runtime_features.cc:573] AttributionReporting cannot be enabled in this configuration. Use --enable-features=ConversionMeasurement in addition.
+[10992:10992:0907/232343.348304:WARNING:content/child/runtime_features.cc:563] SharedStorage cannot be enabled in this configuration. Use --enable-features=SharedStorageAPI in addition.
+[10992:10992:0907/232343.348470:WARNING:content/child/runtime_features.cc:573] AttributionReporting cannot be enabled in this configuration. Use --enable-features=ConversionMeasurement in addition.
+[10991:10991:0907/232343.349752:WARNING:content/child/runtime_features.cc:563] SharedStorage cannot be enabled in this configuration. Use --enable-features=SharedStorageAPI in addition.
+[10991:10991:0907/232343.349847:WARNING:content/child/runtime_features.cc:573] AttributionReporting cannot be enabled in this configuration. Use --enable-features=ConversionMeasurement in addition.
+[10857:10857:0907/232343.528112:INFO:CONSOLE:696] "ReferenceError: rnd is not defined", source: http://localhost:8765/game.js (696)
+[0m
+[0m✱ [0mGrep "rnd\("[90m in twisted-metal · 7 matches[0m
+[0m→ [0mRead twisted-metal/game.js[90m [limit=20, offset=100][0m
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -104,8 +104,9 @@
+ function toast(t,ms=1600){const el=$('toast');el.textContent=t;el.style.opacity=1;clearTimeout(el._t);el._t=setTimeout(()=>el.style.opacity=0,ms);}
+ function showErr(t){const el=$('err');el.textContent=t;el.classList.remove('hidden');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.add('hidden'),6000);}
+ function feed(t){const k=$('killfeed');const d=document.createElement('div');d.textContent=t;k.prepend(d);while(k.children.length>5)k.lastChild.remove();}
+ function fmtT(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
++const R=(a,b)=>a+Math.random()*(b-a);
+ 
+ /* ---------- Arena build ---------- */
+ function buildArena(){
+   const A=ARENAS[G.sel.arena];G.obstacles=[];G.barrels=[];G.pickups=[];G.repairs=[];G.pools=[];
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -138,9 +138,9 @@
+   const V=VEHICLES[vehKey];
+   return {id:eid++,isPlayer,name:name||V.name,veh:vehKey,V,x,y,a:Math.random()*TAU,vx:0,vy:0,
+     hp:V.hp,maxhp:V.hp,alive:true,respawn:0,invuln:isPlayer?0:0,lives:isPlayer?PLAYER_LIVES:Infinity,
+     mgHeat:0,mgCd:0,turbo:100,weapons:{homing:2,power:4,fire:0,napalm:0,mine:0},order:['homing','power','fire','napalm','mine'],
+-    wi:0,specialCd:0,burn:0,burnT:0,kills:0,ai:isPlayer?null:{t:0,mode:'hunt',tx:x,ty:y,fireT:rnd(.5,1.5),wt:rnd(0,2)},
++    wi:0,specialCd:0,burn:0,burnT:0,kills:0,ai:isPlayer?null:{t:0,mode:'hunt',tx:x,ty:y,fireT:R(.5,1.5),wt:R(0,2)},
+     smoke:0,flash:0,hitT:0};
+ }
+ function spawnPositions(){const A=ARENAS[G.sel.arena];const cx=A.w/2,cy=A.h/2,R=Math.min(A.w,A.h)*0.36;
+   return Array.from({length:6},(_,i)=>({x:cx+Math.cos(i/6*TAU)*R,y:cy+Math.sin(i/6*TAU)*R}));}
+
+[0m
+[0m$ [0mnode --check twisted-metal/game.js && echo OK
+chromium --headless --disable-gpu --no-sandbox --enable-logging=stderr --window-size=1280,800 --virtual-time-budget=3000 --dump-dom http://localhost:8765/index.html 2>&1 | grep -i "console\|error\|Reference" | head -n 10; echo "---dom check---"
+chromium --headless --disable-gpu --no-sandbox --window-size=1280,800 --virtual-time-budget=3000 --screenshot=/tmp/shot_title2.png http://localhost:8765/index.html 2>/dev/null; ls -lh /tmp/shot_title2.png
+OK
+[11472:11489:0907/232451.770539:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[11472:11489:0907/232451.771135:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[11472:11489:0907/232451.787874:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[11472:11489:0907/232451.819248:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[11472:11472:0907/232451.928275:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[11472:11472:0907/232451.928365:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[11472:11489:0907/232451.928770:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[11472:11489:0907/232451.928825:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[11472:11472:0907/232451.931430:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[11472:11472:0907/232451.941042:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+---dom check---
+-rw-r--r-- 1 runner runner 307K Sep  7 23:24 /tmp/shot_title2.png
+[0m
+[0m$ [0mchromium --headless --disable-gpu --no-sandbox --enable-logging=stderr --window-size=1280,800 --virtual-time-budget=3000 --dump-dom http://localhost:8765/index.html 2>/tmp/c2.log >/tmp/d2.html; grep -o "INFO:CONSOLE.*" /tmp/c2.log | head; grep -o "Error[^<]*" /tmp/d2.html | head; echo DONE
+DONE
+[0m
+Crash fixed — now verifying gameplay and capturing combat.
+[0m→ [0mRead /tmp/shot_title2.png
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -716,5 +716,13 @@
+   if(G.bots.every(b=>!b.alive)&&G.kills<KILLS_TO_WIN){for(const b of G.bots)b.respawn=Math.min(b.respawn,.8);}
+ }
+ buildRoster();
+ toTitle();
++// test/automation hook: ?auto=1 starts a match immediately, ?arena= / ?veh= select
++try{const q=new URLSearchParams(location.search);
++if(q.has('veh')&&VEHICLES[q.get('veh')])G.sel.veh=q.get('veh');
++if(q.has('arena')&&ARENAS[q.get('arena')])G.sel.arena=q.get('arena');
++if(q.has('auto')){startGame();if(q.get('auto')==='combat'){for(let i=0;i<240;i++)step(1/60);G.player.x=ARENAS[G.sel.arena].w/2;G.player.y=ARENAS[G.sel.arena].h/2;
++  for(const b of G.bots){b.x=G.player.x+R(-260,260);b.y=G.player.y+R(-220,220);}
++  explode(G.player.x+120,G.player.y-80,1.4);fireSpecial(G.player);
++  for(let i=0;i<60;i++)step(1/60);}}}catch(e){}
+ requestAnimationFrame(frame);
+
+[0m
+[0m$ [0mnode --check twisted-metal/game.js && echo OK
+chromium --headless --disable-gpu --no-sandbox --window-size=1280,800 --virtual-time-budget=5000 --screenshot=/tmp/shot_combat.png "http://localhost:8765/index.html?auto=combat&arena=rustyard&veh=chuckles" 2>/dev/null; ls -lh /tmp/shot_combat.png
+chromium --headless --disable-gpu --no-sandbox --window-size=1280,800 --virtual-time-budget=5000 --screenshot=/tmp/shot_select.png "http://localhost:8765/index.html?auto=select" 2>/dev/null; echo done
+OK
+-rw-r--r-- 1 runner runner 110K Sep  7 23:25 /tmp/shot_combat.png
+done
+[0m
+[0m→ [0mRead /tmp/shot_combat.png
+[0m→ [0mRead twisted-metal/game.js[90m [limit=70, offset=380][0m
+[0m→ [0mRead twisted-metal/game.js[90m [limit=80, offset=450][0m
+Found the camera bug hiding the player — fixing vehicle rendering.
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -428,10 +428,11 @@
+   for(let x=0;x<W;x+=64){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}
+   for(let y=0;y<H;y+=64){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+   groundKey=key;return ground;
+ }
+-function drawVehicle(c){
+-  ctx.save();ctx.translate(c.x-G.cam.x+W/2,c.y-G.cam.y+H/2);ctx.rotate(c.a);
++function drawVehicle(c, sx, sy){
++  if(sx===undefined){sx=c.x-G.cam.x+W/2;sy=c.y-G.cam.y+H/2;}
++  ctx.save();ctx.translate(sx,sy);ctx.rotate(c.a);
+   if(c.invuln>0&&Math.floor(G.time*8)%2===0)ctx.globalAlpha=.4;
+   const V=c.V;
+   // shadow
+   ctx.fillStyle='rgba(0,0,0,.45)';ctx.beginPath();ctx.ellipse(2,3,26,15,0,0,TAU);ctx.fill();
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -463,17 +463,16 @@
+   if(c.hp<c.maxhp*.4||c.burn>0){ctx.fillStyle=`rgba(255,${90+Math.random()*60|0},20,${.5+Math.random()*.4})`;
+     ctx.beginPath();ctx.arc(-6+(Math.random()-.5)*8,(Math.random()-.5)*10,5+Math.random()*4,0,TAU);ctx.fill();}
+   if(c.flash>0){ctx.globalAlpha=.6;ctx.fillStyle='#fff';ctx.fillRect(-26,-15,52,30);ctx.globalAlpha=1;}
+   ctx.restore();
+-  // name + hp bar (world space)
+-  const sx=c.x-G.cam.x+W/2, sy=c.y-G.cam.y+H/2-34;
+-  if(sx>-80&&sx<W+80&&sy>-40&&sy<H+40){
++  // name + hp bar (screen space)
++  const sx2=sx, sy2=sy-34;
++  if(sx2>-80&&sx2<W+80&&sy2>-40&&sy2<H+40){
+     ctx.fillStyle=c.isPlayer?'#46e07a':'#ff6a5e';ctx.font='bold 11px Arial';ctx.textAlign='center';
+-    ctx.fillText(c.isPlayer?'YOU':c.name,sx,sy-10);
+-    ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(sx-22,sy-8,44,6);
++    ctx.fillText(c.isPlayer?'YOU':c.name,sx2,sy2-10);
++    ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(sx2-22,sy2-8,44,6);
+     ctx.fillStyle=c.hp/c.maxhp>.5?'#46e07a':c.hp/c.maxhp>.25?'#ffb300':'#e0281e';
+-    ctx.fillRect(sx-22,sy-8,44*clamp(c.hp/c.maxhp,0,1),6);
+-    if(c.specialCd<=0&&!c.isPlayer){/* ready */}
++    ctx.fillRect(sx2-22,sy2-8,44*clamp(c.hp/c.maxhp,0,1),6);
+   }
+ }
+ function render(){
+   ctx.fillStyle='#0c0a08';ctx.fillRect(0,0,W,H);
+
+[0m
+[0m→ [0mRead twisted-metal/game.js[90m [limit=40, offset=555][0m
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -553,15 +553,11 @@
+   ctx.restore();
+   drawMinimap();
+ }
+ function drawWorldCar(c,ox,oy){
+-  // cull
++  // cull in world space, draw in screen space
+   if(c.x+60< G.cam.x-W/2||c.x-60>G.cam.x+W/2||c.y+60<G.cam.y-H/2||c.y-60>G.cam.y+H/2)return;
+-  const keepX=c.x,keepY=c.y;c.x+=ox;c.y+=oy;
+-  // temporarily shift: drawVehicle expects world coords + cam; emulate by swapping
+-  const cx=G.cam.x,cy=G.cam.y;G.cam.x=W/2-ox;G.cam.y=H/2-oy;
+-  drawVehicle(c);
+-  G.cam.x=cx;G.cam.y=cy;c.x=keepX;c.y=keepY;
++  drawVehicle(c, c.x+ox, c.y+oy);
+ }
+ function drawMinimap(){
+   const A=ARENAS[G.sel.arena];
+   mmc.clearRect(0,0,148,148);mmc.fillStyle='rgba(0,0,0,.6)';mmc.fillRect(0,0,148,148);
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -716,9 +716,9 @@
+ // test/automation hook: ?auto=1 starts a match immediately, ?arena= / ?veh= select
+ try{const q=new URLSearchParams(location.search);
+ if(q.has('veh')&&VEHICLES[q.get('veh')])G.sel.veh=q.get('veh');
+ if(q.has('arena')&&ARENAS[q.get('arena')])G.sel.arena=q.get('arena');
+-if(q.has('auto')){startGame();if(q.get('auto')==='combat'){for(let i=0;i<240;i++)step(1/60);G.player.x=ARENAS[G.sel.arena].w/2;G.player.y=ARENAS[G.sel.arena].h/2;
++if(q.has('auto')&&q.get('auto')!=='select'){startGame();if(q.get('auto')==='combat'){for(let i=0;i<240;i++)step(1/60);G.player.x=ARENAS[G.sel.arena].w/2;G.player.y=ARENAS[G.sel.arena].h/2;
+   for(const b of G.bots){b.x=G.player.x+R(-260,260);b.y=G.player.y+R(-220,220);}
+   explode(G.player.x+120,G.player.y-80,1.4);fireSpecial(G.player);
+   for(let i=0;i<60;i++)step(1/60);}}}catch(e){}
+ requestAnimationFrame(frame);
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -575,9 +575,9 @@
+ function updateHUD(){
+   const c=G.player;if(!c)return;
+   $('hpFill').style.width=clamp(c.hp/c.maxhp*100,0,100)+'%';
+   $('hpFill').style.background=c.hp/c.maxhp>.5?'linear-gradient(90deg,#2ecc71,#a9ff6a)':c.hp/c.maxhp>.25?'linear-gradient(90deg,#ffb300,#ff7a1a)':'linear-gradient(90deg,#e0281e,#ff5a5a)';
+-  $('lives').textContent='●'.repeat(Math.max(0,c.lives+1))+'  +'+Math.max(0,c.lives)+' spare';
++  $('lives').textContent='●'.repeat(Math.max(0,c.lives+1))+' · '+Math.max(0,c.lives)+' spare';
+   $('vehicleName').textContent=c.V.name+' · '+c.V.specialName+(c.specialCd>0?` (${Math.ceil(c.specialCd)}s)`:' READY (F)');
+   $('turboFill').style.width=c.turbo+'%';
+   $('heatFill').style.width=c.mgHeat+'%';
+   const w=curWeapon(c);
+
+[0m
+[0m← [0mEdit twisted-metal/style.css
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/style.css
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/style.css
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/style.css
+@@ -16,9 +16,9 @@
+ #flash{position:absolute;inset:0;pointer-events:none;z-index:4;opacity:0;background:#fff}
+ .hidden{display:none!important}
+ /* HUD */
+ #hud{position:absolute;top:0;left:0;right:0;z-index:6;display:flex;gap:12px;
+-  justify-content:space-between;align-items:flex-start;padding:10px 64px 0 10px;
++  justify-content:space-between;align-items:flex-start;padding:10px 200px 0 10px;
+   pointer-events:none;text-shadow:0 2px 0 #000}
+ .hud-left,.hud-right,.hud-center{background:var(--panel);border:1px solid var(--line);
+   border-radius:10px;padding:8px 10px}
+ .hud-left{min-width:230px}
+
+[0m
+[0m$ [0mnode --check twisted-metal/game.js && echo OK
+chromium --headless --disable-gpu --no-sandbox --window-size=1280,800 --virtual-time-budget=5000 --screenshot=/tmp/shot_combat2.png "http://localhost:8765/index.html?auto=combat&arena=rustyard&veh=chuckles" 2>/dev/null; ls -lh /tmp/shot_combat2.png
+chromium --headless --disable-gpu --no-sandbox --window-size=1280,800 --virtual-time-budget=3000 --screenshot=/tmp/shot_dust.png "http://localhost:8765/index.html?auto=combat&arena=dustbowl&veh=bastion" 2>/dev/null; ls -lh /tmp/shot_dust.png
+OK
+-rw-r--r-- 1 runner runner 109K Sep  7 23:29 /tmp/shot_combat2.png
+-rw-r--r-- 1 runner runner 106K Sep  7 23:29 /tmp/shot_dust.png
+[0m
+[0m→ [0mRead /tmp/shot_dust.png
+[0m→ [0mRead /tmp/shot_combat2.png
+Combat looks sharp — now polishing HUD and capturing final states.
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -716,9 +716,9 @@
+ // test/automation hook: ?auto=1 starts a match immediately, ?arena= / ?veh= select
+ try{const q=new URLSearchParams(location.search);
+ if(q.has('veh')&&VEHICLES[q.get('veh')])G.sel.veh=q.get('veh');
+ if(q.has('arena')&&ARENAS[q.get('arena')])G.sel.arena=q.get('arena');
+-if(q.has('auto')&&q.get('auto')!=='select'){startGame();if(q.get('auto')==='combat'){for(let i=0;i<240;i++)step(1/60);G.player.x=ARENAS[G.sel.arena].w/2;G.player.y=ARENAS[G.sel.arena].h/2;
++if(q.has('auto')&&q.get('auto')!=='select'){startGame();if(q.get('auto')==='combat'){G.player.x=ARENAS[G.sel.arena].w/2;G.player.y=ARENAS[G.sel.arena].h/2;
+   for(const b of G.bots){b.x=G.player.x+R(-260,260);b.y=G.player.y+R(-220,220);}
+   explode(G.player.x+120,G.player.y-80,1.4);fireSpecial(G.player);
+   for(let i=0;i<60;i++)step(1/60);}}}catch(e){}
+ requestAnimationFrame(frame);
+
+[0m
+[0m→ [0mRead twisted-metal/game.js[90m [limit=20, offset=700][0m
+[0m→ [0mRead twisted-metal/game.js[90m [limit=10, offset=719][0m
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -716,9 +716,9 @@
+ // test/automation hook: ?auto=1 starts a match immediately, ?arena= / ?veh= select
+ try{const q=new URLSearchParams(location.search);
+ if(q.has('veh')&&VEHICLES[q.get('veh')])G.sel.veh=q.get('veh');
+ if(q.has('arena')&&ARENAS[q.get('arena')])G.sel.arena=q.get('arena');
+-if(q.has('auto')&&q.get('auto')!=='select'){startGame();if(q.get('auto')==='combat'){G.player.x=ARENAS[G.sel.arena].w/2;G.player.y=ARENAS[G.sel.arena].h/2;
++if(q.has('auto')&&q.get('auto')!=='select'){startGame();if(q.get('auto')==='combat'){for(let i=0;i<240;i++)step(1/60);G.player.x=ARENAS[G.sel.arena].w/2;G.player.y=ARENAS[G.sel.arena].h/2;
+   for(const b of G.bots){b.x=G.player.x+R(-260,260);b.y=G.player.y+R(-220,220);}
+   explode(G.player.x+120,G.player.y-80,1.4);fireSpecial(G.player);
+   for(let i=0;i<60;i++)step(1/60);}}}catch(e){}
+ requestAnimationFrame(frame);
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -716,9 +716,10 @@
+ // test/automation hook: ?auto=1 starts a match immediately, ?arena= / ?veh= select
+ try{const q=new URLSearchParams(location.search);
+ if(q.has('veh')&&VEHICLES[q.get('veh')])G.sel.veh=q.get('veh');
+ if(q.has('arena')&&ARENAS[q.get('arena')])G.sel.arena=q.get('arena');
+-if(q.has('auto')&&q.get('auto')!=='select'){startGame();if(q.get('auto')==='combat'){for(let i=0;i<240;i++)step(1/60);G.player.x=ARENAS[G.sel.arena].w/2;G.player.y=ARENAS[G.sel.arena].h/2;
++if(q.get('auto')==='select'){toSelect();}
++else if(q.has('auto')&&q.get('auto')!=='select'){startGame();if(q.get('auto')==='combat'){for(let i=0;i<240;i++)step(1/60);G.player.x=ARENAS[G.sel.arena].w/2;G.player.y=ARENAS[G.sel.arena].h/2;
+   for(const b of G.bots){b.x=G.player.x+R(-260,260);b.y=G.player.y+R(-220,220);}
+   explode(G.player.x+120,G.player.y-80,1.4);fireSpecial(G.player);
+   for(let i=0;i<60;i++)step(1/60);}}}catch(e){}
+ requestAnimationFrame(frame);
+
+[0m
+[0m← [0mEdit twisted-metal/style.css
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/style.css
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/style.css
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/style.css
+@@ -27,9 +27,10 @@
+ .bar>div{height:100%;width:100%;transition:width .12s}
+ #hpFill{background:linear-gradient(90deg,#2ecc71,#a9ff6a)}
+ .bar.turbo{height:8px}#turboFill{background:var(--turbo)}
+ .bar.heat{height:8px}#heatFill{background:var(--heat);width:0%}
+-.bar-sub{display:flex;justify-content:space-between;font-size:12px;margin-top:4px;color:#ffd9a0}
++.bar-sub{display:flex;justify-content:space-between;gap:10px;font-size:12px;margin-top:4px;color:#ffd9a0}
++.bar-sub #vehicleName{flex:1;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .hud-center{text-align:center;min-width:170px}
+ #weaponBox{font-size:18px}#weaponAmmo{color:var(--amber);margin-left:8px}
+ #objective{font-size:15px;color:#fff;margin-top:2px}
+ #timer{font-size:13px;color:var(--steel)}
+
+[0m
+[0m$ [0mnode --check twisted-metal/game.js && echo OK
+chromium --headless --disable-gpu --no-sandbox --window-size=1280,800 --virtual-time-budget=3000 --screenshot=/tmp/shot_select2.png "http://localhost:8765/index.html?auto=select" 2>/dev/null; ls -lh /tmp/shot_select2.png
+chromium --headless --disable-gpu --no-sandbox --window-size=390,844 --virtual-time-budget=4000 --screenshot=/tmp/shot_mobile.png "http://localhost:8765/index.html?auto=combat&arena=dustbowl" 2>/dev/null; ls -lh /tmp/shot_mobile.png
+OK
+-rw-r--r-- 1 runner runner 211K Sep  7 23:30 /tmp/shot_select2.png
+-rw-r--r-- 1 runner runner 63K Sep  7 23:30 /tmp/shot_mobile.png
+[0m
+[0m→ [0mRead /tmp/shot_mobile.png
+[0m→ [0mRead /tmp/shot_select2.png
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -720,6 +720,9 @@
+ if(q.get('auto')==='select'){toSelect();}
+ else if(q.has('auto')&&q.get('auto')!=='select'){startGame();if(q.get('auto')==='combat'){for(let i=0;i<240;i++)step(1/60);G.player.x=ARENAS[G.sel.arena].w/2;G.player.y=ARENAS[G.sel.arena].h/2;
+   for(const b of G.bots){b.x=G.player.x+R(-260,260);b.y=G.player.y+R(-220,220);}
+   explode(G.player.x+120,G.player.y-80,1.4);fireSpecial(G.player);
+-  for(let i=0;i<60;i++)step(1/60);}}}catch(e){}
++  for(let i=0;i<60;i++)step(1/60);}
++  if(q.get('auto')==='pause'){for(let i=0;i<120;i++)step(1/60);togglePause(true);}
++  if(q.get('auto')==='over'){for(let i=0;i<120;i++)step(1/60);gameOver(false,'Test defeat — the yard takes another driver.');}
++  if(q.get('auto')==='win'){for(let i=0;i<120;i++)step(1/60);G.kills=KILLS_TO_WIN;gameOver(true,'Test victory — Calypso owes you a wish.');}}}catch(e){}
+ requestAnimationFrame(frame);
+
+[0m
+[0m$ [0mnode --check twisted-metal/game.js && echo OK
+chromium --headless --disable-gpu --no-sandbox --window-size=1280,800 --virtual-time-budget=4000 --screenshot=/tmp/shot_pause.png "http://localhost:8765/index.html?auto=pause" 2>/dev/null; ls -lh /tmp/shot_pause.png
+chromium --headless --disable-gpu --no-sandbox --window-size=1280,800 --virtual-time-budget=4000 --screenshot=/tmp/shot_over.png "http://localhost:8765/index.html?auto=over" 2>/dev/null; ls -lh /tmp/shot_over.png
+chromium --headless --disable-gpu --no-sandbox --enable-logging=stderr --window-size=1280,800 --virtual-time-budget=4000 --dump-dom "http://localhost:8765/index.html?auto=combat" 2>/tmp/c3.log >/dev/null; grep -o "INFO:CONSOLE.*" /tmp/c3.log | head -n 5; echo "console-clean-check done"
+OK
+-rw-r--r-- 1 runner runner 90K Sep  7 23:31 /tmp/shot_pause.png
+-rw-r--r-- 1 runner runner 283K Sep  7 23:31 /tmp/shot_over.png
+INFO:CONSOLE:47] "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio", source: http://localhost:8765/game.js (47)
+INFO:CONSOLE:52] "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio", source: http://localhost:8765/game.js (52)
+INFO:CONSOLE:52] "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio", source: http://localhost:8765/game.js (52)
+INFO:CONSOLE:52] "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio", source: http://localhost:8765/game.js (52)
+INFO:CONSOLE:52] "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio", source: http://localhost:8765/game.js (52)
+console-clean-check done
+[0m
+Mobile and menus verified — checking pause and game-over flows.
+[0m→ [0mRead /tmp/shot_pause.png
+[0m→ [0mRead /tmp/shot_over.png
+[0m
+[0m$ [0mmkdir -p twisted-metal/evidence
+cp /tmp/shot_title2.png twisted-metal/evidence/01-title.png
+cp /tmp/shot_select2.png twisted-metal/evidence/02-select.png
+cp /tmp/shot_combat2.png twisted-metal/evidence/03-combat-rustyard.png
+cp /tmp/shot_dust.png twisted-metal/evidence/04-combat-dustbowl.png
+cp /tmp/shot_mobile.png twisted-metal/evidence/05-mobile.png
+cp /tmp/shot_pause.png twisted-metal/evidence/06-pause.png
+cp /tmp/shot_over.png twisted-metal/evidence/07-gameover.png
+ls -lh twisted-metal/evidence/
+total 1.2M
+-rw-r--r-- 1 runner runner 307K Sep  7 23:32 01-title.png
+-rw-r--r-- 1 runner runner 211K Sep  7 23:32 02-select.png
+-rw-r--r-- 1 runner runner 109K Sep  7 23:32 03-combat-rustyard.png
+-rw-r--r-- 1 runner runner 106K Sep  7 23:32 04-combat-dustbowl.png
+-rw-r--r-- 1 runner runner  63K Sep  7 23:32 05-mobile.png
+-rw-r--r-- 1 runner runner  90K Sep  7 23:32 06-pause.png
+-rw-r--r-- 1 runner runner 283K Sep  7 23:32 07-gameover.png
+[0m
+[0m# [0mTodos
+[✓] Set up workspace, progress page, reference-assets dir
+[✓] Research Twisted Metal + comparables, select 6+ visual anchors, download refs with provenance
+[✓] Design game architecture and split into judgeable pieces
+[✓] Build playable game (states, combat, weapons, HUD, pause, responsive)
+[•] Verify: playtest, screenshots, visual QA, performance/accessibility/recovery
+[ ] Delivery evidence + progress page finalization
+[0m
+[0m• [0mCritic P1 shell states[90m General Agent[0m
+[0m• [0mCritic P3 combat systems[90m General Agent[0m
+[0m• [0mCritic P4 polish/access[90m General Agent[0m
+[0m✓ [0mCritic P1 shell states[90m General Agent[0m
+[0m✓ [0mCritic P4 polish/access[90m General Agent[0m
+[0m✓ [0mCritic P3 combat systems[90m General Agent[0m
+Critics agree: pause needs a proper overlay, plus a respawn edge case — fixing both.
+[0m→ [0mRead twisted-metal/game.js[90m [limit=30, offset=250][0m
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -253,10 +253,9 @@
+ if(!c.alive){c.respawn-=dt;
+   if(c.respawn<=0){
+     if(c.isPlayer&&c.lives<0)return;
+     const A=ARENAS[G.sel.arena];
+-    // respawn at bot spawn ring or random safe
+-    if(!c.isPlayer&&G.kills+(G.bots.filter(b=>b.alive).length)>=KILLS_TO_WIN+1){c.respawn=1;return;} // stop feeding after quota nearly met (still allow)
++    // bots always reinforce until the quota is met (short-timer in step() covers all-dead case)
+     c.x=150+Math.random()*(A.w-300);c.y=150+Math.random()*(A.h-300);
+     c.hp=c.maxhp;c.alive=true;c.invuln=2;c.vx=c.vy=0;c.burn=0;c.mgHeat=0;
+     ring(c.x,c.y,'#7df9ff');
+   }return;}
+
+[0m
+[0m← [0mEdit twisted-metal/index.html
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/index.html
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/index.html
+@@ -73,8 +73,18 @@
+     <button id="btnBack" class="ghost">BACK</button></div>
+   </div>
+ </section>
+ 
++<section id="screen-pause" class="screen hidden">
++  <div class="card">
++    <h2>⏸ PAUSED</h2>
++    <p class="tag">The yard holds its breath. Foze are frozen.</p>
++    <div class="row"><button id="btnResume" class="big">RESUME (P)</button>
++    <button id="btnPauseRestart" class="ghost">RESTART (R)</button>
++    <button id="btnPauseHelp" class="ghost">MANUAL (H)</button></div>
++  </div>
++</section>
++
+ <section id="screen-over" class="screen hidden">
+   <div class="card">
+     <h2 id="overTitle">WRECKED</h2>
+     <p id="overStats">—</p>
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -587,9 +587,9 @@
+   $('enemies').textContent=`FOES ${G.bots.filter(b=>b.alive).length} · DEATHS ${G.deaths}`;
+ }
+ 
+ /* ---------- Flow ---------- */
+-function show(id){['screen-title','screen-select','screen-over','screen-help'].forEach(s=>$(s).classList.add('hidden'));if(id)$(id).classList.remove('hidden');}
++function show(id){['screen-title','screen-select','screen-over','screen-help','screen-pause'].forEach(s=>$(s).classList.add('hidden'));if(id)$(id).classList.remove('hidden');}
+ function toSelect(){G.state='select';show('screen-select');buildRoster();}
+ function toTitle(){G.state='title';show('screen-title');$('hud').classList.add('hidden');}
+ function startGame(){audio();startMatch();G.state='playing';G.paused=false;show(null);$('hud').classList.remove('hidden');
+   toast(`${ARENAS[G.sel.arena].name} — wreck ${KILLS_TO_WIN} foes!`);feed('Match start — good hunting.');}
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -608,8 +608,10 @@
+ function togglePause(force){
+   if(G.state!=='playing')return;
+   G.paused=typeof force==='boolean'?force:!G.paused;
+   $('btnPause').textContent=G.paused?'▶':'⏸';
++  if(G.paused){show('screen-pause');$('btnResume').focus();}
++  else{show(null);}
+   toast(G.paused?'PAUSED — P to resume':'ROLLING!');
+ }
+ function toggleMute(){muted=!muted;$('btnMute').textContent=muted?'🔇':'🔊';if(!muted)audio();}
+ let helpFrom=null;
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -590,9 +590,9 @@
+ /* ---------- Flow ---------- */
+ function show(id){['screen-title','screen-select','screen-over','screen-help','screen-pause'].forEach(s=>$(s).classList.add('hidden'));if(id)$(id).classList.remove('hidden');}
+ function toSelect(){G.state='select';show('screen-select');buildRoster();}
+ function toTitle(){G.state='title';show('screen-title');$('hud').classList.add('hidden');}
+-function startGame(){audio();startMatch();G.state='playing';G.paused=false;show(null);$('hud').classList.remove('hidden');
++function startGame(){audio();startMatch();G.state='playing';G.paused=false;$('btnPause').textContent='⏸';show(null);$('hud').classList.remove('hidden');
+   toast(`${ARENAS[G.sel.arena].name} — wreck ${KILLS_TO_WIN} foes!`);feed('Match start — good hunting.');}
+ function restart(){if(G.state==='title')return;startGame();}
+ function gameOver(win,msg){
+   if(G.state==='over')return;G.state='over';G.over={win,msg};
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -613,12 +613,14 @@
+   else{show(null);}
+   toast(G.paused?'PAUSED — P to resume':'ROLLING!');
+ }
+ function toggleMute(){muted=!muted;$('btnMute').textContent=muted?'🔇':'🔊';if(!muted)audio();}
+-let helpFrom=null;
++let helpFrom=null, helpPaused=false;
+ function toggleHelp(){const h=$('screen-help').classList.contains('hidden');
+-  if(h){helpFrom=G.state;show('screen-help');}else{show(G.state==='playing'?null:('screen-'+(G.state==='select'?'select':G.state==='title')));
+-    if(G.state==='playing'){show(null);}}}
++  if(h){helpFrom=G.state;helpPaused=G.paused;if(G.state==='playing'&&!G.paused){G.paused=true;$('btnPause').textContent='▶';}show('screen-help');$('btnCloseHelp').focus();}
++  else{if(G.state==='playing'){if(helpPaused||G.paused){show('screen-pause');}else{show(null);}}
++    else{show('screen-'+(G.state==='select'?'select':G.state==='title'));}
++    if(G.state==='playing'&&!G.paused&&!helpPaused){show(null);}}}
+ function buildRoster(){
+   const r=$('roster');r.innerHTML='';
+   Object.entries(VEHICLES).forEach(([k,V])=>{
+     const b=document.createElement('button');b.className='pick';b.setAttribute('role','radio');
+
+[0m
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -653,8 +653,11 @@
+ $('btnAgain').onclick=()=>restart();
+ $('btnMenu').onclick=()=>{toSelect();};
+ $('btnCloseHelp').onclick=()=>{if(helpFrom==='title'||G.state!=='playing')show(G.state==='playing'?null:'screen-'+(G.state==='select'?'select':'title')),G.state==='playing'&&show(null);else show(null);};
+ $('btnPause').onclick=()=>{audio();togglePause();};
++$('btnResume').onclick=()=>{audio();togglePause(false);};
++$('btnPauseRestart').onclick=()=>{audio();restart();};
++$('btnPauseHelp').onclick=()=>{audio();toggleHelp();};
+ $('btnMute').onclick=()=>toggleMute();
+ $('btnHelp').onclick=()=>toggleHelp();
+ $('btnReset').onclick=()=>{audio();restart();};
+ 
+
+[0m
+Pause overlay wired — now fixing help flow and re-verifying.
+[0m← [0mEdit twisted-metal/game.js
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/game.js
+@@ -651,9 +651,10 @@
+ $('btnFight').onclick=()=>{startGame();};
+ $('btnBack').onclick=()=>toTitle();
+ $('btnAgain').onclick=()=>restart();
+ $('btnMenu').onclick=()=>{toSelect();};
+-$('btnCloseHelp').onclick=()=>{if(helpFrom==='title'||G.state!=='playing')show(G.state==='playing'?null:'screen-'+(G.state==='select'?'select':'title')),G.state==='playing'&&show(null);else show(null);};
++$('btnCloseHelp').onclick=()=>{if(G.state==='playing'){if(G.paused){show('screen-pause');$('btnResume').focus();}else show(null);}
++  else if(G.state==='select')show('screen-select');else show('screen-title');};
+ $('btnPause').onclick=()=>{audio();togglePause();};
+ $('btnResume').onclick=()=>{audio();togglePause(false);};
+ $('btnPauseRestart').onclick=()=>{audio();restart();};
+ $('btnPauseHelp').onclick=()=>{audio();toggleHelp();};
+
+[0m
+[0m$ [0mnode --check twisted-metal/game.js && node --check twisted-metal/index.html 2>/dev/null; echo "JS OK"
+chromium --headless --disable-gpu --no-sandbox --window-size=1280,800 --virtual-time-budget=4000 --screenshot=/tmp/shot_pause2.png "http://localhost:8765/index.html?auto=pause" 2>/dev/null; ls -lh /tmp/shot_pause2.png
+chromium --headless --disable-gpu --no-sandbox --enable-logging=stderr --window-size=1280,800 --virtual-time-budget=4000 --dump-dom "http://localhost:8765/index.html?auto=combat" 2>/tmp/c4.log >/dev/null; grep -o "INFO:CONSOLE.*Error.*" /tmp/c4.log | head -n 3; echo "errcheck done"
+JS OK
+-rw-r--r-- 1 runner runner 284K Sep  7 23:37 /tmp/shot_pause2.png
+errcheck done
+[0m
+[0m→ [0mRead /tmp/shot_pause2.png
+[0m
+[0m← [0mEdit twisted-metal/index.html
+Index: /home/runner/work/PlayGround/PlayGround/twisted-metal/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/twisted-metal/index.html
++++ /home/runner/work/PlayGround/PlayGround/twisted-metal/index.html
+@@ -76,9 +76,9 @@
+ 
+ <section id="screen-pause" class="screen hidden">
+   <div class="card">
+     <h2>⏸ PAUSED</h2>
+-    <p class="tag">The yard holds its breath. Foze are frozen.</p>
++    <p class="tag">The yard holds its breath. Foes are frozen.</p>
+     <div class="row"><button id="btnResume" class="big">RESUME (P)</button>
+     <button id="btnPauseRestart" class="ghost">RESTART (R)</button>
+     <button id="btnPauseHelp" class="ghost">MANUAL (H)</button></div>
+   </div>
+
+[0m
+[0m$ [0mcp /tmp/shot_pause2.png twisted-metal/evidence/06-pause.png
+chromium --headless --disable-gpu --no-sandbox --window-size=1280,800 --virtual-time-budget=5000 --screenshot=/tmp/shot_combat3.png "http://localhost:8765/index.html?auto=combat&arena=rustyard" 2>/dev/null; cp /tmp/shot_combat3.png twisted-metal/evidence/03-combat-rustyard.png; ls -lh twisted-metal/evidence/
+kill $(cat /tmp/http.pid) 2>/dev/null; echo server-stopped
+total 1.4M
+-rw-r--r-- 1 runner runner 307K Sep  7 23:32 01-title.png
+-rw-r--r-- 1 runner runner 211K Sep  7 23:32 02-select.png
+-rw-r--r-- 1 runner runner 111K Sep  7 23:38 03-combat-rustyard.png
+-rw-r--r-- 1 runner runner 106K Sep  7 23:32 04-combat-dustbowl.png
+-rw-r--r-- 1 runner runner  63K Sep  7 23:32 05-mobile.png
+-rw-r--r-- 1 runner runner 284K Sep  7 23:38 06-pause.png
+-rw-r--r-- 1 runner runner 283K Sep  7 23:32 07-gameover.png
+server-stopped
+[0m
+All fixes verified — now writing delivery docs and final evidence.
+[0m→ [0mRead /tmp/shot_combat3.png
+[0m
+[0m← [0mWrite twisted-metal/README.md
+Wrote file successfully.
+[0m
+[0m← [0mWrite twisted-metal/EVIDENCE.md
+Wrote file successfully.
+[0m
+[0m← [0mWrite twisted-metal/PROGRESS.md
+Wrote file successfully.
+[0m
+[0m$ [0mnode --check twisted-metal/game.js && echo "JS clean"
+ls -lh twisted-metal/ twisted-metal/evidence/ twisted-metal/reference-assets/ | head -n 40
+git status --short | head -n 20
+JS clean
+twisted-metal/:
+total 84K
+-rw-r--r-- 1 runner runner 2.8K Sep  7 23:39 EVIDENCE.md
+-rw-r--r-- 1 runner runner 3.5K Sep  7 23:39 PROGRESS.md
+-rw-r--r-- 1 runner runner 1.6K Sep  7 23:38 README.md
+drwxr-xr-x 2 runner runner 4.0K Sep  7 23:05 assets
+drwxr-xr-x 2 runner runner 4.0K Sep  7 23:32 evidence
+-rw-r--r-- 1 runner runner  44K Sep  7 23:37 game.js
+-rw-r--r-- 1 runner runner 5.3K Sep  7 23:38 index.html
+drwxr-xr-x 2 runner runner 4.0K Sep  7 23:12 reference-assets
+-rw-r--r-- 1 runner runner 6.2K Sep  7 23:30 style.css
+
+twisted-metal/evidence/:
+total 1.4M
+-rw-r--r-- 1 runner runner 307K Sep  7 23:32 01-title.png
+-rw-r--r-- 1 runner runner 211K Sep  7 23:32 02-select.png
+-rw-r--r-- 1 runner runner 111K Sep  7 23:38 03-combat-rustyard.png
+-rw-r--r-- 1 runner runner 106K Sep  7 23:32 04-combat-dustbowl.png
+-rw-r--r-- 1 runner runner  63K Sep  7 23:32 05-mobile.png
+-rw-r--r-- 1 runner runner 284K Sep  7 23:38 06-pause.png
+-rw-r--r-- 1 runner runner 283K Sep  7 23:32 07-gameover.png
+
+twisted-metal/reference-assets/:
+total 3.5M
+-rw-r--r-- 1 runner runner  16K Sep  7 23:08 00-tmblack-cover-art.jpg
+-rw-r--r-- 1 runner runner 324K Sep  7 23:08 01-demolition-derby-contact.jpg
+-rw-r--r-- 1 runner runner 178K Sep  7 23:08 02-icecream-truck-archetype.jpg
+-rw-r--r-- 1 runner runner 1.2M Sep  7 23:09 03-explosion-fireball.png
+-rw-r--r-- 1 runner runner 399K Sep  7 23:10 03b-burning-car.jpg
+-rw-r--r-- 1 runner runner 395K Sep  7 23:09 04-arena-ruins.jpg
+-rw-r--r-- 1 runner runner 526K Sep  7 23:09 05-desert-arena-road.jpg
+-rw-r--r-- 1 runner runner 254K Sep  7 23:09 06-heavy-vehicle.jpg
+-rw-r--r-- 1 runner runner 271K Sep  7 23:09 07-junkyard-arena.jpg
+-rw-r--r-- 1 runner runner 4.2K Sep  7 23:12 PROVENANCE.md
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? twisted-metal/
+[0m
+[0m# [0mTodos
+[✓] Set up workspace, progress page, reference-assets dir
+[✓] Research Twisted Metal + comparables, select 6+ visual anchors, download refs with provenance
+[✓] Design game architecture and split into judgeable pieces
+[✓] Build playable game (states, combat, weapons, HUD, pause, responsive)
+[✓] Verify: playtest, screenshots, visual QA, performance/accessibility/recovery
+[✓] Delivery evidence + progress page finalization
+[0m
+[goal:evidence] RUSTCARNAGE shipped in twisted-metal/ (index.html+style.css+game.js, node --check clean, offline, no deps): 9 vision-inspected refs + PROVENANCE.md; full states (title/select/combat/pause-overlay/victory-defeat/restart/manual); 3 rides, 2 arenas, MG-overheat + 5 pickup weapons + per-vehicle specials, limited repair charges, turbo, 5 AI bots, 6-kill quota/3 hulls/5:00; HUD + minimap + killfeed + vignette; 7 screenshots in evidence/ (title, select, combat×2, mobile 390px, pause, gameover); 3 fresh critics reviewed, 2 largest gaps fixed (pause overlay, respawn hold) and re-captured; headless runs show zero JS errors; README + EVIDENCE.md + PROGRESS.md complete.
+
+[goal:complete]
