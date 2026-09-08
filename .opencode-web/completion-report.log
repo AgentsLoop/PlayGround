@@ -1,0 +1,90 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+[0m$ [0mgit status --short | head -n 20; echo "---"; git branch --show-current; echo "--- public URL check ---"; curl -s -o /tmp/pub.html -w "http=%{http_code} size=%{size_download} time=%{time_total}s\n" --max-time 25 https://antenna-spec-employ-continuing.trycloudflare.com/; shasum -a 256 /tmp/pub.html ./index.html; grep -c "NEON SCRAPYARD" /tmp/pub.html; grep -c "unpkg.com/three@0.160.0/build/three.min.js" /tmp/pub.html
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? PROGRESS_CDN_INVESTIGATION.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? screenshots/
+---
+opencode/34172132419
+--- public URL check ---
+http=200 size=107270 time=0.065141s
+b15e5557229134ba06e40ac3ac26bc806a8e850b3da6fbf701b2dac5a5b433a5  /tmp/pub.html
+b15e5557229134ba06e40ac3ac26bc806a8e850b3da6fbf701b2dac5a5b433a5  ./index.html
+4
+1
+[0m
+Public URL serves the byte-identical game. Capturing final screenshots against it.
+[0m$ [0mCHROME="/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"; "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --enable-unsafe-swiftshader --window-size=1280,800 --virtual-time-budget=12000 --enable-logging=stderr --screenshot=screenshots/final-title.png "https://antenna-spec-employ-continuing.trycloudflare.com/" 2>/tmp/pub-title.err; echo "title_exit=$?"; "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --enable-unsafe-swiftshader --window-size=1280,800 --virtual-time-budget=15000 --enable-logging=stderr --screenshot=screenshots/final-gameplay.png "https://antenna-spec-employ-continuing.trycloudflare.com/?autostart=1&car=wraith&screenshot=1" 2>/tmp/pub-game.err; echo "game_exit=$?"; ls -la screenshots/; echo "--- netfail scans ---"; grep -c -E "net::ERR|Failed to load resource" /tmp/pub-title.err /tmp/pub-game.err || true; grep -E "Uncaught" /tmp/pub-title.err /tmp/pub-game.err | head -n 3 || echo "no uncaught"
+title_exit=0
+game_exit=0
+total 1328
+drwxr-xr-x   4 runner  staff     128 Sep  8 00:20 .
+drwxr-xr-x  17 runner  staff     544 Sep  8 00:19 ..
+-rw-r--r--@  1 runner  staff  328767 Sep  8 00:21 final-gameplay.png
+-rw-r--r--@  1 runner  staff  345645 Sep  8 00:21 final-title.png
+--- netfail scans ---
+/tmp/pub-title.err:0
+/tmp/pub-game.err:0
+[0m
+[0m→ [0mRead screenshots/final-gameplay.png
+[0m→ [0mRead screenshots/final-title.png
+Screenshots verified against the public URL. Committing the game files and pushing.
+[0m
+[0m$ [0mgit diff --check 2>&1; git add index.html screenshots/final-title.png screenshots/final-gameplay.png PROGRESS_CDN_INVESTIGATION.md && git status --short | head -n 10 && git log --oneline -3
+A  PROGRESS_CDN_INVESTIGATION.md
+A  index.html
+A  screenshots/final-gameplay.png
+A  screenshots/final-title.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+b4fe44a Grant reusable OpenCode workflow Pages permission
+[0m
+[0m$ [0mgit commit -m "Verify NEON SCRAPYARD on port 3000: CDN proven, 3D gameplay live with final screenshots" 2>&1 | tail -n 3; git push origin opencode/34172132419 2>&1 | tail -n 3; git rev-parse --short HEAD
+create mode 100644 index.html
+ create mode 100644 screenshots/final-gameplay.png
+ create mode 100644 screenshots/final-title.png
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34172132419 -> opencode/34172132419
+2d723bd
+[0m
+[0m$ [0mgh issue comment 66 --body "## FINAL — NEON SCRAPYARD playable and verified
+
+Play now: https://antenna-spec-employ-continuing.trycloudflare.com
+Pick a ride (GIGGLES / WRAITH / OUTLAW-X) -> START ENGINE. Controls: WASD/arrows drive, Space/Left-click MG, F/Right-click fire weapon, 1-4/Q/E select, G special, Shift turbo, H handbrake, P pause, M mute, R restart.
+
+![Title / vehicle select](https://raw.githubusercontent.com/AgentsLoop/PlayGround/2d723bd/screenshots/final-title.png)
+![Live 3D gameplay](https://raw.githubusercontent.com/AgentsLoop/PlayGround/2d723bd/screenshots/final-gameplay.png)
+
+Final commit: 2d723bd on branch opencode/34172132419 (pushed; files: index.html, screenshots/final-title.png, screenshots/final-gameplay.png, PROGRESS_CDN_INVESTIGATION.md).
+
+Deployment status:
+- Public tunnel URL above returns HTTP 200 with bytes identical to ./index.html (sha256 b15e5557...433a5, same as verified build e889141).
+- Local: tmux app-server serves repo root on port 3000 (GET / -> 200, 107270 bytes); ./index.html is the served entrypoint (a minimal node static server is used because python3 -m http.server leaves CLOSED sockets in this sandbox).
+
+Test status:
+- Headless Chromium (SwiftShader WebGL) against the public URL: title/vehicle-select renders; ?autostart=1 gameplay renders live 3D arena, vehicles, HUD (HULL/TURBO, weapons, KILLS, ENEMIES, MINIMAP).
+- Console: only benign three r160 deprecation INFO + SwiftShader perf notes. Zero net errors, zero uncaught.
+- CDN investigation: all three exact Three.js URLs return HTTP 200 with correct hashes from the SSH worker; the only failing layer ever observed is WebGL absence in GPU-less headless mode (game falls back to 2D correctly). Full record in PROGRESS_CDN_INVESTIGATION.md.
+
+Known limitations:
+- three.js loads from unpkg CDN at runtime, so fully offline play is impossible (2D fallback covers WebGL-less browsers, not CDN-less ones).
+- Vehicles/arena are stylized originals; no multiplayer or gamepad testing in this environment.
+- Public URL is a temporary trycloudflare tunnel; for permanence serve index.html from this branch via static hosting." 2>&1 | tail -n 2
+https://github.com/AgentsLoop/PlayGround/issues/66#issuecomment-5577158504
+[0m
+[goal:evidence] Public game verified at https://antenna-spec-employ-continuing.trycloudflare.com (HTTP 200, bytes identical to ./index.html sha256 b15e5557...433a5); captured fresh screenshots against the public URL with headless Chromium SwiftShader showing title vehicle-select and live autostart 3D gameplay with zero net errors and zero uncaught, vision-verified both images; committed index.html plus screenshots/final-title.png plus screenshots/final-gameplay.png plus PROGRESS_CDN_INVESTIGATION.md and pushed branch opencode/34172132419 as commit 2d723bd; posted final completion comment to issue 66 with public URL, embedded screenshots, final commit, deployment and test status, and known limitations; tmux app-server still serves port 3000 with GET / returning 200 and 107270 bytes.
+[goal:complete]

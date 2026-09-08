@@ -1,0 +1,28 @@
+# Investigate Three.js CDN download failure via SSH
+
+## Objective
+
+Identify and prove why the Twisted Metal browser game cannot download or activate its Three.js CDN dependency in the OpenCode worker environment. Use the real web artifact and an SSH-connected worker session, test the exact dependency URLs from the worker, and deliver a reproducible root cause with evidence and a minimal recovery recommendation. Do not substitute the offline 2D renderer for a successful 3D download test.
+
+## Quality bar
+
+- Inspect the committed Twisted Metal entrypoint and dependency-loading code before testing.
+- From the SSH worker, test DNS resolution, TCP/TLS connection, HTTP status, redirects, response headers, content type, response size, checksum, and the downloaded file for each actual Three.js dependency URL.
+- Reproduce the browser-side failure with network and console evidence, including whether the failure is caused by URL resolution, proxy policy, TLS, CDN response content, CORS/module loading, WebGL, or application code.
+- Compare worker results with an independent reachable environment when needed, and record exact commands, sanitized outputs, timestamps, URLs, and hashes in the progress record.
+
+## Execution
+
+- Have the lead choose the diagnostic route and divide it into independently judgeable network, browser, and runtime-cause pieces.
+- Assign separate builders and fresh-context critics or verifiers to the important pieces. Require each verifier to inspect the actual evidence, challenge unsupported causal claims, and send unresolved gaps back for another test.
+- Use the SSH issue task to connect to the worker and attempt the download directly before proposing code changes.
+
+## Verification
+
+- Reproduce the failure at least once, isolate the first failing layer, and verify the proposed recovery with a repeat download or browser load.
+- Keep the original failure and successful control test side by side. Report whether the final result proves CDN access, proves only a fallback, or remains blocked by the environment.
+- Do not claim the Three.js path works unless the worker downloads the actual module successfully and the browser loads it without relevant network or page errors.
+
+## Progress
+
+Maintain a canonical live progress page with dependency URLs, commands, sanitized outputs, timestamps, hashes, evidence, decisions, blockers, and the next exact diagnostic action.

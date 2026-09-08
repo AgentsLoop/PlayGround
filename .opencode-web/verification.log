@@ -1,0 +1,264 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+[0m→ [0mRead Agents.md
+[0m
+[0m# [0mTodos
+[•] Confirm/repair playable entrypoint ./index.html (restore verified e889141 build)
+[ ] Start app-server tmux on port 3000 and confirm it serves index.html
+[ ] Run browser tests via headless Chrome, fix failures
+[ ] Capture final- screenshots under screenshots/
+[ ] Publish completion update to issue #66
+[0m
+[0m$ [0mls ./index.html ./dist/index.html 2>&1; echo "---"; ls screenshots 2>&1; echo "--- tmux ---"; tmux ls 2>&1; echo "--- port 3000 ---"; curl -s -o /dev/null -w "%{http_code} %{size_download}\n" --max-time 8 http://127.0.0.1:3000/ 2>&1; echo "--- skills cli check ---"; which npx node 2>&1; node --version 2>&1
+ls: ./dist/index.html: No such file or directory
+ls: ./index.html: No such file or directory
+---
+ls: screenshots: No such file or directory
+--- tmux ---
+error connecting to /private/tmp/tmux-501/default (No such file or directory)
+--- port 3000 ---
+000 0
+--- skills cli check ---
+/opt/homebrew/bin/npx
+/opt/homebrew/bin/node
+v24.20.0
+[0m
+No entrypoint, server, or screenshots — restoring the verified build and starting the server.
+[0m$ [0mtimeout 25 npx skills find "headless browser screenshot testing" 2>&1 | head -n 20
+/bin/bash: timeout: command not found
+[0m
+[0m$ [0mgit show origin/opencode/34119865115:index.html > ./index.html 2>&1 && shasum -a 256 ./index.html && wc -c ./index.html && grep -c "unpkg.com/three@0.160.0/build/three.min.js" ./index.html; node -e "const s=require('fs').readFileSync('./index.html','utf8');const m=s.match(/<script>([\s\S]*)<\/script>\s*<\/body>/);require('fs').writeFileSync('/tmp/inline-check.js',m[1]);" && node --check /tmp/inline-check.js && echo INLINE_JS_SYNTAX_OK
+b15e5557229134ba06e40ac3ac26bc806a8e850b3da6fbf701b2dac5a5b433a5  ./index.html
+  107270 ./index.html
+1
+INLINE_JS_SYNTAX_OK
+[0m
+[0m$ [0mnpx skills find "headless browser screenshot testing" 2>&1 | head -n 20
+npm warn exec The following package was not found and will be installed: skills@1.5.24
+
+[38;5;250m███████╗██╗  ██╗██╗██╗     ██╗     ███████╗[0m
+[38;5;248m██╔════╝██║ ██╔╝██║██║     ██║     ██╔════╝[0m
+[38;5;245m███████╗█████╔╝ ██║██║     ██║     ███████╗[0m
+[38;5;243m╚════██║██╔═██╗ ██║██║     ██║     ╚════██║[0m
+[38;5;240m███████║██║  ██╗██║███████╗███████╗███████║[0m
+[38;5;238m╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚══════╝[0m
+
+[38;5;102mInstall with[0m npx skills add <owner/repo@skill>
+
+[38;5;145mzc277584121/marketing-skills@browser-screenshot[0m [36m3.6K installs[0m
+[38;5;102m└ https://skills.sh/zc277584121/marketing-skills/browser-screenshot[0m
+
+[38;5;145mruvnet/ruflo@browser-screenshot-diff[0m [36m690 installs[0m
+[38;5;102m└ https://skills.sh/ruvnet/ruflo/browser-screenshot-diff[0m
+
+[38;5;145mcatalystbyzoho/agent-skills@catalyst-smartbrowz[0m [36m341 installs[0m
+[38;5;102m└ https://skills.sh/catalystbyzoho/agent-skills/catalyst-smartbrowz[0m
+[0m
+[0m$ [0mnpx skills add zc277584121/marketing-skills@browser-screenshot -g -y 2>&1 | tail -n 5; echo "---"; ls ~/.config/skills 2>/dev/null || ls ~/.skills 2>/dev/null || find / -maxdepth 4 -name "*browser-screenshot*" -not -path "*/proc/*" 2>/dev/null | head -n 5
+│    [31m✗[39m browser-screenshot → PromptScript: [2mPromptScript does not support global skill installation[22m
+
+│
+└  [32mDone![39m[2m  Review skills before use; they run with full agent permissions.[22m
+
+---
+[0m
+[0m$ [0mtmux new-session -d -s app-server "python3 -m http.server 3000" 2>&1; sleep 2; tmux ls 2>&1; curl -s -o /dev/null -w "root:%{http_code} %{size_download}\n" --max-time 10 http://127.0.0.1:3000/; curl -s -o /dev/null -w "index:%{http_code} %{size_download}\n" --max-time 10 http://127.0.0.1:3000/index.html
+app-server: 1 windows (created Tue Sep  8 00:17:51 2026)
+root:000 0
+index:000 0
+[0m
+[0m$ [0mtmux capture-pane -p -t app-server 2>&1 | head -n 10; echo "--- listen ---"; netstat -an 2>/dev/null | grep -E "\.3000" | head -n 8; echo "--- try variants ---"; curl -s -o /dev/null -w "localhost:%{http_code}\n" --max-time 6 http://localhost:3000/ 2>&1; curl -s -o /dev/null -w "explicit-tcp:%{http_code}\n" --max-time 6 --noproxy "*" http://127.0.0.1:3000/ 2>&1; python3 -c "import socket; s=socket.create_connection(('127.0.0.1',3000),timeout=5); print('TCP_OK'); s.close()" 2>&1
+--- listen ---
+tcp46      0      0  *.3000                 *.*                    CLOSED     
+--- try variants ---
+localhost:000
+explicit-tcp:000
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import socket; s=socket.create_connection(('127.0.0.1',3000),timeout=5); print('TCP_OK'); s.close()
+                     ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 874, in create_connection
+    raise exceptions[0]
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 859, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+TimeoutError: timed out
+[0m
+[0m$ [0mps aux | grep -E "http.server" | grep -v grep | head -n 5; echo "---"; tmux send-keys -t app-server "echo PANE_ALIVE" Enter 2>&1; sleep 1; tmux capture-pane -p -t app-server 2>&1 | tail -n 8; echo "--- direct bind test ---"; python3 -m http.server 3001 --bind 0.0.0.0 >/tmp/srv3001.log 2>&1 & sleep 3; cat /tmp/srv3001.log; netstat -an 2>/dev/null | grep -E "\.3001" | head -n 4; python3 -c "import socket; s=socket.create_connection(('127.0.0.1',3001),timeout=5); print('TCP3001_OK'); s.close()" 2>&1 | tail -n 2
+runner           34650   0.0  0.3 435279776  25552 s000  S<s+ 12:17AM   0:00.11 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python -m http.server 3000
+runner           34646   0.0  0.1 435306096   3680   ??  S<s  12:17AM   0:00.01 tmux new-session -d -s app-server python3 -m http.server 3000
+---
+
+
+
+
+
+
+
+
+--- direct bind test ---
+tcp4       0      0  *.3001                 *.*                    CLOSED     
+    ~~~~~~~~~~~~^^^^
+TimeoutError: timed out
+[0m
+Server process is alive but loopback connections time out — diagnosing the socket state.
+[0m$ [0mnetstat -an 2>/dev/null | grep -E "LISTEN" | head -n 15; echo "--- all 3000/3001 ---"; netstat -an 2>/dev/null | grep -E "3000|3001"; echo "--- lsof ---"; lsof -i :3000 -i :3001 2>&1 | head -n 10; echo "--- pf ---"; pfctl -s rules 2>&1 | head -n 10
+tcp4       0      0  127.0.0.1.20242        *.*                    LISTEN     
+tcp4       0      0  127.0.0.1.20241        *.*                    LISTEN     
+tcp4       0      0  127.0.0.1.49203        *.*                    LISTEN     
+tcp4       0      0  127.0.0.1.49202        *.*                    LISTEN     
+tcp4       0      0  *.2222                 *.*                    LISTEN     
+tcp6       0      0  *.2222                 *.*                    LISTEN     
+tcp4       0      0  *.22                   *.*                    LISTEN     
+tcp6       0      0  *.22                   *.*                    LISTEN     
+--- all 3000/3001 ---
+tcp4       0      0  *.3001                 *.*                    CLOSED     
+tcp46      0      0  *.3000                 *.*                    CLOSED     
+--- lsof ---
+COMMAND   PID   USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+Python  34650 runner    4u  IPv6 0xddcaef4e05212d97      0t0  TCP *:hbci (CLOSED)
+Python  36274 runner    3u  IPv4 0xb2f1a2c5d6732b9f      0t0  TCP *:redwood-broker (CLOSED)
+--- pf ---
+pfctl: /dev/pf: Permission denied
+[0m
+[0m$ [0mpython3 -c "
+import socket
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.bind(('0.0.0.0', 3999))
+s.listen(5)
+print('LISTEN_OK', s.getsockname())
+import subprocess
+out=subprocess.run(['netstat','-an'],capture_output=True,text=True).stdout
+print([l for l in out.splitlines() if '3999' in l])
+s.close()
+" 2>&1 | head -n 10; echo "--- node test ---"; node -e "require('http').createServer((q,r)=>{r.end('hi')}).listen(3998,()=>console.log('NODE_LISTEN_OK'))" & sleep 3; netstat -an 2>/dev/null | grep 3998; curl -s --max-time 5 http://127.0.0.1:3998/ 2>&1; echo "curl_exit=$?"; kill %1 2>/dev/null; true
+LISTEN_OK ('0.0.0.0', 3999)
+['tcp4       0      0  *.3999                 *.*                    LISTEN     ']
+--- node test ---
+NODE_LISTEN_OK
+tcp46      0      0  *.3998                 *.*                    LISTEN     
+hicurl_exit=0
+[0m
+[0m$ [0mtmux capture-pane -p -t app-server 2>&1 | tail -n 15; echo "--- kill stale, start node server in tmux ---"; tmux kill-session -t app-server 2>&1; sleep 1; pkill -f "http.server 300" 2>&1; sleep 1; tmux new-session -d -s app-server "node -e \"require('http').createServer((q,r)=>{const fs=require('fs'),p=q.url==='/'?'/index.html':q.url;fs.readFile('.'+p,(e,d)=>{if(e){r.writeHead(404);r.end('nf')}else{r.writeHead(200,{'Content-Type':p.endsWith('.html')?'text/html':'application/octet-stream'});r.end(d)}})}).listen(3000,()=>console.log('APP_SERVER_3000_OK'))\""; sleep 2; tmux capture-pane -p -t app-server 2>&1 | tail -n 5; curl -s -o /dev/null -w "root:%{http_code} %{size_download}\n" --max-time 8 http://127.0.0.1:3000/; curl -s -o /dev/null -w "index:%{http_code} %{size_download}\n" --max-time 8 http://127.0.0.1:3000/index.html
+--- kill stale, start node server in tmux ---
+
+
+
+
+
+root:200 107270
+index:200 107270
+[0m
+Server live on 3000 (200, 107270 bytes). Running browser tests and captures.
+[0m# [0mTodos
+[✓] Confirm/repair playable entrypoint ./index.html (restore verified e889141 build)
+[✓] Start app-server tmux on port 3000 and confirm it serves index.html
+[•] Run browser tests via headless Chrome, fix failures
+[ ] Capture final- screenshots under screenshots/
+[ ] Publish completion update to issue #66
+[0m
+[0m$ [0mmkdir -p screenshots; CHROME="/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"; "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --enable-unsafe-swiftshader --window-size=1280,800 --virtual-time-budget=12000 --enable-logging=stderr --screenshot=/tmp/shot-title.png http://127.0.0.1:3000/ 2>/tmp/chrome-srv.err; echo "exit=$?"; ls -la /tmp/shot-title.png; echo "--- console/net scan ---"; grep -E "CONSOLE|Uncaught|net::|Failed to load" /tmp/chrome-srv.err | sed -E 's/^\[[0-9:,\/ ]+\] //' | sort | uniq -c | sort -rn | head -n 12; grep -c -E "net::ERR|Failed to load resource" /tmp/chrome-srv.err || true
+exit=0
+-rw-r--r--@ 1 runner  wheel  348314 Sep  8 00:19 /tmp/shot-title.png
+--- console/net scan ---
+   1 [37862:98030:0908/001934.140181:INFO:CONSOLE:0] "[.WebGL-0x12c0013d200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)", source: http://127.0.0.1:3000/ (0)
+   1 [37862:98030:0908/001934.140158:INFO:CONSOLE:0] "[.WebGL-0x12c0013d200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels", source: http://127.0.0.1:3000/ (0)
+   1 [37862:98030:0908/001934.140144:INFO:CONSOLE:0] "[.WebGL-0x12c0013d200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels", source: http://127.0.0.1:3000/ (0)
+   1 [37862:98030:0908/001934.140065:INFO:CONSOLE:0] "[.WebGL-0x12c0013d200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels", source: http://127.0.0.1:3000/ (0)
+   1 [37862:98030:0908/001924.773374:INFO:CONSOLE:1] "Scripts "build/three.js" and "build/three.min.js" are deprecated with r150+, and will be removed with r160. Please use ES Modules or alternatives: https://threejs.org/docs/index.html#manual/en/introduction/Installation", source: https://unpkg.com/three@0.160.0/build/three.min.js (1)
+0
+[0m
+[0m→ [0mRead /tmp/shot-title.png
+Title screen renders over HTTP with WebGL active. Checking for an autostart hook for gameplay capture.
+[0m
+[0m$ [0mgrep -o -E "autostart|auto=[a-z]+|location\.search|URLSearchParams[^;]{0,60}|query[a-zA-Z]*=[^;]{0,40}" ./index.html | sort | uniq -c | head -n 12
+2 autostart
+   1 URLSearchParams(location.search)
+[0m
+[0m$ [0mgrep -n "autostart" ./index.html | head; grep -n -A3 -B3 "URLSearchParams" ./index.html | head -n 20
+1930:  // URL params: ?autostart=1&car=wraith skips menu; ?screenshot=1 hides overlays
+1939:    if(qs.get('autostart')==='1'){
+1929-  World.init();
+1930-  // URL params: ?autostart=1&car=wraith skips menu; ?screenshot=1 hides overlays
+1931-  try{
+1932:    const qs=new URLSearchParams(location.search);
+1933-    if(qs.get('screenshot')==='1')document.body.classList.add('screenshot');
+1934-    const car=qs.get('car');
+1935-    if(car){
+[0m
+[0m$ [0mCHROME="/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"; "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --enable-unsafe-swiftshader --window-size=1280,800 --virtual-time-budget=15000 --enable-logging=stderr --screenshot=/tmp/shot-game.png "http://127.0.0.1:3000/?autostart=1&car=wraith&screenshot=1" 2>/tmp/chrome-game.err; echo "exit=$?"; ls -la /tmp/shot-game.png; grep -E "Uncaught|net::|Failed to load" /tmp/chrome-game.err | head -n 5; echo "netfail_count:"; grep -c -E "net::ERR|Failed to load resource" /tmp/chrome-game.err || true
+exit=0
+-rw-r--r--@ 1 runner  wheel  5073 Sep  8 00:20 /tmp/shot-game.png
+netfail_count:
+0
+[0m
+[0m→ [0mRead /tmp/shot-game.png
+Found it — my minimal server chokes on query strings. Fixing and re-verifying.
+[0m
+[0m$ [0mtmux kill-session -t app-server 2>&1; sleep 1; tmux new-session -d -s app-server "node -e \"require('http').createServer((q,r)=>{let p=new URL(q.url,'http://x').pathname;if(p==='/')p='/index.html';require('fs').readFile('.'+p,(e,d)=>{if(e){r.writeHead(404);r.end('nf')}else{r.writeHead(200,{'Content-Type':p.endsWith('.html')?'text/html':'application/octet-stream'});r.end(d)}})}).listen(3000,()=>console.log('APP_SERVER_3000_OK'))\""; sleep 2; curl -s -o /dev/null -w "root:%{http_code} %{size_download}\n" --max-time 8 http://127.0.0.1:3000/; curl -s -o /dev/null -w "query:%{http_code} %{size_download}\n" --max-time 8 "http://127.0.0.1:3000/?autostart=1&car=wraith&screenshot=1"; curl -s --max-time 8 "http://127.0.0.1:3000/?autostart=1" | shasum -a 256; shasum -a 256 ./index.html
+root:200 107270
+query:200 107270
+b15e5557229134ba06e40ac3ac26bc806a8e850b3da6fbf701b2dac5a5b433a5  -
+b15e5557229134ba06e40ac3ac26bc806a8e850b3da6fbf701b2dac5a5b433a5  ./index.html
+[0m
+[0m$ [0mCHROME="/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"; "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --enable-unsafe-swiftshader --window-size=1280,800 --virtual-time-budget=15000 --enable-logging=stderr --screenshot=/tmp/shot-game.png "http://127.0.0.1:3000/?autostart=1&car=wraith&screenshot=1" 2>/tmp/chrome-game2.err; echo "exit=$?"; ls -la /tmp/shot-game.png; echo "netfail:"; grep -c -E "net::ERR|Failed to load resource" /tmp/chrome-game2.err || true; grep -E "Uncaught" /tmp/chrome-game2.err | head -n 3 || true
+exit=0
+-rw-r--r--@ 1 runner  wheel  333050 Sep  8 00:20 /tmp/shot-game.png
+netfail:
+0
+[0m
+[0m→ [0mRead /tmp/shot-game.png
+Live 3D gameplay confirmed. Finalizing screenshots and publishing results.
+[0m
+[0m$ [0mcp /tmp/shot-title.png screenshots/final-title.png && cp /tmp/shot-game.png screenshots/final-gameplay.png && ls -la screenshots/ && shasum -a 256 screenshots/final-*.png && echo "--- entrypoint recheck ---"; ls -la ./index.html && curl -s -o /dev/null -w "serve:%{http_code} %{size_download}\n" --max-time 8 http://127.0.0.1:3000/ && tmux ls 2>&1
+total 1344
+drwxr-xr-x   4 runner  staff     128 Sep  8 00:20 .
+drwxr-xr-x  17 runner  staff     544 Sep  8 00:19 ..
+-rw-r--r--@  1 runner  staff  333050 Sep  8 00:20 final-gameplay.png
+-rw-r--r--@  1 runner  staff  348314 Sep  8 00:20 final-title.png
+80000ff3fa2a568580447a44f0f333af6d419164c2c3f4f3d90dd6b32d7f6300  screenshots/final-gameplay.png
+6064ca95e700e3774c053c84e1551e90fcdbcacdf035c07086bea279699cbd24  screenshots/final-title.png
+--- entrypoint recheck ---
+-rw-r--r--  1 runner  staff  107270 Sep  8 00:17 ./index.html
+serve:200 107270
+app-server: 1 windows (created Tue Sep  8 00:20:10 2026)
+[0m
+[0m# [0mTodos
+[✓] Confirm/repair playable entrypoint ./index.html (restore verified e889141 build)
+[✓] Start app-server tmux on port 3000 and confirm it serves index.html
+[✓] Run browser tests via headless Chrome, fix failures
+[✓] Capture final- screenshots under screenshots/
+[•] Publish completion update to issue #66
+[0m
+[0m$ [0mgh issue comment 66 --body "## App verified on port 3000 — CDN works, 3D gameplay live
+
+Play locally: http://127.0.0.1:3000/ (tmux session app-server, node server, serves ./index.html as 200, 107270 bytes).
+
+Root cause (issue investigation): there is no Three.js CDN download failure in this worker. All three exact dependency URLs return HTTP 200 with correct bytes/hashes from the SSH worker session (unpkg three.min.js 669884 bytes sha256 170c6789...49fa; jsdelivr+unpkg three.module.js 1272972 bytes sha256 76dea815...a495). The only failing layer ever observed is WebGL context creation in GPU-less headless Chrome, which the game correctly converts to its 2D fallback. Full evidence: PROGRESS_CDN_INVESTIGATION.md.
+
+End-to-end proof just now (headless Chrome for Testing 152 + SwiftShader, served over http):
+- Title/vehicle-select renders (NEON SCRAPYARD, 3 rides, START ENGINE).
+- Autostart gameplay renders live 3D: arena, towers, vehicles, HUD (HULL/TURBO 100, weapons, KILLS 0/5, ENEMIES 5, MINIMAP).
+- Console: only benign three.min.js deprecation INFO + SwiftShader perf notes. Zero net errors, zero uncaught.
+- Entrypoint ./index.html is byte-identical to committed build e889141 (sha256 b15e5557...433a5); inline JS node --check PASS.
+
+Fixes applied this pass:
+- Created missing ./index.html (restored verified e889141 build; branch had none).
+- app-server: python3 -m http.server left CLOSED sockets in this sandbox, so tmux app-server now runs a minimal node static server on port 3000 (verified 200 on / and /index.html).
+- Same node server initially 404'd query-string URLs (?autostart=1); fixed to strip query before file lookup, re-verified byte-identical 200.
+
+Screenshots: screenshots/final-title.png, screenshots/final-gameplay.png (committed on the project branch by the workflow).
+Known limitations: loopback python http.server does not bind-usably here (node used instead); public tunnel URL is ephemeral; deprecation warn from three r160 min.js is benign." 2>&1 | tail -n 3
+https://github.com/AgentsLoop/PlayGround/issues/66#issuecomment-5577147912
+[0m
+[0m# [0mTodos
+[✓] Confirm/repair playable entrypoint ./index.html (restore verified e889141 build)
+[✓] Start app-server tmux on port 3000 and confirm it serves index.html
+[✓] Run browser tests via headless Chrome, fix failures
+[✓] Capture final- screenshots under screenshots/
+[✓] Publish completion update to issue #66
+[0m
+[goal:evidence] Verified NEON SCRAPYARD on port 3000: created missing ./index.html from e889141 (sha256 b15e5557...433a5, 107270 bytes, inline JS node --check PASS); tmux app-server serves / and /index.html as HTTP 200 with identical bytes (node static server, python http.server left CLOSED sockets here); headless Chrome over http shows title screen and live autostart 3D gameplay with HUD and minimap, three.min.js r160 loads from unpkg with zero net errors and zero uncaught; fixed query-string 404 in the server and re-verified; screenshots screenshots/final-title.png and screenshots/final-gameplay.png captured and vision-checked; completion update posted to issue 66 as comment 5577147912; CDN root-cause evidence retained in PROGRESS_CDN_INVESTIGATION.md with all three URLs at HTTP 200 and matching hashes, first failing layer proven to be WebGL-only in GPU-less headless mode.
+[goal:complete]
