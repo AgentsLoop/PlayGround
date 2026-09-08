@@ -1,0 +1,29 @@
+# 3D Twisted Metal
+
+## Objective
+
+Deliver a production-quality browser 3D vehicular arena-combat game inspired by the recognizable visual language and interaction model of the Twisted Metal series. Build a real playable 3D scene for desktop Mac users with keyboard and mouse controls, responsive presentation, armed vehicles, arena combat, weapons, damage, survival, and clear match outcomes.
+
+## Quality bar
+
+- Research Twisted Metal and comparable browser 3D arena-combat experiences before coding. Search real screenshots, footage, and interface views; select at least six high-signal visual anchors; download every selected anchor into a clearly named local `reference-assets/` directory; inspect the downloaded files directly; and record each source URL beside its local filename as provenance.
+- Preserve the source's high-level visual language, vehicle-combat tension, readable weapon feedback, arena workflow, and match-state presentation while creating an original implementation and original assets.
+- Implement real driving, aiming, shooting, pickups, enemy behavior, damage, destruction or defeat, restart and recovery, HUD feedback, and win/loss states. Do not replace the 3D game with a flat mockup.
+- Include polished lighting, camera behavior, collision feedback, audio cues where practical, accessible control hints, and reliable loading and error recovery.
+- Inspect the actual running artifact directly. Compare captures side by side or with blind A/B review against the acceptance bar and fix the largest visible gap.
+
+## Execution
+
+- Have the lead choose the route and divide the project into independently judgeable pieces.
+- Assign a separate builder and a fresh-context critic or verifier to every important piece. Each verifier must inspect the actual artifact, identify the largest remaining gap, and send the work back for improvement.
+- Continue across as many sessions as needed. Do not stop at a demo or at the first smoke test.
+
+## Verification
+
+- Exercise the complete play loop on Mac: load, drive, fight, take damage, collect or use weapons, win or lose, restart, and recover from common invalid or interrupted states.
+- Repeat the build, inspect, critic, and fix loop until the acceptance bar is met, or stop only with explicit evidence of the remaining blocker.
+- Record concrete evidence for behavior, visual quality, operability, and delivery in the progress record.
+
+## Progress
+
+Maintain a canonical live progress page with references and provenance, decisions, completed work, evidence, blockers, current gaps, and the next exact action so another agent can resume without losing context.
