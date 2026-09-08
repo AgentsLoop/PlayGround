@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRIM IRON — Arena Vehicular Combat</title>
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.js" } }
+</script>
+</head>
+<body>
+<div id="app">
+  <canvas id="scene"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="minimap-wrap"><canvas id="minimap" width="168" height="168"></canvas></div>
+    <div id="match-clock">05:00</div>
+    <div id="kill-score">KOs <span id="kos">0</span>/5</div>
+    <div id="lives"></div>
+
+    <div id="player-plate">
+      <div id="hp-label">HULL</div>
+      <div id="hp-bar"><div id="hp-fill"></div><div id="hp-ghost"></div></div>
+      <div id="turbo-bar"><div id="turbo-fill"></div></div>
+      <div id="speedo">0 mph</div>
+    </div>
+
+    <div id="weapon-bar"></div>
+    <div id="feed" aria-live="polite" aria-label="Battle feed"></div>
+    <div id="reticle"><div class="ring"></div><div class="dot"></div></div>
+    <div id="hitmarker"></div>
+    <div id="dmg-vignette"></div>
+    <div id="banner" role="alert"></div>
+    <div id="subbanner"></div>
+    <div id="hint-toast"></div>
+  </div>
+
+  <!-- Title screen -->
+  <div id="title" class="overlay">
+    <div class="panel">
+      <div class="kicker">CALYPSO'S INVITATIONAL · DUSK CITY ARENA</div>
+      <h1>GRIM&nbsp;IRON</h1>
+      <p class="tag">Arena vehicular combat. Five rivals. One wish. Be the last engine running.</p>
+      <div class="cols">
+        <div>
+          <h2>Controls</h2>
+          <ul class="keys">
+            <li><b>W A S D</b> / arrows — drive &amp; steer</li>
+            <li><b>Mouse</b> — aim turret · <b>Click / Space</b> — machine gun</li>
+            <li><b>F</b> / right-click — fire selected weapon</li>
+            <li><b>1–5</b> or <b>Q / E</b> — select weapon</li>
+            <li><b>Shift</b> — turbo · <b>P</b> — pause · <b>M</b> — mute</li>
+          </ul>
+        </div>
+        <div>
+          <h2>Arsenal</h2>
+          <ul class="keys">
+            <li><b>MG</b> — infinite shredder, overheats</li>
+            <li><b>Homing</b> — locks nearest rival ahead</li>
+            <li><b>Power</b> — slow, huge, straight</li>
+            <li><b>Napalm</b> — arcing fire pool</li>
+            <li><b>Mine</b> — drop &amp; punish tails</li>
+            <li><b class="gold">SPECIAL — Iron Bloom</b>: radial barrage, charges over time</li>
+          </ul>
+        </div>
+      </div>
+      <div class="row">
+        <button id="btn-start" class="big" autofocus>Enter the Arena</button>
+        <label class="check"><input type="checkbox" id="opt-quality" checked> High detail</label>
+      </div>
+      <p id="load-error" class="error hidden"></p>
+      <p class="fine">Original game. Procedural assets, no downloads. WebGL required.</p>
+    </div>
+  </div>
+
+  <!-- Pause -->
+  <div id="pause" class="overlay hidden">
+    <div class="panel slim">
+      <h1>Paused</h1>
+      <p class="tag">The arena waits for no one. (Except now.)</p>
+      <div class="row">
+        <button id="btn-resume" class="big">Resume</button>
+        <button id="btn-restart-pause">Restart match</button>
+      </div>
+      <ul class="keys"><li><b>P</b> resume · <b>R</b> restart</li></ul>
+    </div>
+  </div>
+
+  <!-- Match end -->
+  <div id="end" class="overlay hidden">
+    <div class="panel slim">
+      <div class="kicker" id="end-kicker">MATCH OVER</div>
+      <h1 id="end-title">You Win</h1>
+      <p class="tag" id="end-sub"></p>
+      <div id="end-stats"></div>
+      <div class="row">
+        <button id="btn-again" class="big">Run It Back (R)</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="nogl" class="overlay hidden">
+    <div class="panel slim"><h1>No WebGL</h1>
+    <p class="tag">This game needs WebGL. Enable hardware acceleration and reload.</p></div>
+  </div>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
