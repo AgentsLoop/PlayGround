@@ -1,0 +1,177 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Verifying the public game and preparing the final capture, commit, and issue update.
+[0m$ [0mgit status --short | head -n 20; echo "---branch---"; git branch --show-current; echo "---log---"; git log --oneline -3; echo "---tmux---"; tmux ls 2>&1; echo "---local3000---"; curl -s -o /dev/null -w "local:%{http_code}\n" http://127.0.0.1:3000/index.html; echo "---public---"; curl -s -o /tmp/pub.html -w "public:%{http_code}\n" --max-time 20 https://thehun-track-hints-urban.trycloudflare.com/; grep -o "<title>[^<]*</title>" /tmp/pub.html | head -n 2
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? PROGRESS.md
+?? evidence/
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? reference-assets/
+?? screenshots/
+---branch---
+opencode/34176296889
+---log---
+b4fe44a Grant reusable OpenCode workflow Pages permission
+---tmux---
+app-server: 1 windows (created Tue Sep  8 01:29:22 2026)
+---local3000---
+local:200
+---public---
+public:200
+<title>Pocket Comet Courier: Neon Delivery Dash</title>
+[0m
+[0m$ [0mls -la screenshots/
+chromium --headless --disable-gpu --no-sandbox --screenshot=screenshots/final-title-desktop.png --window-size=1280,900 --virtual-time-budget=3000 "https://thehun-track-hints-urban.trycloudflare.com/" 2>&1 | tail -n 1
+chromium --headless --disable-gpu --no-sandbox --screenshot=screenshots/final-play-desktop.png --window-size=1280,900 --virtual-time-budget=5000 "https://thehun-track-hints-urban.trycloudflare.com/?autostart=1" 2>&1 | tail -n 1
+chromium --headless --disable-gpu --no-sandbox --screenshot=screenshots/final-play-mobile.png --window-size=390,844 --virtual-time-budget=5000 "https://thehun-track-hints-urban.trycloudflare.com/?autostart=1" 2>&1 | tail -n 1
+chromium --headless --disable-gpu --no-sandbox --screenshot=screenshots/final-gameover-desktop.png --window-size=1280,900 --virtual-time-budget=3000 "https://thehun-track-hints-urban.trycloudflare.com/?gameover=1" 2>&1 | tail -n 1
+ls -lh screenshots/
+chromium --headless --disable-gpu --no-sandbox --dump-dom "https://thehun-track-hints-urban.trycloudflare.com/?selftest=1" 2>/dev/null | grep -A 13 'id="selftest"'
+total 596
+drwxr-xr-x  2 runner runner   4096 Sep  8 01:30 .
+drwxr-xr-x 13 runner runner   4096 Sep  8 01:29 ..
+-rw-r--r--  1 runner runner 149548 Sep  8 01:30 final-gameover-desktop.png
+-rw-r--r--  1 runner runner 161252 Sep  8 01:30 final-play-desktop.png
+-rw-r--r--  1 runner runner 121419 Sep  8 01:30 final-play-mobile.png
+-rw-r--r--  1 runner runner 160226 Sep  8 01:29 final-title-desktop.png
+162636 bytes written to file screenshots/final-title-desktop.png
+163346 bytes written to file screenshots/final-play-desktop.png
+125011 bytes written to file screenshots/final-play-mobile.png
+149194 bytes written to file screenshots/final-gameover-desktop.png
+total 592K
+-rw-r--r-- 1 runner runner 146K Sep  8 01:31 final-gameover-desktop.png
+-rw-r--r-- 1 runner runner 160K Sep  8 01:31 final-play-desktop.png
+-rw-r--r-- 1 runner runner 123K Sep  8 01:31 final-play-mobile.png
+-rw-r--r-- 1 runner runner 159K Sep  8 01:31 final-title-desktop.png
+<body><pre id="selftest">PASS: start enters play
+PASS: timer decays
+PASS: parcel pickup scores
+PASS: hazard damages hp
+PASS: boost consumes charge
+PASS: pause works
+PASS: resume works
+PASS: death goes to gameover
+PASS: restart works
+PASS: timeout ends run
+PASS: best persisted</pre>
+
+
+</body></html>
+[0m
+[0m→ [0mRead screenshots/final-play-mobile.png
+[0m→ [0mRead screenshots/final-play-desktop.png
+Fresh public-URL captures verified on desktop and mobile — now committing and pushing.
+[0m
+[0m$ [0mgit add index.html PROGRESS.md screenshots/ evidence/ reference-assets/ 2>&1
+git status --short | head -n 20
+git -c user.name="opencode" -c user.email="opencode@agentsloop.local" commit -m "Pocket Comet Courier: playable neon delivery dash with verification evidence
+
+- Single-file browser game (index.html): title, play, score/streak,
+  pause/resume, game-over, restart, routes, persisted best; keyboard+touch
+- Reference research assets with provenance; PROGRESS.md record
+- Final screenshots under screenshots/ captured against public URL" 2>&1 | tail -n 5
+git log --oneline -3
+git rev-parse HEAD
+A  PROGRESS.md
+A  evidence/01-title-desktop.png
+A  evidence/02-play-desktop.png
+A  evidence/03-play-mobile.png
+A  evidence/04-pause-desktop.png
+A  evidence/05-gameover-desktop.png
+A  evidence/06-verify-rerun.png
+A  index.html
+A  reference-assets/01-downwell-vg247.jpg
+A  reference-assets/02-downwell-mobygames-cave.png
+A  reference-assets/03-downwell-nintendolife.jpg
+A  reference-assets/04-downwell-linclo.png
+A  reference-assets/05-synthwave-runner-steam.jpg
+A  reference-assets/06-synthwave-runner-itch.png
+A  reference-assets/07-pixel-comet-freepik.jpg
+A  screenshots/final-gameover-desktop.png
+A  screenshots/final-play-desktop.png
+A  screenshots/final-play-mobile.png
+A  screenshots/final-title-desktop.png
+?? .agents/
+ create mode 100644 reference-assets/07-pixel-comet-freepik.jpg
+ create mode 100644 screenshots/final-gameover-desktop.png
+ create mode 100644 screenshots/final-play-desktop.png
+ create mode 100644 screenshots/final-play-mobile.png
+ create mode 100644 screenshots/final-title-desktop.png
+9f50649 Pocket Comet Courier: playable neon delivery dash with verification evidence
+b4fe44a Grant reusable OpenCode workflow Pages permission
+9f506490b15d9e00fcb5825b81606d066a4c9ad4
+[0m
+[0m$ [0mgit push -u origin opencode/34176296889 2>&1 | tail -n 5
+git status --short | head -n 12
+remote:      https://github.com/AgentsLoop/PlayGround/pull/new/opencode/34176296889        
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34176296889 -> opencode/34176296889
+branch 'opencode/34176296889' set up to track 'origin/opencode/34176296889'.
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+[0m
+[0m$ [0mgh issue comment 69 --body "## Final completion — Pocket Comet Courier: Neon Delivery Dash
+
+**Play the public game:** https://thehun-track-hints-urban.trycloudflare.com
+
+Single-file 2D browser game (no build, no network deps): pilot a pocket comet through a neon canyon, thread red hazards, grab amber parcels to hold off the collapsing route timer, chain streaks, hit checkpoints to advance routes. Full flow: title/start, how-to, active play, score/streak/route HUD, pause/resume, game-over, restart, persisted best.
+
+### Screenshots (captured against the public URL, committed under screenshots/)
+
+Desktop play:
+![final play desktop](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34176296889/screenshots/final-play-desktop.png)
+
+Mobile play (390x844):
+![final play mobile](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34176296889/screenshots/final-play-mobile.png)
+
+Title:
+![final title desktop](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34176296889/screenshots/final-title-desktop.png)
+
+Game over (score + persisted best):
+![final gameover desktop](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34176296889/screenshots/final-gameover-desktop.png)
+
+### Final commit
+- Branch pushed: opencode/34176296889
+- Commit: 9f506490b15d9e00fcb5825b81606d066a4c9ad4 (game + PROGRESS.md + reference-assets/ + evidence/ + screenshots/)
+
+### Deployment and test status
+- Local: tmux session app-server serving ./index.html on port 3000 (HTTP 200, correct title).
+- Public: tunnel URL above serves the game (HTTP 200, title verified via curl).
+- Browser tests against the PUBLIC url (?selftest=1): 11/11 PASS — start, timer decay, parcel pickup, hazard damage, boost, pause, resume, death to game-over, restart, timeout, persistence.
+- Console: no uncaught errors; only the expected AudioContext autoplay notice (handled with gesture-safe fallback).
+- Fresh-critic pass done earlier: largest gap (desktop controls below the fold) was fixed and re-verified.
+
+### Known limitations
+- Cloudflare tunnel URL is ephemeral (session-scoped); for a permanent home the branch file works on any static host or file://.
+- Audio is minimal WebAudio bleeps; muted until first user gesture (browser autoplay policy).
+- Reference image 07 (pixel comet) is a stock/illustration source used for the trail concept only — all in-game art is original canvas code.
+- Endless-route balancing (routes 5+) is lightly tuned; future polish could add themed palettes and more hazard patterns." 2>&1 | tail -n 3
+https://github.com/AgentsLoop/PlayGround/issues/69#issuecomment-5577728996
+[0m
+All requested steps are complete:
+
+- **Entrypoint**: `./index.html` confirmed present and served (local `:3000` and the public URL both return HTTP 200 with the game title).
+- **Server**: running in tmux session `app-server` on port 3000.
+- **Browser tests** against the public URL (`?selftest=1`): 11/11 PASS, no console errors, no fixes needed.
+- **Screenshots**: four fresh captures from the public URL under `screenshots/` (`final-title/play-mobile/play-desktop/gameover`), visually inspected.
+- **Commit + push**: `9f50649` on `opencode/34176296889` pushed to origin (private key and infra left untracked).
+- **Issue comment**: final completion update posted to #69 with the public game URL, embedded screenshots, final commit, deployment/test status, and known limitations.
+
+Public game: https://thehun-track-hints-urban.trycloudflare.com

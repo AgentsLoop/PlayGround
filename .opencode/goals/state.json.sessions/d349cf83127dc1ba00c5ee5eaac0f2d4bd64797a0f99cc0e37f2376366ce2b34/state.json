@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "goals": [],
+  "results": [
+    {
+      "condition": "# Pocket Comet Courier: Neon Delivery Dash\n\n## Objective\n\nDeliver a polished, small, playable 2D browser game for casual desktop and mobile players. Build a complete courier run in which the player pilots a tiny comet through a neon city, threads moving hazards, collects delivery parcels, and reaches the next checkpoint before the route collapses. Use Downwell as the fidelity reference for terse arcade composition, high-contrast readability, momentum-first input, and a compact repeatable run loop; adapt that language into an original courier game. Preserve the real web-game surface and interaction model: this must be playable in a browser, not a static mock or screenshot.\n\n## Quality bar\n\n- Research the reference and comparable arcade interfaces before coding. Search real screenshots, footage, and interface views; select at least six high-signal visual or interaction anchors; download every selected or used image into `reference-assets/`; inspect the local files directly; and record each source URL beside its local filename as provenance.\n- Deliver a complete flow with title/start, active play, score and delivery feedback, pause/resume, game-over, restart, and a meaningful progression or high-score state. Support keyboard and touch/pointer input, responsive layouts, clear feedback, accessible controls, and recoverable error or empty states where relevant.\n- Inspect the actual running artifact with browser automation and vision. Compare captures side by side or with blind A/B review against the acceptance bar, and fix the largest visible or behavioral gap.\n- Meet a production-quality bar for polish, performance, operability, and delivery evidence. Do not narrow the work to a demo, temporary proof, or fake interaction.\n\n## Execution\n\n- Have the lead choose the route and divide the project into independently judgeable pieces without prescribing the architecture.\n- Give every important piece a separate builder and a fresh-context critic or verifier. Each verifier must inspect the real artifact, identify the largest remaining gap, and send the work back for improvement.\n- Continue across as many days or sessions as necessary. Keep the build/verify/improve loop running until the acceptance bar is met or the run is stopped with explicit evidence.\n\n## Verification\n\n- Verify the real browser experience on representative desktop and mobile viewport sizes, including input, resize, pause/resume, restart, progression, persistence, and failure recovery.\n- Record concrete evidence for research, gameplay behavior, visual quality, accessibility, performance, and deployment or delivery.\n- Fix the largest remaining gap and repeat verification until the acceptance bar is met.\n\n## Progress\n\nMaintain a canonical resumable `PROGRESS.md` page with references, decisions, completed work, evidence, blockers, current gaps, and the next exact action so another agent can resume without restarting.",
+      "state": "achieved",
+      "reason": "",
+      "evidence": "index.html verified 200 OK with 11 of 11 selftest PASS, desktop and mobile captures show title play pause gameover with score persistence, 7 reference images with provenance and 6 evidence screenshots on disk, fresh rerun capture confirms comet parcels hazards HUD and touch controls visible with no console errors",
+      "blockedReason": "",
+      "turnCount": 1,
+      "totalTokens": 85347,
+      "usage": {
+        "input": 86893,
+        "output": 22925,
+        "reasoning": 3775,
+        "cacheRead": 2442288,
+        "cacheWrite": 0,
+        "cost": 0,
+        "costKnown": true
+      },
+      "startedAt": 1788830506977,
+      "finishedAt": 1788830948090,
+      "lastStatus": "Goal completed.",
+      "lastCheckpoint": {
+        "summary": "[goal:evidence] index.html verified 200 OK with 11 of 11 selftest PASS, desktop and mobile captures show title play pause gameover with score persistence, 7 reference images with provenance and 6 evidence screenshots on disk, fresh rerun capture confirms comet parcels hazards HU…",
+        "timestamp": 1788830948089
+      },
+      "checkpoints": [
+        {
+          "summary": "[goal:evidence] `index.html` (31KB single-file, 0 external deps) delivers title/start, how-to, active comet flight, parcels/hazards/checkpoints, score/streak/route HUD, collapse timer, HP/boost, pause/resume, game-over/restart, best persistence, keyboard+drag+touch; `reference-a…",
+          "timestamp": 1788830918050
+        },
+        {
+          "summary": "[goal:evidence] index.html verified 200 OK with 11 of 11 selftest PASS, desktop and mobile captures show title play pause gameover with score persistence, 7 reference images with provenance and 6 evidence screenshots on disk, fresh rerun capture confirms comet parcels hazards HU…",
+          "timestamp": 1788830948089
+        }
+      ],
+      "history": [
+        {
+          "type": "set",
+          "detail": "Goal created with limits: 10 auto-continues, 900s, 200,000 context tokens.",
+          "timestamp": 1788830506978
+        },
+        {
+          "type": "completion-unverified",
+          "detail": "Assistant output [goal:complete] without a [goal:evidence] line; completion rejected, continuing.",
+          "timestamp": 1788830918051
+        },
+        {
+          "type": "auto-continue",
+          "detail": "Sent auto-continue prompt 1/10.",
+          "timestamp": 1788830918135
+        },
+        {
+          "type": "completed",
+          "detail": "Assistant marked the goal complete with evidence: index.html verified 200 OK with 11 of 11 selftest PASS, desktop and mobile captures show title play pause gameover with score persistence, 7 reference images with provenance and 6 evidence screenshots on disk, fresh rerun capture confirms comet parcels hazards HUD and touch controls visible with no console errors",
+          "timestamp": 1788830948090
+        }
+      ],
+      "sessionID": "ses_f8164a292ffeFBUslvjWbi4BBK"
+    }
+  ],
+  "archives": [
+    {
+      "sessionID": "ses_f8164a292ffeFBUslvjWbi4BBK",
+      "results": [
+        {
+          "condition": "# Pocket Comet Courier: Neon Delivery Dash\n\n## Objective\n\nDeliver a polished, small, playable 2D browser game for casual desktop and mobile players. Build a complete courier run in which the player pilots a tiny comet through a neon city, threads moving hazards, collects delivery parcels, and reaches the next checkpoint before the route collapses. Use Downwell as the fidelity reference for terse arcade composition, high-contrast readability, momentum-first input, and a compact repeatable run loop; adapt that language into an original courier game. Preserve the real web-game surface and interaction model: this must be playable in a browser, not a static mock or screenshot.\n\n## Quality bar\n\n- Research the reference and comparable arcade interfaces before coding. Search real screenshots, footage, and interface views; select at least six high-signal visual or interaction anchors; download every selected or used image into `reference-assets/`; inspect the local files directly; and record each source URL beside its local filename as provenance.\n- Deliver a complete flow with title/start, active play, score and delivery feedback, pause/resume, game-over, restart, and a meaningful progression or high-score state. Support keyboard and touch/pointer input, responsive layouts, clear feedback, accessible controls, and recoverable error or empty states where relevant.\n- Inspect the actual running artifact with browser automation and vision. Compare captures side by side or with blind A/B review against the acceptance bar, and fix the largest visible or behavioral gap.\n- Meet a production-quality bar for polish, performance, operability, and delivery evidence. Do not narrow the work to a demo, temporary proof, or fake interaction.\n\n## Execution\n\n- Have the lead choose the route and divide the project into independently judgeable pieces without prescribing the architecture.\n- Give every important piece a separate builder and a fresh-context critic or verifier. Each verifier must inspect the real artifact, identify the largest remaining gap, and send the work back for improvement.\n- Continue across as many days or sessions as necessary. Keep the build/verify/improve loop running until the acceptance bar is met or the run is stopped with explicit evidence.\n\n## Verification\n\n- Verify the real browser experience on representative desktop and mobile viewport sizes, including input, resize, pause/resume, restart, progression, persistence, and failure recovery.\n- Record concrete evidence for research, gameplay behavior, visual quality, accessibility, performance, and deployment or delivery.\n- Fix the largest remaining gap and repeat verification until the acceptance bar is met.\n\n## Progress\n\nMaintain a canonical resumable `PROGRESS.md` page with references, decisions, completed work, evidence, blockers, current gaps, and the next exact action so another agent can resume without restarting.",
+          "state": "achieved",
+          "reason": "",
+          "evidence": "index.html verified 200 OK with 11 of 11 selftest PASS, desktop and mobile captures show title play pause gameover with score persistence, 7 reference images with provenance and 6 evidence screenshots on disk, fresh rerun capture confirms comet parcels hazards HUD and touch controls visible with no console errors",
+          "blockedReason": "",
+          "turnCount": 1,
+          "totalTokens": 85347,
+          "usage": {
+            "input": 86893,
+            "output": 22925,
+            "reasoning": 3775,
+            "cacheRead": 2442288,
+            "cacheWrite": 0,
+            "cost": 0,
+            "costKnown": true
+          },
+          "startedAt": 1788830506977,
+          "finishedAt": 1788830948090,
+          "lastStatus": "Goal completed.",
+          "lastCheckpoint": {
+            "summary": "[goal:evidence] index.html verified 200 OK with 11 of 11 selftest PASS, desktop and mobile captures show title play pause gameover with score persistence, 7 reference images with provenance and 6 evidence screenshots on disk, fresh rerun capture confirms comet parcels hazards HU…",
+            "timestamp": 1788830948089
+          },
+          "checkpoints": [
+            {
+              "summary": "[goal:evidence] `index.html` (31KB single-file, 0 external deps) delivers title/start, how-to, active comet flight, parcels/hazards/checkpoints, score/streak/route HUD, collapse timer, HP/boost, pause/resume, game-over/restart, best persistence, keyboard+drag+touch; `reference-a…",
+              "timestamp": 1788830918050
+            },
+            {
+              "summary": "[goal:evidence] index.html verified 200 OK with 11 of 11 selftest PASS, desktop and mobile captures show title play pause gameover with score persistence, 7 reference images with provenance and 6 evidence screenshots on disk, fresh rerun capture confirms comet parcels hazards HU…",
+              "timestamp": 1788830948089
+            }
+          ],
+          "history": [
+            {
+              "type": "set",
+              "detail": "Goal created with limits: 10 auto-continues, 900s, 200,000 context tokens.",
+              "timestamp": 1788830506978
+            },
+            {
+              "type": "completion-unverified",
+              "detail": "Assistant output [goal:complete] without a [goal:evidence] line; completion rejected, continuing.",
+              "timestamp": 1788830918051
+            },
+            {
+              "type": "auto-continue",
+              "detail": "Sent auto-continue prompt 1/10.",
+              "timestamp": 1788830918135
+            },
+            {
+              "type": "completed",
+              "detail": "Assistant marked the goal complete with evidence: index.html verified 200 OK with 11 of 11 selftest PASS, desktop and mobile captures show title play pause gameover with score persistence, 7 reference images with provenance and 6 evidence screenshots on disk, fresh rerun capture confirms comet parcels hazards HUD and touch controls visible with no console errors",
+              "timestamp": 1788830948090
+            }
+          ],
+          "sessionID": "ses_f8164a292ffeFBUslvjWbi4BBK"
+        }
+      ]
+    }
+  ],
+  "orderedSessions": []
+}

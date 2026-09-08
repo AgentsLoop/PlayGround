@@ -1,0 +1,28 @@
+# Pocket Comet Courier: Neon Delivery Dash
+
+## Objective
+
+Deliver a polished, small, playable 2D browser game for casual desktop and mobile players. Build a complete courier run in which the player pilots a tiny comet through a neon city, threads moving hazards, collects delivery parcels, and reaches the next checkpoint before the route collapses. Use Downwell as the fidelity reference for terse arcade composition, high-contrast readability, momentum-first input, and a compact repeatable run loop; adapt that language into an original courier game. Preserve the real web-game surface and interaction model: this must be playable in a browser, not a static mock or screenshot.
+
+## Quality bar
+
+- Research the reference and comparable arcade interfaces before coding. Search real screenshots, footage, and interface views; select at least six high-signal visual or interaction anchors; download every selected or used image into `reference-assets/`; inspect the local files directly; and record each source URL beside its local filename as provenance.
+- Deliver a complete flow with title/start, active play, score and delivery feedback, pause/resume, game-over, restart, and a meaningful progression or high-score state. Support keyboard and touch/pointer input, responsive layouts, clear feedback, accessible controls, and recoverable error or empty states where relevant.
+- Inspect the actual running artifact with browser automation and vision. Compare captures side by side or with blind A/B review against the acceptance bar, and fix the largest visible or behavioral gap.
+- Meet a production-quality bar for polish, performance, operability, and delivery evidence. Do not narrow the work to a demo, temporary proof, or fake interaction.
+
+## Execution
+
+- Have the lead choose the route and divide the project into independently judgeable pieces without prescribing the architecture.
+- Give every important piece a separate builder and a fresh-context critic or verifier. Each verifier must inspect the real artifact, identify the largest remaining gap, and send the work back for improvement.
+- Continue across as many days or sessions as necessary. Keep the build/verify/improve loop running until the acceptance bar is met or the run is stopped with explicit evidence.
+
+## Verification
+
+- Verify the real browser experience on representative desktop and mobile viewport sizes, including input, resize, pause/resume, restart, progression, persistence, and failure recovery.
+- Record concrete evidence for research, gameplay behavior, visual quality, accessibility, performance, and deployment or delivery.
+- Fix the largest remaining gap and repeat verification until the acceptance bar is met.
+
+## Progress
+
+Maintain a canonical resumable `PROGRESS.md` page with references, decisions, completed work, evidence, blockers, current gaps, and the next exact action so another agent can resume without restarting.
