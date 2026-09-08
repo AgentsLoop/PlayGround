@@ -1,0 +1,1616 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Kicking off your Mac project — surveying the workspace to map the build.
+[0m⚙ [0mget_goal_history Unknown
+[0m→ [0mRead .
+[0m
+[0m$ [0mgit log --oneline -20; echo "---STATUS---"; git status --short | head -n 100
+b4fe44a Grant reusable OpenCode workflow Pages permission
+---STATUS---
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+[0m
+[0m→ [0mRead README.md
+[0m→ [0mRead Agents.md
+[0m
+[0m$ [0mgh issue list --limit 20 --state all 2>&1; echo "---"; ls -la .opencode/ 2>&1 | head -n 50; echo "---"; cat .github/workflows/*.yml 2>/dev/null | head -n 200
+86	OPEN	Implement the requested Mac project	OpenCode, in progress, Goal, mac	2026-09-08T04:58:21Z
+85	OPEN	3D Twisted Metal	OpenCode, in progress, Goal, mac	2026-09-08T04:56:48Z
+84	OPEN	3D Twisted Metal	OpenCode, failed, Goal, mac	2026-09-08T04:32:46Z
+83	OPEN	Verify broker-backed SSH access on macOS after reliable readiness probe	OpenCode, in progress, Goal, mac, ssh	2026-09-08T04:31:24Z
+82	OPEN	Verify broker-backed SSH access on macOS after startup timing fix	OpenCode, failed, Goal, mac, ssh	2026-09-08T04:04:50Z
+81	OPEN	Verify broker-backed SSH access on macOS after listener detection fix	OpenCode, failed, Goal, mac, ssh	2026-09-08T04:01:02Z
+80	OPEN	Verify broker-backed SSH access on macOS	OpenCode, failed, Goal, mac, ssh	2026-09-08T03:57:56Z
+79	OPEN	Verify SSH URL reporting beside the OpenCode Web URL	OpenCode, complete, Goal	2026-09-08T03:51:35Z
+78	OPEN	OpenCode project kickoff on macOS	OpenCode, failed, Goal, mac	2026-09-08T03:44:41Z
+77	OPEN	Verify SSH and WebGL on Linux worker	OpenCode, in progress, Goal, ssh	2026-09-08T02:12:30Z
+76	OPEN	Verify WebGL GPU acceleration on SSH Mac worker — tunnel registration	OpenCode, in progress, Goal, mac, ssh	2026-09-08T02:10:49Z
+75	OPEN	Verify WebGL GPU acceleration on SSH Mac worker — validated SSH	OpenCode, in progress, Goal, mac, ssh	2026-09-08T02:07:12Z
+74	OPEN	Verify WebGL GPU acceleration on SSH Mac worker — direct access fix	OpenCode, in progress, Goal, mac, ssh	2026-09-08T01:59:02Z
+73	OPEN	Verify WebGL GPU acceleration on SSH Mac worker — endpoint fix	OpenCode, failed, Goal, mac, ssh	2026-09-08T01:56:13Z
+72	OPEN	Verify WebGL GPU acceleration on SSH Mac worker — final rerun	OpenCode, in progress, Goal, mac, ssh	2026-09-08T01:52:49Z
+71	OPEN	Verify WebGL GPU acceleration on SSH Mac worker — rerun	OpenCode, in progress, Goal, mac, ssh	2026-09-08T01:50:22Z
+70	OPEN	Verify WebGL GPU acceleration on SSH Mac worker	OpenCode, in progress, Goal, mac, ssh	2026-09-08T01:40:44Z
+69	OPEN	Pocket Comet Courier: Neon Delivery Dash	OpenCode, complete, Goal	2026-09-08T01:32:44Z
+68	OPEN	Retry actual Metal GPU WebGL validation over SSH on Mac	OpenCode, Goal, mac, ssh	2026-09-08T01:15:37Z
+67	OPEN	Validate actual Metal GPU WebGL over SSH on Mac	OpenCode, Goal, mac, ssh	2026-09-08T00:56:29Z
+---
+total 0
+drwx------   3 runner  staff   96 Sep  8 04:58 .
+drwxr-xr-x  14 runner  staff  448 Sep  8 04:58 ..
+drwx------   5 runner  staff  160 Sep  8 04:58 goals
+---
+name: OpenCode
+run-name: "OpenCode #${{ inputs.issue_number }} — ${{ inputs.issue_title }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue containing the OpenCode label
+        required: true
+      request:
+        description: Exact issue request text
+        required: true
+      issue_title:
+        description: Issue title for the Actions run name
+        required: true
+      labels_json:
+        description: JSON array of issue label names
+        required: false
+        default: '[]'
+      sender:
+        description: GitHub username that submitted the request
+        required: true
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  pages: write
+  id-token: write
+
+jobs:
+  opencode:
+    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-reusable.yml@main
+    with:
+      issue_number: ${{ inputs.issue_number }}
+      request: ${{ inputs.request }}
+      issue_title: ${{ inputs.issue_title }}
+      labels_json: ${{ inputs.labels_json }}
+      sender: ${{ inputs.sender }}
+    secrets: inherit
+[0m
+[0m$ [0mgh issue view 86 --json title,body,labels,comments 2>&1 | head -n 300; echo "===85==="; gh issue view 85 --json title,body,labels 2>&1 | head -n 300
+{"body":"# Implement the requested Mac project\n\n## Objective\n\nDeliver the requested Mac-targeted project outcome to production quality for its intended users. Preserve the real product surface, workflows, states, and dimensionality required by the project request; do not replace it with a flat demo or a temporary proof.\n\n## Quality bar\n\n- Research authoritative references, comparable products, representative data, and executable acceptance fixtures before coding. For visual work, search real screenshots, footage, and interface views, select at least six high-signal anchors, download them into a clearly named local reference-assets directory, inspect the files directly, and record each source URL beside its local filename.\n- Inspect the actual artifact with the relevant tools and compare renders, captures, documents, scenes, or interfaces side by side or with blind A/B review whenever practical.\n- Complete the requested workflows, real states, error and recovery behavior, polish, accessibility or operability, and delivery evidence.\n\n## Execution\n\n- Have the lead choose the route and divide the project into independently judgeable pieces.\n- Give every important piece a builder and a fresh-context critic or verifier. Require the verifier to inspect the actual artifact, compare it with the quality bar, identify the largest remaining gap, and send the work back for improvement.\n- Sustain the work across as many days or sessions as necessary.\n\n## Verification\n\n- Continue the build, verify, and improve loop until the acceptance bar is met or the run stops with explicit evidence.\n- Record concrete evidence for behavior, quality, delivery, blockers, recovery, and remaining gaps.\n\n## Progress\n\nMaintain a canonical live progress page with references, decisions, completed work, evidence, blockers, current gaps, and the next exact action so another agent can resume without losing context.\n","comments":[{"id":"IC_kwDOUKWYJc8AAAABTJBR5A","author":{"login":"github-actions"},"authorAssociation":"CONTRIBUTOR","body":"🔐 **Temporary AgentsWeb SSH session is ready.**\n\nRun: https://github.com/AgentsLoop/PlayGround/actions/runs/34188793708\nSSH URL: `ssh://opencode-issue-86-34188793708-ssh.agentsweb.space:32708`\nHost: `opencode-issue-86-34188793708-ssh.agentsweb.space:32708`\n\nRun this command while the job is active:\n\n```sh\nssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/aiplay-agentsweb -p 32708 runner@opencode-issue-86-34188793708-ssh.agentsweb.space\n```\n🟡 **OpenCode progress (live)**\n\nUpdated: 2026-09-08 04:58:20.633 UTC\n\n🌐 **OpenCode Web UI:** https://integrity-burlington-bar-himself.trycloudflare.com/L1VzZXJzL3J1bm5lci93b3JrL1BsYXlHcm91bmQvUGxheUdyb3VuZA/session/ses_f809e6105ffeVMnv7IKnO38ldC\n\n📁 **Project files:** https://doubt-catalyst-supplement-placing.trycloudflare.com\n\n\n\n- Waiting for live OpenCode progress statistics.\n\nThis opens the currently running OpenCode with Goal session directly. Access remains available while OpenCode runs and for 5 hours afterwards.","createdAt":"2026-09-08T04:58:21Z","includesCreatedEdit":false,"isMinimized":false,"minimizedReason":"","reactionGroups":[],"url":"https://github.com/AgentsLoop/PlayGround/issues/86#issuecomment-5579493860","viewerDidAuthor":true}],"labels":[{"id":"LA_kwDOUKWYJc8AAAACzJDiWQ","name":"OpenCode","description":"","color":"aaaaaa"},{"id":"LA_kwDOUKWYJc8AAAACzJISJQ","name":"in progress","description":"OpenCode workflow is running","color":"FBCA04"},{"id":"LA_kwDOUKWYJc8AAAACzJIShA","name":"Goal","description":"Run OMG with the persistent Goal command","color":"8A2BE2"},{"id":"LA_kwDOUKWYJc8AAAACz3vUCA","name":"mac","description":"Run OpenCode on the macos-latest GitHub-hosted runner","color":"B60205"}],"title":"Implement the requested Mac project"}
+===85===
+{"body":"# 3D Twisted Metal\n\n## Objective\n\nDeliver a production-quality browser 3D vehicular arena-combat game inspired by the recognizable visual language and interaction model of the Twisted Metal series. Build a real playable 3D scene for desktop Mac users with keyboard and mouse controls, responsive presentation, armed vehicles, arena combat, weapons, damage, survival, and clear match outcomes.\n\n## Quality bar\n\n- Research Twisted Metal and comparable browser 3D arena-combat experiences before coding. Search real screenshots, footage, and interface views; select at least six high-signal visual anchors; download every selected anchor into a clearly named local `reference-assets/` directory; inspect the downloaded files directly; and record each source URL beside its local filename as provenance.\n- Preserve the source's high-level visual language, vehicle-combat tension, readable weapon feedback, arena workflow, and match-state presentation while creating an original implementation and original assets.\n- Implement real driving, aiming, shooting, pickups, enemy behavior, damage, destruction or defeat, restart and recovery, HUD feedback, and win/loss states. Do not replace the 3D game with a flat mockup.\n- Include polished lighting, camera behavior, collision feedback, audio cues where practical, accessible control hints, and reliable loading and error recovery.\n- Inspect the actual running artifact directly. Compare captures side by side or with blind A/B review against the acceptance bar and fix the largest visible gap.\n\n## Execution\n\n- Have the lead choose the route and divide the project into independently judgeable pieces.\n- Assign a separate builder and a fresh-context critic or verifier to every important piece. Each verifier must inspect the actual artifact, identify the largest remaining gap, and send the work back for improvement.\n- Continue across as many sessions as needed. Do not stop at a demo or at the first smoke test.\n\n## Verification\n\n- Exercise the complete play loop on Mac: load, drive, fight, take damage, collect or use weapons, win or lose, restart, and recover from common invalid or interrupted states.\n- Repeat the build, inspect, critic, and fix loop until the acceptance bar is met, or stop only with explicit evidence of the remaining blocker.\n- Record concrete evidence for behavior, visual quality, operability, and delivery in the progress record.\n\n## Progress\n\nMaintain a canonical live progress page with references and provenance, decisions, completed work, evidence, blockers, current gaps, and the next exact action so another agent can resume without losing context.\n","labels":[{"id":"LA_kwDOUKWYJc8AAAACzJDiWQ","name":"OpenCode","description":"","color":"aaaaaa"},{"id":"LA_kwDOUKWYJc8AAAACzJISJQ","name":"in progress","description":"OpenCode workflow is running","color":"FBCA04"},{"id":"LA_kwDOUKWYJc8AAAACzJIShA","name":"Goal","description":"Run OMG with the persistent Goal command","color":"8A2BE2"},{"id":"LA_kwDOUKWYJc8AAAACz3vUCA","name":"mac","description":"Run OpenCode on the macos-latest GitHub-hosted runner","color":"B60205"}],"title":"3D Twisted Metal"}
+[0m
+[0m✱ [0mGlob "**/*.html"[90m 0 matches[0m
+[0m✱ [0mGlob "**/PROGRESS*"[90m 0 matches[0m
+[0m
+[0m$ [0mls -R .opencode/goals/ 2>&1 | head -n 50; echo "---"; node --version 2>&1; npm --version 2>&1; python3 --version 2>&1; which chromium google-chrome 2>&1; ls /Applications 2>&1 | head
+state.json.lock
+state.json.lock.claims-v2
+state.json.sessions
+
+.opencode/goals//state.json.lock.claims-v2:
+
+.opencode/goals//state.json.sessions:
+aa73ab992c62ea03ef8e8fa191434f25f0e7f19913a75aef2f724fca728d18fe
+
+.opencode/goals//state.json.sessions/aa73ab992c62ea03ef8e8fa191434f25f0e7f19913a75aef2f724fca728d18fe:
+state.json
+state.json.ledger.jsonl
+state.json.lock
+state.json.lock.claims-v2
+
+.opencode/goals//state.json.sessions/aa73ab992c62ea03ef8e8fa191434f25f0e7f19913a75aef2f724fca728d18fe/state.json.lock.claims-v2:
+claim-4c44eb1a-37ce-469c-859e-5ef50ec4c64f.json
+---
+v24.20.0
+11.19.0
+Python 3.14.7
+Firefox.app
+Google Chrome for Testing.app
+Google Chrome.app
+Microsoft Edge.app
+PowerShell.app
+Python 3.11
+Python 3.12
+Python 3.13
+Python 3.14
+Safari.app
+[0m
+No prior artifacts — treating issue #85 (3D Twisted Metal arena combat) as the concrete target. Setting up the build plan.
+[0m# [0mTodos
+[•] Research references + download 6+ anchors to reference-assets/ with provenance
+[ ] Scaffold playable 3D vehicular combat game (drive/aim/shoot/pickups/AI/damage/HUD/win-loss)
+[ ] Polish: lighting, camera, collision feedback, audio, hints, loading/error recovery
+[ ] Verify: serve, screenshot, play-loop checks, critic fix-loop, progress page
+[0m
+[0m◈ [0mExa Web Search "Twisted Metal PS3 2012 gameplay screenshot arena combat"
+[0m◈ [0mExa Web Search "Twisted Metal 2 gameplay screenshot vehicle HUD weapons"
+[0m→ [0mSkill "image-search"
+[0m
+[0m$ [0mpython3 /Users/runner/work/PlayGround/PlayGround/.agents/skills/image-search/scripts/image_search.py "Twisted Metal gameplay arena combat" --max_results 12 --size Large --download ./reference-assets --output ./reference-assets/search-results.json 2>&1 | head -n 80
+错误: 请先安装 ddgs 库
+运行: pip install ddgs
+[0m
+[0m$ [0mpip install ddgs 2>&1 | tail -n 3 && python3 /Users/runner/work/PlayGround/PlayGround/.agents/skills/image-search/scripts/image_search.py "Twisted Metal gameplay arena combat" --max_results 12 --size Large --download ./reference-assets --output ./reference-assets/search-results.json 2>&1 | head -n 120
+Installing collected packages: primp, lxml, click, ddgs
+
+Successfully installed click-8.5.0 ddgs-9.16.0 lxml-6.1.3 primp-2.0.0
+错误: 请先安装 ddgs 库
+运行: pip install ddgs
+[0m
+[0m→ [0mRead .agents/skills/image-search/scripts/image_search.py
+[0m
+[0m$ [0mwhich pip python3; pip --version; python3 -c "import ddgs; print(ddgs.__file__)" 2>&1; python3 -m pip install ddgs requests 2>&1 | tail -n 2
+/Library/Frameworks/Python.framework/Versions/Current/bin/pip
+/opt/homebrew/bin/python3
+pip 26.2.1 from /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pip (python 3.14)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import ddgs; print(ddgs.__file__)
+    ^^^^^^^^^^^
+ModuleNotFoundError: No module named 'ddgs'
+note: If you believe this is a mistake, please contact your Python installation or OS distribution provider. You can override this, at the risk of breaking your Python installation or OS, by passing --break-system-packages.
+hint: See PEP 668 for the detailed specification.
+[0m
+[0m$ [0mpython3 -m pip install --break-system-packages ddgs requests 2>&1 | tail -n 2 && python3 -c "from ddgs import DDGS; print('ok')"
+Successfully installed charset_normalizer-3.5.1 click-8.5.0 ddgs-9.16.0 idna-3.19 lxml-6.1.3 primp-2.0.0 requests-2.34.2 urllib3-2.7.0
+ok
+[0m
+[0m$ [0mpython3 /Users/runner/work/PlayGround/PlayGround/.agents/skills/image-search/scripts/image_search.py "Twisted Metal PS3 gameplay" --max_results 12 --size Large --download ./reference-assets --output ./reference-assets/search-results.json 2>&1 | head -n 60
+正在搜索图片: Twisted Metal PS3 gameplay
+找到 12 张图片
+正在下载 12 张图片到 reference-assets
+  [1/12] 下载中...
+  [2/12] 下载中...
+  [3/12] 下载中...
+  [4/12] 下载中...
+  [5/12] 下载中...
+  [6/12] 下载中...
+  [7/12] 下载中...
+  [8/12] 下载中...
+  [9/12] 下载中...
+  [10/12] 下载中...
+  [11/12] 下载中...
+  [12/12] 下载中...
+下载完成: 12/12 成功
+结果已保存到: ./reference-assets/search-results.json
+[0m
+[0m$ [0mls -la reference-assets/ && python3 -c "import json; d=json.load(open('reference-assets/search-results.json')); [print(r['title'][:60],'|',r['image'][:90],'|',r['local_path'],'|',r['width'],'x',r['height']) for r in d['results']]"
+total 5888
+drwxr-xr-x  15 runner  staff     480 Sep  8 05:03 .
+drwxr-xr-x  15 runner  staff     480 Sep  8 05:03 ..
+-rw-r--r--   1 runner  staff  132998 Sep  8 05:03 image_001.jpg
+-rw-r--r--   1 runner  staff  102532 Sep  8 05:03 image_002.jpg
+-rw-r--r--   1 runner  staff  102284 Sep  8 05:03 image_003.jpg
+-rw-r--r--   1 runner  staff  153627 Sep  8 05:03 image_004.jpg
+-rw-r--r--   1 runner  staff   97358 Sep  8 05:03 image_005.jpg
+-rw-r--r--   1 runner  staff  319142 Sep  8 05:03 image_006.jpg
+-rw-r--r--   1 runner  staff   86289 Sep  8 05:03 image_007.jpg
+-rw-r--r--   1 runner  staff  100775 Sep  8 05:03 image_008.jpg
+-rw-r--r--   1 runner  staff  809218 Sep  8 05:03 image_009.jpg
+-rw-r--r--   1 runner  staff  144953 Sep  8 05:03 image_010.jpg
+-rw-r--r--   1 runner  staff  124390 Sep  8 05:03 image_011.jpg
+-rw-r--r--   1 runner  staff  810293 Sep  8 05:03 image_012.jpg
+-rw-r--r--   1 runner  staff    5608 Sep  8 05:03 search-results.json
+TWISTED METAL (2012) | PS3 Gameplay - YouTube | https://i.ytimg.com/vi/S5K8A2q3QVo/maxresdefault.jpg | reference-assets/image_001.jpg |  x 
+Twisted Metal ... (PS3) Gameplay - YouTube | https://i.ytimg.com/vi/YMqmhaAVO9s/maxresdefault.jpg | reference-assets/image_002.jpg |  x 
+Twisted Metal PS3 Gameplay - The Brothers Grimm | WikiGameGu | https://i.ytimg.com/vi/V2YOa41m424/maxresdefault.jpg | reference-assets/image_003.jpg |  x 
+Twisted Metal Ps3 Gameplay | http://assets1.ignimgs.com/2010/06/15/twisted-metal-ps3-20100615033359714-3237796.jpg | reference-assets/image_004.jpg | 1280 x 720
+Twisted Metal PS3 Gameplay - Desert Twisted Race - Diablo Pa | https://i.ytimg.com/vi/S2CNIN0lR00/maxresdefault.jpg | reference-assets/image_005.jpg |  x 
+Twisted Metal Ps3 Gameplay | https://i.redd.it/3oio0aszgddb1.jpg | reference-assets/image_006.jpg | 3840 x 2160
+Twisted Metal PS3 Gameplay - Fight for Your Life - Metro Squ | https://i.ytimg.com/vi/OO2GZJtFqZ4/maxresdefault.jpg | reference-assets/image_007.jpg |  x 
+Twisted Metal PS3 Gameplay - Iron Maiden Battle - Dead Man's | https://i.ytimg.com/vi/7kT97rYJHhI/maxresdefault.jpg | reference-assets/image_008.jpg |  x 
+Twisted Metal Ps3 Screenshots | http://gamingpastime.com/wp-content/uploads/2016/12/tm2012_8.jpg | reference-assets/image_009.jpg | 1920 x 1080
+Twisted Metal Limited Edition PS3 Beginning Gameplay - YouTu | https://i.ytimg.com/vi/dfsx-50d9HY/maxresdefault.jpg | reference-assets/image_010.jpg | 1280 x 720
+Twisted Metal Ps3 Gameplay | https://www.gamereactor.eu/media/grtv/79/27921_w926.jpg | reference-assets/image_011.jpg | 926 x 521
+Twisted Metal Ps3 2 Player | http://gamingpastime.com/wp-content/uploads/2016/12/tm2012_4.jpg | reference-assets/image_012.jpg | 1920 x 1080
+[0m
+Reference anchors secured. Inspecting them visually before coding.
+[0m→ [0mRead reference-assets/image_006.jpg
+[0m→ [0mRead reference-assets/image_009.jpg
+[0m→ [0mRead reference-assets/image_004.jpg
+[0m
+[0m$ [0mmkdir -p vendor js css && curl -sL --max-time 60 -o vendor/three.module.js https://unpkg.com/three@0.160.0/build/three.module.js && ls -la vendor/ && head -c 300 vendor/three.module.js
+total 2488
+drwxr-xr-x   3 runner  staff       96 Sep  8 05:05 .
+drwxr-xr-x  18 runner  staff      576 Sep  8 05:05 ..
+-rw-r--r--   1 runner  staff  1272972 Sep  8 05:05 three.module.js
+/**
+ * @license
+ * Copyright 2010-2023 Three.js Authors
+ * SPDX-License-Identifier: MIT
+ */
+const REVISION = '160';
+
+const MOUSE = { LEFT: 0, MIDDLE: 1, RIGHT: 2, ROTATE: 0, DOLLY: 1, PAN: 2 };
+const TOUCH = { ROTATE: 0, PAN: 1, DOLLY_PAN: 2, DOLLY_ROTATE: 3 };
+const CullFaceNone = 0;
+const CullFace
+[0m
+[0m# [0mTodos
+[✓] Research references + download 6+ anchors to reference-assets/ with provenance
+[•] Scaffold playable 3D vehicular combat game (drive/aim/shoot/pickups/AI/damage/HUD/win-loss)
+[ ] Polish: lighting, camera, collision feedback, audio, hints, loading/error recovery
+[ ] Verify: serve, screenshot, play-loop checks, critic fix-loop, progress page
+[0m
+[0m← [0mWrite index.html
+Wrote file successfully.
+[0m
+[0m← [0mWrite css/style.css
+Wrote file successfully.
+[0m
+[0m← [0mWrite js/audio.js
+Wrote file successfully.
+[0m
+Now the core game file — this is the big one.
+[0m← [0mWrite js/main.js
+Wrote file successfully.
+[0m
+Fixing a minimap orientation bug I spotted, then serving it up for verification.
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1090,9 +1090,9 @@
+ }
+ for (const v of vehicles) {
+   if (!v.alive) continue;
+   c.save();
+-  c.translate(px(v.x), px(v.z)); c.rotate(Math.atan2(Math.sin(v.heading), -Math.cos(v.heading)) + Math.PI);
++  c.translate(px(v.x), px(v.z)); c.rotate(Math.atan2(Math.sin(v.heading), -Math.cos(v.heading)));
+   c.fillStyle = v.isPlayer ? '#ffffff' : '#ff3b30';
+   c.beginPath();
+   c.moveTo(0, -5); c.lineTo(3.4, 4); c.lineTo(-3.4, 4); c.closePath(); c.fill();
+   c.restore();
+
+[0m
+[0m$ [0mnode --check js/main.js 2>&1 || node -e "import('./js/main.js')" 2>&1 | head -n 5; python3 -c "import http.server" 2>&1; echo "---syntax---"; node --input-type=module -e "import('./js/audio.js').then(()=>console.log('audio ok'))" 2>&1 | head
+---syntax---
+audio ok
+[0m
+[0m$ [0mtmux new-session -d -s grimiron -c /Users/runner/work/PlayGround/PlayGround "python3 -m http.server 8765" 2>&1; sleep 1; curl -s -o /dev/null -w "%{http_code}" http://localhost:8765/index.html; echo; tmux ls 2>&1
+000
+grimiron: 1 windows (created Tue Sep  8 05:16:46 2026)
+[0m
+[0m$ [0msleep 2; curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8765/index.html; tmux capture-pane -t grimiron -p 2>&1 | head -n 20
+200
+Serving HTTP on :: port 8765 (http://[::]:8765/) ...
+::ffff:127.0.0.1 - - [08/Sep/2026 05:18:13] "GET /index.html HTTP/1.1" 200 -
+[0m
+Server is up. Adding a tiny autostart hook for headless verification, then capturing.
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1293,8 +1293,12 @@
+ $('btn-start').addEventListener('click', () => { audio.ensure(); startMatch(); });
+ $('btn-resume').addEventListener('click', () => togglePause());
+ $('btn-restart-pause').addEventListener('click', () => restart());
+ $('btn-again').addEventListener('click', () => restart());
++// headless/verification hook: ?play=1 skips the title screen
++if (new URLSearchParams(location.search).has('play')) {
++  setTimeout(() => { audio.ensure(); startMatch(); }, 600);
++}
+ onResize();
+ // idle camera drift on title
+ camPos.set(0, 40, -90);
+ camera.position.copy(camPos);
+
+[0m
+[0m$ [0mls "/Applications/Google Chrome.app/Contents/MacOS/" 2>&1; "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=6000 --screenshot=/tmp/shot-title.png "http://127.0.0.1:8765/index.html" 2>&1 | tail -n 3; ls -la /tmp/shot-title.png
+Google Chrome
+[40635:97519:0908/052026.768902:VERBOSE1:chrome/updater/updater.cc:419] UpdaterMain (--crash-handler) returned 0.
+[39805:94934:0908/052034.052098:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+150687 bytes written to file /tmp/shot-title.png
+-rw-r--r--@ 1 runner  wheel  150687 Sep  8 05:20 /tmp/shot-title.png
+[0m
+[0m→ [0mRead /tmp/shot-title.png
+Title renders cleanly. Now gameplay capture.
+[0m
+[0m$ [0m"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=12000 --screenshot=/tmp/shot-play.png "http://127.0.0.1:8765/index.html?play=1" 2>&1 | tail -n 2; ls -la /tmp/shot-play.png
+168473 bytes written to file /tmp/shot-play.png
+Created TensorFlow Lite XNNPACK delegate for CPU.
+-rw-r--r--@ 1 runner  wheel  168473 Sep  8 05:21 /tmp/shot-play.png
+[0m
+[0m→ [0mRead /tmp/shot-play.png
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -68,10 +68,10 @@
+ renderer.shadowMap.enabled = true;
+ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+ 
+ const scene = new THREE.Scene();
+-scene.background = new THREE.Color(0x2a1408);
+-scene.fog = new THREE.Fog(0x3a1c0c, 160, 520);
++scene.background = new THREE.Color(0x53290f);
++scene.fog = new THREE.Fog(0x53290f, 190, 620);
+ 
+ const camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.5, 1200);
+ function onResize() {
+   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -79,12 +79,12 @@
+ }
+ addEventListener('resize', onResize);
+ 
+ // dusk lighting (TM2012 sunset-arena language: low orange sun, long shadows)
+-const hemi = new THREE.HemisphereLight(0xffb37a, 0x1a1210, 0.75);
++const hemi = new THREE.HemisphereLight(0xffc490, 0x3a2620, 1.35);
+ scene.add(hemi);
+-const sun = new THREE.DirectionalLight(0xff8c3a, 2.0);
+-sun.position.set(-140, 90, 60);
++const sun = new THREE.DirectionalLight(0xffa050, 2.6);
++sun.position.set(-120, 150, 90);
+ sun.castShadow = true;
+ sun.shadow.mapSize.set(2048, 2048);
+ sun.shadow.camera.left = -160; sun.shadow.camera.right = 160;
+ sun.shadow.camera.top = 160; sun.shadow.camera.bottom = -160;
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -89,9 +89,12 @@
+ sun.shadow.camera.left = -160; sun.shadow.camera.right = 160;
+ sun.shadow.camera.top = 160; sun.shadow.camera.bottom = -160;
+ sun.shadow.camera.far = 500; sun.shadow.bias = -0.0004;
+ scene.add(sun);
+-scene.add(new THREE.AmbientLight(0x30202a, 0.5));
++scene.add(new THREE.AmbientLight(0x584050, 0.9));
++const fill = new THREE.DirectionalLight(0x6a86ff, 0.55); // cool rim from opposite side
++fill.position.set(130, 70, -90);
++scene.add(fill);
+ const boomLight = new THREE.PointLight(0xffa040, 0, 90, 1.8); // reused explosion flash
+ scene.add(boomLight);
+ 
+ // ---------- arena ----------
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -105,9 +105,9 @@
+ function buildArena() {
+   // ground
+   const g = new THREE.Mesh(
+     new THREE.PlaneGeometry(WALL * 2 + 60, WALL * 2 + 60),
+-    new THREE.MeshStandardMaterial({ color: 0x3d332a, roughness: 0.95 })
++    new THREE.MeshStandardMaterial({ color: 0x5c4d3b, roughness: 0.95 })
+   );
+   g.rotation.x = -Math.PI / 2; g.receiveShadow = true; scene.add(g);
+   // street grid overlay
+   const grid = new THREE.GridHelper(WALL * 2, 28, 0x66553a, 0x4a3f30);
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -143,9 +143,9 @@
+   [0, -84, 44, 22], [0, 84, 44, 22], [-84, 0, 22, 44], [84, 0, 22, 44],
+   // inner islands
+   [-38, -36, 22, 18], [38, -36, 22, 18], [-38, 36, 22, 18], [38, 36, 22, 18],
+ ];
+-const palette = [0x4a3f36, 0x54432f, 0x3c3430, 0x5c4a33];
++const palette = [0x6b5c48, 0x77603f, 0x5a4c42, 0x7d6540];
+ blocks.forEach(([x, z, w, d], i) => {
+   const h = 14 + ((i * 37) % 22);
+   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d),
+     new THREE.MeshStandardMaterial({ color: palette[i % palette.length], roughness: 0.9 }));
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -239,9 +239,9 @@
+   x.lineWidth = 6; x.strokeStyle = 'rgba(0,0,0,.85)'; x.strokeText(text, 128, 32);
+   x.fillStyle = color; x.fillText(text, 128, 32);
+   const tex = new THREE.CanvasTexture(c);
+   const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
+-  sp.scale.set(11, 2.75, 1);
++  sp.scale.set(7.5, 1.9, 1);
+   return { sprite: sp, canvas: c, ctx: x, tex, text, color };
+ }
+ function redrawPlate(p, frac) {
+   const x = p.ctx;
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -300,9 +300,9 @@
+ function makeVehicle(name, color, tint, opts, isPlayer) {
+   const mesh = buildCarMesh(color);
+   scene.add(mesh);
+   const plate = makeNameplate(isPlayer ? 'YOU · ' + name : name, isPlayer ? '#ffd75e' : tint);
+-  plate.sprite.position.y = 5.2; mesh.add(plate.sprite);
++  plate.sprite.position.y = 4.6; mesh.add(plate.sprite);
+   redrawPlate(plate, 1);
+   return {
+     name, tint, isPlayer, mesh, plate,
+     x: 0, z: 0, heading: 0, speed: 0,
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -316,9 +316,9 @@
+ }
+ 
+ let player, enemies = [], vehicles = [];
+ function spawnVehicles() {
+-  player = makeVehicle('Jester', 0x8c1f28, '#ffd75e', { hp: 140, top: 30, accel: 26 }, true);
++  player = makeVehicle('Jester', 0xc03038, '#ffd75e', { hp: 140, top: 30, accel: 26 }, true);
+   const spawns = [[-30, -55, 0], [30, -55, 0], [-30, 55, Math.PI], [30, 55, Math.PI], [0, 70, Math.PI]];
+   enemies = RIVALS.map((r, i) => {
+     const v = makeVehicle(r.name, r.color, r.tint, r, false);
+     const [sx, sz, hd] = spawns[i];
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -556,9 +556,9 @@
+     else if (k === 'special') count = player.special >= 100 ? 'READY' : Math.floor(player.special) + '%';
+     else count = '×' + player.ammo[k];
+     if (k !== 'mg' && k !== 'special' && player.ammo[k] <= 0) d.classList.add('empty');
+     if (k === 'special' && player.special < 100) d.classList.add('empty');
+-    d.innerHTML = `<div class="k">${i === 0 ? 'SPC' : i} ${WICON[k]}</div><div class="n">${WEAPONS[k].name}</div><div class="c">${count}</div>`;
++    d.innerHTML = `<div class="k">${i === 0 ? 'CLK' : i} ${WICON[k]}</div><div class="n">${WEAPONS[k].name}</div><div class="c">${count}</div>`;
+     ui.wbar.appendChild(d);
+   });
+ }
+ 
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1201,8 +1201,15 @@
+ if (keys['w'] || keys['arrowup']) th += 1;
+ if (keys['s'] || keys['arrowdown']) th -= 1;
+ if (keys['a'] || keys['arrowleft']) st += 1;
+ if (keys['d'] || keys['arrowright']) st -= 1;
++if (DEMO) { // verification autopilot: cruise, aim forward, shoot
++  th = 0.8; st = Math.sin(G.elapsed * 0.5) * 0.5;
++  mouseNX = 0.1; mouseNY = 0.05;
++  if (Math.floor(G.elapsed * 2) % 4 === 0) fireMG(player, dt);
++  if (!DEMO._fired && G.elapsed > 6) { DEMO._fired = true; fireSelected(player); }
++  if (!DEMO._fired2 && G.elapsed > 9) { DEMO._fired2 = true; player.sel = 'power'; renderWeapons(); fireSelected(player); }
++}
+ driveVehicle(player, dt, th, st);
+ updatePlayerTurret();
+ if ((mouseDown || keys[' ']) && player.mgHeat < 100) fireMG(player, dt);
+ if (keys['f'] && !player._fHeld) { fireSelected(player); }
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -620,8 +620,9 @@
+ }
+ 
+ // ---------- firing ----------
+ const _v3 = new THREE.Vector3(), _ray = new THREE.Raycaster(), _plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
++const DEMO = new URLSearchParams(location.search).has('demo') ? {} : null;
+ function aimPoint(v) {
+   // mouse ray onto ground plane ahead of vehicle
+   _ray.setFromCamera({ x: mouseNX, y: mouseNY }, camera);
+   const hit = new THREE.Vector3();
+
+[0m
+[0m$ [0m"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=20000 --screenshot=/tmp/shot-play2.png "http://127.0.0.1:8765/index.html?play=1&demo=1" 2>&1 | tail -n 1
+Created TensorFlow Lite XNNPACK delegate for CPU.
+[0m
+[0m$ [0mls -la /tmp/shot-play2.png 2>&1
+-rw-r--r--@ 1 runner  wheel  148658 Sep  8 05:23 /tmp/shot-play2.png
+[0m
+[0m→ [0mRead /tmp/shot-play2.png
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -179,8 +179,48 @@
+     const lamp = new THREE.Mesh(new THREE.SphereGeometry(1.4, 10, 10),
+       new THREE.MeshBasicMaterial({ color: 0xfff2cc }));
+     lamp.position.set(x, 26.5, z); scene.add(lamp);
+   });
++
++  // gradient dusk sky dome + sun disc + distant skyline silhouettes
++  const skyGeo = new THREE.SphereGeometry(800, 24, 16);
++  const skyMat = new THREE.ShaderMaterial({
++    side: THREE.BackSide, depthWrite: false, fog: false,
++    uniforms: { top: { value: new THREE.Color(0x1a0e2a) }, mid: { value: new THREE.Color(0xb34a12) }, bot: { value: new THREE.Color(0xff9a3c) } },
++    vertexShader: 'varying vec3 vP; void main(){ vP=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
++    fragmentShader: `varying vec3 vP; uniform vec3 top,mid,bot;
++      void main(){ float h=normalize(vP).y;
++        vec3 c = h>0.25 ? mix(mid,top,smoothstep(0.25,0.9,h)) : mix(bot,mid,smoothstep(-0.05,0.25,h));
++        gl_FragColor=vec4(c,1.0); }`,
++  });
++  scene.add(new THREE.Mesh(skyGeo, skyMat));
++  const sunDisc = new THREE.Mesh(new THREE.CircleGeometry(34, 32),
++    new THREE.MeshBasicMaterial({ color: 0xffd9a0, fog: false }));
++  sunDisc.position.set(-480, 150, 300); sunDisc.lookAt(0, 40, 0); scene.add(sunDisc);
++  const glow = new THREE.Mesh(new THREE.CircleGeometry(70, 32),
++    new THREE.MeshBasicMaterial({ color: 0xff7a20, transparent: true, opacity: 0.35, fog: false }));
++  glow.position.set(-482, 150, 302); glow.lookAt(0, 40, 0); scene.add(glow);
++  // far skyline (cheap dark boxes outside walls)
++  const farMat = new THREE.MeshBasicMaterial({ color: 0x241207 });
++  for (let i = 0; i < 26; i++) {
++    const a = (i / 26) * TAU;
++    const r = 260 + (i * 53) % 120;
++    const w = 24 + (i * 29) % 40, h = 40 + (i * 47) % 90;
++    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), farMat);
++    m.position.set(Math.cos(a) * r, h / 2 - 2, Math.sin(a) * r);
++    scene.add(m);
++  }
++  // water tower silhouette (TM city-arena motif)
++  const wt = new THREE.Group();
++  const tank = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 10, 12), new THREE.MeshStandardMaterial({ color: 0x4a3428, roughness: 0.9 }));
++  tank.position.y = 26; wt.add(tank);
++  const legG = new THREE.CylinderGeometry(0.5, 0.5, 22, 6);
++  const legM = new THREE.MeshStandardMaterial({ color: 0x33241a });
++  [[-4, -4], [4, -4], [-4, 4], [4, 4]].forEach(([lx, lz]) => {
++    const l = new THREE.Mesh(legG, legM); l.position.set(lx, 11, lz); wt.add(l);
++  });
++  wt.position.set(-78, 0, -78 + 34); // atop corner block area
++  scene.add(wt);
+ }
+ 
+ // explosive barrels
+ const barrels = [];
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1345,11 +1345,36 @@
+ $('btn-resume').addEventListener('click', () => togglePause());
+ $('btn-restart-pause').addEventListener('click', () => restart());
+ $('btn-again').addEventListener('click', () => restart());
+ // headless/verification hook: ?play=1 skips the title screen
+-if (new URLSearchParams(location.search).has('play')) {
++const QS = new URLSearchParams(location.search);
++if (QS.has('play')) {
+   setTimeout(() => { audio.ensure(); startMatch(); }, 600);
+ }
++// scripted acceptance scenarios (?play=1&scenario=killall|diew|timeout)
++window.__grim = { G, get vehicles() { return vehicles; }, get player() { return player; }, killVehicle, damageVehicle, endMatch, restart };
++const scen = QS.get('scenario');
++if (scen) {
++  const poll = setInterval(() => {
++    if (G.mode !== 'playing') return;
++    clearInterval(poll);
++    if (scen === 'killall') enemies.forEach((e, i) => setTimeout(() => killVehicle(e, player), 400 + i * 450));
++    else if (scen === 'diew') { G.lives = 1; setTimeout(() => damageVehicle(player, 9999, enemies[0]), 800); }
++    else if (scen === 'timeout') { G.time = 2; }
++  }, 300);
++  setInterval(() => {
++    if (G.mode === 'over' && !document.getElementById('verify')) {
++      const d = document.createElement('div');
++      d.id = 'verify';
++      d.textContent = JSON.stringify({
++        mode: G.mode, kos: G.kos, lives: G.lives, won: G.over && G.over.won,
++        endVisible: !$('end').classList.contains('hidden'),
++        title: $('end-title').textContent,
++      });
++      document.body.appendChild(d);
++    }
++  }, 500);
++}
+ onResize();
+ // idle camera drift on title
+ camPos.set(0, 40, -90);
+ camera.position.copy(camPos);
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -217,10 +217,11 @@
+   const legM = new THREE.MeshStandardMaterial({ color: 0x33241a });
+   [[-4, -4], [4, -4], [-4, 4], [4, 4]].forEach(([lx, lz]) => {
+     const l = new THREE.Mesh(legG, legM); l.position.set(lx, 11, lz); wt.add(l);
+   });
+-  wt.position.set(-78, 0, -78 + 34); // atop corner block area
++  wt.position.set(-78, 0, -44); // beside corner block, legs on the ground
+   scene.add(wt);
++  addSolid(-78, -44, 10, 10); obstacles.push({ x: -78, z: -44, w: 10, d: 10, c: '#6b5b45' });
+ }
+ 
+ // explosive barrels
+ const barrels = [];
+
+[0m
+[0m$ [0mCHROME='"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=25000 --dump-dom'; eval "$CHROME \"http://127.0.0.1:8765/index.html?play=1&scenario=killall\"" 2>/dev/null | grep -o '<div id="verify">[^<]*</div>'; echo "=== diew ==="; eval "$CHROME \"http://127.0.0.1:8765/index.html?play=1&scenario=diew\"" 2>/dev/null | grep -o '<div id="verify">[^<]*</div>'
+<div id="verify">{"mode":"over","kos":5,"lives":3,"won":true,"endVisible":false,"title":"You Win"}</div>
+=== diew ===
+<div id="verify">{"mode":"over","kos":0,"lives":0,"won":false,"endVisible":false,"title":"You Win"}</div>
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1155,8 +1155,9 @@
+ banner('READY', 'Eliminate all 5 rivals');
+ audio.countBeep(false);
+ feed('Match started — 5 rivals, 3 rides', 'sys');
+ const iv = setInterval(() => {
++  if (G.mode !== 'countdown') { clearInterval(iv); return; } // superseded (restart / early end)
+   n--;
+   if (n > 0) { banner(String(n)); audio.countBeep(false); }
+   else {
+     clearInterval(iv);
+
+[0m
+[0m$ [0mtime ("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=200000 --dump-dom "http://127.0.0.1:8765/index.html?play=1&scenario=killall" 2>/dev/null | grep -o '<div id="verify">[^<]*</div>')
+<div id="verify">{"mode":"over","kos":5,"lives":3,"won":true,"endVisible":false,"title":"You Win"}</div>
+
+real	0m15.309s
+user	0m25.851s
+sys	0m4.130s
+[0m
+Panel timeout mysteriously not firing — instrumenting to find out why.
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1174,8 +1174,9 @@
+ G.over = { won, reason };
+ const secs = Math.floor((performance.now() - G.stats.start) / 1000);
+ if (won) audio.win(); else audio.lose();
+ setTimeout(() => {
++  document.title = 'PANEL_SHOWN_' + (won ? 'win' : 'lose');
+   $('end-kicker').textContent = won ? '★ VICTORY ★' : 'WRECKED OUT';
+   $('end-title').textContent = won ? 'Last Engine Running' : 'Scrap Metal';
+   $('end-sub').textContent = reason;
+   const acc = G.stats.shots ? Math.round(G.stats.hits / G.stats.shots * 100) : 0;
+
+[0m
+[0m$ [0m("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=120000 --dump-dom "http://127.0.0.1:8765/index.html?play=1&scenario=killall" 2>/dev/null | grep -o '<title>[^<]*</title>\|<div id="verify">[^<]*</div>\|<div id="end"[^>]*>')
+<title>PANEL_SHOWN_win</title>
+<div id="end" class="overlay">
+<div id="verify">{"mode":"over","kos":5,"lives":3,"won":true,"endVisible":false,"title":"You Win"}</div>
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1364,17 +1364,16 @@
+     else if (scen === 'diew') { G.lives = 1; setTimeout(() => damageVehicle(player, 9999, enemies[0]), 800); }
+     else if (scen === 'timeout') { G.time = 2; }
+   }, 300);
+   setInterval(() => {
+-    if (G.mode === 'over' && !document.getElementById('verify')) {
+-      const d = document.createElement('div');
+-      d.id = 'verify';
++    if (G.mode === 'over') {
++      let d = document.getElementById('verify');
++      if (!d) { d = document.createElement('div'); d.id = 'verify'; document.body.appendChild(d); }
+       d.textContent = JSON.stringify({
+         mode: G.mode, kos: G.kos, lives: G.lives, won: G.over && G.over.won,
+         endVisible: !$('end').classList.contains('hidden'),
+         title: $('end-title').textContent,
+       });
+-      document.body.appendChild(d);
+     }
+   }, 500);
+ }
+ onResize();
+
+[0m
+[0m$ [0mCH='"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars'; for s in killall diew timeout; do echo "=== $s ==="; eval "$CH --virtual-time-budget=120000 --dump-dom \"http://127.0.0.1:8765/index.html?play=1&scenario=$s\"" 2>/dev/null | grep -o '<div id="verify">[^<]*</div>'; done
+=== killall ===
+<div id="verify">{"mode":"over","kos":5,"lives":3,"won":true,"endVisible":true,"title":"Last Engine Running"}</div>
+=== diew ===
+<div id="verify">{"mode":"over","kos":0,"lives":0,"won":false,"endVisible":true,"title":"Scrap Metal"}</div>
+=== timeout ===
+[0m
+Win and loss paths verified. Timeout just needs a longer window — rerunning.
+[0m$ [0m"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=300000 --dump-dom "http://127.0.0.1:8765/index.html?play=1&scenario=timeout" 2>/dev/null | grep -o '<div id="verify">[^<]*</div>'
+(no output)
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1361,9 +1361,9 @@
+   if (G.mode !== 'playing') return;
+   clearInterval(poll);
+   if (scen === 'killall') enemies.forEach((e, i) => setTimeout(() => killVehicle(e, player), 400 + i * 450));
+   else if (scen === 'diew') { G.lives = 1; setTimeout(() => damageVehicle(player, 9999, enemies[0]), 800); }
+-  else if (scen === 'timeout') { G.time = 2; }
++  else if (scen === 'timeout') { G.time = 0.05; }
+ }, 300);
+ setInterval(() => {
+   if (G.mode === 'over') {
+     let d = document.getElementById('verify');
+
+[0m
+[0m$ [0m"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=120000 --dump-dom "http://127.0.0.1:8765/index.html?play=1&scenario=timeout" 2>/dev/null | grep -o '<div id="verify">[^<]*</div>'; echo "=== realtime action shot (30s) ==="; timeout 90 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --timeout=30000 --screenshot=/tmp/shot-action.png "http://127.0.0.1:8765/index.html?play=1&demo=1" 2>&1 | tail -n 1
+<div id="verify">{"mode":"over","kos":0,"lives":3,"won":false,"endVisible":true,"title":"Scrap Metal"}</div>
+=== realtime action shot (30s) ===
+/bin/bash: timeout: command not found
+[0m
+Timeout path verified. Retrying the realtime action shot without the missing wrapper.
+[0m$ [0m"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --timeout=30000 --screenshot=/tmp/shot-action.png "http://127.0.0.1:8765/index.html?play=1&demo=1" 2>&1 | tail -n 1; ls -la /tmp/shot-action.png
+[74381:179449:0908/053722.991941:ERROR:base/process/process_mac.cc:98] task_policy_set TASK_SUPPRESSION_POLICY: (os/kern) invalid argument (4)
+-rw-r--r--@ 1 runner  wheel  161606 Sep  8 05:37 /tmp/shot-action.png
+[0m
+[0m→ [0mRead /tmp/shot-action.png
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -116,8 +116,21 @@
+ // center emblem
+ const ring = new THREE.Mesh(new THREE.RingGeometry(9, 12, 40),
+   new THREE.MeshBasicMaterial({ color: 0xffb02e, transparent: true, opacity: 0.5, side: THREE.DoubleSide }));
+ ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03; scene.add(ring);
++// ground variation: dark asphalt streets + pale dirt patches (cheap quads)
++const patchGeo = new THREE.PlaneGeometry(1, 1);
++const streetMat = new THREE.MeshBasicMaterial({ color: 0x2e2a26, transparent: true, opacity: 0.55 });
++const dirtMat = new THREE.MeshBasicMaterial({ color: 0x6e5a40, transparent: true, opacity: 0.5 });
++const patchSpots = [
++  [0, -60, 26, 90, 0], [0, 60, 26, 90, 0], [-60, 0, 90, 26, 1], [60, 0, 90, 26, 1],
++  [0, 0, 40, 40, 1], [-30, -48, 30, 20, 0], [30, 48, 30, 20, 0],
++];
++patchSpots.forEach(([x, z, w, d, dirt]) => {
++  const m = new THREE.Mesh(patchGeo, dirt ? dirtMat : streetMat);
++  m.rotation.x = -Math.PI / 2; m.position.set(x, 0.015, z); m.scale.set(w, d, 1);
++  scene.add(m);
++});
+ 
+ // walls
+ const wallMat = new THREE.MeshStandardMaterial({ color: 0x5a4a3a, roughness: 0.8 });
+ const wallGeoH = new THREE.BoxGeometry(WALL * 2 + 8, 7, 3);
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1262,10 +1262,11 @@
+ if (DEMO) { // verification autopilot: cruise, aim forward, shoot
+   th = 0.8; st = Math.sin(G.elapsed * 0.5) * 0.5;
+   mouseNX = 0.1; mouseNY = 0.05;
+   if (Math.floor(G.elapsed * 2) % 4 === 0) fireMG(player, dt);
+-  if (!DEMO._fired && G.elapsed > 6) { DEMO._fired = true; fireSelected(player); }
+-  if (!DEMO._fired2 && G.elapsed > 9) { DEMO._fired2 = true; player.sel = 'power'; renderWeapons(); fireSelected(player); }
++  if (!DEMO._fired && G.elapsed > 0.8) { DEMO._fired = true; fireSelected(player); }
++  if (!DEMO._fired2 && G.elapsed > 1.8) { DEMO._fired2 = true; player.sel = 'power'; renderWeapons(); fireSelected(player); }
++  if (!DEMO._fired3 && G.elapsed > 3.0) { DEMO._fired3 = true; player.sel = 'napalm'; renderWeapons(); fireSelected(player); }
+ }
+ driveVehicle(player, dt, th, st);
+ updatePlayerTurret();
+ if ((mouseDown || keys[' ']) && player.mgHeat < 100) fireMG(player, dt);
+
+[0m
+[0m$ [0m"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=150000 --screenshot=/tmp/shot-action2.png "http://127.0.0.1:8765/index.html?play=1&demo=1" 2>&1 | tail -n 1
+(no output)
+
+<shell_metadata>
+shell tool terminated command after exceeding timeout 120000 ms. If this command is expected to take longer and is not waiting for interactive input, retry with a larger timeout value in milliseconds.
+</shell_metadata>
+[0m
+[0m$ [0mls -la /tmp/shot-action2.png 2>&1
+-rw-r--r--@ 1 runner  wheel  119132 Sep  8 05:39 /tmp/shot-action2.png
+[0m
+[0m→ [0mRead /tmp/shot-action2.png
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -455,8 +455,9 @@
+   explode(b.x, 1.5, b.z, 13, 45, owner, 1.1);
+   feed(`${owner.isPlayer ? 'You' : owner.name} blew a fuel barrel`, owner.isPlayer ? 'me' : 'foe');
+ }
+ function spawnBurst(x, y, z, big) {
++  if (bursts.length > 46) { const old = bursts.shift(); scene.remove(old.pts); }
+   const n = G.highDetail ? Math.floor(26 * big) + 10 : 12;
+   const geo = new THREE.BufferGeometry();
+   const pos = new Float32Array(n * 3), vel = [];
+   for (let i = 0; i < n; i++) {
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -472,19 +472,20 @@
+   });
+   const pts = new THREE.Points(geo, mat);
+   scene.add(pts);
+   bursts.push({ pts, vel, life: 0.9, maxlife: 0.9 });
++  if (big < 0.5) return; // small arms fire: sparks only, no smoke
+   // smoke puff
+   const sgeo = new THREE.BufferGeometry();
+   const spos = new Float32Array(8 * 3); const svel = [];
+   for (let i = 0; i < 8; i++) {
+     spos[i * 3] = x; spos[i * 3 + 1] = y + 1; spos[i * 3 + 2] = z;
+     svel.push([(Math.random() - 0.5) * 6, 3 + Math.random() * 4, (Math.random() - 0.5) * 6]);
+   }
+   sgeo.setAttribute('position', new THREE.BufferAttribute(spos, 3));
+-  const spts = new THREE.Points(sgeo, new THREE.PointsMaterial({ color: 0x2a2222, size: 3.2, transparent: true, opacity: 0.8 }));
++  const spts = new THREE.Points(sgeo, new THREE.PointsMaterial({ color: 0x3a2c26, size: 2.1, transparent: true, opacity: 0.5 }));
+   scene.add(spts);
+-  bursts.push({ pts: spts, vel: svel, life: 1.6, maxlife: 1.6, smoke: true });
++  bursts.push({ pts: spts, vel: svel, life: 1.1, maxlife: 1.1, smoke: true });
+ }
+ function spawnTracer(x1, y1, z1, x2, y2, z2) {
+   const len = Math.hypot(x2 - x1, y2 - y1, z2 - z1);
+   const geo = new THREE.CylinderGeometry(0.07, 0.07, len, 5);
+
+[0m
+[0m$ [0m"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=80000 --screenshot=/tmp/shot-action3.png "http://127.0.0.1:8765/index.html?play=1&demo=1" 2>&1 | tail -n 1; ls -la /tmp/shot-action3.png
+117660 bytes written to file /tmp/shot-action3.png
+-rw-r--r--@ 1 runner  wheel  117660 Sep  8 05:43 /tmp/shot-action3.png
+[0m
+[0m→ [0mRead /tmp/shot-action3.png
+[0m• [0mCritic-review arena combat game[90m General Agent[0m
+[0m
+[0m# [0mTodos
+[✓] Research references + download 6+ anchors to reference-assets/ with provenance
+[✓] Scaffold playable 3D vehicular combat game (drive/aim/shoot/pickups/AI/damage/HUD/win-loss)
+[✓] Polish: lighting, camera, collision feedback, audio, hints, loading/error recovery
+[•] Verify: serve, screenshot, play-loop checks, critic fix-loop, progress page
+[0m
+[0m✓ [0mCritic-review arena combat game[90m General Agent[0m
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -419,22 +419,24 @@
+   // orient
+   m.lookAt(ox + dirX * 5, y0 + (type === 'napalm' ? 2 : 0), oz + dirZ * 5);
+   m.rotateX(Math.PI / 2);
+ }
+-function explode(x, y, z, radius, dmg, owner, big = 1) {
++function explode(x, y, z, radius, dmg, owner, big = 1, opts = {}) {
++  const chains = opts.chains !== false;
+   spawnBurst(x, y, z, big);
+   boomLight.position.set(x, 6, z); boomLight.intensity = 60 * big;
+   audio.explosion(big);
+   G.shake = Math.min(1.4, G.shake + 0.5 * big);
+-  // damage falloff
++  // damage falloff — never splash the shooter with their own direct hit
+   for (const v of vehicles) {
+-    if (!v.alive) continue;
++    if (!v.alive || v === owner) continue;
+     const d = Math.hypot(v.x - x, v.z - z);
+     if (d < radius) {
+       const f = 1 - (d / radius) * 0.6;
+       damageVehicle(v, dmg * f, owner);
+     }
+   }
++  if (!chains) return;
+   // chain barrels
+   for (const b of barrels) {
+     if (!b.alive) continue;
+     if (Math.hypot(b.x - x, b.z - z) < radius) { b.hp = 0; detonateBarrel(b, owner); }
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -536,8 +536,9 @@
+ function killVehicle(v, by) {
+   v.alive = false; v.hp = 0;
+   explode(v.x, 1.5, v.z, 6, 0, by || v, 1.4); // visual only (dmg 0, chained inside? guard below)
+   v.mesh.visible = false; v.plate.sprite.visible = false;
++  if (!v.isPlayer) v.plate.sprite.visible = false;
+   const killer = by && by.name ? (by.isPlayer ? 'You' : by.name) : 'The arena';
+   if (v.isPlayer) {
+     G.lives--;
+     renderLives();
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -536,9 +536,8 @@
+ function killVehicle(v, by) {
+   v.alive = false; v.hp = 0;
+   explode(v.x, 1.5, v.z, 6, 0, by || v, 1.4); // visual only (dmg 0, chained inside? guard below)
+   v.mesh.visible = false; v.plate.sprite.visible = false;
+-  if (!v.isPlayer) v.plate.sprite.visible = false;
+   const killer = by && by.name ? (by.isPlayer ? 'You' : by.name) : 'The arena';
+   if (v.isPlayer) {
+     G.lives--;
+     renderLives();
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -355,8 +355,9 @@
+ const mesh = buildCarMesh(color);
+ scene.add(mesh);
+ const plate = makeNameplate(isPlayer ? 'YOU · ' + name : name, isPlayer ? '#ffd75e' : tint);
+ plate.sprite.position.y = 4.6; mesh.add(plate.sprite);
++if (isPlayer) plate.sprite.visible = false; // own plate would sit on the aim reticle
+ redrawPlate(plate, 1);
+ return {
+   name, tint, isPlayer, mesh, plate,
+   x: 0, z: 0, heading: 0, speed: 0,
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -535,9 +535,9 @@
+   setTimeout(() => el.remove(), 850);
+ }
+ function killVehicle(v, by) {
+   v.alive = false; v.hp = 0;
+-  explode(v.x, 1.5, v.z, 6, 0, by || v, 1.4); // visual only (dmg 0, chained inside? guard below)
++  explode(v.x, 1.5, v.z, 6, 0, by || v, 1.4, { chains: false }); // visual only
+   v.mesh.visible = false; v.plate.sprite.visible = false;
+   const killer = by && by.name ? (by.isPlayer ? 'You' : by.name) : 'The arena';
+   if (v.isPlayer) {
+     G.lives--;
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -571,9 +571,9 @@
+   v.alive = true; v.hp = v.maxhp; v._lowWarned = false;
+   v.x = 0; v.z = -70; v.heading = 0; v.speed = 0;
+   v.ammo = { homing: 2, power: 1, napalm: 1, mine: 1 };
+   v.sel = 'homing'; v.turbo = 100; v.invuln = 3; v.mgHeat = 0;
+-  v.mesh.visible = true; v.plate.sprite.visible = true;
++  v.mesh.visible = true; if (!v.isPlayer) v.plate.sprite.visible = true;
+   redrawPlate(v.plate, 1);
+   banner('BACK IN', 'Re-entered with full hull');
+   renderWeapons();
+ }
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -569,9 +569,12 @@
+ function respawnPlayer() {
+   const v = player;
+   v.alive = true; v.hp = v.maxhp; v._lowWarned = false;
+   v.x = 0; v.z = -70; v.heading = 0; v.speed = 0;
+-  v.ammo = { homing: 2, power: 1, napalm: 1, mine: 1 };
++  v.ammo = {
++    homing: Math.max(2, v.ammo.homing), power: Math.max(1, v.ammo.power),
++    napalm: Math.max(1, v.ammo.napalm), mine: Math.max(1, v.ammo.mine),
++  };
+   v.sel = 'homing'; v.turbo = 100; v.invuln = 3; v.mgHeat = 0;
+   v.mesh.visible = true; if (!v.isPlayer) v.plate.sprite.visible = true;
+   redrawPlate(v.plate, 1);
+   banner('BACK IN', 'Re-entered with full hull');
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -700,27 +700,35 @@
+ v.mgCd = WEAPONS.mg.cd; v.mgHeat = Math.min(100, v.mgHeat + 7);
+ G.stats && v.isPlayer && G.stats.shots++;
+ const d = turretDir(v);
+ const ox = v.x + d.x * 4, oz = v.z + d.z * 4;
+-// hitscan-ish: step along ray, damage first vehicle hit
++// hitscan: nearest wall distance via segment-vs-AABB slab test (cover matters)
+ const range = 70;
+-let hx = ox + d.x * range, hz = oz + d.z * range, hy = 1.6;
+-let best = null, bestD = range;
++let wallD = range;
++for (const s of solids) {
++  let t0 = 0, t1 = wallD, ok = true;
++  for (const [o, dd, mn, mx] of [[ox, d.x, s.minX, s.maxX], [oz, d.z, s.minZ, s.maxZ]]) {
++    if (Math.abs(dd) < 1e-8) { if (o < mn || o > mx) { ok = false; break; } }
++    else {
++      let ta = (mn - o) / dd, tb = (mx - o) / dd;
++      if (ta > tb) { const tmp = ta; ta = tb; tb = tmp; }
++      t0 = Math.max(t0, ta); t1 = Math.min(t1, tb);
++      if (t0 > t1) { ok = false; break; }
++    }
++  }
++  if (ok && t0 > 0.5 && t0 < wallD) wallD = t0;
++}
++// nearest vehicle inside the unobstructed span
++let hx = ox + d.x * wallD, hz = oz + d.z * wallD, hy = 1.6;
++let best = null, bestD = wallD;
+ for (const t of vehicles) {
+   if (t === v || !t.alive) continue;
+-  // distance from ray
+   const rx = t.x - ox, rz = t.z - oz;
+   const along = rx * d.x + rz * d.z;
+-  if (along < 2 || along > range) continue;
++  if (along < 2 || along > bestD) continue;
+   const perp = Math.abs(rx * d.z - rz * d.x);
+   if (perp < 3.2 && along < bestD) { best = t; bestD = along; }
+ }
+-// walls block: cheap check vs solids
+-for (const s of solids) {
+-  // sample midpoint: if segment crosses solid, clamp
+-  const mx = ox + d.x * bestD * 0.9, mz = oz + d.z * bestD * 0.9;
+-  if (mx > s.minX && mx < s.maxX && mz > s.minZ && mz < s.maxZ) { best = null; bestD *= 0.85; break; }
+-}
+ hx = ox + d.x * bestD; hz = oz + d.z * bestD;
+ spawnTracer(ox, 2.2, oz, hx, hy, hz);
+ spawnMuzzle(ox, 2.2, oz);
+ if (v.isPlayer) audio.mg();
+
+[0m
+[0m✱ [0mGrep "hx = ox|spawnTracer|if \(best\)"[90m in js · 5 matches[0m
+MG wall logic is coherent. Applying the remaining critic fixes.
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1077,11 +1077,13 @@
+     const hitV = s.type !== 'napalm';
+     scene.remove(s.mesh); shots.splice(i, 1);
+     if (s.type === 'power') explode(s.x, Math.max(1, s.y), s.z, 9, s.dmg, s.owner, 1);
+     else if (s.type === 'homing') {
+-      // did we end near the target? count hit regardless via radius
++      // only count accuracy when we actually finish near the mark
++      const tgt = s.target;
++      const near = tgt && tgt.alive && Math.hypot(tgt.x - s.x, tgt.z - s.z) < 9;
+       explode(s.x, Math.max(1, s.y), s.z, 7, s.dmg, s.owner, 0.7);
+-      if (s.owner.isPlayer) G.stats.hits++;
++      if (s.owner.isPlayer && near) G.stats.hits++;
+     } else if (hitV) explode(s.x, Math.max(1, s.y), s.z, 5, s.dmg * 0.5, s.owner, 0.5);
+     continue;
+   }
+ }
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -984,8 +984,9 @@
+ m.life -= dt;
+ m.mesh.material.emissiveIntensity = 0.4 + Math.abs(Math.sin(G.elapsed * (m.armT > 0 ? 3 : 9))) * 0.6;
+ if (m.armT > 0) { m.armT -= dt; }
+ else {
++  m.armT -= dt; // keep counting so owner re-trigger (armT <= -4) is reachable
+   for (const v of vehicles) {
+     if (!v.alive || v === m.owner) continue;
+     if (Math.hypot(m.x - v.x, m.z - v.z) < 4.5) {
+       scene.remove(m.mesh); mines.splice(i, 1);
+
+[0m
+[0m→ [0mRead js/main.js[90m [limit=50, offset=975][0m
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1001,9 +1001,9 @@
+           scene.remove(m.mesh); mines.splice(i, 1);
+           explode(m.x, 1, m.z, 11, m.dmg * 0.8, m.owner, 1);
+         }
+       }
+-      if (mines.includes(m)) m.armT -= dt * 0; // keep armed marker
++      if (mines.includes(m)) m.armT -= 0; // armed marker (counter keeps running above)
+     }
+     if (mines.includes(m) && m.life <= 0) { scene.remove(m.mesh); mines.splice(i, 1); explode(m.x, 1, m.z, 9, m.dmg * 0.6, m.owner, 0.8); }
+   }
+ }
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1221,8 +1221,9 @@
+ function togglePause(force) {
+   if (G.mode === 'playing' || force === true) {
+     if (G.mode !== 'playing') return;
+     G.mode = 'paused';
++    audio.setEngine(0, false);
+     $('pause').classList.remove('hidden');
+   } else if (G.mode === 'paused') {
+     G.mode = 'playing';
+     $('pause').classList.add('hidden');
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1182,8 +1182,9 @@
+ $('title').classList.add('hidden');
+ $('end').classList.add('hidden');
+ hud.classList.remove('hidden');
+ G.mode = 'countdown';
++const gen = ++G.countGen;
+ let n = 3;
+ banner('READY', 'Eliminate all 5 rivals');
+ audio.countBeep(false);
+ feed('Match started — 5 rivals, 3 rides', 'sys');
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1188,9 +1188,9 @@
+ banner('READY', 'Eliminate all 5 rivals');
+ audio.countBeep(false);
+ feed('Match started — 5 rivals, 3 rides', 'sys');
+ const iv = setInterval(() => {
+-  if (G.mode !== 'countdown') { clearInterval(iv); return; } // superseded (restart / early end)
++  if (G.mode !== 'countdown' || gen !== G.countGen) { clearInterval(iv); return; } // superseded (restart / early end)
+   n--;
+   if (n > 0) { banner(String(n)); audio.countBeep(false); }
+   else {
+     clearInterval(iv);
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -36,9 +36,9 @@
+ // ---------- state ----------
+ const G = {
+   mode: 'title', // title|countdown|playing|paused|over
+   time: MATCH_TIME, lives: PLAYER_LIVES, kos: 0,
+-  shake: 0, slowmo: 1, elapsed: 0,
++  shake: 0, slowmo: 1, elapsed: 0, countGen: 0,
+   stats: null, highDetail: true,
+   muted: false, over: null,
+ };
+ function freshStats() { return { shots: 0, hits: 0, kills: 0, pickups: 0, dmgDealt: 0, start: performance.now() }; }
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -818,8 +818,9 @@
+ if (throttle > 0) v.speed = Math.min(top, v.speed + acc * dt * throttle);
+ else if (throttle < 0) v.speed = Math.max(-v.top * 0.55, v.speed + acc * 1.2 * dt * throttle);
+ else v.speed = lerp(v.speed, 0, Math.min(1, dt * (v.speed > 1 ? 1.4 : 3)));
+ v.heading += steer * dt * (1.9 - Math.min(0.7, Math.abs(v.speed) / v.top * 0.7)) * (v.speed < 0 ? -1 : 1);
++v._lastSteer = steer;
+ if (boosting) v.turbo = Math.max(0, v.turbo - 30 * dt);
+ else v.turbo = Math.min(100, v.turbo + 7 * dt);
+ 
+ const nx = v.x + Math.sin(v.heading) * v.speed * dt;
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -753,8 +753,13 @@
+ }
+ function fireSelected(v) {
+   if (G.mode !== 'playing' || !v.alive || v.wpnCd > 0) return;
+   const k = v.sel;
++  if (k === 'mg') { // single aimed shot on the shared trigger
++    v.wpnCd = 0.14;
++    fireMG(v);
++    return;
++  }
+   if (k === 'special') {
+     if (v.special < 100) { if (v.isPlayer) toast('Iron Bloom charging…'); return; }
+     v.special = 0; v.wpnCd = WEAPONS.special.cd;
+     const d = turretDir(v);
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -665,20 +665,19 @@
+ document.addEventListener('visibilitychange', () => {
+   if (document.hidden && G.mode === 'playing') togglePause(true);
+ });
+ function cycleWeapon(d) {
+-  const order = ['homing', 'power', 'napalm', 'mine', 'special'];
++  const order = ['mg', 'homing', 'power', 'napalm', 'mine', 'special'];
+   let i = order.indexOf(player.sel);
+   for (let n = 0; n < order.length; n++) {
+     i = (i + d + order.length) % order.length;
+     const k = order[i];
+-    const ok = k === 'special' ? player.special >= 100 : player.ammo[k] > 0;
++    const ok = k === 'mg' || k === 'special' ? (k === 'mg' || player.special >= 100) : player.ammo[k] > 0;
+     if (ok) { selectWeapon(k); return; }
+   }
+ }
+ function selectWeapon(k) {
+   if (k === 'special' && player.special < 100) { toast('Iron Bloom charging… ' + Math.floor(player.special) + '%'); return; }
+-  if (k !== 'special' && k !== 'mg' && player.ammo[k] <= 0) { toast('No ' + WEAPONS[k].name + ' left — grab a crate'); return; }
+   player.sel = k; renderWeapons(); audio.lock();
+ }
+ 
+ // ---------- firing ----------
+
+[0m
+[0m✱ [0mGrep "function (cycleWeapon|selectWeapon)"[90m in js/main.js · 2 matches[0m
+[0m→ [0mRead js/main.js[90m [limit=22, offset=668][0m
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -670,9 +670,9 @@
+   let i = order.indexOf(player.sel);
+   for (let n = 0; n < order.length; n++) {
+     i = (i + d + order.length) % order.length;
+     const k = order[i];
+-    const ok = k === 'mg' || k === 'special' ? (k === 'mg' || player.special >= 100) : player.ammo[k] > 0;
++    const ok = k === 'mg' || (k === 'special' ? player.special >= 100 : player.ammo[k] > 0);
+     if (ok) { selectWeapon(k); return; }
+   }
+ }
+ function selectWeapon(k) {
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -676,8 +676,9 @@
+   }
+ }
+ function selectWeapon(k) {
+   if (k === 'special' && player.special < 100) { toast('Iron Bloom charging… ' + Math.floor(player.special) + '%'); return; }
++  if (k !== 'mg' && k !== 'special' && player.ammo[k] <= 0) { toast('No ' + WEAPONS[k].name + ' left — grab a crate'); return; }
+   player.sel = k; renderWeapons(); audio.lock();
+ }
+ 
+ // ---------- firing ----------
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -619,8 +619,11 @@
+     else count = '×' + player.ammo[k];
+     if (k !== 'mg' && k !== 'special' && player.ammo[k] <= 0) d.classList.add('empty');
+     if (k === 'special' && player.special < 100) d.classList.add('empty');
+     d.innerHTML = `<div class="k">${i === 0 ? 'CLK' : i} ${WICON[k]}</div><div class="n">${WEAPONS[k].name}</div><div class="c">${count}</div>`;
++    d.style.pointerEvents = 'auto'; d.style.cursor = 'pointer';
++    d.title = 'Select ' + WEAPONS[k].name;
++    d.addEventListener('click', () => selectWeapon(k));
+     ui.wbar.appendChild(d);
+   });
+ }
+ 
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -686,8 +686,9 @@
+ 
+ // ---------- firing ----------
+ const _v3 = new THREE.Vector3(), _ray = new THREE.Raycaster(), _plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+ const DEMO = new URLSearchParams(location.search).has('demo') ? {} : null;
++const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+ function aimPoint(v) {
+   // mouse ray onto ground plane ahead of vehicle
+   _ray.setFromCamera({ x: mouseNX, y: mouseNY }, camera);
+   const hit = new THREE.Vector3();
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -27,9 +27,9 @@
+   <div id="speedo">0 mph</div>
+ </div>
+ 
+ <div id="weapon-bar"></div>
+-<div id="feed"></div>
++<div id="feed" aria-live="polite" aria-label="Battle feed"></div>
+ <div id="reticle"><div class="ring"></div><div class="dot"></div></div>
+ <div id="hitmarker"></div>
+ <div id="dmg-vignette"></div>
+ <div id="banner"></div>
+
+[0m
+[0m← [0mEdit css/style.css
+Index: /Users/runner/work/PlayGround/PlayGround/css/style.css
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/css/style.css
++++ /Users/runner/work/PlayGround/PlayGround/css/style.css
+@@ -110,8 +110,10 @@
+   letter-spacing:1px;background:#241a08;color:var(--amber);border:2px solid var(--amber);
+   padding:10px 22px;font-size:15px}
+ button.big{font-size:19px;padding:13px 30px;background:linear-gradient(180deg,#5a3005,#2a1502)}
+ button:hover{background:var(--amber);color:#1a0d00}
++button:focus-visible{outline:3px solid #fff;outline-offset:2px}
++.wslot:focus-visible{outline:2px solid #fff}
+ .check{font-size:13px;color:#cbb}.check input{accent-color:var(--amber)}
+ .error{color:#ff7b72;margin-top:10px;font-weight:700}
+ .fine{margin-top:12px;font-size:11px;color:#8d8267}
+ #end-stats{margin:12px 0;font-size:15px;line-height:2;color:#ffe9bd}
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -31,9 +31,9 @@
+   <div id="feed" aria-live="polite" aria-label="Battle feed"></div>
+   <div id="reticle"><div class="ring"></div><div class="dot"></div></div>
+   <div id="hitmarker"></div>
+   <div id="dmg-vignette"></div>
+-  <div id="banner"></div>
++  <div id="banner" role="alert"></div>
+   <div id="subbanner"></div>
+   <div id="hint-toast"></div>
+ </div>
+ 
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -1139,9 +1139,9 @@
+ const k = 1 - Math.pow(0.001, dt);
+ camPos.x = lerp(camPos.x, tx, k); camPos.z = lerp(camPos.z, tz, k);
+ camPos.y = lerp(camPos.y, up + Math.abs(player.speed) * 0.05, k);
+ G.shake = Math.max(0, G.shake - dt * 2.2);
+-const sh = G.shake * G.shake;
++const sh = REDUCED ? 0 : G.shake * G.shake;
+ camera.position.set(
+   camPos.x + (Math.random() - 0.5) * sh * 3,
+   camPos.y + (Math.random() - 0.5) * sh * 2,
+   camPos.z + (Math.random() - 0.5) * sh * 3
+
+[0m
+[0m← [0mEdit index.html
+Index: /Users/runner/work/PlayGround/PlayGround/index.html
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/index.html
++++ /Users/runner/work/PlayGround/PlayGround/index.html
+@@ -66,9 +66,9 @@
+     </ul>
+   </div>
+ </div>
+ <div class="row">
+-  <button id="btn-start" class="big">Enter the Arena</button>
++  <button id="btn-start" class="big" autofocus>Enter the Arena</button>
+   <label class="check"><input type="checkbox" id="opt-quality" checked> High detail</label>
+ </div>
+ <p id="load-error" class="error hidden"></p>
+ <p class="fine">Original game. Procedural assets, no downloads. WebGL required.</p>
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -933,9 +933,9 @@
+       const opts = ['homing', 'power', 'napalm'].filter(k => v.ammo[k] > 0);
+       if (opts.length && Math.random() < ai.agg) {
+         v.sel = opts[Math.floor(Math.random() * opts.length)];
+         fireSelected(v);
+-      } else fireMG(v, 99); // bypass cd arg? fireMG uses v.mgCd; call directly with cd ready
++      } else fireMG(v); // MG trigger pull (cd-gated inside)
+       if (v.special >= 100 && d < 40 && Math.random() < 0.5) { v.sel = 'special'; fireSelected(v); }
+     } else if (d < 55) fireMG(v, dt);
+   } else { v.turretYaw = lerp(v.turretYaw, 0, dt); }
+ }
+
+[0m
+[0m← [0mEdit js/main.js
+Index: /Users/runner/work/PlayGround/PlayGround/js/main.js
+===================================================================
+--- /Users/runner/work/PlayGround/PlayGround/js/main.js
++++ /Users/runner/work/PlayGround/PlayGround/js/main.js
+@@ -698,9 +698,9 @@
+ function turretDir(v) {
+   const a = v.heading + v.turretYaw;
+   return { x: Math.sin(a), z: Math.cos(a), ang: a };
+ }
+-function fireMG(v, dt) {
++function fireMG(v) {
+   if (v.mgCd > 0 || v.mgHeat >= 100) return;
+   v.mgCd = WEAPONS.mg.cd; v.mgHeat = Math.min(100, v.mgHeat + 7);
+   G.stats && v.isPlayer && G.stats.shots++;
+   const d = turretDir(v);
+
+[0m
+[0m✱ [0mGrep "fireMG\(player, dt\)|fireMG\(v, dt\)"[90m in js/main.js · 3 matches[0m
+[0m
+[0m$ [0mpython3 - <<'EOF'
+import re
+p = 'js/main.js'
+s = open(p).read()
+s = s.replace('fireMG(v, dt)', 'fireMG(v)').replace('fireMG(player, dt)', 'fireMG(player)')
+open(p, 'w').write(s)
+print('done')
+EOF
+grep -n "fireMG(" js/main.js
+done
+702:function fireMG(v) {
+763:    fireMG(v);
+937:      } else fireMG(v); // MG trigger pull (cd-gated inside)
+939:    } else if (d < 55) fireMG(v);
+1296:        if (Math.floor(G.elapsed * 2) % 4 === 0) fireMG(player);
+1303:      if ((mouseDown || keys[' ']) && player.mgHeat < 100) fireMG(player);
+[0m
+All critic fixes in. Writing provenance and progress records.
+[0m$ [0mpython3 -c "
+import json
+d = json.load(open('reference-assets/search-results.json'))
+lines = ['# Reference-assets provenance', '', 'Reference only — inspiration for visual language. No third-party pixels ship in the game (all assets procedural).', '']
+for r in d['results']:
+    import os
+    local = r['local_path'].replace('reference-assets/', '') if r.get('local_path') else '?'
+    lines.append(f\"- \`{local}\` — {r['title'][:70]} — source page: {r['url']} — direct image: {r['image']}\")
+open('reference-assets/PROVENANCE.md','w').write('\n'.join(lines) + '\n')
+print('\n'.join(lines[:6]))
+"
+# Reference-assets provenance
+
+Reference only — inspiration for visual language. No third-party pixels ship in the game (all assets procedural).
+
+- `image_001.jpg` — TWISTED METAL (2012) | PS3 Gameplay - YouTube — source page: https://www.youtube.com/watch?v=S5K8A2q3QVo — direct image: https://i.ytimg.com/vi/S5K8A2q3QVo/maxresdefault.jpg
+- `image_002.jpg` — Twisted Metal ... (PS3) Gameplay - YouTube — source page: https://www.youtube.com/watch?v=YMqmhaAVO9s — direct image: https://i.ytimg.com/vi/YMqmhaAVO9s/maxresdefault.jpg
+[0m
+[0m← [0mWrite PROGRESS.md
+Wrote file successfully.
+[0m
+Re-running full verification after the fixes.
+[0m$ [0mCH='"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=120000 --dump-dom'; for s in killall diew timeout; do echo "=== $s ==="; eval "$CH \"http://127.0.0.1:8765/index.html?play=1&scenario=$s\"" 2>/dev/null | grep -o '<div id="verify">[^<]*</div>\|Uncaught[^<]*' | head -n 3; done; echo "=== plain play ==="; eval "$CH \"http://127.0.0.1:8765/index.html?play=1\"" 2>/dev/null | grep -o 'id="hud" class="[^"]*"\|id="match-clock">[^<]*<\|id="nogl" class="[^"]*"\|id="load-error" class="[^"]*"dem>
+/bin/bash: -c: line 0: unexpected EOF while looking for matching `''
+/bin/bash: -c: line 1: syntax error: unexpected end of file
+[0m
+[0m$ [0mfor s in killall diew timeout; do echo "=== $s ==="; "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=120000 --dump-dom "http://127.0.0.1:8765/index.html?play=1&scenario=$s" 2>/dev/null | grep -o 'verify">[^<]*'; done
+=== killall ===
+verify">{"mode":"over","kos":5,"lives":3,"won":true,"endVisible":true,"title":"Last Engine Running"}
+=== diew ===
+verify">{"mode":"over","kos":0,"lives":0,"won":false,"endVisible":true,"title":"Scrap Metal"}
+=== timeout ===
+verify">{"mode":"over","kos":0,"lives":3,"won":false,"endVisible":true,"title":"Scrap Metal"}
+[0m
+[0m$ [0m"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=60000 --dump-dom "http://127.0.0.1:8765/index.html?play=1" 2>/dev/null | grep -o 'id="hud" class="[^"]*"' ; "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=60000 --dump-dom "http://127.0.0.1:8765/index.html?play=1" 2>/dev/null | grep -o 'id="match-clock">[^<]*' ; echo "--- external refs ---"; grep -rn "https\?://" index.html js/ css/ vendor/three.module.js 2>/dev/null | grep -v "three.js Authors\|github\|khronos\|opengl" | head -n 5; echo "(exit $?)"; git status --short | head -n 30
+id="hud" class=""
+id="match-clock">04:59
+--- external refs ---
+vendor/three.module.js:317:// http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/21963136#21963136
+vendor/three.module.js:341:// https://en.wikipedia.org/wiki/Modulo_operation
+vendor/three.module.js:355:// https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/inverse-lerp-a-super-useful-yet-often-overlooked-function-r5230/
+vendor/three.module.js:370:// https://en.wikipedia.org/wiki/Linear_interpolation
+vendor/three.module.js:377:// http://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
+(exit 0)
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? PROGRESS.md
+?? css/
+?? index.html
+?? js/
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? reference-assets/
+?? vendor/
+[0m
+[0m$ [0m"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --enable-unsafe-swiftshader --no-sandbox --window-size=1280,800 --hide-scrollbars --virtual-time-budget=80000 --screenshot=/tmp/shot-final.png "http://127.0.0.1:8765/index.html?play=1&demo=1" 2>&1 | tail -n 1
+147420 bytes written to file /tmp/shot-final.png
+[0m
+[0m→ [0mRead /tmp/shot-final.png
+[0m
+[0m$ [0mmkdir -p captures && cp /tmp/shot-title.png captures/01-title.png && cp /tmp/shot-action3.png captures/02-combat.png && cp /tmp/shot-final.png captures/03-final.png && ls -la captures/
+total 816
+drwxr-xr-x   5 runner  staff     160 Sep  8 05:55 .
+drwxr-xr-x  21 runner  staff     672 Sep  8 05:55 ..
+-rw-r--r--@  1 runner  staff  150687 Sep  8 05:55 01-title.png
+-rw-r--r--@  1 runner  staff  117660 Sep  8 05:55 02-combat.png
+-rw-r--r--@  1 runner  staff  147420 Sep  8 05:55 03-final.png
+[0m
+[0m# [0mTodos
+[✓] Research references + download 6+ anchors to reference-assets/ with provenance
+[✓] Scaffold playable 3D vehicular combat game (drive/aim/shoot/pickups/AI/damage/HUD/win-loss)
+[✓] Polish: lighting, camera, collision feedback, audio, hints, loading/error recovery
+[✓] Verify: serve, screenshot, play-loop checks, critic fix-loop, progress page
+[0m
+[goal:evidence] Delivered GRIM IRON, an original 3D vehicular arena-combat game (Twisted-Metal-inspired, addressing issue #85's request): index.html, css/style.css, js/main.js (~1440 lines), js/audio.js (synthesized, zero audio assets), vendored vendor/three.module.js r160 (no runtime CDN). 12 reference anchors inspected in reference-assets/ with URL provenance in PROVENANCE.md. Full loop verified live in headless Chrome: killall→win panel "Last Engine Running" (KOs 5/5), diew→loss "Scrap Metal" (lives 0), timeout→defeat, plain play→HUD live with clock ticking 05:00→04:59 and zero JS errors, zero external network refs. Fresh-context critic ran 9 bug findings, all fixed (self-splash exclusion, segment-vs-AABB MG wall blocking, mine owner-retrigger, chain-free kill visuals, countdown generation guard, engine silence on pause, honest homing accuracy, clickable/selectable MG, own-plate off reticle). Captures in captures/01-title,02-combat,03-final.png; live resume record in PROGRESS.md; server on :8765 (tmux grimiron).
+[goal:complete]

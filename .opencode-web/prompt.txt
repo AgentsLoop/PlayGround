@@ -1,0 +1,26 @@
+# Implement the requested Mac project
+
+## Objective
+
+Deliver the requested Mac-targeted project outcome to production quality for its intended users. Preserve the real product surface, workflows, states, and dimensionality required by the project request; do not replace it with a flat demo or a temporary proof.
+
+## Quality bar
+
+- Research authoritative references, comparable products, representative data, and executable acceptance fixtures before coding. For visual work, search real screenshots, footage, and interface views, select at least six high-signal anchors, download them into a clearly named local reference-assets directory, inspect the files directly, and record each source URL beside its local filename.
+- Inspect the actual artifact with the relevant tools and compare renders, captures, documents, scenes, or interfaces side by side or with blind A/B review whenever practical.
+- Complete the requested workflows, real states, error and recovery behavior, polish, accessibility or operability, and delivery evidence.
+
+## Execution
+
+- Have the lead choose the route and divide the project into independently judgeable pieces.
+- Give every important piece a builder and a fresh-context critic or verifier. Require the verifier to inspect the actual artifact, compare it with the quality bar, identify the largest remaining gap, and send the work back for improvement.
+- Sustain the work across as many days or sessions as necessary.
+
+## Verification
+
+- Continue the build, verify, and improve loop until the acceptance bar is met or the run stops with explicit evidence.
+- Record concrete evidence for behavior, quality, delivery, blockers, recovery, and remaining gaps.
+
+## Progress
+
+Maintain a canonical live progress page with references, decisions, completed work, evidence, blockers, current gaps, and the next exact action so another agent can resume without losing context.
