@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SSH URL Reporting Verification — PlayGround</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 24px; max-width: 900px; margin-inline: auto; }
+  header { border-bottom: 2px solid #ccc; padding-bottom: 12px; margin-bottom: 16px; }
+  code, pre { background: rgba(127,127,127,.15); padding: 2px 6px; border-radius: 6px; }
+  pre { padding: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+  .grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px; }
+  .card { border: 1px solid #ccc; border-radius: 12px; padding: 12px; min-width: 0; overflow-wrap: anywhere; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  #game { border: 1px solid #888; border-radius: 12px; width: 100%; height: 240px; display: block; background: #0b1020; }
+  button { padding: 8px 14px; border-radius: 8px; border: 1px solid #888; cursor: pointer; }
+  .pass { color: #0a7a2e; font-weight: 700; }
+</style>
+</head>
+<body>
+<header>
+<h1 data-testid="app-title">SSH URL Reporting Verification</h1>
+<p>Playable verification page for <a href="https://github.com/AgentsLoop/PlayGround/issues/79">issue #79</a>.
+Run <code>34184464257</code>. Both access URLs are shown side-by-side below and remain usable while the run is active.</p>
+</header>
+
+<div class="grid">
+<section class="card" data-testid="ssh-card">
+<h2>🔐 AgentsWeb SSH</h2>
+<p id="ssh-url" data-testid="ssh-url">ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257</p>
+<pre data-testid="ssh-command">ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/aiplay-agentsweb -p 32257 runner@opencode-issue-79-34184464257-ssh.agentsweb.space</pre>
+<p>Host: <code data-testid="ssh-host">opencode-issue-79-34184464257-ssh.agentsweb.space:32257</code></p>
+<p class="pass" data-testid="ssh-status">SSH TCP: OPEN · SSH exec: OK · sessions API via SSH: OK</p>
+</section>
+<section class="card" data-testid="web-card">
+<h2>🌐 OpenCode Web</h2>
+<p><a data-testid="web-url" href="https://fast-javascript-involvement-nut.trycloudflare.com/L2hvbWUvcnVubmVyL3dvcmsvUGxheUdyb3VuZC9QbGF5R3JvdW5k/session/ses_f80e1ff7effeRLDkkOz7xjlX98">OpenCode Web UI session</a></p>
+<p><code data-testid="web-host">fast-javascript-involvement-nut.trycloudflare.com (HTTP 200)</code></p>
+<p>Project files: <code data-testid="project-url">https://spot-moderator-intense-condition.trycloudflare.com (HTTP 200)</code></p>
+<p class="pass" data-testid="web-status">Web UI: 200 · Session ses_f80e1ff7effeRLDkkOz7xjlX98 · Project files: 200</p>
+</section>
+</div>
+
+<h2>Playable check (canvas)</h2>
+<p>Click / tap the canvas to score. This proves the page is live and interactive on port 3000.</p>
+<canvas id="game" width="800" height="240" data-testid="game-canvas"></canvas>
+<p>Score: <strong id="score" data-testid="score">0</strong> <button id="reset" data-testid="reset-btn">Reset</button></p>
+
+<script>
+const c = document.getElementById('game');
+const x = c.getContext('2d');
+let score = 0, tx = 400, ty = 120;
+function draw() {
+  x.fillStyle = '#0b1020'; x.fillRect(0,0,c.width,c.height);
+  x.fillStyle = '#7cf'; x.beginPath(); x.arc(tx,ty,22,0,7); x.fill();
+  x.fillStyle = '#fff'; x.font = '16px system-ui'; x.fillText('Click the dot', 12, 24);
+}
+function move() { tx = 40 + Math.random()*(c.width-80); ty = 40 + Math.random()*(c.height-80); draw(); }
+c.addEventListener('pointerdown', e => {
+  const r = c.getBoundingClientRect();
+  const px = (e.clientX-r.left)*(c.width/r.width), py = (e.clientY-r.top)*(c.height/r.height);
+  if (Math.hypot(px-tx,py-ty) < 30) { score++; document.getElementById('score').textContent = score; move(); }
+});
+document.getElementById('reset').addEventListener('click', () => { score = 0; document.getElementById('score').textContent='0'; move(); });
+draw();
+</script>
+</body>
+</html>
