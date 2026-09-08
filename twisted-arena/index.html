@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IRON MAYHEM — Arena Combat (Twisted-Metal-inspired original)</title>
+<meta name="description" content="Original browser 3D vehicular arena-combat game. Drive, aim, shoot, grab pickups, survive.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23120d08'/%3E%3Ctext x='16' y='23' font-size='18' text-anchor='middle'%3E🔥%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+</head>
+<body>
+<div id="app">
+  <canvas id="scene"></canvas>
+  <canvas id="minimap" width="148" height="148" aria-label="Minimap"></canvas>
+  <div id="crosshair" aria-hidden="true"><div class="ch-dot"></div><div class="ch-ring"></div></div>
+  <div id="hitmarker" aria-hidden="true">✕</div>
+  <div id="damage-vignette" aria-hidden="true"></div>
+  <div id="muzzle-flash-overlay" aria-hidden="true"></div>
+
+  <header id="hud-top" class="hidden">
+    <div id="hud-objective"><span id="enemies-left">3</span> RIVALS LEFT &nbsp;•&nbsp; <span id="match-timer">0:00</span></div>
+    <div id="killfeed" aria-live="polite"></div>
+  </header>
+
+  <section id="hud-bottom" class="hidden">
+    <div id="player-plate">
+      <div class="plate-row"><span id="player-name">SCRAPJACK</span><span id="shield-badge" class="hidden">🛡 SHIELD</span></div>
+      <div class="bar hp"><div id="hp-fill"></div><span id="hp-text">100</span></div>
+      <div class="plate-sub">
+        <span>🔥 <b id="mg-heat">MG READY</b></span>
+        <span>🚀 <b id="missiles">×4</b></span>
+        <span>💀 <b id="kills">0</b></span>
+      </div>
+    </div>
+    <div id="enemy-plates"></div>
+  </section>
+
+  <div id="toast-stack"></div>
+
+  <!-- Loading -->
+  <div id="screen-loading" class="screen">
+    <div class="panel">
+      <h1>IRON MAYHEM</h1>
+      <p class="sub">arena combat • original build, twisted-metal-inspired</p>
+      <div class="loader"><div class="loader-bar"></div></div>
+      <p id="loading-status" role="status">Booting arena…</p>
+    </div>
+  </div>
+
+  <!-- Menu / vehicle select -->
+  <div id="screen-menu" class="screen hidden">
+    <div class="panel wide">
+      <h1>IRON MAYHEM</h1>
+      <p class="sub">last rig rolling wins • 1 vs 3 • pickups pay the brave</p>
+      <div id="vehicle-cards" role="listbox" aria-label="Choose your vehicle"></div>
+      <div class="controls-grid">
+        <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / arrows — drive</div>
+        <div>🖱 <b>mouse</b> — aim turret &nbsp;•&nbsp; <b>click / Space</b> — machine gun</div>
+        <div><kbd>E</kbd> / right-click — fire missile (<span id="menu-missile-note">limited</span>)</div>
+        <div><kbd>Shift</kbd> — boost &nbsp;•&nbsp; <kbd>T</kbd> — unstuck &nbsp;•&nbsp; <kbd>P</kbd> — pause &nbsp;•&nbsp; <kbd>M</kbd> — mute</div>
+      </div>
+      <div class="btn-row">
+        <button id="btn-start" class="btn primary">START ENGINE</button>
+        <button id="btn-how" class="btn">HOW TO WIN</button>
+      </div>
+      <p id="how-text" class="hidden">Destroy all 3 rivals before they scrap you. Green crosses heal, rockets restock missiles, blue rings grant a shield. Ramps are cover, walls bounce shots — keep moving.</p>
+      <p class="fine">Original code, models &amp; audio. Visual language studied from Twisted Metal references in <code>reference-assets/</code>. No source assets reused.</p>
+      <p id="menu-error" class="error hidden"></p>
+    </div>
+  </div>
+
+  <!-- Pause -->
+  <div id="screen-pause" class="screen hidden">
+    <div class="panel">
+      <h2>PAUSED</h2>
+      <p class="sub">engine idling…</p>
+      <div class="btn-row"><button id="btn-resume" class="btn primary">RESUME</button><button id="btn-restart-pause" class="btn">RESTART</button><button id="btn-quit-pause" class="btn">GARAGE</button></div>
+    </div>
+  </div>
+
+  <!-- End -->
+  <div id="screen-end" class="screen hidden">
+    <div class="panel">
+      <h2 id="end-title">YOU WIN</h2>
+      <p id="end-sub" class="sub"></p>
+      <div id="end-stats"></div>
+      <div class="btn-row"><button id="btn-again" class="btn primary">RUN IT BACK (R)</button><button id="btn-garage" class="btn">CHANGE RIG</button></div>
+    </div>
+  </div>
+
+  <div id="fatal" class="hidden" role="alert"></div>
+  <button id="btn-mute" class="btn small" title="Mute (M)">🔊</button>
+</div>
+<noscript><p style="padding:2rem;font-family:sans-serif">IRON MAYHEM needs JavaScript + WebGL.</p></noscript>
+<script>
+/* Boot watchdog: covers the one failure the module can't report itself —
+   the three.js CDN import failing (module never evaluates, boot never runs). */
+(function () {
+  function showFatal(msg) {
+    var el = document.getElementById('fatal');
+    if (!el || !el.classList.contains('hidden')) return;
+    el.classList.remove('hidden');
+    el.innerHTML = '&#9888; ' + msg + ' <button id="fatal-retry" class="btn small" style="position:static">RETRY</button>';
+    document.getElementById('fatal-retry').onclick = function () { location.reload(); };
+    var l = document.getElementById('screen-loading');
+    if (l) l.classList.add('hidden');
+  }
+  window.addEventListener('error', function () {
+    if (!window.__game) showFatal('Could not load the 3D engine (CDN unreachable?). Check your connection, then retry.');
+  }, true);
+  setTimeout(function () {
+    if (!window.__game) showFatal('Still booting after 20s — the 3D engine (CDN) may be unreachable. Check your connection, then retry.');
+  }, 20000);
+})();
+</script>
+<script type="module" src="game.js"></script>
+</body>
+</html>
