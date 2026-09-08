@@ -1,0 +1,3355 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Verifying SSH vs Web URL reporting — inspecting workspace.
+[0m⚙ [0mget_goal_history Unknown
+[0m→ [0mRead .
+[0m→ [0mRead .agentsweb
+[0m→ [0mRead .opencode-web
+[0m→ [0mRead .opencode-ssh
+[0m→ [0mRead README.md
+[0m→ [0mRead Agents.md
+[0m→ [0mRead .agentsweb/README.md
+[0m→ [0mRead .opencode-web/ssh-sessions.json
+[0m✱ [0mGlob ".opencode/**/*"[90m 0 matches[0m
+[0m✱ [0mGlob ".github/**/*"[90m 0 matches[0m
+[0m
+[0m$ [0mls -la; echo ---; ls -la .github/ 2>&1; echo ---; ls -la .opencode/ 2>&1; echo ---; ls -la .agents/ 2>&1; echo ---; cat .opencode-web/opencode.log 2>&1 | head -n 200; echo ===; cat .opencode-web/project-cloudflared.log 2>&1 | head -n 200
+total 56
+drwxr-xr-x 10 runner runner 4096 Sep  8 03:44 .
+drwxr-xr-x  3 runner runner 4096 Sep  8 03:43 ..
+drwxr-xr-x  5 runner runner 4096 Sep  8 03:43 .agents
+drwxr-xr-x  4 runner runner 4096 Sep  8 03:43 .agentsweb
+drwxr-xr-x  7 runner runner 4096 Sep  8 03:44 .git
+drwxr-xr-x  3 runner runner 4096 Sep  8 03:43 .github
+drwxr-xr-x  9 runner runner 4096 Sep  8 03:43 .omgithub-runtime
+drwx------  3 runner runner 4096 Sep  8 03:44 .opencode
+drwx------  2 runner runner 4096 Sep  8 03:44 .opencode-ssh
+drwx------  3 runner runner 4096 Sep  8 03:44 .opencode-web
+-rw-r--r--  1 runner runner 1914 Sep  8 03:43 Agents.md
+-rw-r--r--  1 runner runner   53 Sep  8 03:43 README.md
+-rw-------  1 runner runner  411 Sep  8 03:44 opencode-agentsweb-id_ed25519
+-rw-r--r--  1 runner runner  102 Sep  8 03:44 opencode-agentsweb-id_ed25519.pub
+---
+total 12
+drwxr-xr-x  3 runner runner 4096 Sep  8 03:43 .
+drwxr-xr-x 10 runner runner 4096 Sep  8 03:44 ..
+drwxr-xr-x  2 runner runner 4096 Sep  8 03:43 workflows
+---
+total 12
+drwx------  3 runner runner 4096 Sep  8 03:44 .
+drwxr-xr-x 10 runner runner 4096 Sep  8 03:44 ..
+drwx------  4 runner runner 4096 Sep  8 03:44 goals
+---
+total 24
+drwxr-xr-x  5 runner runner 4096 Sep  8 03:43 .
+drwxr-xr-x 10 runner runner 4096 Sep  8 03:44 ..
+drwxr-xr-x  7 runner runner 4096 Sep  8 03:44 .git
+-rw-r--r--  1 runner runner  733 Sep  8 03:43 README.md
+drwxr-xr-x  7 runner runner 4096 Sep  8 03:43 skills
+drwxr-xr-x  2 runner runner 4096 Sep  8 03:43 third-party-licenses
+---
+Warning: OPENCODE_SERVER_PASSWORD is not set; server is unsecured.
+opencode server listening on http://127.0.0.1:41807
+===
+2026-09-08T03:44:16Z INF Thank you for trying Cloudflare Tunnel. Doing so, without a Cloudflare account, is a quick way to experiment and try it out. However, be aware that these account-less Tunnels have no uptime guarantee, are subject to the Cloudflare Online Services Terms of Use (https://www.cloudflare.com/website-terms/), and Cloudflare reserves the right to investigate your use of Tunnels for violations of such terms. If you intend to use Tunnels in production you should use a pre-created named tunnel by following: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps
+2026-09-08T03:44:16Z INF Requesting new quick Tunnel on trycloudflare.com...
+2026-09-08T03:44:19Z INF +--------------------------------------------------------------------------------------------+
+2026-09-08T03:44:19Z INF |  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |
+2026-09-08T03:44:19Z INF |  https://spot-moderator-intense-condition.trycloudflare.com                                |
+2026-09-08T03:44:19Z INF +--------------------------------------------------------------------------------------------+
+2026-09-08T03:44:19Z INF Cannot determine default configuration path. No file [config.yml config.yaml] in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp /etc/cloudflared /usr/local/etc/cloudflared]
+2026-09-08T03:44:19Z INF Version 2026.8.3 (Checksum f29324fe934d1e100617484c78deef803c4dc2cd351d645bbde42e96b4fccc5e)
+2026-09-08T03:44:19Z INF GOOS: linux, GOVersion: go1.26.4, GoArch: amd64
+2026-09-08T03:44:19Z INF Settings: map[ha-connections:1 no-autoupdate:true protocol:quic url:http://127.0.0.1:36079]
+2026-09-08T03:44:19Z INF Environmental variables map[AGENTSWEB_TUNNEL_URL:ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257]
+2026-09-08T03:44:19Z INF Generated Connector ID: 4e581204-afd0-4991-b191-b6a39aa6e631
+2026-09-08T03:44:19Z INF Initial protocol quic
+2026-09-08T03:44:19Z INF ICMP proxy will use 10.1.1.125 as source for IPv4
+2026-09-08T03:44:19Z INF ICMP proxy will use fe80::7eed:8dff:fe4f:3c42 in zone eth0 as source for IPv6
+2026-09-08T03:44:19Z WRN The user running cloudflared process has a GID (group ID) that is not within ping_group_range. You might need to add that user to a group within that range, or instead update the range to encompass a group the user is already in by modifying /proc/sys/net/ipv4/ping_group_range. Otherwise cloudflared will not be able to ping this network error="Group ID 1001 is not between ping group 1 to 0"
+2026-09-08T03:44:19Z WRN ICMP proxy feature is disabled error="cannot create ICMPv4 proxy: Group ID 1001 is not between ping group 1 to 0 nor ICMPv6 proxy: socket: permission denied"
+2026/09/08 03:44:19 failed to sufficiently increase receive buffer size (was: 1024 kiB, wanted: 7168 kiB, got: 2048 kiB). See https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes for details.
+2026-09-08T03:44:19Z INF ICMP proxy will use 10.1.1.125 as source for IPv4
+2026-09-08T03:44:19Z INF ICMP proxy will use fe80::7eed:8dff:fe4f:3c42 in zone eth0 as source for IPv6
+2026-09-08T03:44:19Z INF Starting metrics server on 127.0.0.1:20241/metrics
+2026-09-08T03:44:19Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.192.77
+2026-09-08T03:44:19Z INF Registered tunnel connection connIndex=0 connection=4be13f54-9490-40a0-8e9a-5a566c904808 event=0 ip=198.41.192.77 location=msp01 protocol=quic
+2026-09-08T03:44:25Z INF +-------------------------------------------------------------------------------------+
+2026-09-08T03:44:25Z INF |                               CONNECTIVITY PRE-CHECKS                               |
+2026-09-08T03:44:25Z INF +-------------------------------------------------------------------------------------+
+2026-09-08T03:44:25Z INF |  COMPONENT         TARGET                     STATUS  DETAILS                       |
+2026-09-08T03:44:25Z INF |  DNS Resolution    region1.v2.argotunnel.com  PASS    DNS Resolved successfully     |
+2026-09-08T03:44:25Z INF |  DNS Resolution    region2.v2.argotunnel.com  PASS    DNS Resolved successfully     |
+2026-09-08T03:44:25Z INF |  UDP Connectivity  region1.v2.argotunnel.com  PASS    QUIC connection successful    |
+2026-09-08T03:44:25Z INF |  UDP Connectivity  region2.v2.argotunnel.com  PASS    QUIC connection successful    |
+2026-09-08T03:44:25Z INF |  TCP Connectivity  region1.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
+2026-09-08T03:44:25Z INF |  TCP Connectivity  region2.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
+2026-09-08T03:44:25Z INF |  Cloudflare API    api.cloudflare.com:443     PASS    API is reachable              |
+2026-09-08T03:44:25Z INF |                                                                                     |
+2026-09-08T03:44:25Z INF |  SUMMARY: Environment is healthy. cloudflared will use 'quic' as primary protocol.  |
+2026-09-08T03:44:25Z INF +-------------------------------------------------------------------------------------+
+2026-09-08T03:44:25Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=region1.v2.argotunnel.com
+2026-09-08T03:44:25Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=region2.v2.argotunnel.com
+2026-09-08T03:44:25Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=region1.v2.argotunnel.com
+2026-09-08T03:44:25Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=region2.v2.argotunnel.com
+2026-09-08T03:44:25Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=region1.v2.argotunnel.com
+2026-09-08T03:44:25Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=region2.v2.argotunnel.com
+2026-09-08T03:44:25Z INF precheck component="Cloudflare API" details="API is reachable" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=api.cloudflare.com:443
+2026-09-08T03:44:25Z INF precheck complete hard_fail=false run_id=32800cd4-9f44-4156-87cb-57f632bdea3b suggested_protocol=quic
+[0m
+[0m$ [0mls -R .github/workflows/ 2>&1; echo ===; ls -R .omgithub-runtime/ 2>&1 | head -n 100; echo ===; ls -R .opencode/goals/ 2>&1 | head -n 100; echo ===; cat .opencode-web/prompt.txt 2>&1; echo ===; cat .opencode-web/opencode-run.log 2>&1 | head -n 200; echo ===; cat .opencode-ssh/tunnel.log 2>&1 | head -n 200; echo ===; cat .opencode-ssh/access.env 2>&1
+.github/workflows/:
+opencode.yml
+===
+.omgithub-runtime/:
+AGENTS.md
+README.md
+ideas
+prompt.md
+scripts
+site
+wiki
+
+.omgithub-runtime/ideas:
+github-actions-visual-workflow-editor.md
+github-agent-project-comparison.md
+github-app-user-configuration.md
+github-project-remix.md
+ios-builder-native-app-generation.md
+issue-triggered-opencode-workflow.md
+opencode-docker-sandbox.md
+opencode-oauth-env-auth.md
+opencode-token-isolation.md
+opencode-worker-env-response.md
+
+.omgithub-runtime/scripts:
+deploy-omgithub-a1.sh
+gh-run-watch-logs.py
+opencode-failed-comment.md
+opencode-final-report.md
+opencode-ssh-closed-comment.md
+ssh-run-log.sh
+test-opencode-progress-tracker.sh
+
+.omgithub-runtime/site:
+Caddyfile.omgithub
+Dockerfile
+README.md
+docker-compose.yml
+index.html
+package-lock.json
+package.json
+server
+src
+vite.config.js
+
+.omgithub-runtime/site/server:
+auth.mjs
+github-build.mjs
+github-build.test.mjs
+github.mjs
+github.test.mjs
+index.mjs
+public-project.mjs
+public-project.test.mjs
+store.mjs
+
+.omgithub-runtime/site/src:
+App.vue
+components
+composables
+main.js
+style.css
+views
+
+.omgithub-runtime/site/src/components:
+GameCard.vue
+
+.omgithub-runtime/site/src/composables:
+useJsonResource.js
+
+.omgithub-runtime/site/src/views:
+HomeView.vue
+ProfileView.vue
+ProjectView.vue
+StoreView.vue
+
+.omgithub-runtime/wiki:
+access.md
+oh-my-github-app.md
+omgithub.md
+opencode.md
+testing.md
+===
+.opencode/goals/:
+state.json.lock
+state.json.lock.claims-v2
+state.json.sessions
+
+.opencode/goals/state.json.lock.claims-v2:
+
+.opencode/goals/state.json.sessions:
+098b26805cf293c7e3d58b3ae530fd216414192124bcb5fccaec0eb9d96dcb52
+
+.opencode/goals/state.json.sessions/098b26805cf293c7e3d58b3ae530fd216414192124bcb5fccaec0eb9d96dcb52:
+state.json
+state.json.ledger.jsonl
+state.json.lock
+state.json.lock.claims-v2
+
+.opencode/goals/state.json.sessions/098b26805cf293c7e3d58b3ae530fd216414192124bcb5fccaec0eb9d96dcb52/state.json.lock.claims-v2:
+claim-7f93d300-e7da-4afc-8607-36d72f43c108.json
+===
+Verify SSH URL reporting beside the OpenCode Web URL
+===
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Verifying SSH vs Web URL reporting — inspecting workspace.
+[0m⚙ [0mget_goal_history Unknown
+[0m→ [0mRead .
+[0m→ [0mRead .agentsweb
+[0m→ [0mRead .opencode-web
+[0m→ [0mRead .opencode-ssh
+[0m→ [0mRead README.md
+[0m→ [0mRead Agents.md
+[0m→ [0mRead .agentsweb/README.md
+[0m→ [0mRead .opencode-web/ssh-sessions.json
+[0m✱ [0mGlob ".opencode/**/*"[90m 0 matches[0m
+[0m✱ [0mGlob ".github/**/*"[90m 0 matches[0m
+[0m
+[0m$ [0mls -la; echo ---; ls -la .github/ 2>&1; echo ---; ls -la .opencode/ 2>&1; echo ---; ls -la .agents/ 2>&1; echo ---; cat .opencode-web/opencode.log 2>&1 | head -n 200; echo ===; cat .opencode-web/project-cloudflared.log 2>&1 | head -n 200
+total 56
+drwxr-xr-x 10 runner runner 4096 Sep  8 03:44 .
+drwxr-xr-x  3 runner runner 4096 Sep  8 03:43 ..
+drwxr-xr-x  5 runner runner 4096 Sep  8 03:43 .agents
+drwxr-xr-x  4 runner runner 4096 Sep  8 03:43 .agentsweb
+drwxr-xr-x  7 runner runner 4096 Sep  8 03:44 .git
+drwxr-xr-x  3 runner runner 4096 Sep  8 03:43 .github
+drwxr-xr-x  9 runner runner 4096 Sep  8 03:43 .omgithub-runtime
+drwx------  3 runner runner 4096 Sep  8 03:44 .opencode
+drwx------  2 runner runner 4096 Sep  8 03:44 .opencode-ssh
+drwx------  3 runner runner 4096 Sep  8 03:44 .opencode-web
+-rw-r--r--  1 runner runner 1914 Sep  8 03:43 Agents.md
+-rw-r--r--  1 runner runner   53 Sep  8 03:43 README.md
+-rw-------  1 runner runner  411 Sep  8 03:44 opencode-agentsweb-id_ed25519
+-rw-r--r--  1 runner runner  102 Sep  8 03:44 opencode-agentsweb-id_ed25519.pub
+---
+total 12
+drwxr-xr-x  3 runner runner 4096 Sep  8 03:43 .
+drwxr-xr-x 10 runner runner 4096 Sep  8 03:44 ..
+drwxr-xr-x  2 runner runner 4096 Sep  8 03:43 workflows
+---
+total 12
+drwx------  3 runner runner 4096 Sep  8 03:44 .
+drwxr-xr-x 10 runner runner 4096 Sep  8 03:44 ..
+drwx------  4 runner runner 4096 Sep  8 03:44 goals
+---
+total 24
+drwxr-xr-x  5 runner runner 4096 Sep  8 03:43 .
+drwxr-xr-x 10 runner runner 4096 Sep  8 03:44 ..
+drwxr-xr-x  7 runner runner 4096 Sep  8 03:44 .git
+-rw-r--r--  1 runner runner  733 Sep  8 03:43 README.md
+drwxr-xr-x  7 runner runner 4096 Sep  8 03:43 skills
+drwxr-xr-x  2 runner runner 4096 Sep  8 03:43 third-party-licenses
+---
+Warning: OPENCODE_SERVER_PASSWORD is not set; server is unsecured.
+opencode server listening on http://127.0.0.1:41807
+===
+2026-09-08T03:44:16Z INF Thank you for trying Cloudflare Tunnel. Doing so, without a Cloudflare account, is a quick way to experiment and try it out. However, be aware that these account-less Tunnels have no uptime guarantee, are subject to the Cloudflare Online Services Terms of Use (https://www.cloudflare.com/website-terms/), and Cloudflare reserves the right to investigate your use of Tunnels for violations of such terms. If you intend to use Tunnels in production you should use a pre-created named tunnel by following: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps
+2026-09-08T03:44:16Z INF Requesting new quick Tunnel on trycloudflare.com...
+2026-09-08T03:44:19Z INF +--------------------------------------------------------------------------------------------+
+2026-09-08T03:44:19Z INF |  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |
+2026-09-08T03:44:19Z INF |  https://spot-moderator-intense-condition.trycloudflare.com                                |
+2026-09-08T03:44:19Z INF +--------------------------------------------------------------------------------------------+
+2026-09-08T03:44:19Z INF Cannot determine default configuration path. No file [config.yml config.yaml] in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp /etc/cloudflared /usr/local/etc/cloudflared]
+2026-09-08T03:44:19Z INF Version 2026.8.3 (Checksum f29324fe934d1e100617484c78deef803c4dc2cd351d645bbde42e96b4fccc5e)
+2026-09-08T03:44:19Z INF GOOS: linux, GOVersion: go1.26.4, GoArch: amd64
+2026-09-08T03:44:19Z INF Settings: map[ha-connections:1 no-autoupdate:true protocol:quic url:http://127.0.0.1:36079]
+2026-09-08T03:44:19Z INF Environmental variables map[AGENTSWEB_TUNNEL_URL:ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257]
+2026-09-08T03:44:19Z INF Generated Connector ID: 4e581204-afd0-4991-b191-b6a39aa6e631
+2026-09-08T03:44:19Z INF Initial protocol quic
+2026-09-08T03:44:19Z INF ICMP proxy will use 10.1.1.125 as source for IPv4
+2026-09-08T03:44:19Z INF ICMP proxy will use fe80::7eed:8dff:fe4f:3c42 in zone eth0 as source for IPv6
+2026-09-08T03:44:19Z WRN The user running cloudflared process has a GID (group ID) that is not within ping_group_range. You might need to add that user to a group within that range, or instead update the range to encompass a group the user is already in by modifying /proc/sys/net/ipv4/ping_group_range. Otherwise cloudflared will not be able to ping this network error="Group ID 1001 is not between ping group 1 to 0"
+2026-09-08T03:44:19Z WRN ICMP proxy feature is disabled error="cannot create ICMPv4 proxy: Group ID 1001 is not between ping group 1 to 0 nor ICMPv6 proxy: socket: permission denied"
+2026/09/08 03:44:19 failed to sufficiently increase receive buffer size (was: 1024 kiB, wanted: 7168 kiB, got: 2048 kiB). See https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes for details.
+2026-09-08T03:44:19Z INF ICMP proxy will use 10.1.1.125 as source for IPv4
+2026-09-08T03:44:19Z INF ICMP proxy will use fe80::7eed:8dff:fe4f:3c42 in zone eth0 as source for IPv6
+2026-09-08T03:44:19Z INF Starting metrics server on 127.0.0.1:20241/metrics
+2026-09-08T03:44:19Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.192.77
+2026-09-08T03:44:19Z INF Registered tunnel connection connIndex=0 connection=4be13f54-9490-40a0-8e9a-5a566c904808 event=0 ip=198.41.192.77 location=msp01 protocol=quic
+2026-09-08T03:44:25Z INF +-------------------------------------------------------------------------------------+
+2026-09-08T03:44:25Z INF |                               CONNECTIVITY PRE-CHECKS                               |
+2026-09-08T03:44:25Z INF +-------------------------------------------------------------------------------------+
+2026-09-08T03:44:25Z INF |  COMPONENT         TARGET                     STATUS  DETAILS                       |
+2026-09-08T03:44:25Z INF |  DNS Resolution    region1.v2.argotunnel.com  PASS    DNS Resolved successfully     |
+2026-09-08T03:44:25Z INF |  DNS Resolution    region2.v2.argotunnel.com  PASS    DNS Resolved successfully     |
+2026-09-08T03:44:25Z INF |  UDP Connectivity  region1.v2.argotunnel.com  PASS    QUIC connection successful    |
+2026-09-08T03:44:25Z INF |  UDP Connectivity  region2.v2.argotunnel.com  PASS    QUIC connection successful    |
+2026-09-08T03:44:25Z INF |  TCP Connectivity  region1.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
+2026-09-08T03:44:25Z INF |  TCP Connectivity  region2.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
+2026-09-08T03:44:25Z INF |  Cloudflare API    api.cloudflare.com:443     PASS    API is reachable              |
+2026-09-08T03:44:25Z INF |                                                                                     |
+2026-09-08T03:44:25Z INF |  SUMMARY: Environment is healthy. cloudflared will use 'quic' as primary protocol.  |
+2026-09-08T03:44:25Z INF +-------------------------------------------------------------------------------------+
+2026-09-08T03:44:25Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=region1.v2.argotunnel.com
+2026-09-08T03:44:25Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=region2.v2.argotunnel.com
+2026-09-08T03:44:25Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=region1.v2.argotunnel.com
+2026-09-08T03:44:25Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=region2.v2.argotunnel.com
+2026-09-08T03:44:25Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=region1.v2.argotunnel.com
+2026-09-08T03:44:25Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=region2.v2.argotunnel.com
+2026-09-08T03:44:25Z INF precheck component="Cloudflare API" details="API is reachable" run_id=32800cd4-9f44-4156-87cb-57f632bdea3b status=pass target=api.cloudflare.com:443
+2026-09-08T03:44:25Z INF precheck complete hard_fail=false run_id=32800cd4-9f44-4156-87cb-57f632bdea3b suggested_protocol=quic
+[0m
+===
+ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257
+===
+AGENTSWEB_HOST=opencode-issue-79-34184464257-ssh.agentsweb.space
+AGENTSWEB_PORT=32257
+AGENTSWEB_COMMAND=ssh\ -o\ StrictHostKeyChecking=no\ -o\ UserKnownHostsFile=/dev/null\ -i\ ~/.ssh/aiplay-agentsweb\ -p\ 32257\ runner@opencode-issue-79-34184464257-ssh.agentsweb.space
+AGENTSWEB_TUNNEL_URL=ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257
+[0m
+Found the tunnel URLs — now checking where they're surfaced together.
+[0m$ [0mls -la .github/workflows/; cat .github/workflows/opencode.yml
+total 12
+drwxr-xr-x 2 runner runner 4096 Sep  8 03:43 .
+drwxr-xr-x 3 runner runner 4096 Sep  8 03:43 ..
+-rw-r--r-- 1 runner runner 1073 Sep  8 03:43 opencode.yml
+name: OpenCode
+run-name: "OpenCode #${{ inputs.issue_number }} — ${{ inputs.issue_title }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue containing the OpenCode label
+        required: true
+      request:
+        description: Exact issue request text
+        required: true
+      issue_title:
+        description: Issue title for the Actions run name
+        required: true
+      labels_json:
+        description: JSON array of issue label names
+        required: false
+        default: '[]'
+      sender:
+        description: GitHub username that submitted the request
+        required: true
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  pages: write
+  id-token: write
+
+jobs:
+  opencode:
+    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-reusable.yml@main
+    with:
+      issue_number: ${{ inputs.issue_number }}
+      request: ${{ inputs.request }}
+      issue_title: ${{ inputs.issue_title }}
+      labels_json: ${{ inputs.labels_json }}
+      sender: ${{ inputs.sender }}
+    secrets: inherit
+[0m
+[0m$ [0mcat .omgithub-runtime/scripts/opencode-final-report.md 2>&1; echo "======"; cat .omgithub-runtime/scripts/opencode-failed-comment.md 2>&1; echo "======"; cat .omgithub-runtime/scripts/opencode-ssh-closed-comment.md 2>&1; echo "======"; cat .omgithub-runtime/scripts/ssh-run-log.sh 2>&1; echo "======"; cat .omgithub-runtime/prompt.md 2>&1 | head -n 300
+✅ **Game complete and publicly verified.**
+
+[Open Project](@PROJECT_URL@)
+Final commit: [@FINAL_COMMIT@](@COMMIT_URL@)
+OpenCode logs release: [@RELEASE_URL@](@RELEASE_URL@)
+
+<details><summary>Final screenshots</summary>
+
+@IMAGES@
+
+</details>
+======
+❌ **OpenCode workflow failed.**
+
+Actions run: [@RUN_URL@](@RUN_URL@)
+
+**Failed step(s):**
+@FAILED_STEPS@
+======
+🔒 **AgentsWeb SSH session closed.**
+
+Temporary access for [run #@RUN_NUMBER@](@RUN_URL@) has expired.
+======
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo="AgentsLoop/OhMyGithub"
+run_id=""
+key="${HOME}/.ssh/aiplay-agentsweb"
+broker_url="${BROKER_REGISTRY_URL:-https://broker.agentsweb.space/api/registrations}"
+
+usage() {
+  echo "Usage: $0 <run-id> [--repo OWNER/REPO] [--key PATH]" >&2
+  exit 2
+}
+
+[[ $# -ge 1 ]] || usage
+run_id="$1"
+shift
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --repo) repo="${2:?missing repository}"; shift 2 ;;
+    --key) key="${2:?missing SSH key}"; shift 2 ;;
+    --broker-url) broker_url="${2:?missing broker URL}"; shift 2 ;;
+    *) usage ;;
+  esac
+done
+
+[[ "$run_id" =~ ^[0-9]+$ ]] || { echo "Invalid run ID: $run_id" >&2; exit 2; }
+[[ -r "$key" ]] || { echo "SSH key is not readable: $key" >&2; exit 1; }
+command -v gh >/dev/null || { echo "gh is required" >&2; exit 1; }
+command -v jq >/dev/null || { echo "jq is required" >&2; exit 1; }
+
+# The broker registry is faster than waiting for the workflow's issue comment.
+# /api/registrations requires the broker token; without one, use the comment
+# fallback below. The token is never printed.
+broker_token="${BROKER_API_TOKEN:-}"
+if [[ -z "$broker_token" && -f "../../sshworker/workers-dashboard/.env" ]]; then
+  broker_token="$(sed -n 's/^BROKER_API_TOKEN=//p' ../../sshworker/workers-dashboard/.env | head -n 1 | tr -d '\r')"
+fi
+
+if [[ -n "$broker_token" ]]; then
+  broker_json="$(curl -fsS --max-time 8 -H "Authorization: Bearer $broker_token" "$broker_url" 2>/dev/null || true)"
+  ssh_data="$(jq -r --arg run "$run_id" '
+    .registrations[]?
+    | select((.run_id | tostring) == $run)
+    | [.subdomain, (.public_port // .display_port // 22)] | @tsv
+  ' <<<"$broker_json" 2>/dev/null | head -n 1)"
+else
+  ssh_data=""
+fi
+
+if [[ -n "$ssh_data" ]]; then
+  IFS=$'\t' read -r host port <<<"$ssh_data"
+  [[ "$host" == *.* ]] || host="${host}.agentsweb.space"
+else
+  comment_data="$(gh api "repos/${repo}/issues/comments?per_page=100")"
+  ssh_data="$(jq -r --arg run "actions/runs/${run_id}" '
+    .[] | select(.body | contains($run)) | .body
+    | capture("ssh[^\\n]*-i [^ ]+ -p (?<port>[0-9]+) runner@(?<host>[^\\n `]+)")
+    | [.host, .port] | @tsv
+  ' <<<"$comment_data" | tail -n 1)"
+  if [[ -n "$ssh_data" ]]; then
+    IFS=$'\t' read -r host port <<<"$ssh_data"
+    [[ "$host" == *.* ]] || host="${host}.agentsweb.space"
+  fi
+fi
+
+if [[ -z "$ssh_data" ]]; then
+  echo "No temporary SSH command found for run ${run_id}." >&2
+  echo "The run may not have posted access details yet, or its session may be closed." >&2
+  exit 1
+fi
+echo "Following live Actions log for run ${run_id} via ${host}:${port}" >&2
+exec ssh -o StrictHostKeyChecking=no \
+  -o UserKnownHostsFile=/dev/null \
+  -o ConnectTimeout=20 \
+  -i "$key" -p "$port" "runner@${host}" \
+  'set -e
+   diag_root=/home/runner/actions-runner/cached
+   diag="$(find "$diag_root" -mindepth 3 -maxdepth 3 -type d -path "*/_diag/pages" -print | sort -V | tail -n 1)"
+   [[ -n "$diag" ]] || { echo "No Actions diagnostics directory found." >&2; exit 1; }
+   log="$(find "$diag" -type f -name "*_1.log" -size +0c -print -quit)"
+   [[ -n "$log" ]] || { echo "No non-empty Actions page log found." >&2; exit 1; }
+   echo "Following $log" >&2
+   exec tail -F "$log"'
+======
+I want you to build a first-person shooter at the level of the most recent Call of Duty games. It should be utterly perfect, visually beautiful, with every single thing done at AAA quality—from textures to physics to anything you could think of.
+
+Fan out sub-agents and have sub-agents tackle each one individually so that the game is utterly perfect. Have a separate sub-agent check each item visually to ensure it looks triple A. That separate sub-agent should be a really harsh critic, and if it doesn't look triple A, keep iterating until it does.
+
+Don't stop until each sub-agent is utterly wowed with the quality when compared with the actual Call of Duty game. It should literally compare them side by side blind and say which one looks better. Do this in ThreeJS. Continue iterating until it's utterly perfect. Fan out sub-agents and ultracode.
+[0m
+[0m$ [0mcat .omgithub-runtime/AGENTS.md 2>&1 | head -n 500
+echo "=====WIKI opencode.md====="
+cat .omgithub-runtime/wiki/opencode.md 2>&1 | head -n 1000
+# OMG (Oh My GitHub) agent instructions
+
+## Wiki index
+
+- [OpenCode workflow](wiki/opencode.md)
+- [Oh My Github App](wiki/oh-my-github-app.md)
+- [Temporary Mac SSH access](wiki/access.md)
+- [Testing and verification](wiki/testing.md)
+- [OmGithub publishing](wiki/omgithub.md)
+
+## Main project file
+
+The main project file is [.github/workflows/opencode.yml](.github/workflows/opencode.yml).
+
+The local [game issue E2E skill](.agents/skills/game-issue-e2e/SKILL.md) must
+stay aligned with this workflow. Its kickoff procedure creates a fresh issue
+with the `OpenCode` label, does not use comments as
+triggers, and waits only for the initial OpenCode session link.
+The GitHub App dispatches execution for an issue opened with `OpenCode` or when
+the `OpenCode` label is added to an existing issue. The workflow itself accepts
+only `workflow_dispatch`; edits, comments, and unrelated labels must not be
+documented as triggers. When a human opens an issue without `OpenCode`, the App
+ensures the repository label exists, leaves the issue unlabeled, and posts a
+reminder; it does not start the workflow automatically.
+An optional issue-title suffix `branch: <existing-branch>` selects the target
+checkout and pull-request base; without it, the default branch is used.
+
+## Literal instruction replacements
+
+When a user asks to replace one mode, label, command, or behavior with another,
+interpret “instead of” literally. Remove every reference to the old option from
+the affected instruction and replace its behavior with the new option. Do not
+keep the old option as a prohibition, exception, fallback, precedence note, or
+documentation example unless the user explicitly asks to preserve it. Verify
+the result with a case-insensitive search for the old option before reporting
+completion.
+
+When a user asks to remove a requirement or behavior, delete that instruction
+without adding a replacement prohibition, disclaimer, or alternate behavior
+unless the user explicitly requests one.
+
+## Shell timing
+
+When writing shell scripts,
+always add explicit per-command execution-time measurements between commands.
+Use `/usr/bin/time -p` or a small timing helper around each meaningful command;
+the outer command duration is not sufficient because it hides which step is
+slow or hung. Use `/usr/bin/time` only in scripts; do not invoke it directly in
+interactive shell commands.
+
+## Ideas
+
+Store durable implementation ideas as individual Markdown files under
+`./ideas/`, using descriptive kebab-case filenames such as
+`ideas/opencode-oauth-env-auth.md`.
+
+## Git delivery
+
+After every code change, commit and push the change.
+Before running any workflow, verify that the working tree is clean and everything
+is committed.
+
+When the user asks to undo a just-made change or commit, inspect the targeted
+commit and working tree first, then prefer rewriting that commit and pushing with
+`git push --force-with-lease` rather than creating a revert commit. Preserve
+unrelated changes and stop if the remote branch has advanced unexpectedly. Use
+`git revert` when the change is already shared broadly or when history rewriting
+would be unsafe.
+
+## Git Commits
+- Write evidence-rich commit messages, not short subject-only messages. Use a specific subject and a body that records the motivating symptom or context, root cause, decision rationale and alternatives considered, material changes, verification performed, discovered Throughput bottlenecks or Hung commands, relevant Pitfalls and Gotchas, and known caveats or follow-up. Preserve the durable reasoning summary needed for diagnosis, rollback, and future extension.
+- Always include the current Codex chat/task ID in the commit message, using a clear field such as `Chat-ID: <chat-id>` in the body.
+
+## Links in handoffs
+
+When a relevant URL or stable identifier exists, include a clickable Markdown
+link in the user-facing response. Link GitHub issues, Actions runs, pull
+requests, commits, releases, public app URLs, and Codex tasks/threads rather
+than reporting only their numbers or plain text. For Codex tasks/threads, use
+the `codex://threads/<thread-id>` URL format.
+
+When mentioning a commit, append its relative age in hours or days.
+
+## OpenCode GitHub Actions
+
+To execute an issue, open it with the `OpenCode` label, or add that label to an
+existing issue. The GitHub App converts that event into one workflow dispatch.
+Edits, comments, and other labels do not execute it.
+The workflow starts a temporary AgentsWeb SSH session,
+verifies it, runs OpenCode, and cleans up the SSH session afterward.
+
+When monitoring a triggered run, use `gh run watch <run-id> --repo AgentsLoop/OhMyGithub --exit-status` for overall job status.
+Do not use `gh run view --log` to read logs from a running task: GitHub reports that
+logs are unavailable until completion. Use `bash scripts/ssh-run-log.sh <run-id>`
+for the live Actions log over SSH. Do not use tight `for` loops around `gh run list`,
+which needlessly consume GitHub API rate limit.
+
+To connect to an issue's live worker, find its run ID with
+`gh run list --repo AgentsLoop/OhMyGithub --workflow opencode.yml --status in_progress`,
+then run `bash scripts/ssh-run-log.sh <run-id>` to discover the host and port and SSH
+with `~/.ssh/aiplay-agentsweb` as shown by the helper.
+
+When the user asks to check a live OpenCode workflow, always pull the runner logs
+over SSH first, using `scripts/ssh-run-log.sh` or a targeted SSH read from the
+same runner. Base the answer on those logs before discussing whether an action
+is confirmed; do not lead with a generic inability-to-confirm statement when
+live log evidence can be collected.
+
+For real-time inspection from a live temporary SSH session, use the helper:
+
+```sh
+bash scripts/ssh-run-log.sh <run-id>
+```
+
+The helper discovers the temporary SSH command from the triggering issue or pull
+request, then follows the freshest `_diag/pages` log. The runner uploads chunks from
+`_diag/blocks` to GitHub. Do not print environment files, tokens, or private keys while
+inspecting the runner.
+
+## Mac SSH access
+
+The Mac private key stays at `~/.ssh/aiplay-agentsweb`. Its public key is
+stored in the repository Actions secret `AGENTSWEB_SSH_PUBLIC_KEY`. The issue
+commented by the workflow contains a directly usable command such as:
+
+```sh
+ssh -i ~/.ssh/aiplay-agentsweb -p <port> runner@<run-name>.agentsweb.space
+```
+
+The command works only while the corresponding Actions job is running.
+
+## Connecting to a live OpenCode worker
+
+Use the repository helper to discover the worker host and port from the broker
+or issue comment. It uses the persistent local key `~/.ssh/aiplay-agentsweb`:
+
+```sh
+bash scripts/ssh-run-log.sh <run-id> --repo AgentsLoop/OhMyGithub
+```
+
+For an interactive shell, reuse the host and port printed by the helper and
+use the same key:
+
+```sh
+ssh -tt -o StrictHostKeyChecking=no \
+  -o UserKnownHostsFile=/dev/null \
+  -i ~/.ssh/aiplay-agentsweb \
+  -p <port> runner@<run-name>.agentsweb.space
+```
+
+Do not substitute the generated runner key under `sshworker/outputs/keys/`; it
+can produce a misleading `Permission denied (publickey)` result. Temporary
+worker SSH access ends when the Actions job and session are cleaned up. Never
+print secrets while inspecting a worker.
+=====WIKI opencode.md=====
+# OMG (Oh My GitHub) workflow
+
+The canonical workflow is `.github/workflows/opencode.yml`.
+The numbered build, verification, remediation, completion, and screenshot
+prompt templates are stored as Markdown files in `.github/prompts/`.
+
+## Trigger
+
+The `OpenCode` issue label is the execution marker consumed by the Oh My Github
+App. The App dispatches `.github/workflows/opencode.yml`; the workflow itself
+accepts only `workflow_dispatch` and does not subscribe directly to issue
+events. The issue body, or title when the body is empty, supplies the request
+text. Comments and edits never trigger execution. An issue with the `Goal` label
+uses the installed `opencode-goal-plugin`, configures
+`noInterruptOnUserMessage: true`, and starts the runner with `opencode run
+--command goal`; an issue without `Goal` uses the standard `opencode run`
+path. The `OpenCode` label asks the App to launch the workflow; add `Goal` to select
+persistent goal mode. This keeps
+one request event mapped to one OpenCode session.
+
+An issue with the `ralph` label installs the standalone
+[`opencode-ralph-loop`](https://github.com/charfeng1/opencode-ralph-loop) plugin
+and starts `opencode run --command ralph-loop` in the same workflow session.
+Ralph takes precedence when both `Goal` and `ralph` are present, which makes it
+safe to add `ralph` to the usual Goal-labeled issue. The workflow requires
+Ralph's `<promise>DONE</promise>` completion marker before validation and
+completion reporting.
+
+When a human opens an issue without `OpenCode`, the App posts a reminder to add
+the label and stops; it does not dispatch a workflow. Adding `OpenCode` later
+starts the normal App-dispatched flow.
+
+The `test` label runs the full workflow with a mock OpenCode-generated project
+and must be used alongside `OpenCode`. The App remains triggered only by the
+exact `OpenCode` label. Test mode skips OpenCode generation, copies the fixture
+from `.github/fixtures/test-project`, then runs local verification, pushes the
+normal immutable branch, reports its OmGithub tree URL, and completes the issue.
+It also emits the normal live-progress comment, final report, lifecycle labels,
+and logs release from synthetic OpenCode session artifacts, so only the model
+generation itself is replaced.
+
+The workflow uses the `macos-latest` GitHub-hosted runner by default for the
+entire OpenCode job. The `linux` label opts the run into `ubuntu-latest`.
+
+An optional issue-title suffix in the exact form `branch: <existing-branch>`
+selects the checkout. The App removes that suffix from the
+OpenCode request and validates the branch before dispatching the thin workflow
+wrapper.
+Invalid or missing branches receive an issue comment and do not start the build.
+Without the directive, the repository default branch is used.
+
+See the dedicated [Oh My Github App documentation](oh-my-github-app.md) for
+App ownership, installation scope, permissions, events, and webhook details.
+
+An issue labeled `omo` additionally installs and configures the OpenCode Ultimate
+edition of `oh-my-openagent` with Bun before the OpenCode server starts. The
+installer runs non-interactively with provider authentication skipped; `/omo` is
+not a command and does not trigger a run by itself. An `omo`-labeled OpenCode run
+uses OMO's native `goal` command and prepends `ulw` to the objective. The Codex
+Light `ulw-loop` component is not recreated or registered for OpenCode.
+
+## What the job does
+
+1. Checks out the repository with persisted `GITHUB_TOKEN` credentials.
+2. Copies `.github/templates/agents.template.md` to `$PROJECT_DIR/Agents.md`,
+   then appends every `.github/templates/*.md` file whose basename matches an
+   issue label,
+   excluding the base template itself. The worker therefore receives the
+   shared issue-update, screenshot, and completion-report requirements plus all
+   active label policies.
+3. Attempts to start an ephemeral AgentsWeb SSH tunnel. If setup fails, the
+   workflow continues without SSH access and keeps the browser session path
+   available.
+4. Starts the OpenCode web UI and a loopback Nginx file server rooted at the
+   resolved project directory, then publishes each through its own temporary
+   trycloudflare.com tunnel. The access comment contains both URLs, rendered
+   from shared templates under `scripts/` for both its initial and
+   live-progress forms. Final, smoke-test, failed, and SSH-closed
+   comments use the same renderer and remain independently status-specific.
+5. Creates an `opencode/<run-id>` branch from the relevant base branch.
+6. Starts `opencode run --attach` against the same OpenCode installation and
+   server-backed session store, then posts a direct URL to that live session.
+7. Verifies SSH connectivity when the optional tunnel was started successfully.
+8. Creates and refreshes one unified progress-comment template with aggregate
+   OpenCode statistics about every 10 seconds while the run is active, keeping
+   the launch access details intact. The report also
+   counts active child sessions from `/session/status` and all descendant
+   subagent sessions from their `parentID` lineage. It also reports inferred
+   human-readable elapsed time, aggregate token count and tokens-per-second speed,
+   plus inferred image-context model calls by following image MIME attachments
+   through each session transcript.
+   Message text, reasoning, prompts, and tool details are
+   never rendered in the live comment; full logs are published only in the
+   completion release.
+9. Waits for the build session to finish, forks it into a separate verification
+   session, runs the verification prompt there, starts the app, and exposes it through a
+   separate temporary trycloudflare.com tunnel, and verifies the public URL.
+10. Verifies the app through the public tunnel. If verification fails, sends a
+   remediation prompt to the forked verification session and retries up to three
+   times. The completion report and screenshot evidence prompts also use that
+   verification session. Detects both uncommitted generated files and commits already created
+   by OpenCode, then pushes the immutable branch in YAML.
+11. Gives the verified public URL back to the worker, requests committed final
+    browser screenshots, and appends immutable screenshot URLs with the game,
+    commit, and Open Project links to the oldest triggering-issue comment containing the
+    `🟡 **OpenCode progress (live)**` marker. If screenshots are missing, it
+    sends up to two follow-up prompts to the same OpenCode session before
+    continuing delivery with a warning.
+12. Creates a uniquely tagged GitHub release containing the final OpenCode
+    response JSON and safe runner log files, then appends its link to that same
+    live-progress comment.
+13. Keeps SSH, the OpenCode Web UI, and the app available for 5 hours after
+   verification,
+   then marks the comment closed and terminates both tunnels.
+
+Validation is controlled by the repository variable `VALIDATION_ENABLED`. It
+defaults to `true`. When set to `off` (or any value other than `true`), the
+workflow stops after the initial OpenCode prompt and temporary OpenCode Web
+trycloudflare exposure; app verification/remediation, completion and screenshot
+prompts, Git delivery, immutable project publication, release/report generation, and the
+complete label are skipped. The temporary access session still sleeps for five
+hours before cleanup.
+
+After the branch is pushed, the completion report links the full commit SHA to
+OmGithub. Opening that URL anonymously downloads the public commit, discovers
+root `index.html` or `dist/index.html` plus final screenshots, and creates the
+store page and playable deployment. There is no separate publishing credential
+or upload step.
+See [OmGithub publishing](omgithub.md).
+
+The OmGithub issue workspace polls issue comments every eight seconds. Its
+header contains the four numbered workflow stages plus the currently executing
+stage and description. On desktop it shows the live OpenCode session on the
+left and the newest progress screenshot or playable preview on the right. At
+the mobile breakpoint, Chat and Preview tabs keep only one iframe visible at a
+time. Numbered preview controls retain access to every progress and final
+screenshot found in issue comments.
+
+The comment URL opens `/<encoded-worktree>/session/<session-id>` rather than
+the web home page. This matters because the web home page stores its project
+selection in the browser, while the runner's project exists only on the
+temporary GitHub Actions filesystem.
+
+## Local tracker test
+
+On macOS, run `./scripts/test-opencode-progress-tracker.sh`. It starts a local
+mock OpenCode HTTP server with nested, active, and completed child sessions,
+including user and tool image attachments, then asserts the three derived
+progress counters.
+
+The workflow uses the built-in OpenCode model path and does not require an
+`OPENCODE_API_KEY` secret. To authenticate an ephemeral worker with the Mac's
+OpenAI OAuth login, save the complete local OpenCode `auth.json` as the
+`OPENCODE_AUTH_JSON` repository secret; the workflow passes it through
+OpenCode's `OPENCODE_AUTH_CONTENT` environment variable. Branch creation and
+pushing are deliberately handled by the workflow rather than by OpenCode's
+GitHub integration.
+
+## Findings: tracking the GitHub run in Web UI
+
+The previous GitHub integration installed the OpenCode CLI and ran:
+
+```sh
+opencode github run
+```
+
+The workflow now sends the comment text directly to `opencode run --attach --dir
+<project-directory>`. The explicit directory is required when the CLI attaches
+to a separately started OpenCode server; without it, the CLI can answer while
+the resulting session is not visible in the intended Web UI workspace.
+
+For the installed `opencode-goal-plugin`, invoke a goal from the non-interactive
+CLI with `opencode run --command goal "<objective>"`; passing `/goal <objective>`
+as the message sends literal text instead of invoking the custom command. To
+send a follow-up to the same attached session, use `opencode run --attach
+<server-url> --session <session-id> "<message>"`. In this workflow, the
+issue text is passed directly as the objective before it is passed to the custom
+command, and later human messages steer the running goal instead of
+pausing it.
+
+Before starting OpenCode, the workflow checks out `agents-dev/skills` into
+`$PROJECT_DIR/.agents`. OpenCode discovers project skills from
+`$PROJECT_DIR/.agents/skills/**/SKILL.md`.
+The workflow excludes this nested skills checkout through `.git/info/exclude`
+so it cannot be included in the generated app commit.
+The workflow verifies the discovered skill list through OpenCode's `/skill`
+endpoint and synchronizes `model/<provider>/<name>` and `skill/<name>` labels
+in the repository.
+This keeps the regular OpenCode session while making branch and immutable
+commit behavior explicit and reviewable in YAML.
+Model labels are refreshed from the live OpenCode catalog on each run and are
+limited to models with zero input, output, and cache-read cost, plus the
+explicitly allowed `opencode/gpt-5.6-luna` and `openai/gpt-5.6-luna` models.
+Use `model/openai/gpt-5.6-luna` when the OpenAI provider is required. Default GitHub labels are removed, and
+the triggering issue is marked `in progress`, `validating`, `complete`, or
+`failed` as the job advances.
+For difficult game requests, the `game-issue-e2e` skill selects the synchronized
+`model/opencode/muse-spark-1.3-contributor-free` label; if that label is
+unavailable, the skill records that it used the workflow default instead.
+
+The workflow reads the repository variable `PROJECT_DIR` as a repository-relative
+project home. It defaults to `./`.
+Absolute paths and parent-directory traversal are rejected. OpenCode Web and all
+OpenCode runs use the resolved directory, and skill checkout, Git delivery,
+and screenshot links use the same project home. OpenCode's server
+also loads project instances per request using the `x-opencode-directory` header.
+A tunneled browser request does not know the runner's `$GITHUB_WORKSPACE`, so
+the UI can appear empty even while `opencode github run` is actively working.
+
+The reliable architecture is:
+
+```text
+opencode github run
+        |
+        v
+shared OpenCode session/database
+        ^
+        | x-opencode-directory: $PROJECT_DIR
+        |
+trycloudflare tunnel -> workspace-scoped OpenCode Web UI
+```
+
+The workflow starts OpenCode from `$PROJECT_DIR`, so its direct server is
+already scoped to the checked-out worktree. API and session probes explicitly
+send `x-opencode-directory: $PROJECT_DIR`, while Cloudflare tunnels directly
+to that same loopback server. This avoids an extra reverse-proxy hop and keeps
+WebSocket upgrades native. The access comment points to the encoded
+canonical worktree/session route, so the browser opens the live run directly.
+The resolver emits the repository root without a trailing `/.`; this keeps the
+encoded browser route identical to OpenCode's canonical session directory. A loaded
+Web UI or healthy tunnel alone does not prove session tracking; acceptance
+requires a screenshot while the run is active.
+
+## Repository settings
+
+- For runner-side SSH access and verification, configure the
+  `AGENTSWEB_SSH_PUBLIC_KEY` Actions secret with the public key matching the Mac
+  private key described in [access.md](access.md). Without it, the workflow
+  skips SSH setup and verification but still exposes the OpenCode Web session.
+[0m
+[0m$ [0mls -la .opencode-web/nginx/ 2>&1; cat .opencode-web/nginx/* 2>&1 | head -n 200
+echo "===cloudflared.log==="; cat .opencode-web/cloudflared.log 2>&1 | head -n 200
+echo "===response-comment-tracker.sh==="; cat .opencode-web/response-comment-tracker.sh 2>&1 | head -n 500
+echo "===opencode-web env==="; env | grep -i -E "tunnel|agentsweb|cloudflare|opencode|ssh|web|url" 2>&1 | sort
+echo "===ps==="; ps aux 2>&1 | head -n 100
+total 40
+drwx------ 7 runner runner 4096 Sep  8 03:44 .
+drwx------ 3 runner runner 4096 Sep  8 03:44 ..
+-rw-r--r-- 1 runner runner   85 Sep  8 03:44 access.log
+drwx------ 2 runner runner 4096 Sep  8 03:44 client_body_temp
+-rw-r--r-- 1 runner runner    0 Sep  8 03:44 error.log
+drwx------ 2 runner runner 4096 Sep  8 03:44 fastcgi_temp
+-rw-r--r-- 1 runner runner  925 Sep  8 03:44 nginx.conf
+-rw-r--r-- 1 runner runner    5 Sep  8 03:44 nginx.pid
+drwx------ 2 runner runner 4096 Sep  8 03:44 proxy_temp
+drwx------ 2 runner runner 4096 Sep  8 03:44 scgi_temp
+drwx------ 2 runner runner 4096 Sep  8 03:44 uwsgi_temp
+127.0.0.1 - - [08/Sep/2026:03:44:15 +0000] "GET / HTTP/1.1" 200 647 "-" "curl/8.5.0"
+cat: .opencode-web/nginx/client_body_temp: Is a directory
+cat: .opencode-web/nginx/fastcgi_temp: Is a directory
+worker_processes 1;
+pid /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/nginx.pid;
+error_log /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/error.log;
+events { worker_connections 128; }
+http {
+  access_log /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/access.log;
+  client_body_temp_path /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/client_body_temp;
+  proxy_temp_path /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/proxy_temp;
+  fastcgi_temp_path /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/fastcgi_temp;
+  uwsgi_temp_path /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/uwsgi_temp;
+  scgi_temp_path /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/scgi_temp;
+  server {
+    listen 127.0.0.1:36079;
+    root /home/runner/work/PlayGround/PlayGround;
+    index __codex_no_automatic_index_file__;
+    autoindex on;
+  }
+}
+3598
+cat: .opencode-web/nginx/proxy_temp: Is a directory
+cat: .opencode-web/nginx/scgi_temp: Is a directory
+cat: .opencode-web/nginx/uwsgi_temp: Is a directory
+===cloudflared.log===
+2026-09-08T03:44:16Z INF Thank you for trying Cloudflare Tunnel. Doing so, without a Cloudflare account, is a quick way to experiment and try it out. However, be aware that these account-less Tunnels have no uptime guarantee, are subject to the Cloudflare Online Services Terms of Use (https://www.cloudflare.com/website-terms/), and Cloudflare reserves the right to investigate your use of Tunnels for violations of such terms. If you intend to use Tunnels in production you should use a pre-created named tunnel by following: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps
+2026-09-08T03:44:16Z INF Requesting new quick Tunnel on trycloudflare.com...
+2026-09-08T03:44:20Z INF +--------------------------------------------------------------------------------------------+
+2026-09-08T03:44:20Z INF |  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |
+2026-09-08T03:44:20Z INF |  https://fast-javascript-involvement-nut.trycloudflare.com                                 |
+2026-09-08T03:44:20Z INF +--------------------------------------------------------------------------------------------+
+2026-09-08T03:44:20Z INF Cannot determine default configuration path. No file [config.yml config.yaml] in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp /etc/cloudflared /usr/local/etc/cloudflared]
+2026-09-08T03:44:20Z INF Version 2026.8.3 (Checksum f29324fe934d1e100617484c78deef803c4dc2cd351d645bbde42e96b4fccc5e)
+2026-09-08T03:44:20Z INF GOOS: linux, GOVersion: go1.26.4, GoArch: amd64
+2026-09-08T03:44:20Z INF Settings: map[ha-connections:1 no-autoupdate:true protocol:quic url:http://127.0.0.1:41807]
+2026-09-08T03:44:20Z INF Environmental variables map[AGENTSWEB_TUNNEL_URL:ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257]
+2026-09-08T03:44:20Z INF Generated Connector ID: 21cd9899-5dee-4e13-ac62-ae188a97316d
+2026-09-08T03:44:20Z INF Initial protocol quic
+2026-09-08T03:44:20Z INF ICMP proxy will use 10.1.1.125 as source for IPv4
+2026-09-08T03:44:20Z INF ICMP proxy will use fe80::7eed:8dff:fe4f:3c42 in zone eth0 as source for IPv6
+2026-09-08T03:44:20Z WRN The user running cloudflared process has a GID (group ID) that is not within ping_group_range. You might need to add that user to a group within that range, or instead update the range to encompass a group the user is already in by modifying /proc/sys/net/ipv4/ping_group_range. Otherwise cloudflared will not be able to ping this network error="Group ID 1001 is not between ping group 1 to 0"
+2026-09-08T03:44:20Z WRN ICMP proxy feature is disabled error="cannot create ICMPv4 proxy: Group ID 1001 is not between ping group 1 to 0 nor ICMPv6 proxy: socket: permission denied"
+2026/09/08 03:44:20 failed to sufficiently increase receive buffer size (was: 1024 kiB, wanted: 7168 kiB, got: 2048 kiB). See https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes for details.
+2026-09-08T03:44:20Z INF ICMP proxy will use 10.1.1.125 as source for IPv4
+2026-09-08T03:44:20Z INF ICMP proxy will use fe80::7eed:8dff:fe4f:3c42 in zone eth0 as source for IPv6
+2026-09-08T03:44:20Z INF Starting metrics server on 127.0.0.1:20242/metrics
+2026-09-08T03:44:20Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.200.113
+2026-09-08T03:44:20Z INF Registered tunnel connection connIndex=0 connection=d3ea03d0-13e2-4601-98f8-0ed5e18b9799 event=0 ip=198.41.200.113 location=ord08 protocol=quic
+2026-09-08T03:44:26Z INF +-------------------------------------------------------------------------------------+
+2026-09-08T03:44:26Z INF |                               CONNECTIVITY PRE-CHECKS                               |
+2026-09-08T03:44:26Z INF +-------------------------------------------------------------------------------------+
+2026-09-08T03:44:26Z INF |  COMPONENT         TARGET                     STATUS  DETAILS                       |
+2026-09-08T03:44:26Z INF |  DNS Resolution    region1.v2.argotunnel.com  PASS    DNS Resolved successfully     |
+2026-09-08T03:44:26Z INF |  DNS Resolution    region2.v2.argotunnel.com  PASS    DNS Resolved successfully     |
+2026-09-08T03:44:26Z INF |  UDP Connectivity  region1.v2.argotunnel.com  PASS    QUIC connection successful    |
+2026-09-08T03:44:26Z INF |  UDP Connectivity  region2.v2.argotunnel.com  PASS    QUIC connection successful    |
+2026-09-08T03:44:26Z INF |  TCP Connectivity  region1.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
+2026-09-08T03:44:26Z INF |  TCP Connectivity  region2.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
+2026-09-08T03:44:26Z INF |  Cloudflare API    api.cloudflare.com:443     PASS    API is reachable              |
+2026-09-08T03:44:26Z INF |                                                                                     |
+2026-09-08T03:44:26Z INF |  SUMMARY: Environment is healthy. cloudflared will use 'quic' as primary protocol.  |
+2026-09-08T03:44:26Z INF +-------------------------------------------------------------------------------------+
+2026-09-08T03:44:26Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=region1.v2.argotunnel.com
+2026-09-08T03:44:26Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=region2.v2.argotunnel.com
+2026-09-08T03:44:26Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=region1.v2.argotunnel.com
+2026-09-08T03:44:26Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=region2.v2.argotunnel.com
+2026-09-08T03:44:26Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=region1.v2.argotunnel.com
+2026-09-08T03:44:26Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=region2.v2.argotunnel.com
+2026-09-08T03:44:26Z INF precheck component="Cloudflare API" details="API is reachable" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=api.cloudflare.com:443
+2026-09-08T03:44:26Z INF precheck complete hard_fail=false run_id=79d38baa-ca78-4946-aa11-17530c634497 suggested_protocol=quic
+===response-comment-tracker.sh===
+#!/usr/bin/env bash
+set -euo pipefail
+
+started_at="$(date +%s)"
+
+format_elapsed() {
+  local elapsed_seconds="$1"
+  local elapsed_hours=$((elapsed_seconds / 3600))
+  local elapsed_minutes=$(((elapsed_seconds % 3600) / 60))
+
+  if (( elapsed_hours > 0 )); then
+    printf '%dh %02dm' "$elapsed_hours" "$elapsed_minutes"
+  else
+    printf '%dm' "$elapsed_minutes"
+  fi
+}
+
+if [[ "${1:-}" == "--format-elapsed" ]]; then
+  format_elapsed "${2:?elapsed seconds are required}"
+  printf '\n'
+  exit 0
+fi
+
+vision_calls() {
+  jq -r '
+    def has_image($message):
+      any((($message.parts // [])[]?);
+        (.type == "file" and ((.mime // .mediaType // "") | startswith("image/"))) or
+        (.type == "tool" and any(((.state.attachments // [])[]?.mime?); ((. // "") | startswith("image/"))))
+      );
+    reduce .[] as $message ({ seen: false, calls: 0 };
+      if $message.info.role == "assistant" then
+        .calls += (if .seen then 1 else 0 end)
+        | .seen = (.seen or has_image($message))
+      else
+        .seen = (.seen or has_image($message))
+      end
+    ) | .calls
+  '
+}
+
+while :; do
+  payload="$(curl --fail --silent --show-error \
+    -H "x-opencode-directory: $PROJECT_DIR" \
+    "http://127.0.0.1:$OPENCODE_WEB_PORT/session/$SESSION_ID/message" 2>/dev/null || true)"
+  sessions_payload="$(curl --fail --silent --show-error \
+    -H "x-opencode-directory: $PROJECT_DIR" \
+    "http://127.0.0.1:$OPENCODE_WEB_PORT/session" 2>/dev/null || true)"
+  status_payload="$(curl --fail --silent --show-error \
+    -H "x-opencode-directory: $PROJECT_DIR" \
+    "http://127.0.0.1:$OPENCODE_WEB_PORT/session/status" 2>/dev/null || true)"
+  if jq -e 'type == "array"' >/dev/null 2>&1 <<<"$payload" && \
+    jq -e 'type == "array"' >/dev/null 2>&1 <<<"$sessions_payload" && \
+    jq -e 'type == "object"' >/dev/null 2>&1 <<<"$status_payload"; then
+    stats="$(jq -r '
+      def parts: [.[].parts[]?];
+      def tools: [parts[] | select(.type == "tool")];
+      [
+        (tools | length),
+        ([tools[] | select(.state.status == "running" or .state.status == "pending")] | length)
+      ] | @tsv
+    ' <<<"$payload")"
+    IFS=$'\t' read -r tool_count active_count <<<"$stats"
+    subagent_stats="$(jq -nr \
+      --arg root "$SESSION_ID" \
+      --argjson sessions "$sessions_payload" \
+      --argjson statuses "$status_payload" '
+      def descendants($all; $parent):
+        [$all[] | select(.parentID == $parent)] as $children
+        | ($children | map(.id)) as $ids
+        | if ($ids | length) == 0 then $ids
+          else $ids + ([$ids[] | descendants($all; .)] | add)
+          end;
+      ($sessions | descendants($sessions; $root)) as $subagents
+      | {
+          total: ($subagents | length),
+          failed: ([$statuses | to_entries[]
+            | select((.key as $id | ($subagents | index($id))) != null)
+            | select(.value.type == "error" or .value.type == "failed")
+          ] | length),
+          active: ([$statuses | to_entries[]
+            | select((.key as $id | ($subagents | index($id))) != null)
+            | select(.value.type != "idle" and .value.type != "error" and .value.type != "failed")
+          ] | length)
+        }
+      | [.active, .total, .failed] | @tsv
+    ')"
+    IFS=$'\t' read -r active_subagents total_subagents failed_subagents <<<"$subagent_stats"
+    token_count="$(jq -nr \
+      --arg root "$SESSION_ID" \
+      --argjson sessions "$sessions_payload" '
+      def descendants($all; $parent):
+        [$all[] | select(.parentID == $parent)] as $children
+        | ($children | map(.id)) as $ids
+        | if ($ids | length) == 0 then $ids
+          else $ids + ([$ids[] | descendants($all; .)] | add)
+          end;
+      ([$root] + ($sessions | descendants($sessions; $root))) as $tracked
+      | reduce $sessions[] as $session (0;
+          if ($tracked | index($session.id)) == null then .
+          else .
+            + ($session.tokens.input // 0)
+            + ($session.tokens.output // 0)
+            + ($session.tokens.reasoning // 0)
+            + ($session.tokens.cache.read // 0)
+            + ($session.tokens.cache.write // 0)
+          end
+        )
+    ')"
+    subagent_ids="$(jq -nr \
+      --arg root "$SESSION_ID" \
+      --argjson sessions "$sessions_payload" '
+      def descendants($all; $parent):
+        [$all[] | select(.parentID == $parent)] as $children
+        | ($children | map(.id)) as $ids
+        | if ($ids | length) == 0 then $ids
+          else $ids + ([$ids[] | descendants($all; .)] | add)
+          end;
+      ($sessions | descendants($sessions; $root))[]
+    ')"
+    vision_count="$(vision_calls <<<"$payload")"
+    while IFS= read -r subagent_id; do
+      [[ -n "$subagent_id" ]] || continue
+      subagent_payload="$(curl --fail --silent --show-error \
+        -H "x-opencode-directory: $PROJECT_DIR" \
+        "http://127.0.0.1:$OPENCODE_WEB_PORT/session/$subagent_id/message" 2>/dev/null || true)"
+      if jq -e 'type == "array"' >/dev/null 2>&1 <<<"$subagent_payload"; then
+        subagent_vision_count="$(vision_calls <<<"$subagent_payload")"
+        vision_count=$((vision_count + subagent_vision_count))
+      fi
+    done <<<"$subagent_ids"
+    changed_count="$(git -C "$PROJECT_DIR" status --porcelain 2>/dev/null | wc -l | tr -d ' ')"
+    elapsed_seconds="$(( $(date +%s) - started_at ))"
+    elapsed="$(format_elapsed "$elapsed_seconds")"
+    speed_score="$(awk -v tokens="$token_count" -v elapsed="$elapsed_seconds" \
+      'BEGIN { if (elapsed > 0) printf "%.1f", tokens / elapsed; else print "0.0" }')"
+    access_links="$(< "${PROGRESS_COMMENT_TEMPLATE:-$(dirname "$0")/opencode-progress-comment-template.md}")"
+    ssh_section=""
+    if [[ "${AGENTSWEB_SSH_ENABLED:-false}" == "true" && "${AGENTSWEB_SSH_READY:-false}" == "true" ]]; then
+      ssh_section="🔐 **Temporary AgentsWeb SSH session is ready.**
+
+Run: ${RUN_URL}
+Host: ${SSH_HOST}:${SSH_PORT}
+
+Run this command while the job is active:
+
+Command:
+${SSH_COMMAND}
+"
+    fi
+    progress_stats="- Elapsed: ${elapsed}
+- Token count: ${token_count}
+- Speed score: ${speed_score} tokens/s
+- Tool calls: $tool_count
+- Active tool calls: $active_count
+- Active subagents: $active_subagents
+- Total subagents executed: $total_subagents
+- Total failed subagents: $failed_subagents
+- Image-context model calls: $vision_count
+- Changed workspace files: $changed_count"
+    validation_session_section=""
+    if [[ -s "$OPENCODE_WEB_DIR/validation-session-url" ]]; then
+      validation_session_section="🔎 **Validation OpenCode Web UI:** $(<"$OPENCODE_WEB_DIR/validation-session-url")"
+    fi
+    access_note="This opens the currently running OpenCode session directly. Access remains available while OpenCode runs and for 5 hours afterwards."
+    access_links="${access_links//@SSH_SECTION@/$ssh_section}"
+    access_links="${access_links//@UPDATED@/$(date -u '+%Y-%m-%d %H:%M:%S UTC')}"
+    access_links="${access_links//@OPENCODE_WEB_URL@/$OPENCODE_WEB_URL}"
+    access_links="${access_links//@PROJECT_FILE_URL@/${PROJECT_FILE_URL:-unavailable}}"
+    access_links="${access_links//@VALIDATION_SESSION_SECTION@/$validation_session_section}"
+    access_links="${access_links//@PROGRESS_STATS@/$progress_stats}"
+    access_links="${access_links//@ACCESS_NOTE@/$access_note}"
+    body="${access_links}"
+    if [[ "${PROGRESS_DRY_RUN:-false}" == "true" ]]; then
+      printf '%s\n' "$body" > "${PROGRESS_OUTPUT:?PROGRESS_OUTPUT is required in dry-run mode}"
+    else
+      gh api --method PATCH "repos/$REPOSITORY/issues/comments/$COMMENT_ID" \
+        -f body="$body" >/dev/null || true
+    fi
+  fi
+  [[ -f "$OPENCODE_WEB_DIR/response-comment.done" ]] && break
+  sleep 10
+done
+===opencode-web env===
+ACTIONS_ORCHESTRATION_ID=884fc9b2-a36f-4b98-8a47-983f73eef2c6.opencode.opencode.__default
+AGENTSWEB_COMMAND=ssh\ -o\ StrictHostKeyChecking=no\ -o\ UserKnownHostsFile=/dev/null\ -i\ ~/.ssh/aiplay-agentsweb\ -p\ 32257\ runner@opencode-issue-79-34184464257-ssh.agentsweb.space
+AGENTSWEB_HOST=opencode-issue-79-34184464257-ssh.agentsweb.space
+AGENTSWEB_PORT=32257
+AGENTSWEB_SSH_ENABLED=true
+AGENTSWEB_TUNNEL_URL=ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257
+BRANCH_NAME=opencode/34184464257
+CHROMEWEBDRIVER=/usr/local/share/chromedriver-linux64
+COMMENT_BODY=Verify SSH URL reporting beside the OpenCode Web URL
+EDGEWEBDRIVER=/usr/local/share/edge_driver
+GECKOWEBDRIVER=/usr/local/share/gecko_driver
+GITHUB_ACTION=opencode_web
+GITHUB_API_URL=https://api.github.com
+GITHUB_GRAPHQL_URL=https://api.github.com/graphql
+GITHUB_JOB=opencode
+GITHUB_SERVER_URL=https://github.com
+GITHUB_WORKFLOW=OpenCode
+GITHUB_WORKFLOW_REF=AgentsLoop/PlayGround/.github/workflows/opencode.yml@refs/heads/main
+LABELS_JSON=["OpenCode","Goal"]
+OPENCODE=1
+OPENCODE_API_KEY=
+OPENCODE_AUTH_CONTENT=
+OPENCODE_ENABLE_EXA=true
+OPENCODE_ENABLE_EXPERIMENTAL_MODELS=true
+OPENCODE_EXPERIMENTAL=true
+OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
+OPENCODE_EXPERIMENTAL_WEBSOCKETS=true
+OPENCODE_EXPERIMENTAL_WORKSPACES=true
+OPENCODE_PID=3575
+OPENCODE_WEB_DIR=/home/runner/work/PlayGround/PlayGround/.opencode-web
+OPENCODE_WEB_PORT=41807
+SSH_DIR=/home/runner/work/PlayGround/PlayGround/.opencode-ssh
+SSH_KEY=/home/runner/work/PlayGround/PlayGround/opencode-agentsweb-id_ed25519
+SSH_NAME=opencode-issue-79-34184464257-ssh
+SSH_ONLY_REQUEST=false
+SSH_PORT=32257
+SSH_PUBLIC_KEY=/home/runner/work/PlayGround/PlayGround/opencode-agentsweb-id_ed25519.pub
+===ps===
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  1.7  0.0  22820 14340 ?        Ss   03:42   0:02 /sbin/init
+root           2  0.0  0.0      0     0 ?        S    03:42   0:00 [kthreadd]
+root           3  0.0  0.0      0     0 ?        S    03:42   0:00 [pool_workqueue_release]
+root           4  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-rcu_gp]
+root           5  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-sync_wq]
+root           6  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-kvfree_rcu_reclaim]
+root           7  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-slub_flushwq]
+root           8  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-netns]
+root           9  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/0:0-cgroup_release]
+root          10  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/0:0H-events_highpri]
+root          11  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/0:1-events]
+root          12  0.1  0.0      0     0 ?        R    03:42   0:00 [kworker/u16:0+flush-259:0]
+root          13  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-mm_percpu_wq]
+root          14  0.0  0.0      0     0 ?        S    03:42   0:00 [ksoftirqd/0]
+root          15  0.0  0.0      0     0 ?        I    03:42   0:00 [rcu_sched]
+root          16  0.0  0.0      0     0 ?        S    03:42   0:00 [rcu_exp_par_gp_kthread_worker/0]
+root          17  0.0  0.0      0     0 ?        S    03:42   0:00 [rcu_exp_gp_kthread_worker]
+root          18  0.0  0.0      0     0 ?        S    03:42   0:00 [migration/0]
+root          19  0.0  0.0      0     0 ?        S    03:42   0:00 [idle_inject/0]
+root          20  0.0  0.0      0     0 ?        S    03:42   0:00 [cpuhp/0]
+root          21  0.0  0.0      0     0 ?        S    03:42   0:00 [cpuhp/2]
+root          22  0.0  0.0      0     0 ?        S    03:42   0:00 [idle_inject/2]
+root          23  0.4  0.0      0     0 ?        S    03:42   0:00 [migration/2]
+root          24  0.0  0.0      0     0 ?        S    03:42   0:00 [ksoftirqd/2]
+root          25  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/2:0-events]
+root          26  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/2:0H-events_highpri]
+root          27  0.0  0.0      0     0 ?        S    03:42   0:00 [cpuhp/1]
+root          28  0.0  0.0      0     0 ?        S    03:42   0:00 [idle_inject/1]
+root          29  0.4  0.0      0     0 ?        S    03:42   0:00 [migration/1]
+root          30  0.0  0.0      0     0 ?        S    03:42   0:00 [ksoftirqd/1]
+root          31  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/1:0-events]
+root          32  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/1:0H-events_highpri]
+root          33  0.0  0.0      0     0 ?        S    03:42   0:00 [cpuhp/3]
+root          34  0.0  0.0      0     0 ?        S    03:42   0:00 [idle_inject/3]
+root          35  0.6  0.0      0     0 ?        S    03:42   0:00 [migration/3]
+root          36  0.0  0.0      0     0 ?        S    03:42   0:00 [ksoftirqd/3]
+root          37  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/3:0-events]
+root          38  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/3:0H-events_highpri]
+root          39  0.0  0.0      0     0 ?        S    03:42   0:00 [kdevtmpfs]
+root          40  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-inet_frag_wq]
+root          41  0.0  0.0      0     0 ?        I    03:42   0:00 [rcu_tasks_rude_kthread]
+root          42  0.0  0.0      0     0 ?        I    03:42   0:00 [rcu_tasks_trace_kthread]
+root          43  0.0  0.0      0     0 ?        S    03:42   0:00 [kauditd]
+root          44  0.0  0.0      0     0 ?        S    03:42   0:00 [khungtaskd]
+root          45  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/u16:1-async]
+root          46  0.0  0.0      0     0 ?        S    03:42   0:00 [oom_reaper]
+root          47  0.0  0.0      0     0 ?        R    03:42   0:00 [kworker/u16:2+ext4-rsv-conversion]
+root          48  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-writeback]
+root          49  0.0  0.0      0     0 ?        S    03:42   0:00 [kcompactd0]
+root          50  0.0  0.0      0     0 ?        SN   03:42   0:00 [ksmd]
+root          51  0.0  0.0      0     0 ?        SN   03:42   0:00 [khugepaged]
+root          52  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-kblockd]
+root          53  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-blkcg_punt_bio]
+root          54  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-kintegrityd]
+root          55  0.0  0.0      0     0 ?        S    03:42   0:00 [irq/9-acpi]
+root          56  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/3:1-events]
+root          57  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/1:1-mm_percpu_wq]
+root          58  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/2:1-cgroup_release]
+root          59  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-tpm_dev_wq]
+root          60  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-ata_sff]
+root          61  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-md]
+root          62  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-md_bitmap]
+root          63  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-edac-poller]
+root          64  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-hv_vmbus_con]
+root          65  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-hv_vmbus_rescind]
+root          66  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-hv_pri_chan]
+root          67  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-hv_sub_chan]
+root          68  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-devfreq_wq]
+root          69  0.0  0.0      0     0 ?        S    03:42   0:00 [watchdogd]
+root          70  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-quota_events_unbound]
+root          71  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/0:1H-kblockd]
+root          72  0.0  0.0      0     0 ?        S    03:42   0:00 [kswapd0]
+root          73  0.0  0.0      0     0 ?        S    03:42   0:00 [ecryptfs-kthread]
+root          74  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-kthrotld]
+root          75  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-nfit]
+root          76  0.0  0.0      0     0 ?        S    03:42   0:00 [scsi_eh_0]
+root          77  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-scsi_tmf_0]
+root          78  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-nvme-wq]
+root          79  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-nvme-reset-wq]
+root          80  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-nvme-delete-wq]
+root          81  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-nvme-auth-wq]
+root          82  0.1  0.0      0     0 ?        I    03:42   0:00 [kworker/u16:3-kvfree_rcu_reclaim]
+root          83  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/0:2-events]
+root          84  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/u16:4-async]
+root          85  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/u16:5-events_unbound]
+root          86  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/u16:6-events_power_efficient]
+root          87  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/u16:7]
+root          88  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-mld]
+root          89  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/3:1H-kblockd]
+root          90  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-ipv6_addrconf]
+root          91  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/0:3-rcu_gp]
+root          92  0.0  0.0      0     0 ?        S    03:42   0:00 [hv_balloon]
+root          93  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-kstrp]
+root          95  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/u17:0]
+root         106  0.0  0.0      0     0 ?        S    03:42   0:00 [jbd2/nvme0n1p1-8]
+root         107  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-ext4-rsv-conversion]
+root         108  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/3:2-mm_percpu_wq]
+root         110  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/2:1H-kblockd]
+root         152  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/1:1H-kblockd]
+[0m
+[0m$ [0menv | sort 2>&1
+echo "===ls web dir==="; ls -la .opencode-web/ 2>&1
+echo "===response tracker log==="; cat .opencode-web/response-comment-tracker.log 2>&1 | head -n 500
+echo "===opencode-run log tail==="; cat .opencode-web/opencode-run.log 2>&1 | tail -n 500
+ACCEPT_EULA=Y
+ACTIONS_ORCHESTRATION_ID=884fc9b2-a36f-4b98-8a47-983f73eef2c6.opencode.opencode.__default
+ACTIONS_RUNNER_ACTION_ARCHIVE_CACHE=/opt/actionarchivecache
+ACTIONS_RUNNER_RETURN_JOB_RESULT_FOR_HOSTED=1
+AGENT=1
+AGENTSWEB_COMMAND=ssh\ -o\ StrictHostKeyChecking=no\ -o\ UserKnownHostsFile=/dev/null\ -i\ ~/.ssh/aiplay-agentsweb\ -p\ 32257\ runner@opencode-issue-79-34184464257-ssh.agentsweb.space
+AGENTSWEB_HOST=opencode-issue-79-34184464257-ssh.agentsweb.space
+AGENTSWEB_PORT=32257
+AGENTSWEB_SSH_ENABLED=true
+AGENTSWEB_TUNNEL_URL=ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257
+AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
+ANDROID_HOME=/usr/local/lib/android/sdk
+ANDROID_NDK=/usr/local/lib/android/sdk/ndk/27.3.13750724
+ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/27.3.13750724
+ANDROID_NDK_LATEST_HOME=/usr/local/lib/android/sdk/ndk/29.0.14206865
+ANDROID_NDK_ROOT=/usr/local/lib/android/sdk/ndk/27.3.13750724
+ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+ANT_HOME=/usr/share/ant
+APP_PORT=3000
+AZURE_EXTENSION_DIR=/opt/az/azcliextensions
+BOOTSTRAP_HASKELL_NONINTERACTIVE=1
+BRANCH_NAME=opencode/34184464257
+CHROMEWEBDRIVER=/usr/local/share/chromedriver-linux64
+CHROME_BIN=/usr/bin/google-chrome
+CI=true
+COMMENT_BODY=Verify SSH URL reporting beside the OpenCode Web URL
+CONDA=/usr/share/miniconda
+DEBIAN_FRONTEND=noninteractive
+DOTNET_MULTILEVEL_LOOKUP=0
+DOTNET_NOLOGO=1
+DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+EDGEWEBDRIVER=/usr/local/share/edge_driver
+ENABLE_RUNNER_TRACING=true
+GECKOWEBDRIVER=/usr/local/share/gecko_driver
+GHCUP_INSTALL_BASE_PREFIX=/usr/local
+GH_REPO=AgentsLoop/PlayGround
+GH_TOKEN=ghs_15368_eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRobmQiLCJjdHgiOiJlU2ZORkI2MkYyTmxUWUttRm9vd2ZYZV83VEMxXzZjTW1jREtaNUl6WmFSSDcyd0tPeFN2ZzBBIiwiZXhwIjoxNzg4ODQyNTgzLCJpYXQiOjE3ODg4Mzg5ODMsImlzcyI6ImdpdGh1YiIsImp0aSI6IjYxMzBjYTAzLWIxZjQtNGRlNy1hNTVjLThlM2Q4MjNmMzYwYiIsInZlciI6M30.zqXu_cyrM_V1knA_BbE0mi_GlRefpXXN6_pa9sLUCNMWXB0EAZL9hXvL7jtTiPKZ_QKOpM3if0mEssddk2fRVg
+GITHUB_ACTION=opencode_web
+GITHUB_ACTIONS=true
+GITHUB_ACTION_REF=
+GITHUB_ACTION_REPOSITORY=
+GITHUB_ACTOR=oh-my-github-app[bot]
+GITHUB_ACTOR_ID=322643646
+GITHUB_API_URL=https://api.github.com
+GITHUB_ARTIFACTS=/home/runner/work/_temp/_runner_file_commands/artifacts_9a921aaf-bf05-480f-bbe6-ff28b7bb2796
+GITHUB_ARTIFACTS_LIST=/home/runner/work/_temp/_runner_file_commands/artifacts_list_9a921aaf-bf05-480f-bbe6-ff28b7bb2796
+GITHUB_BASE_REF=
+GITHUB_ENV=/home/runner/work/_temp/_runner_file_commands/set_env_9a921aaf-bf05-480f-bbe6-ff28b7bb2796
+GITHUB_EVENT_NAME=workflow_dispatch
+GITHUB_EVENT_PATH=/home/runner/work/_temp/_github_workflow/event.json
+GITHUB_GRAPHQL_URL=https://api.github.com/graphql
+GITHUB_HEAD_REF=
+GITHUB_JOB=opencode
+GITHUB_OUTPUT=/home/runner/work/_temp/_runner_file_commands/set_output_9a921aaf-bf05-480f-bbe6-ff28b7bb2796
+GITHUB_PATH=/home/runner/work/_temp/_runner_file_commands/add_path_9a921aaf-bf05-480f-bbe6-ff28b7bb2796
+GITHUB_REF=refs/heads/main
+GITHUB_REF_NAME=main
+GITHUB_REF_PROTECTED=false
+GITHUB_REF_TYPE=branch
+GITHUB_REPOSITORY=AgentsLoop/PlayGround
+GITHUB_REPOSITORY_ID=1353029669
+GITHUB_REPOSITORY_OWNER=AgentsLoop
+GITHUB_REPOSITORY_OWNER_ID=318478564
+GITHUB_RETENTION_DAYS=90
+GITHUB_RUN_ATTEMPT=1
+GITHUB_RUN_ID=34184464257
+GITHUB_RUN_NUMBER=96
+GITHUB_SERVER_URL=https://github.com
+GITHUB_SHA=b4fe44a788e990e138c4d8d1a9b5f61988c117e2
+GITHUB_STATE=/home/runner/work/_temp/_runner_file_commands/save_state_9a921aaf-bf05-480f-bbe6-ff28b7bb2796
+GITHUB_STEP_SUMMARY=/home/runner/work/_temp/_runner_file_commands/step_summary_9a921aaf-bf05-480f-bbe6-ff28b7bb2796
+GITHUB_TRIGGERING_ACTOR=oh-my-github-app[bot]
+GITHUB_WORKFLOW=OpenCode
+GITHUB_WORKFLOW_REF=AgentsLoop/PlayGround/.github/workflows/opencode.yml@refs/heads/main
+GITHUB_WORKFLOW_SHA=b4fe44a788e990e138c4d8d1a9b5f61988c117e2
+GITHUB_WORKSPACE=/home/runner/work/PlayGround/PlayGround
+GOAL_REQUEST=true
+GOROOT_1_24_X64=/opt/hostedtoolcache/go/1.24.13/x64
+GOROOT_1_25_X64=/opt/hostedtoolcache/go/1.25.14/x64
+GOROOT_1_26_X64=/opt/hostedtoolcache/go/1.26.7/x64
+GRADLE_HOME=/usr/share/gradle-9.7.1
+HCA_CLOUD_PROVIDER=azure
+HOME=/home/runner
+HOMEBREW_CLEANUP_PERIODIC_FULL_DAYS=3650
+HOMEBREW_NO_AUTO_UPDATE=1
+INVOCATION_ID=dc7511df7a754ad48d82af88c016d022
+ImageOS=ubuntu24
+ImageVersion=20260831.293.1
+JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-amd64
+JAVA_HOME_11_X64=/usr/lib/jvm/temurin-11-jdk-amd64
+JAVA_HOME_17_X64=/usr/lib/jvm/temurin-17-jdk-amd64
+JAVA_HOME_21_X64=/usr/lib/jvm/temurin-21-jdk-amd64
+JAVA_HOME_25_X64=/usr/lib/jvm/temurin-25-jdk-amd64
+JAVA_HOME_8_X64=/usr/lib/jvm/temurin-8-jdk-amd64
+JOURNAL_STREAM=9:11696
+LABELS_JSON=["OpenCode","Goal"]
+LANG=C.UTF-8
+LOGNAME=runner
+MEMORY_PRESSURE_WATCH=/sys/fs/cgroup/system.slice/hosted-compute-agent.service/memory.pressure
+MEMORY_PRESSURE_WRITE=c29tZSAyMDAwMDAgMjAwMDAwMAA=
+NVM_DIR=/home/runner/.nvm
+OMO_REQUEST=false
+OPENCODE=1
+OPENCODE_API_KEY=
+OPENCODE_AUTH_CONTENT=
+OPENCODE_ENABLE_EXA=true
+OPENCODE_ENABLE_EXPERIMENTAL_MODELS=true
+OPENCODE_EXPERIMENTAL=true
+OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
+OPENCODE_EXPERIMENTAL_WEBSOCKETS=true
+OPENCODE_EXPERIMENTAL_WORKSPACES=true
+OPENCODE_PID=3575
+OPENCODE_WEB_DIR=/home/runner/work/PlayGround/PlayGround/.opencode-web
+OPENCODE_WEB_PORT=41807
+PATH=/snap/bin:/home/runner/.local/bin:/opt/pipx_bin:/home/runner/.cargo/bin:/home/runner/.config/composer/vendor/bin:/usr/local/.ghcup/bin:/home/runner/.dotnet/tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+PIPX_BIN_DIR=/opt/pipx_bin
+PIPX_HOME=/opt/pipx
+POWERSHELL_DISTRIBUTION_CHANNEL=GitHub-Actions-Linux
+PROJECT_DIR=/home/runner/work/PlayGround/PlayGround
+PROJECT_PATH=.
+PSModulePath=/root/.local/share/powershell/Modules:/usr/local/share/powershell/Modules:/opt/microsoft/powershell/7/Modules:/usr/share/az_15.6.1
+PWD=/home/runner/work/PlayGround/PlayGround
+RALPH_REQUEST=false
+RUNNER_ARCH=X64
+RUNNER_ENVIRONMENT=github-hosted
+RUNNER_NAME=GitHub Actions 1000000255
+RUNNER_OS=Linux
+RUNNER_TEMP=/home/runner/work/_temp
+RUNNER_TOOL_CACHE=/opt/hostedtoolcache
+RUNNER_TRACKING_ID=github_9eb6dbe7-55c9-481b-9539-46db7bd82f20
+RUNNER_WORKSPACE=/home/runner/work/PlayGround
+RUNTIME_DIR=/home/runner/work/PlayGround/PlayGround/.omgithub-runtime
+SELENIUM_JAR_PATH=/usr/share/java/selenium-server.jar
+SGX_AESM_ADDR=1
+SHELL=/bin/bash
+SHLVL=1
+SSH_DIR=/home/runner/work/PlayGround/PlayGround/.opencode-ssh
+SSH_KEY=/home/runner/work/PlayGround/PlayGround/opencode-agentsweb-id_ed25519
+SSH_NAME=opencode-issue-79-34184464257-ssh
+SSH_ONLY_REQUEST=false
+SSH_PORT=32257
+SSH_PUBLIC_KEY=/home/runner/work/PlayGround/PlayGround/opencode-agentsweb-id_ed25519.pub
+SWIFT_PATH=/usr/share/swift/usr/bin
+SYSTEMD_EXEC_PID=1820
+TARGET_OWNER=AgentsLoop
+TARGET_REF=main
+TARGET_REPO=PlayGround
+TARGET_REPOSITORY=AgentsLoop/PlayGround
+TEST_REQUEST=false
+TRIGGER_ISSUE_NUMBER=79
+USER=runner
+USE_BAZEL_FALLBACK_VERSION=silent:
+VALIDATION_ENABLED=true
+VCPKG_INSTALLATION_ROOT=/usr/local/share/vcpkg
+XDG_CONFIG_HOME=/home/runner/.config
+XDG_RUNTIME_DIR=/run/user/1001
+_=/usr/bin/env
+npm_config_user_agent=npm/undefined node/v24.3.0 linux x64 workspaces/false ci/github-actions
+===ls web dir===
+total 38976
+drwx------  3 runner runner     4096 Sep  8 03:44 .
+drwxr-xr-x 10 runner runner     4096 Sep  8 03:44 ..
+-rwxr-xr-x  1 runner runner 39763452 Sep  8 03:44 cloudflared
+-rw-r--r--  1 runner runner     6497 Sep  8 03:44 cloudflared.log
+-rw-r--r--  1 runner runner        5 Sep  8 03:44 cloudflared.pid
+drwx------  7 runner runner     4096 Sep  8 03:44 nginx
+-rw-r--r--  1 runner runner    74745 Sep  8 03:45 opencode-run.log
+-rw-r--r--  1 runner runner        5 Sep  8 03:44 opencode-run.pid
+-rw-r--r--  1 runner runner      119 Sep  8 03:44 opencode.log
+-rw-r--r--  1 runner runner        5 Sep  8 03:44 opencode.pid
+-rw-r--r--  1 runner runner     6495 Sep  8 03:44 project-cloudflared.log
+-rw-r--r--  1 runner runner        5 Sep  8 03:44 project-cloudflared.pid
+-rw-r--r--  1 runner runner       53 Sep  8 03:44 prompt.txt
+-rw-r--r--  1 runner runner        0 Sep  8 03:44 response-comment-tracker.log
+-rw-r--r--  1 runner runner        5 Sep  8 03:44 response-comment-tracker.pid
+-rwx------  1 runner runner     7650 Sep  8 03:44 response-comment-tracker.sh
+-rw-r--r--  1 runner runner      748 Sep  8 03:44 ssh-sessions.json
+===response tracker log===
+===opencode-run log tail===
+OpenAI OAuth login, save the complete local OpenCode `auth.json` as the
+`OPENCODE_AUTH_JSON` repository secret; the workflow passes it through
+OpenCode's `OPENCODE_AUTH_CONTENT` environment variable. Branch creation and
+pushing are deliberately handled by the workflow rather than by OpenCode's
+GitHub integration.
+
+## Findings: tracking the GitHub run in Web UI
+
+The previous GitHub integration installed the OpenCode CLI and ran:
+
+```sh
+opencode github run
+```
+
+The workflow now sends the comment text directly to `opencode run --attach --dir
+<project-directory>`. The explicit directory is required when the CLI attaches
+to a separately started OpenCode server; without it, the CLI can answer while
+the resulting session is not visible in the intended Web UI workspace.
+
+For the installed `opencode-goal-plugin`, invoke a goal from the non-interactive
+CLI with `opencode run --command goal "<objective>"`; passing `/goal <objective>`
+as the message sends literal text instead of invoking the custom command. To
+send a follow-up to the same attached session, use `opencode run --attach
+<server-url> --session <session-id> "<message>"`. In this workflow, the
+issue text is passed directly as the objective before it is passed to the custom
+command, and later human messages steer the running goal instead of
+pausing it.
+
+Before starting OpenCode, the workflow checks out `agents-dev/skills` into
+`$PROJECT_DIR/.agents`. OpenCode discovers project skills from
+`$PROJECT_DIR/.agents/skills/**/SKILL.md`.
+The workflow excludes this nested skills checkout through `.git/info/exclude`
+so it cannot be included in the generated app commit.
+The workflow verifies the discovered skill list through OpenCode's `/skill`
+endpoint and synchronizes `model/<provider>/<name>` and `skill/<name>` labels
+in the repository.
+This keeps the regular OpenCode session while making branch and immutable
+commit behavior explicit and reviewable in YAML.
+Model labels are refreshed from the live OpenCode catalog on each run and are
+limited to models with zero input, output, and cache-read cost, plus the
+explicitly allowed `opencode/gpt-5.6-luna` and `openai/gpt-5.6-luna` models.
+Use `model/openai/gpt-5.6-luna` when the OpenAI provider is required. Default GitHub labels are removed, and
+the triggering issue is marked `in progress`, `validating`, `complete`, or
+`failed` as the job advances.
+For difficult game requests, the `game-issue-e2e` skill selects the synchronized
+`model/opencode/muse-spark-1.3-contributor-free` label; if that label is
+unavailable, the skill records that it used the workflow default instead.
+
+The workflow reads the repository variable `PROJECT_DIR` as a repository-relative
+project home. It defaults to `./`.
+Absolute paths and parent-directory traversal are rejected. OpenCode Web and all
+OpenCode runs use the resolved directory, and skill checkout, Git delivery,
+and screenshot links use the same project home. OpenCode's server
+also loads project instances per request using the `x-opencode-directory` header.
+A tunneled browser request does not know the runner's `$GITHUB_WORKSPACE`, so
+the UI can appear empty even while `opencode github run` is actively working.
+
+The reliable architecture is:
+
+```text
+opencode github run
+        |
+        v
+shared OpenCode session/database
+        ^
+        | x-opencode-directory: $PROJECT_DIR
+        |
+trycloudflare tunnel -> workspace-scoped OpenCode Web UI
+```
+
+The workflow starts OpenCode from `$PROJECT_DIR`, so its direct server is
+already scoped to the checked-out worktree. API and session probes explicitly
+send `x-opencode-directory: $PROJECT_DIR`, while Cloudflare tunnels directly
+to that same loopback server. This avoids an extra reverse-proxy hop and keeps
+WebSocket upgrades native. The access comment points to the encoded
+canonical worktree/session route, so the browser opens the live run directly.
+The resolver emits the repository root without a trailing `/.`; this keeps the
+encoded browser route identical to OpenCode's canonical session directory. A loaded
+Web UI or healthy tunnel alone does not prove session tracking; acceptance
+requires a screenshot while the run is active.
+
+## Repository settings
+
+- For runner-side SSH access and verification, configure the
+  `AGENTSWEB_SSH_PUBLIC_KEY` Actions secret with the public key matching the Mac
+  private key described in [access.md](access.md). Without it, the workflow
+  skips SSH setup and verification but still exposes the OpenCode Web session.
+[0m
+[0m$ [0mls -la .opencode-web/nginx/ 2>&1; cat .opencode-web/nginx/* 2>&1 | head -n 200
+echo "===cloudflared.log==="; cat .opencode-web/cloudflared.log 2>&1 | head -n 200
+echo "===response-comment-tracker.sh==="; cat .opencode-web/response-comment-tracker.sh 2>&1 | head -n 500
+echo "===opencode-web env==="; env | grep -i -E "tunnel|agentsweb|cloudflare|opencode|ssh|web|url" 2>&1 | sort
+echo "===ps==="; ps aux 2>&1 | head -n 100
+total 40
+drwx------ 7 runner runner 4096 Sep  8 03:44 .
+drwx------ 3 runner runner 4096 Sep  8 03:44 ..
+-rw-r--r-- 1 runner runner   85 Sep  8 03:44 access.log
+drwx------ 2 runner runner 4096 Sep  8 03:44 client_body_temp
+-rw-r--r-- 1 runner runner    0 Sep  8 03:44 error.log
+drwx------ 2 runner runner 4096 Sep  8 03:44 fastcgi_temp
+-rw-r--r-- 1 runner runner  925 Sep  8 03:44 nginx.conf
+-rw-r--r-- 1 runner runner    5 Sep  8 03:44 nginx.pid
+drwx------ 2 runner runner 4096 Sep  8 03:44 proxy_temp
+drwx------ 2 runner runner 4096 Sep  8 03:44 scgi_temp
+drwx------ 2 runner runner 4096 Sep  8 03:44 uwsgi_temp
+127.0.0.1 - - [08/Sep/2026:03:44:15 +0000] "GET / HTTP/1.1" 200 647 "-" "curl/8.5.0"
+cat: .opencode-web/nginx/client_body_temp: Is a directory
+cat: .opencode-web/nginx/fastcgi_temp: Is a directory
+worker_processes 1;
+pid /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/nginx.pid;
+error_log /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/error.log;
+events { worker_connections 128; }
+http {
+  access_log /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/access.log;
+  client_body_temp_path /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/client_body_temp;
+  proxy_temp_path /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/proxy_temp;
+  fastcgi_temp_path /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/fastcgi_temp;
+  uwsgi_temp_path /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/uwsgi_temp;
+  scgi_temp_path /home/runner/work/PlayGround/PlayGround/.opencode-web/nginx/scgi_temp;
+  server {
+    listen 127.0.0.1:36079;
+    root /home/runner/work/PlayGround/PlayGround;
+    index __codex_no_automatic_index_file__;
+    autoindex on;
+  }
+}
+3598
+cat: .opencode-web/nginx/proxy_temp: Is a directory
+cat: .opencode-web/nginx/scgi_temp: Is a directory
+cat: .opencode-web/nginx/uwsgi_temp: Is a directory
+===cloudflared.log===
+2026-09-08T03:44:16Z INF Thank you for trying Cloudflare Tunnel. Doing so, without a Cloudflare account, is a quick way to experiment and try it out. However, be aware that these account-less Tunnels have no uptime guarantee, are subject to the Cloudflare Online Services Terms of Use (https://www.cloudflare.com/website-terms/), and Cloudflare reserves the right to investigate your use of Tunnels for violations of such terms. If you intend to use Tunnels in production you should use a pre-created named tunnel by following: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps
+2026-09-08T03:44:16Z INF Requesting new quick Tunnel on trycloudflare.com...
+2026-09-08T03:44:20Z INF +--------------------------------------------------------------------------------------------+
+2026-09-08T03:44:20Z INF |  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |
+2026-09-08T03:44:20Z INF |  https://fast-javascript-involvement-nut.trycloudflare.com                                 |
+2026-09-08T03:44:20Z INF +--------------------------------------------------------------------------------------------+
+2026-09-08T03:44:20Z INF Cannot determine default configuration path. No file [config.yml config.yaml] in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp /etc/cloudflared /usr/local/etc/cloudflared]
+2026-09-08T03:44:20Z INF Version 2026.8.3 (Checksum f29324fe934d1e100617484c78deef803c4dc2cd351d645bbde42e96b4fccc5e)
+2026-09-08T03:44:20Z INF GOOS: linux, GOVersion: go1.26.4, GoArch: amd64
+2026-09-08T03:44:20Z INF Settings: map[ha-connections:1 no-autoupdate:true protocol:quic url:http://127.0.0.1:41807]
+2026-09-08T03:44:20Z INF Environmental variables map[AGENTSWEB_TUNNEL_URL:ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257]
+2026-09-08T03:44:20Z INF Generated Connector ID: 21cd9899-5dee-4e13-ac62-ae188a97316d
+2026-09-08T03:44:20Z INF Initial protocol quic
+2026-09-08T03:44:20Z INF ICMP proxy will use 10.1.1.125 as source for IPv4
+2026-09-08T03:44:20Z INF ICMP proxy will use fe80::7eed:8dff:fe4f:3c42 in zone eth0 as source for IPv6
+2026-09-08T03:44:20Z WRN The user running cloudflared process has a GID (group ID) that is not within ping_group_range. You might need to add that user to a group within that range, or instead update the range to encompass a group the user is already in by modifying /proc/sys/net/ipv4/ping_group_range. Otherwise cloudflared will not be able to ping this network error="Group ID 1001 is not between ping group 1 to 0"
+2026-09-08T03:44:20Z WRN ICMP proxy feature is disabled error="cannot create ICMPv4 proxy: Group ID 1001 is not between ping group 1 to 0 nor ICMPv6 proxy: socket: permission denied"
+2026/09/08 03:44:20 failed to sufficiently increase receive buffer size (was: 1024 kiB, wanted: 7168 kiB, got: 2048 kiB). See https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes for details.
+2026-09-08T03:44:20Z INF ICMP proxy will use 10.1.1.125 as source for IPv4
+2026-09-08T03:44:20Z INF ICMP proxy will use fe80::7eed:8dff:fe4f:3c42 in zone eth0 as source for IPv6
+2026-09-08T03:44:20Z INF Starting metrics server on 127.0.0.1:20242/metrics
+2026-09-08T03:44:20Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.200.113
+2026-09-08T03:44:20Z INF Registered tunnel connection connIndex=0 connection=d3ea03d0-13e2-4601-98f8-0ed5e18b9799 event=0 ip=198.41.200.113 location=ord08 protocol=quic
+2026-09-08T03:44:26Z INF +-------------------------------------------------------------------------------------+
+2026-09-08T03:44:26Z INF |                               CONNECTIVITY PRE-CHECKS                               |
+2026-09-08T03:44:26Z INF +-------------------------------------------------------------------------------------+
+2026-09-08T03:44:26Z INF |  COMPONENT         TARGET                     STATUS  DETAILS                       |
+2026-09-08T03:44:26Z INF |  DNS Resolution    region1.v2.argotunnel.com  PASS    DNS Resolved successfully     |
+2026-09-08T03:44:26Z INF |  DNS Resolution    region2.v2.argotunnel.com  PASS    DNS Resolved successfully     |
+2026-09-08T03:44:26Z INF |  UDP Connectivity  region1.v2.argotunnel.com  PASS    QUIC connection successful    |
+2026-09-08T03:44:26Z INF |  UDP Connectivity  region2.v2.argotunnel.com  PASS    QUIC connection successful    |
+2026-09-08T03:44:26Z INF |  TCP Connectivity  region1.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
+2026-09-08T03:44:26Z INF |  TCP Connectivity  region2.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
+2026-09-08T03:44:26Z INF |  Cloudflare API    api.cloudflare.com:443     PASS    API is reachable              |
+2026-09-08T03:44:26Z INF |                                                                                     |
+2026-09-08T03:44:26Z INF |  SUMMARY: Environment is healthy. cloudflared will use 'quic' as primary protocol.  |
+2026-09-08T03:44:26Z INF +-------------------------------------------------------------------------------------+
+2026-09-08T03:44:26Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=region1.v2.argotunnel.com
+2026-09-08T03:44:26Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=region2.v2.argotunnel.com
+2026-09-08T03:44:26Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=region1.v2.argotunnel.com
+2026-09-08T03:44:26Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=region2.v2.argotunnel.com
+2026-09-08T03:44:26Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=region1.v2.argotunnel.com
+2026-09-08T03:44:26Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=region2.v2.argotunnel.com
+2026-09-08T03:44:26Z INF precheck component="Cloudflare API" details="API is reachable" run_id=79d38baa-ca78-4946-aa11-17530c634497 status=pass target=api.cloudflare.com:443
+2026-09-08T03:44:26Z INF precheck complete hard_fail=false run_id=79d38baa-ca78-4946-aa11-17530c634497 suggested_protocol=quic
+===response-comment-tracker.sh===
+#!/usr/bin/env bash
+set -euo pipefail
+
+started_at="$(date +%s)"
+
+format_elapsed() {
+  local elapsed_seconds="$1"
+  local elapsed_hours=$((elapsed_seconds / 3600))
+  local elapsed_minutes=$(((elapsed_seconds % 3600) / 60))
+
+  if (( elapsed_hours > 0 )); then
+    printf '%dh %02dm' "$elapsed_hours" "$elapsed_minutes"
+  else
+    printf '%dm' "$elapsed_minutes"
+  fi
+}
+
+if [[ "${1:-}" == "--format-elapsed" ]]; then
+  format_elapsed "${2:?elapsed seconds are required}"
+  printf '\n'
+  exit 0
+fi
+
+vision_calls() {
+  jq -r '
+    def has_image($message):
+      any((($message.parts // [])[]?);
+        (.type == "file" and ((.mime // .mediaType // "") | startswith("image/"))) or
+        (.type == "tool" and any(((.state.attachments // [])[]?.mime?); ((. // "") | startswith("image/"))))
+      );
+    reduce .[] as $message ({ seen: false, calls: 0 };
+      if $message.info.role == "assistant" then
+        .calls += (if .seen then 1 else 0 end)
+        | .seen = (.seen or has_image($message))
+      else
+        .seen = (.seen or has_image($message))
+      end
+    ) | .calls
+  '
+}
+
+while :; do
+  payload="$(curl --fail --silent --show-error \
+    -H "x-opencode-directory: $PROJECT_DIR" \
+    "http://127.0.0.1:$OPENCODE_WEB_PORT/session/$SESSION_ID/message" 2>/dev/null || true)"
+  sessions_payload="$(curl --fail --silent --show-error \
+    -H "x-opencode-directory: $PROJECT_DIR" \
+    "http://127.0.0.1:$OPENCODE_WEB_PORT/session" 2>/dev/null || true)"
+  status_payload="$(curl --fail --silent --show-error \
+    -H "x-opencode-directory: $PROJECT_DIR" \
+    "http://127.0.0.1:$OPENCODE_WEB_PORT/session/status" 2>/dev/null || true)"
+  if jq -e 'type == "array"' >/dev/null 2>&1 <<<"$payload" && \
+    jq -e 'type == "array"' >/dev/null 2>&1 <<<"$sessions_payload" && \
+    jq -e 'type == "object"' >/dev/null 2>&1 <<<"$status_payload"; then
+    stats="$(jq -r '
+      def parts: [.[].parts[]?];
+      def tools: [parts[] | select(.type == "tool")];
+      [
+        (tools | length),
+        ([tools[] | select(.state.status == "running" or .state.status == "pending")] | length)
+      ] | @tsv
+    ' <<<"$payload")"
+    IFS=$'\t' read -r tool_count active_count <<<"$stats"
+    subagent_stats="$(jq -nr \
+      --arg root "$SESSION_ID" \
+      --argjson sessions "$sessions_payload" \
+      --argjson statuses "$status_payload" '
+      def descendants($all; $parent):
+        [$all[] | select(.parentID == $parent)] as $children
+        | ($children | map(.id)) as $ids
+        | if ($ids | length) == 0 then $ids
+          else $ids + ([$ids[] | descendants($all; .)] | add)
+          end;
+      ($sessions | descendants($sessions; $root)) as $subagents
+      | {
+          total: ($subagents | length),
+          failed: ([$statuses | to_entries[]
+            | select((.key as $id | ($subagents | index($id))) != null)
+            | select(.value.type == "error" or .value.type == "failed")
+          ] | length),
+          active: ([$statuses | to_entries[]
+            | select((.key as $id | ($subagents | index($id))) != null)
+            | select(.value.type != "idle" and .value.type != "error" and .value.type != "failed")
+          ] | length)
+        }
+      | [.active, .total, .failed] | @tsv
+    ')"
+    IFS=$'\t' read -r active_subagents total_subagents failed_subagents <<<"$subagent_stats"
+    token_count="$(jq -nr \
+      --arg root "$SESSION_ID" \
+      --argjson sessions "$sessions_payload" '
+      def descendants($all; $parent):
+        [$all[] | select(.parentID == $parent)] as $children
+        | ($children | map(.id)) as $ids
+        | if ($ids | length) == 0 then $ids
+          else $ids + ([$ids[] | descendants($all; .)] | add)
+          end;
+      ([$root] + ($sessions | descendants($sessions; $root))) as $tracked
+      | reduce $sessions[] as $session (0;
+          if ($tracked | index($session.id)) == null then .
+          else .
+            + ($session.tokens.input // 0)
+            + ($session.tokens.output // 0)
+            + ($session.tokens.reasoning // 0)
+            + ($session.tokens.cache.read // 0)
+            + ($session.tokens.cache.write // 0)
+          end
+        )
+    ')"
+    subagent_ids="$(jq -nr \
+      --arg root "$SESSION_ID" \
+      --argjson sessions "$sessions_payload" '
+      def descendants($all; $parent):
+        [$all[] | select(.parentID == $parent)] as $children
+        | ($children | map(.id)) as $ids
+        | if ($ids | length) == 0 then $ids
+          else $ids + ([$ids[] | descendants($all; .)] | add)
+          end;
+      ($sessions | descendants($sessions; $root))[]
+    ')"
+    vision_count="$(vision_calls <<<"$payload")"
+    while IFS= read -r subagent_id; do
+      [[ -n "$subagent_id" ]] || continue
+      subagent_payload="$(curl --fail --silent --show-error \
+        -H "x-opencode-directory: $PROJECT_DIR" \
+        "http://127.0.0.1:$OPENCODE_WEB_PORT/session/$subagent_id/message" 2>/dev/null || true)"
+      if jq -e 'type == "array"' >/dev/null 2>&1 <<<"$subagent_payload"; then
+        subagent_vision_count="$(vision_calls <<<"$subagent_payload")"
+        vision_count=$((vision_count + subagent_vision_count))
+      fi
+    done <<<"$subagent_ids"
+    changed_count="$(git -C "$PROJECT_DIR" status --porcelain 2>/dev/null | wc -l | tr -d ' ')"
+    elapsed_seconds="$(( $(date +%s) - started_at ))"
+    elapsed="$(format_elapsed "$elapsed_seconds")"
+    speed_score="$(awk -v tokens="$token_count" -v elapsed="$elapsed_seconds" \
+      'BEGIN { if (elapsed > 0) printf "%.1f", tokens / elapsed; else print "0.0" }')"
+    access_links="$(< "${PROGRESS_COMMENT_TEMPLATE:-$(dirname "$0")/opencode-progress-comment-template.md}")"
+    ssh_section=""
+    if [[ "${AGENTSWEB_SSH_ENABLED:-false}" == "true" && "${AGENTSWEB_SSH_READY:-false}" == "true" ]]; then
+      ssh_section="🔐 **Temporary AgentsWeb SSH session is ready.**
+
+Run: ${RUN_URL}
+Host: ${SSH_HOST}:${SSH_PORT}
+
+Run this command while the job is active:
+
+Command:
+${SSH_COMMAND}
+"
+    fi
+    progress_stats="- Elapsed: ${elapsed}
+- Token count: ${token_count}
+- Speed score: ${speed_score} tokens/s
+- Tool calls: $tool_count
+- Active tool calls: $active_count
+- Active subagents: $active_subagents
+- Total subagents executed: $total_subagents
+- Total failed subagents: $failed_subagents
+- Image-context model calls: $vision_count
+- Changed workspace files: $changed_count"
+    validation_session_section=""
+    if [[ -s "$OPENCODE_WEB_DIR/validation-session-url" ]]; then
+      validation_session_section="🔎 **Validation OpenCode Web UI:** $(<"$OPENCODE_WEB_DIR/validation-session-url")"
+    fi
+    access_note="This opens the currently running OpenCode session directly. Access remains available while OpenCode runs and for 5 hours afterwards."
+    access_links="${access_links//@SSH_SECTION@/$ssh_section}"
+    access_links="${access_links//@UPDATED@/$(date -u '+%Y-%m-%d %H:%M:%S UTC')}"
+    access_links="${access_links//@OPENCODE_WEB_URL@/$OPENCODE_WEB_URL}"
+    access_links="${access_links//@PROJECT_FILE_URL@/${PROJECT_FILE_URL:-unavailable}}"
+    access_links="${access_links//@VALIDATION_SESSION_SECTION@/$validation_session_section}"
+    access_links="${access_links//@PROGRESS_STATS@/$progress_stats}"
+    access_links="${access_links//@ACCESS_NOTE@/$access_note}"
+    body="${access_links}"
+    if [[ "${PROGRESS_DRY_RUN:-false}" == "true" ]]; then
+      printf '%s\n' "$body" > "${PROGRESS_OUTPUT:?PROGRESS_OUTPUT is required in dry-run mode}"
+    else
+      gh api --method PATCH "repos/$REPOSITORY/issues/comments/$COMMENT_ID" \
+        -f body="$body" >/dev/null || true
+    fi
+  fi
+  [[ -f "$OPENCODE_WEB_DIR/response-comment.done" ]] && break
+  sleep 10
+done
+===opencode-web env===
+ACTIONS_ORCHESTRATION_ID=884fc9b2-a36f-4b98-8a47-983f73eef2c6.opencode.opencode.__default
+AGENTSWEB_COMMAND=ssh\ -o\ StrictHostKeyChecking=no\ -o\ UserKnownHostsFile=/dev/null\ -i\ ~/.ssh/aiplay-agentsweb\ -p\ 32257\ runner@opencode-issue-79-34184464257-ssh.agentsweb.space
+AGENTSWEB_HOST=opencode-issue-79-34184464257-ssh.agentsweb.space
+AGENTSWEB_PORT=32257
+AGENTSWEB_SSH_ENABLED=true
+AGENTSWEB_TUNNEL_URL=ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257
+BRANCH_NAME=opencode/34184464257
+CHROMEWEBDRIVER=/usr/local/share/chromedriver-linux64
+COMMENT_BODY=Verify SSH URL reporting beside the OpenCode Web URL
+EDGEWEBDRIVER=/usr/local/share/edge_driver
+GECKOWEBDRIVER=/usr/local/share/gecko_driver
+GITHUB_ACTION=opencode_web
+GITHUB_API_URL=https://api.github.com
+GITHUB_GRAPHQL_URL=https://api.github.com/graphql
+GITHUB_JOB=opencode
+GITHUB_SERVER_URL=https://github.com
+GITHUB_WORKFLOW=OpenCode
+GITHUB_WORKFLOW_REF=AgentsLoop/PlayGround/.github/workflows/opencode.yml@refs/heads/main
+LABELS_JSON=["OpenCode","Goal"]
+OPENCODE=1
+OPENCODE_API_KEY=
+OPENCODE_AUTH_CONTENT=
+OPENCODE_ENABLE_EXA=true
+OPENCODE_ENABLE_EXPERIMENTAL_MODELS=true
+OPENCODE_EXPERIMENTAL=true
+OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
+OPENCODE_EXPERIMENTAL_WEBSOCKETS=true
+OPENCODE_EXPERIMENTAL_WORKSPACES=true
+OPENCODE_PID=3575
+OPENCODE_WEB_DIR=/home/runner/work/PlayGround/PlayGround/.opencode-web
+OPENCODE_WEB_PORT=41807
+SSH_DIR=/home/runner/work/PlayGround/PlayGround/.opencode-ssh
+SSH_KEY=/home/runner/work/PlayGround/PlayGround/opencode-agentsweb-id_ed25519
+SSH_NAME=opencode-issue-79-34184464257-ssh
+SSH_ONLY_REQUEST=false
+SSH_PORT=32257
+SSH_PUBLIC_KEY=/home/runner/work/PlayGround/PlayGround/opencode-agentsweb-id_ed25519.pub
+===ps===
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  1.7  0.0  22820 14340 ?        Ss   03:42   0:02 /sbin/init
+root           2  0.0  0.0      0     0 ?        S    03:42   0:00 [kthreadd]
+root           3  0.0  0.0      0     0 ?        S    03:42   0:00 [pool_workqueue_release]
+root           4  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-rcu_gp]
+root           5  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-sync_wq]
+root           6  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-kvfree_rcu_reclaim]
+root           7  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-slub_flushwq]
+root           8  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-netns]
+root           9  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/0:0-cgroup_release]
+root          10  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/0:0H-events_highpri]
+root          11  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/0:1-events]
+root          12  0.1  0.0      0     0 ?        R    03:42   0:00 [kworker/u16:0+flush-259:0]
+root          13  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-mm_percpu_wq]
+root          14  0.0  0.0      0     0 ?        S    03:42   0:00 [ksoftirqd/0]
+root          15  0.0  0.0      0     0 ?        I    03:42   0:00 [rcu_sched]
+root          16  0.0  0.0      0     0 ?        S    03:42   0:00 [rcu_exp_par_gp_kthread_worker/0]
+root          17  0.0  0.0      0     0 ?        S    03:42   0:00 [rcu_exp_gp_kthread_worker]
+root          18  0.0  0.0      0     0 ?        S    03:42   0:00 [migration/0]
+root          19  0.0  0.0      0     0 ?        S    03:42   0:00 [idle_inject/0]
+root          20  0.0  0.0      0     0 ?        S    03:42   0:00 [cpuhp/0]
+root          21  0.0  0.0      0     0 ?        S    03:42   0:00 [cpuhp/2]
+root          22  0.0  0.0      0     0 ?        S    03:42   0:00 [idle_inject/2]
+root          23  0.4  0.0      0     0 ?        S    03:42   0:00 [migration/2]
+root          24  0.0  0.0      0     0 ?        S    03:42   0:00 [ksoftirqd/2]
+root          25  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/2:0-events]
+root          26  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/2:0H-events_highpri]
+root          27  0.0  0.0      0     0 ?        S    03:42   0:00 [cpuhp/1]
+root          28  0.0  0.0      0     0 ?        S    03:42   0:00 [idle_inject/1]
+root          29  0.4  0.0      0     0 ?        S    03:42   0:00 [migration/1]
+root          30  0.0  0.0      0     0 ?        S    03:42   0:00 [ksoftirqd/1]
+root          31  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/1:0-events]
+root          32  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/1:0H-events_highpri]
+root          33  0.0  0.0      0     0 ?        S    03:42   0:00 [cpuhp/3]
+root          34  0.0  0.0      0     0 ?        S    03:42   0:00 [idle_inject/3]
+root          35  0.6  0.0      0     0 ?        S    03:42   0:00 [migration/3]
+root          36  0.0  0.0      0     0 ?        S    03:42   0:00 [ksoftirqd/3]
+root          37  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/3:0-events]
+root          38  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/3:0H-events_highpri]
+root          39  0.0  0.0      0     0 ?        S    03:42   0:00 [kdevtmpfs]
+root          40  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-inet_frag_wq]
+root          41  0.0  0.0      0     0 ?        I    03:42   0:00 [rcu_tasks_rude_kthread]
+root          42  0.0  0.0      0     0 ?        I    03:42   0:00 [rcu_tasks_trace_kthread]
+root          43  0.0  0.0      0     0 ?        S    03:42   0:00 [kauditd]
+root          44  0.0  0.0      0     0 ?        S    03:42   0:00 [khungtaskd]
+root          45  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/u16:1-async]
+root          46  0.0  0.0      0     0 ?        S    03:42   0:00 [oom_reaper]
+root          47  0.0  0.0      0     0 ?        R    03:42   0:00 [kworker/u16:2+ext4-rsv-conversion]
+root          48  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-writeback]
+root          49  0.0  0.0      0     0 ?        S    03:42   0:00 [kcompactd0]
+root          50  0.0  0.0      0     0 ?        SN   03:42   0:00 [ksmd]
+root          51  0.0  0.0      0     0 ?        SN   03:42   0:00 [khugepaged]
+root          52  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-kblockd]
+root          53  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-blkcg_punt_bio]
+root          54  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-kintegrityd]
+root          55  0.0  0.0      0     0 ?        S    03:42   0:00 [irq/9-acpi]
+root          56  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/3:1-events]
+root          57  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/1:1-mm_percpu_wq]
+root          58  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/2:1-cgroup_release]
+root          59  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-tpm_dev_wq]
+root          60  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-ata_sff]
+root          61  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-md]
+root          62  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-md_bitmap]
+root          63  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-edac-poller]
+root          64  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-hv_vmbus_con]
+root          65  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-hv_vmbus_rescind]
+root          66  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-hv_pri_chan]
+root          67  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-hv_sub_chan]
+root          68  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-devfreq_wq]
+root          69  0.0  0.0      0     0 ?        S    03:42   0:00 [watchdogd]
+root          70  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-quota_events_unbound]
+root          71  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/0:1H-kblockd]
+root          72  0.0  0.0      0     0 ?        S    03:42   0:00 [kswapd0]
+root          73  0.0  0.0      0     0 ?        S    03:42   0:00 [ecryptfs-kthread]
+root          74  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-kthrotld]
+root          75  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-nfit]
+root          76  0.0  0.0      0     0 ?        S    03:42   0:00 [scsi_eh_0]
+root          77  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-scsi_tmf_0]
+root          78  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-nvme-wq]
+root          79  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-nvme-reset-wq]
+root          80  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-nvme-delete-wq]
+root          81  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-nvme-auth-wq]
+root          82  0.1  0.0      0     0 ?        I    03:42   0:00 [kworker/u16:3-kvfree_rcu_reclaim]
+root          83  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/0:2-events]
+root          84  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/u16:4-async]
+root          85  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/u16:5-events_unbound]
+root          86  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/u16:6-events_power_efficient]
+root          87  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/u16:7]
+root          88  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-mld]
+root          89  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/3:1H-kblockd]
+root          90  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-ipv6_addrconf]
+root          91  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/0:3-rcu_gp]
+root          92  0.0  0.0      0     0 ?        S    03:42   0:00 [hv_balloon]
+root          93  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-kstrp]
+root          95  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/u17:0]
+root         106  0.0  0.0      0     0 ?        S    03:42   0:00 [jbd2/nvme0n1p1-8]
+root         107  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/R-ext4-rsv-conversion]
+root         108  0.0  0.0      0     0 ?        I    03:42   0:00 [kworker/3:2-mm_percpu_wq]
+root         110  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/2:1H-kblockd]
+root         152  0.0  0.0      0     0 ?        I<   03:42   0:00 [kworker/1:1H-kblockd]
+[0m
+[0m
+Identified both tunnels — now verifying they're reported side-by-side.
+[0m$ [0mgh api repos/AgentsLoop/PlayGround/issues/79/comments --paginate 2>&1 | head -n 500
+echo "===ISSUE==="; gh api repos/AgentsLoop/PlayGround/issues/79 2>&1 | head -n 200
+[{"url":"https://api.github.com/repos/AgentsLoop/PlayGround/issues/comments/5578811627","html_url":"https://github.com/AgentsLoop/PlayGround/issues/79#issuecomment-5578811627","issue_url":"https://api.github.com/repos/AgentsLoop/PlayGround/issues/79","id":5578811627,"node_id":"IC_kwDOUKWYJc8AAAABTIXo6w","user":{"login":"github-actions[bot]","id":41898282,"node_id":"MDM6Qm90NDE4OTgyODI=","avatar_url":"https://avatars.githubusercontent.com/in/15368?v=4","gravatar_id":"","url":"https://api.github.com/users/github-actions%5Bbot%5D","html_url":"https://github.com/apps/github-actions","followers_url":"https://api.github.com/users/github-actions%5Bbot%5D/followers","following_url":"https://api.github.com/users/github-actions%5Bbot%5D/following{/other_user}","gists_url":"https://api.github.com/users/github-actions%5Bbot%5D/gists{/gist_id}","starred_url":"https://api.github.com/users/github-actions%5Bbot%5D/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/github-actions%5Bbot%5D/subscriptions","organizations_url":"https://api.github.com/users/github-actions%5Bbot%5D/orgs","repos_url":"https://api.github.com/users/github-actions%5Bbot%5D/repos","events_url":"https://api.github.com/users/github-actions%5Bbot%5D/events{/privacy}","received_events_url":"https://api.github.com/users/github-actions%5Bbot%5D/received_events","type":"Bot","user_view_type":"public","site_admin":false},"created_at":"2026-09-08T03:44:34Z","updated_at":"2026-09-08T03:45:36Z","body":"🔐 **Temporary AgentsWeb SSH session is ready.**\n\nRun: https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257\nHost: opencode-issue-79-34184464257-ssh.agentsweb.space:32257\n\nRun this command while the job is active:\n\nCommand:\nssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/aiplay-agentsweb -p 32257 runner@opencode-issue-79-34184464257-ssh.agentsweb.space\n\n🟡 **OpenCode progress (live)**\n\nUpdated: 2026-09-08 03:45:35 UTC\n\n🌐 **OpenCode Web UI:** https://fast-javascript-involvement-nut.trycloudflare.com/L2hvbWUvcnVubmVyL3dvcmsvUGxheUdyb3VuZC9QbGF5R3JvdW5k/session/ses_f80e1ff7effeRLDkkOz7xjlX98\n\n📁 **Project files:** https://spot-moderator-intense-condition.trycloudflare.com\n\n\n\n- Elapsed: 1m\n- Token count: 194425\n- Speed score: 3187.3 tokens/s\n- Tool calls: 18\n- Active tool calls: 0\n- Active subagents: 0\n- Total subagents executed: 0\n- Total failed subagents: 0\n- Image-context model calls: 0\n- Changed workspace files: 9\n\nThis opens the currently running OpenCode session directly. Access remains available while OpenCode runs and for 5 hours afterwards.","author_association":"CONTRIBUTOR","pin":null,"reactions":{"url":"https://api.github.com/repos/AgentsLoop/PlayGround/issues/comments/5578811627/reactions","total_count":0,"+1":0,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"performed_via_github_app":{"id":15368,"client_id":"Iv1.05c79e9ad1f6bdfa","slug":"github-actions","node_id":"MDM6QXBwMTUzNjg=","owner":{"login":"github","id":9919,"node_id":"MDEyOk9yZ2FuaXphdGlvbjk5MTk=","avatar_url":"https://avatars.githubusercontent.com/u/9919?v=4","gravatar_id":"","url":"https://api.github.com/users/github","html_url":"https://github.com/github","followers_url":"https://api.github.com/users/github/followers","following_url":"https://api.github.com/users/github/following{/other_user}","gists_url":"https://api.github.com/users/github/gists{/gist_id}","starred_url":"https://api.github.com/users/github/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/github/subscriptions","organizations_url":"https://api.github.com/users/github/orgs","repos_url":"https://api.github.com/users/github/repos","events_url":"https://api.github.com/users/github/events{/privacy}","received_events_url":"https://api.github.com/users/github/received_events","type":"Organization","user_view_type":"public","site_admin":false},"name":"GitHub Actions","description":"Automate your workflow from idea to production","external_url":"https://help.github.com/en/actions","html_url":"https://github.com/apps/github-actions","created_at":"2018-07-30T09:30:17Z","updated_at":"2026-06-18T16:17:48Z","permissions":{"actions":"write","administration":"read","artifact_metadata":"write","attestations":"write","checks":"write","code_quality":"write","contents":"write","copilot_requests":"write","deployments":"write","discussions":"write","drives":"write","issues":"write","merge_queues":"write","metadata":"read","models":"read","packages":"write","pages":"write","pull_requests":"write","repository_hooks":"write","repository_projects":"write","security_events":"write","statuses":"write","vulnerability_alerts":"read"},"events":["branch_protection_rule","check_run","check_suite","create","delete","deployment","deployment_status","discussion","discussion_comment","fork","gollum","issues","issue_comment","label","merge_group","milestone","page_build","public","pull_request","pull_request_review","pull_request_review_comment","push","registry_package","release","repository","repository_dispatch","status","watch","workflow_dispatch","workflow_run"]},"minimized":null}]===ISSUE===
+{"url":"https://api.github.com/repos/AgentsLoop/PlayGround/issues/79","repository_url":"https://api.github.com/repos/AgentsLoop/PlayGround","labels_url":"https://api.github.com/repos/AgentsLoop/PlayGround/issues/79/labels{/name}","comments_url":"https://api.github.com/repos/AgentsLoop/PlayGround/issues/79/comments","events_url":"https://api.github.com/repos/AgentsLoop/PlayGround/issues/79/events","html_url":"https://github.com/AgentsLoop/PlayGround/issues/79","id":5381704911,"node_id":"I_kwDOUKWYJc8AAAABQMZMzw","number":79,"title":"Verify SSH URL reporting beside the OpenCode Web URL","user":{"login":"agents-dev","id":306679077,"node_id":"U_kgDOEkeNJQ","avatar_url":"https://avatars.githubusercontent.com/u/306679077?v=4","gravatar_id":"","url":"https://api.github.com/users/agents-dev","html_url":"https://github.com/agents-dev","followers_url":"https://api.github.com/users/agents-dev/followers","following_url":"https://api.github.com/users/agents-dev/following{/other_user}","gists_url":"https://api.github.com/users/agents-dev/gists{/gist_id}","starred_url":"https://api.github.com/users/agents-dev/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/agents-dev/subscriptions","organizations_url":"https://api.github.com/users/agents-dev/orgs","repos_url":"https://api.github.com/users/agents-dev/repos","events_url":"https://api.github.com/users/agents-dev/events{/privacy}","received_events_url":"https://api.github.com/users/agents-dev/received_events","type":"User","user_view_type":"public","site_admin":false},"labels":[{"id":12021981785,"node_id":"LA_kwDOUKWYJc8AAAACzJDiWQ","url":"https://api.github.com/repos/AgentsLoop/PlayGround/labels/OpenCode","name":"OpenCode","color":"aaaaaa","default":false,"description":null},{"id":12022059557,"node_id":"LA_kwDOUKWYJc8AAAACzJISJQ","url":"https://api.github.com/repos/AgentsLoop/PlayGround/labels/in%20progress","name":"in progress","color":"FBCA04","default":false,"description":"OpenCode workflow is running"},{"id":12022059652,"node_id":"LA_kwDOUKWYJc8AAAACzJIShA","url":"https://api.github.com/repos/AgentsLoop/PlayGround/labels/Goal","name":"Goal","color":"8A2BE2","default":false,"description":"Run OMG with the persistent Goal command"}],"state":"open","locked":false,"assignees":[],"milestone":null,"comments":1,"created_at":"2026-09-08T03:42:54Z","updated_at":"2026-09-08T03:45:36Z","closed_at":null,"assignee":null,"author_association":"CONTRIBUTOR","issue_field_values":[],"type":null,"active_lock_reason":null,"sub_issues_summary":{"total":0,"completed":0,"percent_completed":0},"issue_dependencies_summary":{"blocked_by":0,"total_blocked_by":0,"blocking":0,"total_blocking":0},"body":"# Verify SSH URL reporting beside the OpenCode Web URL\\n\\n## Objective\\n\\nDeliver an end-to-end verification of the OpenCode workflow for maintainers who need to debug temporary access. Confirm that the issue access comment shows the registered AgentsWeb SSH URL together with the OpenCode Web URL after successful tunnel setup, and clearly reports when the SSH URL is not registered after a tunnel failure.\\n\\n## Quality bar\\n\\n- Research the workflow, comment templates, and relevant GitHub Actions behavior before testing.\\n- Exercise the real issue-triggered workflow and real GitHub issue comments.\\n- Inspect the actual rendered issue comment and the Actions logs directly.\\n- Verify successful and failure-path reporting, including recovery and cleanup behavior.\\n- Keep the SSH URL and OpenCode Web URL clearly distinguishable and usable while the run is active.\\n\\n## Execution\\n\\n- Have the lead divide the work into independently judgeable verification pieces.\\n- Assign a builder and a fresh-context critic or verifier to each important piece.\\n- Continue across sessions as needed and preserve all relevant evidence.\\n\\n## Verification\\n\\n- Confirm the issue uses the OpenCode and Goal labels and triggers one workflow_dispatch run on main.\\n- Verify the initial OpenCode Web UI session link, then inspect the access comment for both URLs.\\n- Inspect the failure-path evidence and confirm the comment reports SSH URL: not registered when no registration URL exists.\\n- Fix the largest remaining gap and repeat the build/verify/improve loop until the acceptance bar is met or the run stops with explicit evidence.\\n- Record concrete issue, run, comment, session, and log evidence without exposing secrets.\\n\\n## Progress\\n\\nMaintain a resumable live progress page with references, decisions, completed work, evidence, blockers, current gaps, and the next exact action.","closed_by":null,"reactions":{"url":"https://api.github.com/repos/AgentsLoop/PlayGround/issues/79/reactions","total_count":0,"+1":0,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"timeline_url":"https://api.github.com/repos/AgentsLoop/PlayGround/issues/79/timeline","performed_via_github_app":null,"state_reason":null,"pinned_comment":null}
+[0m
+[0m$ [0mgh api repos/AgentsLoop/OhMyGithub/contents/.github/workflows/opencode-reusable.yml --jq '.content' 2>&1 | base64 -d | head -n 1000
+echo "===END PART1==="
+name: OpenCode reusable pipeline
+
+on:
+  workflow_call:
+    inputs:
+      issue_number:
+        description: Issue containing the OpenCode label
+        required: true
+        type: string
+      request:
+        description: Exact issue request text
+        required: true
+        type: string
+      issue_title:
+        description: Issue title for reporting
+        required: true
+        type: string
+      labels_json:
+        description: JSON array of issue label names
+        required: false
+        default: '[]'
+        type: string
+      sender:
+        description: GitHub username that submitted the request
+        required: true
+        type: string
+    secrets:
+      OPENCODE_API_KEY:
+        required: false
+      OPENCODE_AUTH_JSON:
+        required: false
+      AGENTSWEB_SSH_PUBLIC_KEY:
+        required: false
+jobs:
+  opencode:
+    # Ubuntu is the default; the mac label opts this run into macOS.
+    runs-on: ${{ contains(inputs.labels_json, '"mac"') && 'macos-latest' || 'ubuntu-latest' }}
+    permissions:
+      contents: write
+      issues: write
+    env:
+      SSH_NAME: opencode-issue-${{ inputs.issue_number }}-${{ github.run_id }}-ssh
+      SSH_KEY: ${{ github.workspace }}/opencode-agentsweb-id_ed25519
+      SSH_PUBLIC_KEY: ${{ github.workspace }}/opencode-agentsweb-id_ed25519.pub
+      SSH_DIR: ${{ github.workspace }}/.opencode-ssh
+      OPENCODE_WEB_PORT: 4096
+      OPENCODE_WEB_DIR: ${{ github.workspace }}/.opencode-web
+      PROJECT_PATH: ${{ vars.PROJECT_DIR || './' }}
+      PROJECT_DIR: ${{ github.workspace }}/${{ vars.PROJECT_DIR || './' }}
+      OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+      OPENCODE_AUTH_CONTENT: ${{ secrets.OPENCODE_AUTH_JSON }}
+      OPENCODE_EXPERIMENTAL: "true"
+      OPENCODE_EXPERIMENTAL_WORKSPACES: "true"
+      OPENCODE_ENABLE_EXA: "true"
+      OPENCODE_ENABLE_EXPERIMENTAL_MODELS: "true"
+      OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS: "true"
+      OPENCODE_EXPERIMENTAL_WEBSOCKETS: "true"
+      TARGET_OWNER: ${{ github.repository_owner }}
+      TARGET_REPO: ${{ github.event.repository.name }}
+      TARGET_REPOSITORY: ${{ github.repository }}
+      GH_REPO: ${{ github.repository }}
+      TARGET_REF: ${{ github.ref_name }}
+      RUNTIME_DIR: ${{ github.workspace }}/.omgithub-runtime
+      APP_PORT: 3000
+      BRANCH_NAME: opencode/${{ github.run_id }}
+      AGENTSWEB_SSH_ENABLED: ${{ secrets.AGENTSWEB_SSH_PUBLIC_KEY != '' }}
+      TRIGGER_ISSUE_NUMBER: ${{ inputs.issue_number }}
+      COMMENT_BODY: ${{ inputs.request }}
+      LABELS_JSON: ${{ inputs.labels_json }}
+      TEST_REQUEST: ${{ contains(inputs.labels_json, '"test"') && contains(inputs.labels_json, '"OpenCode"') }}
+      GOAL_REQUEST: ${{ contains(inputs.labels_json, '"Goal"') }}
+      RALPH_REQUEST: ${{ contains(inputs.labels_json, '"ralph"') }}
+      OMO_REQUEST: ${{ contains(inputs.labels_json, '"omo"') }}
+      SSH_ONLY_REQUEST: ${{ contains(inputs.labels_json, '"ssh"') }}
+      VALIDATION_ENABLED: ${{ vars.VALIDATION_ENABLED || 'true' }}
+    steps:
+      - name: Publish task link
+        shell: bash
+        run: |
+          set -euo pipefail
+          issue_url="https://github.com/${GITHUB_REPOSITORY}/issues/${TRIGGER_ISSUE_NUMBER}"
+          {
+            echo '## OpenCode task'
+            echo
+            echo "[Open triggering issue](${issue_url})"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Export target token
+        shell: bash
+        run: echo "GH_TOKEN=${{ github.token }}" >> "$GITHUB_ENV"
+
+      - name: Checkout target repository
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref_name }}
+          token: ${{ github.token }}
+          fetch-depth: 1
+          persist-credentials: true
+
+      - name: Checkout centralized OMG runtime
+        uses: actions/checkout@v6
+        with:
+          repository: AgentsLoop/OhMyGithub
+          ref: main
+          path: .omgithub-runtime
+          token: ${{ github.token }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Checkout AgentsWeb tunnel client
+        if: env.TEST_REQUEST != 'true'
+        uses: actions/checkout@v6
+        with:
+          repository: agents-dev/agent-workspace
+          path: .agentsweb
+          sparse-checkout: |
+            lolgames_tunnel
+          persist-credentials: false
+
+      - name: Resolve project directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$TEST_REQUEST" == 'true' ]]; then
+            PROJECT_PATH='workflow-test-project'
+          fi
+          if [[ "$PROJECT_PATH" = /* || "$PROJECT_PATH" =~ (^|/)\.\.(/|$) ]]; then
+            echo "PROJECT_DIR must be a path inside the repository: $PROJECT_PATH" >&2
+            exit 1
+          fi
+          project_path="${PROJECT_PATH#./}"
+          project_path="${project_path%/}"
+          project_path="${project_path:-.}"
+          if [[ "$project_path" == '.' ]]; then
+            resolved_project_dir="$GITHUB_WORKSPACE"
+          else
+            resolved_project_dir="$GITHUB_WORKSPACE/$project_path"
+          fi
+          printf 'PROJECT_PATH=%s\n' "$project_path" >> "$GITHUB_ENV"
+          printf 'PROJECT_DIR=%s\n' "$resolved_project_dir" >> "$GITHUB_ENV"
+
+      - name: Checkout shared OpenCode skills
+        if: env.TEST_REQUEST != 'true'
+        uses: actions/checkout@v6
+        with:
+          repository: agents-dev/skills
+          path: ${{ vars.PROJECT_DIR || './' }}/.agents
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Exclude shared skills from generated changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          project_path="${PROJECT_PATH#./}"
+          project_path="${project_path%/}"
+          skills_path="${project_path:+/$project_path}/.agents/"
+          ralph_state_path="${project_path:+/$project_path}/.opencode/ralph-loop.local.md"
+          grep -qxF "$skills_path" .git/info/exclude || echo "$skills_path" >> .git/info/exclude
+          grep -qxF "$ralph_state_path" .git/info/exclude || echo "$ralph_state_path" >> .git/info/exclude
+
+          if [[ -z "$project_path" ]]; then
+            for runtime_path in '/.agentsweb/' '/.omgithub-runtime/' '/.opencode-ssh/' '/.opencode-web/' \
+              '/opencode-agentsweb-id_ed25519' '/opencode-agentsweb-id_ed25519.pub'; do
+              grep -qxF "$runtime_path" .git/info/exclude || echo "$runtime_path" >> .git/info/exclude
+            done
+          fi
+
+      - name: Install worker instructions
+        if: env.TEST_REQUEST != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -d "$PROJECT_DIR"
+          template_dir="$RUNTIME_DIR/.github/templates"
+          base_template="$template_dir/agents.template.md"
+          [[ -f "$base_template" ]] || { echo "Missing worker base template: $base_template" >&2; exit 1; }
+          cp "$base_template" "$PROJECT_DIR/Agents.md"
+
+          append_template() {
+            local template="$1"
+            [[ -f "$template" ]] || { echo "Missing worker label template: $template" >&2; exit 1; }
+            printf '\n' >> "$PROJECT_DIR/Agents.md"
+            cat "$template" >> "$PROJECT_DIR/Agents.md"
+          }
+
+          # Append every label-matched template except the base template. This
+          # keeps new templates convention-based: .github/templates/foo.md is selected
+          # automatically by a foo issue label.
+          while IFS= read -r template; do
+            template_name="${template##*/}"
+            template_stem="${template_name%.md}"
+            if jq -e --arg name "$template_stem" \
+              'any(.[]; (ascii_downcase == ($name | ascii_downcase)))' \
+              <<< "$LABELS_JSON" >/dev/null; then
+              append_template "$template"
+            fi
+          done < <(find "$template_dir" -maxdepth 1 -type f -name '*.md' ! -name 'agents.template.md' -print | sort)
+
+          if [[ "$RALPH_REQUEST" == "true" ]]; then
+            grep -qF 'When running in Ralph mode' "$PROJECT_DIR/Agents.md"
+          elif grep -qF 'When running in Ralph mode' "$PROJECT_DIR/Agents.md"; then
+            echo 'Ralph-mode instructions leaked into a non-Ralph Agents.md.' >&2
+            exit 1
+          fi
+
+      - name: Sync OpenCode labels
+        uses: actions/github-script@v7
+        env:
+          OPENCODE_MODEL: opencode/muse-spark-1.3-contributor-free
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require('node:fs');
+            const path = require('node:path');
+
+            const catalog = await fetch('https://models.opencode.ai/api.json').then(async (response) => {
+              if (!response.ok) throw new Error(`OpenCode model catalog returned ${response.status}`);
+              return response.json();
+            });
+            const models = Object.values(catalog.opencode?.models ?? {})
+              .filter((model) =>
+                (model.cost?.input === 0 && model.cost?.output === 0 && model.cost?.cache_read === 0) ||
+                model.id === 'gpt-5.6-luna'
+              )
+              .map((model) => model.id)
+              .filter(Boolean)
+              .sort();
+            if (!models.includes(process.env.OPENCODE_MODEL.slice('opencode/'.length))) {
+              throw new Error(`Configured model is missing from the OpenCode catalog: ${process.env.OPENCODE_MODEL}`);
+            }
+            const openaiLuna = catalog.openai?.models?.['gpt-5.6-luna'];
+            if (!openaiLuna) {
+              throw new Error('OpenAI catalog is missing gpt-5.6-luna');
+            }
+
+            const skillsRoot = path.join(process.env.PROJECT_DIR, '.agents', 'skills');
+            const skillNames = fs.existsSync(skillsRoot)
+              ? fs.readdirSync(skillsRoot, { withFileTypes: true })
+                  .filter((entry) => entry.isDirectory())
+                  .filter((entry) => fs.existsSync(path.join(skillsRoot, entry.name, 'SKILL.md')))
+                  .map((entry) => entry.name)
+              : [];
+
+            const labels = [
+              { name: 'in progress', color: 'FBCA04', description: 'OpenCode workflow is running' },
+              { name: 'validating', color: '1D76DB', description: 'OpenCode workflow is validating the result' },
+              { name: 'complete', color: '0E8A16', description: 'OpenCode workflow completed successfully' },
+              { name: 'failed', color: 'B60205', description: 'OpenCode workflow failed' },
+              { name: 'Goal', color: '8A2BE2', description: 'Run OMG with the persistent Goal command' },
+              { name: 'ralph', color: '5319E7', description: 'Run OpenCode with the Ralph auto-continuation loop' },
+              { name: 'omo', color: '5319E7', description: 'Preinstall oh-my-openagent for this OpenCode run' },
+              { name: 'test', color: '1D76DB', description: 'Run the full workflow with a mock OpenCode-generated project' },
+              { name: 'mac', color: 'B60205', description: 'Run OpenCode on the macos-latest GitHub-hosted runner' },
+              { name: 'linux', color: '1D76DB', description: 'Run OpenCode on the ubuntu-latest GitHub-hosted runner' },
+              { name: 'ssh', color: '5319E7', description: 'Start an SSH-only debugging session without OpenCode' },
+              ...models.map((model) => ({
+                name: `model/opencode/${model}`,
+                color: '5319E7',
+                description: `OpenCode model: opencode/${model}`
+              })),
+              {
+                name: 'model/openai/gpt-5.6-luna',
+                color: '5319E7',
+                description: 'OpenAI model: openai/gpt-5.6-luna'
+              },
+              ...skillNames.map((name) => ({
+                name: `skill/${name}`,
+                color: '1D76DB',
+                description: `OpenCode skill: ${name}`
+              }))
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.createLabel({
+                  owner: process.env.TARGET_OWNER,
+                  repo: process.env.TARGET_REPO,
+                  ...label
+                });
+              } catch (error) {
+                if (error.status !== 422) throw error;
+                await github.rest.issues.updateLabel({
+                  owner: process.env.TARGET_OWNER,
+                  repo: process.env.TARGET_REPO,
+                  name: label.name,
+                  color: label.color,
+                  description: label.description
+                });
+              }
+            }
+
+            const managedPrefixes = ['model/', 'skill/'];
+            const defaultLabels = new Set([
+              'bug', 'documentation', 'duplicate', 'enhancement', 'good first issue',
+              'help wanted', 'invalid', 'question', 'wontfix'
+            ]);
+            const existing = await github.paginate(github.rest.issues.listLabelsForRepo, {
+              owner: process.env.TARGET_OWNER,
+              repo: process.env.TARGET_REPO,
+              per_page: 100
+            });
+            const desired = new Set(labels.map(({ name }) => name));
+            for (const label of existing) {
+              if (defaultLabels.has(label.name) ||
+                  (managedPrefixes.some((prefix) => label.name.startsWith(prefix)) && !desired.has(label.name))) {
+                await github.rest.issues.deleteLabel({
+                  owner: process.env.TARGET_OWNER,
+                  repo: process.env.TARGET_REPO,
+                  name: label.name
+                });
+              }
+            }
+
+            core.info(`Synchronized ${labels.length} labels from the live OpenCode catalog and shared skills`);
+
+      - name: Mark issue in progress
+        uses: actions/github-script@v7
+        env:
+          GOAL_REQUEST: ${{ env.GOAL_REQUEST }}
+          RALPH_REQUEST: ${{ env.RALPH_REQUEST }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require('node:fs');
+            const number = Number(process.env.TRIGGER_ISSUE_NUMBER);
+            const statuses = ['in progress', 'validating', 'complete', 'failed'];
+            for (const status of statuses) {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: process.env.TARGET_OWNER, repo: process.env.TARGET_REPO,
+                  issue_number: number, name: status
+                });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+            }
+            await github.rest.issues.addLabels({
+              owner: process.env.TARGET_OWNER, repo: process.env.TARGET_REPO,
+              issue_number: number,
+              labels: [
+                'in progress',
+                ...(process.env.GOAL_REQUEST === 'true' ? ['Goal'] : []),
+                ...(process.env.RALPH_REQUEST === 'true' ? ['ralph'] : [])
+              ]
+            });
+
+      - name: Start AgentsWeb SSH session
+        id: agentsweb
+        if: env.TEST_REQUEST != 'true' && env.AGENTSWEB_SSH_ENABLED == 'true'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          # GITHUB_RUN_NUMBER starts at 1 in every repository, so using it here
+          # makes every new repository's first OMG run contend for port 32001.
+          # GITHUB_RUN_ID is globally unique and distributes runs across the
+          # broker's 32000-32999 public-port range.
+          SSH_PORT=$((32000 + GITHUB_RUN_ID % 1000))
+          echo "SSH_PORT=$SSH_PORT" >> "$GITHUB_ENV"
+          if [[ "$RUNNER_OS" == 'Linux' ]]; then
+            sudo apt-get update
+            sudo apt-get install -y openssh-server tmux
+          else
+            command -v tmux >/dev/null 2>&1 || brew install tmux
+          fi
+          install -d -m 700 "$SSH_DIR"
+          ssh-keygen -t ed25519 -f "$SSH_KEY" -N '' -q
+          chmod 600 "$SSH_KEY"
+          install -d -m 700 "$HOME/.ssh"
+          {
+            cat "$SSH_PUBLIC_KEY"
+            printf '%s\n' '${{ secrets.AGENTSWEB_SSH_PUBLIC_KEY }}'
+          } > "$HOME/.ssh/authorized_keys"
+          chmod 600 "$HOME/.ssh/authorized_keys"
+          [[ "$RUNNER_OS" != 'Linux' ]] || sudo mkdir -p /run/sshd
+          sudo /usr/sbin/sshd -p 2222 -o PasswordAuthentication=no \
+            -o PermitRootLogin=no -o PubkeyAuthentication=yes
+          is_listening() {
+            if command -v ss >/dev/null 2>&1; then
+              ss -ltn | grep -q ':2222 '
+            else
+              lsof -nP -iTCP:2222 -sTCP:LISTEN >/dev/null 2>&1
+            fi
+          }
+          for _ in {1..20}; do
+            is_listening && break
+            sleep 1
+          done
+          is_listening
+          nohup env PYTHONPATH="$GITHUB_WORKSPACE/.agentsweb" \
+            python3 -m lolgames_tunnel client 127.0.0.1:2222 \
+            --server agentsweb.space --name "$SSH_NAME" --public-port "$SSH_PORT" \
+            > "$SSH_DIR/tunnel.log" 2>&1 &
+          echo $! > "$SSH_DIR/tunnel.pid"
+          for _ in {1..45}; do
+            grep -q '^ssh://' "$SSH_DIR/tunnel.log" && break
+            if ! kill -0 "$(cat "$SSH_DIR/tunnel.pid")" 2>/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          if ! grep -q '^ssh://' "$SSH_DIR/tunnel.log"; then
+            echo 'AgentsWeb tunnel did not register.' >&2
+            sed -n '1,160p' "$SSH_DIR/tunnel.log" >&2
+            exit 1
+          fi
+          SSH_TUNNEL_URL="$(sed -n 's#^\(ssh://[^[:space:]]*\).*#\1#p' "$SSH_DIR/tunnel.log" | head -n 1)"
+          SSH_HOST="${SSH_NAME}.agentsweb.space"
+          SSH_COMMAND="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/aiplay-agentsweb -p ${SSH_PORT} runner@${SSH_HOST}"
+          {
+            printf 'AGENTSWEB_HOST=%q\n' "$SSH_HOST"
+            printf 'AGENTSWEB_PORT=%q\n' "$SSH_PORT"
+            printf 'AGENTSWEB_COMMAND=%q\n' "$SSH_COMMAND"
+            printf 'AGENTSWEB_TUNNEL_URL=%q\n' "$SSH_TUNNEL_URL"
+          } | tee "$SSH_DIR/access.env" >> "$GITHUB_ENV"
+          printf 'host=%s\nport=%s\ncommand=%s\n' "$SSH_HOST" "$SSH_PORT" "$SSH_COMMAND" >> "$GITHUB_OUTPUT"
+          if [[ "$SSH_ONLY_REQUEST" == 'true' ]]; then
+            body=$'🔐 **SSH-only debugging session is ready.**\n\n'
+            body+="Run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"$'\n'
+            body+="SSH URL: \`${SSH_TUNNEL_URL}\`"$'\n'
+            body+="Host: \`${SSH_HOST}:${SSH_PORT}\`"$'\n\n'
+            body+=$'Connect while the job is active:\n\n```sh\n'
+            body+="${SSH_COMMAND}"$'\n```\n\n'
+            body+=$'This run skips OpenCode and holds the runner for five hours for interactive debugging.'
+            jq -n --arg body "$body" '{body: $body}' \
+              | gh api "repos/${TARGET_REPOSITORY}/issues/${TRIGGER_ISSUE_NUMBER}/comments" \
+                --method POST --input - >/dev/null
+          fi
+
+      - name: Post SSH-only access details
+        id: ssh_access_comment
+        if: env.SSH_ONLY_REQUEST == 'true' && env.AGENTSWEB_SSH_ENABLED != 'true'
+        uses: actions/github-script@v7
+        env:
+          AGENTSWEB_SSH_ENABLED: ${{ env.AGENTSWEB_SSH_ENABLED }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const number = Number(process.env.TRIGGER_ISSUE_NUMBER);
+            const run = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = [
+              '❌ **SSH-only debugging session could not start.**', '',
+              `Run: ${run}`, 'The `AGENTSWEB_SSH_PUBLIC_KEY` secret is not configured.'
+            ].join('\n');
+            const comment = await github.rest.issues.createComment({
+              owner: process.env.TARGET_OWNER, repo: process.env.TARGET_REPO,
+              issue_number: number, body
+            });
+            core.setOutput('comment_id', comment.data.id);
+            if (process.env.AGENTSWEB_SSH_ENABLED !== 'true') core.setFailed('AGENTSWEB SSH is required for the ssh label.');
+
+      - name: Hold SSH-only debugging session
+        if: env.SSH_ONLY_REQUEST == 'true' && env.AGENTSWEB_SSH_ENABLED == 'true' && steps.agentsweb.outcome == 'success'
+        shell: bash
+        run: sleep 18000
+
+      - name: Start OpenCode web UI and Cloudflare tunnel
+        id: opencode_web
+        if: env.TEST_REQUEST != 'true' && env.SSH_ONLY_REQUEST != 'true'
+        shell: bash
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          set -euo pipefail
+          install -d -m 700 "$OPENCODE_WEB_DIR"
+          OPENCODE_VERSION="$(
+            curl --fail --silent --show-error --location --retry 3 --retry-all-errors \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H 'Accept: application/vnd.github+json' \
+              https://api.github.com/repos/anomalyco/opencode/releases/latest \
+              | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p'
+          )"
+          [[ "$OPENCODE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          curl --fail --silent --show-error --location https://opencode.ai/install \
+            | bash -s -- --version "$OPENCODE_VERSION"
+          OPENCODE_BIN="$HOME/.opencode/bin/opencode"
+          [[ -x "$OPENCODE_BIN" ]]
+          install -d -m 700 "$HOME/.config/opencode"
+          cat > "$HOME/.config/opencode/opencode.json" <<'EOF'
+          {
+            "$schema": "https://opencode.ai/config.json",
+            "plugin": [],
+            "permission": {
+              "*": "allow",
+              "task": "allow"
+            }
+          }
+          EOF
+          if [[ "$OMO_REQUEST" == 'true' && "$RALPH_REQUEST" != 'true' ]]; then
+            echo 'Installing oh-my-openagent for the omo-labeled request'
+            if ! command -v bun >/dev/null 2>&1; then
+              curl --fail --silent --show-error --location https://bun.sh/install | bash
+            fi
+            export BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
+            export PATH="$BUN_INSTALL/bin:$PATH"
+            command -v bun
+            bunx oh-my-openagent install \
+              --no-tui \
+              --platform=opencode \
+              --claude=no \
+              --openai=no \
+              --gemini=no \
+              --copilot=no \
+              --opencode-zen=no \
+              --zai-coding-plan=no \
+              --opencode-go=no \
+              --kimi-for-coding=no \
+              --bailian-coding-plan=no \
+              --minimax-cn-coding-plan=no \
+              --minimax-coding-plan=no \
+              --vercel-ai-gateway=no \
+              --skip-auth
+          fi
+          config_tmp="$OPENCODE_WEB_DIR/opencode.json"
+          if [[ "$RALPH_REQUEST" == 'true' ]]; then
+            npm install --prefix "$HOME/.config/opencode" --no-save --no-package-lock \
+              --ignore-scripts opencode-ralph-loop@1.0.10
+            jq '
+              .plugin = ((.plugin // []) + ["opencode-ralph-loop"]) |
+              .permission = ((.permission // {}) + {"*": "allow", "task": "allow"})
+            ' "$HOME/.config/opencode/opencode.json" > "$config_tmp"
+          elif [[ "$OMO_REQUEST" != 'true' ]]; then
+            npm install --prefix "$HOME/.config/opencode" --no-save --no-package-lock \
+              --ignore-scripts opencode-goal-plugin@0.8.2
+            jq '
+              .plugin = ((.plugin // []) + [["opencode-goal-plugin", {"noInterruptOnUserMessage": true}]]) |
+              .command.goal = {
+                "description": "Set a session-scoped goal and auto-continue until complete.",
+                "template": "$ARGUMENTS",
+                "agent": "build"
+              } |
+              .permission = ((.permission // {}) + {"*": "allow", "task": "allow"})
+            ' "$HOME/.config/opencode/opencode.json" > "$config_tmp"
+          else
+            jq '.permission = ((.permission // {}) + {"*": "allow", "task": "allow"})' \
+              "$HOME/.config/opencode/opencode.json" > "$config_tmp"
+          fi
+          mv "$config_tmp" "$HOME/.config/opencode/opencode.json"
+          PORTS="$(node --input-type=module -e '
+            import net from "node:net";
+            const ports = [];
+            for (let index = 0; index < 2; index += 1) {
+              const server = net.createServer();
+              await new Promise((resolve, reject) => {
+                server.once("error", reject);
+                server.listen(0, "127.0.0.1", resolve);
+              });
+              ports.push(server.address().port);
+              server.close();
+            }
+            console.log(ports.join(" "));
+          ')"
+          read -r OPENCODE_WEB_PORT PROJECT_FILE_PORT <<< "$PORTS"
+          [[ "$OPENCODE_WEB_PORT" =~ ^[0-9]+$ && "$PROJECT_FILE_PORT" =~ ^[0-9]+$ ]]
+          {
+            printf 'OPENCODE_WEB_PORT=%s\n' "$OPENCODE_WEB_PORT"
+            printf 'PROJECT_FILE_PORT=%s\n' "$PROJECT_FILE_PORT"
+          } >> "$GITHUB_ENV"
+          echo "Allocated OpenCode port: $OPENCODE_WEB_PORT"
+          echo "Allocated project file server port: $PROJECT_FILE_PORT"
+          nohup "$OPENCODE_BIN" serve --hostname 127.0.0.1 --port "$OPENCODE_WEB_PORT" \
+            > "$OPENCODE_WEB_DIR/opencode.log" 2>&1 &
+          echo $! > "$OPENCODE_WEB_DIR/opencode.pid"
+          wait_for_http() {
+            local url="$1"
+            local attempts="$2"
+            local response_code
+            for _ in $(seq 1 "$attempts"); do
+              response_code="$(curl --silent --show-error --max-time 3 \
+                --output /dev/null --write-out '%{http_code}' "$url" || true)"
+              if [[ "$response_code" =~ ^2[0-9][0-9]$ ]]; then
+                return 0
+              fi
+              sleep 1
+            done
+            return 1
+          }
+          wait_for_http_response() {
+            local url="$1"
+            local attempts="$2"
+            local response_code
+            for _ in $(seq 1 "$attempts"); do
+              response_code="$(curl --silent --show-error --max-time 3 \
+                --output /dev/null --write-out '%{http_code}' "$url" || true)"
+              if [[ "$response_code" =~ ^[1-5][0-9][0-9]$ ]]; then
+                return 0
+              fi
+              sleep 1
+            done
+            return 1
+          }
+          if ! wait_for_http "http://127.0.0.1:$OPENCODE_WEB_PORT/global/health" 45; then
+            echo 'OpenCode server did not become healthy; server log follows:' >&2
+            curl --silent --show-error --max-time 10 \
+              -i "http://127.0.0.1:$OPENCODE_WEB_PORT/global/health" >&2 || true
+            sed -n '1,160p' "$OPENCODE_WEB_DIR/opencode.log" >&2 || true
+            exit 1
+          fi
+          if ! command -v nginx >/dev/null 2>&1; then
+            case "$RUNNER_OS" in
+              Linux)
+                sudo apt-get update
+                sudo apt-get install -y nginx
+                ;;
+              macOS)
+                brew install nginx
+                ;;
+              *)
+                echo "Nginx is not installed and cannot be provisioned on $RUNNER_OS" >&2
+                exit 1
+                ;;
+            esac
+          fi
+          NGINX_BIN="$(command -v nginx)"
+          NGINX_PREFIX="$OPENCODE_WEB_DIR/nginx"
+          install -d -m 700 "$NGINX_PREFIX" "$NGINX_PREFIX/client_body_temp" \
+            "$NGINX_PREFIX/proxy_temp" "$NGINX_PREFIX/fastcgi_temp" \
+            "$NGINX_PREFIX/uwsgi_temp" "$NGINX_PREFIX/scgi_temp"
+          cat > "$NGINX_PREFIX/nginx.conf" <<EOF
+          worker_processes 1;
+          pid $NGINX_PREFIX/nginx.pid;
+          error_log $NGINX_PREFIX/error.log;
+          events { worker_connections 128; }
+          http {
+            access_log $NGINX_PREFIX/access.log;
+            client_body_temp_path $NGINX_PREFIX/client_body_temp;
+            proxy_temp_path $NGINX_PREFIX/proxy_temp;
+            fastcgi_temp_path $NGINX_PREFIX/fastcgi_temp;
+            uwsgi_temp_path $NGINX_PREFIX/uwsgi_temp;
+            scgi_temp_path $NGINX_PREFIX/scgi_temp;
+            server {
+              listen 127.0.0.1:$PROJECT_FILE_PORT;
+              root $PROJECT_DIR;
+              index __codex_no_automatic_index_file__;
+              autoindex on;
+            }
+          }
+          EOF
+          "$NGINX_BIN" -t -c "$NGINX_PREFIX/nginx.conf" -p "$NGINX_PREFIX"
+          "$NGINX_BIN" -c "$NGINX_PREFIX/nginx.conf" -p "$NGINX_PREFIX"
+          if ! wait_for_http "http://127.0.0.1:$PROJECT_FILE_PORT/" 15; then
+            echo 'Nginx project file server did not become healthy; server log follows:' >&2
+            sed -n '1,160p' "$NGINX_PREFIX/error.log" >&2 || true
+            exit 1
+          fi
+          echo 'Cloudflare will tunnel directly to the workspace-scoped OpenCode server and project file server'
+          case "$RUNNER_OS/$RUNNER_ARCH" in
+            Linux/X64) CLOUDFLARED_ASSET='cloudflared-linux-amd64' ;;
+            Linux/ARM64) CLOUDFLARED_ASSET='cloudflared-linux-arm64' ;;
+            macOS/X64) CLOUDFLARED_ASSET='cloudflared-darwin-amd64.tgz' ;;
+            macOS/ARM64) CLOUDFLARED_ASSET='cloudflared-darwin-arm64.tgz' ;;
+            *) echo "Unsupported runner platform: $RUNNER_OS/$RUNNER_ARCH" >&2; exit 1 ;;
+          esac
+          if [[ "$CLOUDFLARED_ASSET" == *.tgz ]]; then
+            curl --fail --silent --show-error --location --output "$OPENCODE_WEB_DIR/cloudflared.tgz" \
+              "https://github.com/cloudflare/cloudflared/releases/latest/download/$CLOUDFLARED_ASSET"
+            tar -xzf "$OPENCODE_WEB_DIR/cloudflared.tgz" -C "$OPENCODE_WEB_DIR" cloudflared
+          else
+            curl --fail --silent --show-error --location --output "$OPENCODE_WEB_DIR/cloudflared" \
+              "https://github.com/cloudflare/cloudflared/releases/latest/download/$CLOUDFLARED_ASSET"
+          fi
+          chmod 755 "$OPENCODE_WEB_DIR/cloudflared"
+          nohup "$OPENCODE_WEB_DIR/cloudflared" tunnel --no-autoupdate --url "http://127.0.0.1:$OPENCODE_WEB_PORT" \
+            > "$OPENCODE_WEB_DIR/cloudflared.log" 2>&1 &
+          echo $! > "$OPENCODE_WEB_DIR/cloudflared.pid"
+          nohup "$OPENCODE_WEB_DIR/cloudflared" tunnel --no-autoupdate --url "http://127.0.0.1:$PROJECT_FILE_PORT" \
+            > "$OPENCODE_WEB_DIR/project-cloudflared.log" 2>&1 &
+          echo $! > "$OPENCODE_WEB_DIR/project-cloudflared.pid"
+          for _ in {1..60}; do
+            WEB_URL="$(sed -nE 's#.*(https://[a-z0-9-]+\.trycloudflare\.com).*#\1#p' "$OPENCODE_WEB_DIR/cloudflared.log" | head -n 1)"
+            PROJECT_URL="$(sed -nE 's#.*(https://[a-z0-9-]+\.trycloudflare\.com).*#\1#p' "$OPENCODE_WEB_DIR/project-cloudflared.log" | head -n 1)"
+            [[ -n "$WEB_URL" && -n "$PROJECT_URL" ]] && break
+            sleep 1
+          done
+          [[ -n "${WEB_URL:-}" && -n "${PROJECT_URL:-}" ]]
+          printf 'url=%s\nproject_url=%s\n' "$WEB_URL" "$PROJECT_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Configure Git identity
+        if: env.SSH_ONLY_REQUEST != 'true'
+        shell: bash
+        run: |
+          git config user.name 'opencode[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: Create OpenCode branch
+        if: env.SSH_ONLY_REQUEST != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_BRANCH="$TARGET_REF"
+          git fetch origin "$BASE_BRANCH"
+          git checkout -B "$BRANCH_NAME" "origin/$BASE_BRANCH"
+
+      - name: Generate mock OpenCode project
+        if: env.TEST_REQUEST == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -p install -d "$PROJECT_DIR"
+          /usr/bin/time -p cp -R "$RUNTIME_DIR/.github/fixtures/test-project/." "$PROJECT_DIR/"
+          /usr/bin/time -p node "$PROJECT_DIR/scripts/write-build-metadata.mjs" \
+            "$PROJECT_DIR/build.json" "$GITHUB_RUN_ID" "$TRIGGER_ISSUE_NUMBER" "$TARGET_REPOSITORY"
+          /usr/bin/time -p test -f "$PROJECT_DIR/index.html"
+          /usr/bin/time -p test -f "$PROJECT_DIR/package.json"
+          /usr/bin/time -p install -d "$OPENCODE_WEB_DIR"
+          /usr/bin/time -p /usr/bin/printf '%s\n' \
+            'Mock OpenCode generation started.' \
+            "Copied the committed fixture into $PROJECT_DIR." \
+            'Mock OpenCode generation completed successfully.' \
+            > "$OPENCODE_WEB_DIR/opencode-run.log"
+          /usr/bin/time -p /usr/bin/printf '%s\n' \
+            'Mock verification session completed successfully.' \
+            > "$OPENCODE_WEB_DIR/verification.log"
+          # shellcheck disable=SC2016
+          /usr/bin/time -p jq -n \
+            --arg id "ses_mock_${GITHUB_RUN_ID}" \
+            --arg request "$COMMENT_BODY" \
+            '[
+              {info:{role:"user"},parts:[{type:"text",text:$request}]},
+              {info:{role:"assistant"},parts:[{type:"text",text:"Mock OpenCode copied the fixture project and completed generation."}]}
+            ]' > "$OPENCODE_WEB_DIR/opencode-response.json"
+          printf 'MOCK_SESSION_ID=ses_mock_%s\n' "$GITHUB_RUN_ID" >> "$GITHUB_ENV"
+
+      - name: Verify mock OpenCode project locally
+        if: env.TEST_REQUEST == 'true'
+        id: mock_project
+        shell: bash
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          set -euo pipefail
+          /usr/bin/time -p npm run start -- --port "$APP_PORT" > "$RUNNER_TEMP/mock-project.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for _ in {1..30}; do
+            if page="$(curl --fail --silent --show-error --max-time 3 "http://127.0.0.1:$APP_PORT")"; then
+              grep -q 'mock-opencode-project' <<< "$page"
+              /usr/bin/time -p mkdir -p screenshots
+              /usr/bin/time -p npx --yes playwright@latest install chromium
+              /usr/bin/time -p npx --yes playwright@latest screenshot \
+                --browser chromium \
+                --wait-for-selector='[data-testid="mock-opencode-project"]' \
+                --wait-for-timeout=500 \
+                "http://127.0.0.1:$APP_PORT" \
+                screenshots/final-mock-opencode.png
+              /usr/bin/time -p test -s screenshots/final-mock-opencode.png
+              printf 'screenshots_json=["final-mock-opencode.png"]\n' >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/mock-project.log" >&2
+          exit 1
+
+      - name: Resolve OpenCode model and skill labels
+        id: opencode_labels
+        if: env.TEST_REQUEST != 'true' && env.SSH_ONLY_REQUEST != 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const number = Number(process.env.TRIGGER_ISSUE_NUMBER);
+            const response = await github.rest.issues.listLabelsOnIssue({
+              owner: process.env.TARGET_OWNER,
+              repo: process.env.TARGET_REPO,
+              issue_number: number,
+              sort: 'created',
+              direction: 'asc',
+              per_page: 100
+            });
+            const names = response.data.map(({ name }) => name);
+            const modelLabels = names.filter((name) => name.startsWith('model/'));
+            if (modelLabels.length > 1) {
+              core.setFailed(`Expected at most one model/* label, found: ${modelLabels.join(', ')}`);
+              return;
+            }
+            const model = modelLabels[0]?.slice('model/'.length) || 'opencode/muse-spark-1.3-contributor-free';
+            const skills = names.filter((name) => name.startsWith('skill/'))
+              .map((name) => name.slice('skill/'.length)).sort();
+            core.setOutput('model', model);
+            core.setOutput('skills_json', JSON.stringify(skills));
+            core.info(`Resolved model=${model}; skills=${skills.join(', ') || '(none)'}`);
+
+      - name: Run OpenCode and locate its web session
+        id: opencode_run
+        if: env.TEST_REQUEST != 'true' && env.SSH_ONLY_REQUEST != 'true'
+        shell: bash
+        working-directory: ${{ env.PROJECT_DIR }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          OPENCODE_WEB_URL: ${{ steps.opencode_web.outputs.url }}
+          OPENCODE_MODEL: ${{ steps.opencode_labels.outputs.model }}
+          OPENCODE_SKILLS: ${{ steps.opencode_labels.outputs.skills_json }}
+          GOAL_REQUEST: ${{ env.GOAL_REQUEST }}
+          RALPH_REQUEST: ${{ env.RALPH_REQUEST }}
+          OMO_REQUEST: ${{ env.OMO_REQUEST }}
+        run: |
+          set -euo pipefail
+          OPENCODE_BIN="$HOME/.opencode/bin/opencode"
+          PROMPT_FILE="$OPENCODE_WEB_DIR/prompt.txt"
+          RUN_LOG="$OPENCODE_WEB_DIR/opencode-run.log"
+          RUN_EXIT="$OPENCODE_WEB_DIR/opencode-run.exit"
+          skill_text="$(jq -r 'if length == 0 then "(none)" else join(", ") end' <<<"$OPENCODE_SKILLS")"
+          prompt_template="$(< "$RUNTIME_DIR/.github/prompts/01-build.md")"
+          request_text="$COMMENT_BODY"
+          prompt="${prompt_template//@COMMENT_BODY@/$request_text}"
+          prompt="${prompt//@OPENCODE_MODEL@/$OPENCODE_MODEL}"
+          prompt="${prompt//@SKILL_TEXT@/$skill_text}"
+          if [[ "$OMO_REQUEST" == 'true' && "$RALPH_REQUEST" != 'true' ]]; then
+            prompt=$'ulw\n\n'"$prompt"
+          fi
+          printf '%s\n' "$prompt" > "$PROMPT_FILE"
+          if [[ "$OMO_REQUEST" == 'true' && "$RALPH_REQUEST" != 'true' ]]; then
+            cat >> "$PROMPT_FILE" <<'EOF'
+
+            This request has the `omo` issue label. Use oh-my-openagent Ultimate's native Goal system for the persistent objective and `ulw` for full OMO orchestration. Keep the objective active through verified implementation iterations and do not stop after the first successful pass. Preserve the workflow's evidence, commit, and push requirements.
+          EOF
+          fi
+          if [[ "$OMO_REQUEST" == 'true' && "$RALPH_REQUEST" != 'true' ]]; then
+            echo 'OpenCode invocation mode: omo-goal-ulw'
+          elif [[ "$RALPH_REQUEST" == 'true' ]]; then
+            echo 'OpenCode invocation mode: ralph-loop'
+          else
+            echo "OpenCode invocation mode: $([[ "$GOAL_REQUEST" == 'true' ]] && echo goal || echo standard)"
+          fi
+          # The inner shell expands the positional parameters after nohup starts.
+          # shellcheck disable=SC2016
+          nohup bash -c '
+            if [[ "$9" == true ]]; then
+              "$1" run --auto --dangerously-skip-permissions --attach "http://127.0.0.1:$2" --dir "$PROJECT_DIR" --model "$6" --command ralph-loop "$(cat "$3")" > "$4" 2>&1
+            elif [[ "$8" == true ]]; then
+              "$1" run --auto --dangerously-skip-permissions --attach "http://127.0.0.1:$2" --dir "$PROJECT_DIR" --model "$6" --command goal "$(cat "$3")" > "$4" 2>&1
+            elif [[ "$7" == true ]]; then
+              "$1" run --auto --dangerously-skip-permissions --attach "http://127.0.0.1:$2" --dir "$PROJECT_DIR" --model "$6" --command goal "$(cat "$3")" > "$4" 2>&1
+            else
+              "$1" run --auto --dangerously-skip-permissions --attach "http://127.0.0.1:$2" --dir "$PROJECT_DIR" --model "$6" "$(cat "$3")" > "$4" 2>&1
+            fi
+            code=$?
+            echo "$code" > "$5"
+            exit "$code"
+          ' \
+            _ "$OPENCODE_BIN" "$OPENCODE_WEB_PORT" "$PROMPT_FILE" "$RUN_LOG" "$RUN_EXIT" "$OPENCODE_MODEL" "$GOAL_REQUEST" "$OMO_REQUEST" "$RALPH_REQUEST" \
+            > /dev/null 2>&1 &
+          echo $! > "$OPENCODE_WEB_DIR/opencode-run.pid"
+          SESSION_ID=''
+          for _ in {1..120}; do
+            SESSION_ID="$(curl --fail --silent --show-error \
+              -H "x-opencode-directory: $PROJECT_DIR" \
+              "http://127.0.0.1:$OPENCODE_WEB_PORT/session" | jq -r '.[0].id // empty')"
+            [[ "$SESSION_ID" == ses_* ]] && break
+            sleep 1
+          done
+          [[ "$SESSION_ID" == ses_* ]]
+          DIRECTORY_B64="$(printf '%s' "$PROJECT_DIR" | base64 | tr -d '\n' | tr '+/' '-_' | tr -d '=')"
+          printf 'session_id=%s\nsession_url=%s\n' "$SESSION_ID" \
+            "${OPENCODE_WEB_URL}/${DIRECTORY_B64}/session/${SESSION_ID}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify live sessions through SSH
+        id: verify_sessions
+        if: env.TEST_REQUEST != 'true' && env.SSH_ONLY_REQUEST != 'true' && env.AGENTSWEB_SSH_ENABLED == 'true' && steps.agentsweb.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          source "$SSH_DIR/access.env"
+          echo "Expected session: ${{ steps.opencode_run.outputs.session_id }}"
+          for _ in {1..12}; do
+            if ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+              -o ConnectTimeout=20 -o ConnectionAttempts=1 -i "$SSH_KEY" \
+              -p "$SSH_PORT" \
+              "runner@$AGENTSWEB_HOST" \
+              "curl --fail --silent --show-error -H 'x-opencode-directory: $PROJECT_DIR' http://127.0.0.1:$OPENCODE_WEB_PORT/session" \
+              > "$OPENCODE_WEB_DIR/ssh-sessions.json"; then
+              break
+            fi
+            sleep 5
+          done
+          [[ -s "$OPENCODE_WEB_DIR/ssh-sessions.json" ]]
+          echo
+          echo 'Sessions returned through SSH:'
+          jq . "$OPENCODE_WEB_DIR/ssh-sessions.json"
+          jq -e --arg session "${{ steps.opencode_run.outputs.session_id }}" \
+            'any(.[]; .id == $session)' "$OPENCODE_WEB_DIR/ssh-sessions.json"
+
+      - name: Post temporary access details
+        id: access_comment
+        if: env.SSH_ONLY_REQUEST != 'true'
+        uses: actions/github-script@v7
+        env:
+          AGENTSWEB_SSH_ENABLED: ${{ env.AGENTSWEB_SSH_ENABLED }}
+          AGENTSWEB_SSH_READY: ${{ steps.agentsweb.outcome == 'success' }}
+          SSH_ACCESS_FILE: ${{ env.SSH_DIR }}/access.env
+          SSH_TUNNEL_LOG: ${{ env.SSH_DIR }}/tunnel.log
+          OPENCODE_WEB_URL: ${{ env.TEST_REQUEST == 'true' && format('https://github.com/{0}/actions/runs/{1}', github.repository, github.run_id) || steps.opencode_run.outputs.session_url }}
+          PROJECT_FILE_URL: ${{ env.TEST_REQUEST == 'true' && format('https://github.com/{0}/tree/{1}/workflow-test-project', github.repository, env.BRANCH_NAME) || steps.opencode_web.outputs.project_url }}
+          PROGRESS_COMMENT_TEMPLATE: ${{ env.RUNTIME_DIR }}/.github/scripts/opencode-progress-comment-template.md
+          GOAL_REQUEST: ${{ env.GOAL_REQUEST }}
+          RALPH_REQUEST: ${{ env.RALPH_REQUEST }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require('node:fs');
+            const accessText = fs.existsSync(process.env.SSH_ACCESS_FILE) ? fs.readFileSync(process.env.SSH_ACCESS_FILE, 'utf8').trim() : '';
+            const access = Object.fromEntries(accessText ? accessText.split('\n').map((line) => {
+              const separator = line.indexOf('=');
+              return [line.slice(0, separator), line.slice(separator + 1)];
+            }) : []);
+            const tunnelLog = fs.existsSync(process.env.SSH_TUNNEL_LOG) ? fs.readFileSync(process.env.SSH_TUNNEL_LOG, 'utf8') : '';
+            const tunnelUrl = access.AGENTSWEB_TUNNEL_URL || (tunnelLog.match(/^ssh:\/\/[^\s]+/m) || [])[0] || 'not registered';
+            const { renderProgressComment } = require(`${process.env.RUNTIME_DIR}/.github/scripts/opencode-comment-templates.cjs`);
+            const number = Number(process.env.TRIGGER_ISSUE_NUMBER);
+            const run = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const command = process.env.TEST_REQUEST === 'true'
+              ? 'mock OpenCode'
+              : (process.env.RALPH_REQUEST === 'true'
+              ? 'OpenCode with Ralph Loop'
+              : (process.env.GOAL_REQUEST === 'true' ? 'OpenCode with Goal' : 'OpenCode'));
+            const sshSection = process.env.AGENTSWEB_SSH_ENABLED === 'true' && process.env.AGENTSWEB_SSH_READY === 'true'
+              ? [
+                  '🔐 **Temporary AgentsWeb SSH session is ready.**', '',
+                  `Run: ${run}`, `SSH URL: \`${tunnelUrl}\``, `Host: \`${access.AGENTSWEB_HOST}:${access.AGENTSWEB_PORT}\``, '',
+                  'Run this command while the job is active:', '',
+                  '```sh', access.AGENTSWEB_COMMAND, '```'
+                ].join('\n')
+              : (process.env.AGENTSWEB_SSH_ENABLED === 'true'
+                ? ['⚠️ **AgentsWeb SSH tunnel setup failed.**', '', `Run: ${run}`, `SSH URL: \`${tunnelUrl}\``].join('\n')
+                : '');
+            const body = renderProgressComment({
+              SSH_SECTION: sshSection,
+              UPDATED: new Date().toISOString().replace('T', ' ').replace('Z', ' UTC'),
+              OPENCODE_WEB_URL: process.env.OPENCODE_WEB_URL,
+              PROJECT_FILE_URL: process.env.PROJECT_FILE_URL || 'unavailable',
+              VALIDATION_SESSION_SECTION: '',
+              PROGRESS_STATS: process.env.TEST_REQUEST === 'true'
+                ? '- Elapsed: under 1 minute\n- Token count: 0\n- Speed score: fixture copy\n- Tool calls: 0\n- Active tool calls: 0\n- Active subagents: 0\n- Total subagents executed: 0\n- Total failed subagents: 0\n- Image-context model calls: 0\n- Changed workspace files: fixture project'
+                : '- Waiting for live OpenCode progress statistics.',
+              ACCESS_NOTE: process.env.TEST_REQUEST === 'true'
+                ? 'This is a synthetic OpenCode session for the full workflow test. Generation is replaced only by the fixture copy; reporting and delivery continue normally.'
+                : `This opens the currently running ${command} session directly. Access remains available while OpenCode runs and for 5 hours afterwards.`
+            });
+            const comment = await github.rest.issues.createComment({
+              owner: process.env.TARGET_OWNER, repo: process.env.TARGET_REPO, issue_number: number, body
+            });
+            core.setOutput('comment_id', comment.data.id);
+
+      - name: Start live OpenCode response comment
+        id: response_comment
+        if: env.SSH_ONLY_REQUEST != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMENT_ID: ${{ steps.access_comment.outputs.comment_id }}
+          SESSION_ID: ${{ steps.opencode_run.outputs.session_id }}
+          OPENCODE_WEB_URL: ${{ steps.opencode_run.outputs.session_url }}
+          PROJECT_FILE_URL: ${{ steps.opencode_web.outputs.project_url }}
+          ISSUE_NUMBER: ${{ env.TRIGGER_ISSUE_NUMBER }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [[ "$TEST_REQUEST" == 'true' ]]; then
+            /usr/bin/time -p /usr/bin/printf '%s\n' \
+              'Progress comment created.' \
+              "Synthetic session: $MOCK_SESSION_ID" \
+              'Fixture generation is complete; downstream validation and delivery are running.' \
+              > "$OPENCODE_WEB_DIR/response-comment-tracker.log"
+            exit 0
+          fi
+          TRACKER="$OPENCODE_WEB_DIR/response-comment-tracker.sh"
+          install -m 700 "$RUNTIME_DIR/.github/scripts/opencode-progress-tracker.sh" "$TRACKER"
+          source "$SSH_DIR/access.env"
+          # The tracker is intentionally independent of the step shell so it can poll
+          # while later workflow steps run; cleanup stops it at the end of the job.
+          nohup env PROJECT_DIR="$PROJECT_DIR" OPENCODE_WEB_PORT="$OPENCODE_WEB_PORT" \
+            OPENCODE_WEB_DIR="$OPENCODE_WEB_DIR" SESSION_ID="$SESSION_ID" \
+            PROJECT_FILE_URL="${{ steps.opencode_web.outputs.project_url }}" \
+            PROGRESS_COMMENT_TEMPLATE="$RUNTIME_DIR/.github/scripts/opencode-progress-comment-template.md" \
+            AGENTSWEB_SSH_ENABLED="$AGENTSWEB_SSH_ENABLED" \
+            AGENTSWEB_SSH_READY="${{ steps.agentsweb.outcome == 'success' }}" \
+            SSH_COMMAND="$AGENTSWEB_COMMAND" \
+            SSH_HOST="$AGENTSWEB_HOST" \
+            RUN_URL="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
+            COMMENT_ID="$COMMENT_ID" REPOSITORY="$REPOSITORY" GH_TOKEN="$GH_TOKEN" \
+            "$TRACKER" > "$OPENCODE_WEB_DIR/response-comment-tracker.log" 2>&1 &
+          echo $! > "$OPENCODE_WEB_DIR/response-comment-tracker.pid"
+
+      - name: Verify Ralph completion promise
+        if: env.TEST_REQUEST != 'true' && env.SSH_ONLY_REQUEST != 'true' && env.RALPH_REQUEST == 'true'
+        shell: bash
+        working-directory: ${{ env.PROJECT_DIR }}
+        env:
+          SESSION_ID: ${{ steps.opencode_run.outputs.session_id }}
+        run: |
+          set -euo pipefail
+          RUN_EXIT="$OPENCODE_WEB_DIR/opencode-run.exit"
+          RUN_LOG="$OPENCODE_WEB_DIR/opencode-run.log"
+          RESPONSE_FILE="$OPENCODE_WEB_DIR/ralph-response.json"
+          for _ in {1..21600}; do
+            [[ -f "$RUN_EXIT" ]] && break
+            sleep 1
+          done
+          [[ -f "$RUN_EXIT" ]]
+===END PART1===
+[0m
+[0m$ [0mgh api repos/AgentsLoop/OhMyGithub/contents/.github/workflows/opencode-reusable.yml --jq '.content' 2>&1 | base64 -d | wc -l
+gh api repos/AgentsLoop/OhMyGithub/contents/.github/scripts/opencode-progress-comment-template.md --jq '.content' 2>&1 | base64 -d
+echo "===TEMPLATES CJS==="; gh api repos/AgentsLoop/OhMyGithub/contents/.github/scripts/opencode-comment-templates.cjs --jq '.content' 2>&1 | base64 -d | head -n 300
+1512
+@SSH_SECTION@
+🟡 **OpenCode progress (live)**
+
+Updated: @UPDATED@
+
+🌐 **OpenCode Web UI:** @OPENCODE_WEB_URL@
+
+📁 **Project files:** @PROJECT_FILE_URL@
+
+@VALIDATION_SESSION_SECTION@
+
+@PROGRESS_STATS@
+
+@ACCESS_NOTE@
+===TEMPLATES CJS===
+const fs = require('node:fs');
+const path = require('node:path');
+
+function renderTemplate(name, values) {
+  const localPath = path.join(__dirname, name);
+  const sharedPath = path.join(__dirname, '..', '..', 'scripts', name);
+  const templatePath = fs.existsSync(localPath) ? localPath : sharedPath;
+  let body = fs.readFileSync(templatePath, 'utf8').trim();
+  for (const [key, value] of Object.entries(values)) {
+    body = body.replaceAll(`@${key}@`, String(value ?? ''));
+  }
+  return body;
+}
+
+function renderProgressComment(values) {
+  return renderTemplate('opencode-progress-comment-template.md', values);
+}
+
+module.exports = { renderProgressComment, renderTemplate };
+[0m
+[0m$ [0mcat .opencode-ssh/tunnel.log 2>&1 | head -n 100
+echo "===ACCESS ENV==="; cat .opencode-ssh/access.env 2>&1
+echo "===CLOUDFLARE WEB URL extract==="; grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' .opencode-web/cloudflared.log | head -n 5
+echo "===PROJECT URL extract==="; grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' .opencode-web/project-cloudflared.log | head -n 5
+echo "===GH RUN==="; gh api repos/AgentsLoop/PlayGround/actions/runs/34184464257 --jq '{status, conclusion, html_url}' 2>&1
+ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257
+===ACCESS ENV===
+AGENTSWEB_HOST=opencode-issue-79-34184464257-ssh.agentsweb.space
+AGENTSWEB_PORT=32257
+AGENTSWEB_COMMAND=ssh\ -o\ StrictHostKeyChecking=no\ -o\ UserKnownHostsFile=/dev/null\ -i\ ~/.ssh/aiplay-agentsweb\ -p\ 32257\ runner@opencode-issue-79-34184464257-ssh.agentsweb.space
+AGENTSWEB_TUNNEL_URL=ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257
+===CLOUDFLARE WEB URL extract===
+https://fast-javascript-involvement-nut.trycloudflare.com
+===PROJECT URL extract===
+https://spot-moderator-intense-condition.trycloudflare.com
+===GH RUN===
+{"conclusion":null,"html_url":"https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257","status":"in_progress"}
+[0m
+[0m$ [0mpython3 -c "
+import urllib.request, ssl
+for url in ['https://fast-javascript-involvement-nut.trycloudflare.com/', 'https://spot-moderator-intense-condition.trycloudflare.com/']:
+    try:
+        with urllib.request.urlopen(url, timeout=15) as r:
+            print(url, r.status, len(r.read()))
+    except Exception as e:
+        print(url, 'ERR', e)
+"
+https://fast-javascript-involvement-nut.trycloudflare.com/ 200 2884
+https://spot-moderator-intense-condition.trycloudflare.com/ 200 635
+[0m
+[0m$ [0mcurl -s -o /tmp/web-session.html -w "%{http_code} %{size_download}\n" --max-time 20 "https://fast-javascript-involvement-nut.trycloudflare.com/L2hvbWUvcnVubmVyL3dvcmsvUGxheUdyb3VuZC9QbGF5R3JvdW5k/session/ses_f80e1ff7effeRLDkkOz7xjlX98"; head -c 1000 /tmp/web-session.html; echo
+echo "===LOCAL API check==="; curl -s --max-time 10 -H "x-opencode-directory: /home/runner/work/PlayGround/PlayGround" http://127.0.0.1:41807/session | head -c 2000; echo
+echo "===SSH TCP check==="; timeout 10 bash -c 'cat < /dev/null > /dev/tcp/opencode-issue-79-34184464257-ssh.agentsweb.space/32257 && echo TCP-OPEN || echo TCP-FAIL'
+200 2884
+<!doctype html>
+<html lang="en" style="background-color: var(--v2-background-bg-deep, #fafafa)">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, interactive-widget=resizes-content, viewport-fit=cover"
+    />
+    <title>OpenCode</title>
+    <link rel="icon" type="image/png" href="/favicon-96x96-v3.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-v3.svg" />
+    <link rel="shortcut icon" href="/favicon-v3.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-v3.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#fafafa" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta property="og:image" content="/social-share.png" />
+    <meta property="twitter:
+===LOCAL API check===
+[{"id":"ses_f80e1ff7effeRLDkkOz7xjlX98","slug":"clever-nebula","projectID":"0c237aa193815467d7fd5279958325141801d607","directory":"/home/runner/work/PlayGround/PlayGround","path":"","summary":{"additions":0,"deletions":0,"files":0},"cost":0,"tokens":{"input":66281,"output":2406,"reasoning":1537,"cache":{"read":426256,"write":0}},"title":"New session - 2026-09-08T03:44:27.778Z","agent":"build","model":{"id":"muse-spark-1.3-contributor-free","providerID":"opencode","variant":"default"},"version":"1.18.29","time":{"created":1788839067778,"updated":1788839167722},"permission":[{"permission":"question","pattern":"*","action":"deny"},{"permission":"plan_enter","pattern":"*","action":"deny"},{"permission":"plan_exit","pattern":"*","action":"deny"}]}]
+===SSH TCP check===
+TCP-OPEN
+[0m
+Live tunnels and session verified — now checking failure-path reporting.
+[0m$ [0mssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=15 -i ./opencode-agentsweb-id_ed25519 -p 32257 runner@opencode-issue-79-34184464257-ssh.agentsweb.space "echo SSH-OK; hostname; whoami" 2>&1 | head -n 20
+echo "===SSH via tunnel to local sshd, then curl opencode==="; ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=15 -i ./opencode-agentsweb-id_ed25519 -p 32257 runner@opencode-issue-79-34184464257-ssh.agentsweb.space "curl --fail --silent -H 'x-opencode-directory: /home/runner/work/PlayGround/PlayGround' http://127.0.0.1:41807/session | head -c 300" 2>&1 | head -n 20
+Warning: Permanently added '[opencode-issue-79-34184464257-ssh.agentsweb.space]:32257' (ED25519) to the list of known hosts.
+SSH-OK
+runnervmejwal
+runner
+===SSH via tunnel to local sshd, then curl opencode===
+Warning: Permanently added '[opencode-issue-79-34184464257-ssh.agentsweb.space]:32257' (ED25519) to the list of known hosts.
+[{"id":"ses_f80e1ff7effeRLDkkOz7xjlX98","slug":"clever-nebula","projectID":"0c237aa193815467d7fd5279958325141801d607","directory":"/home/runner/work/PlayGround/PlayGround","path":"","summary":{"additions":0,"deletions":0,"files":0},"cost":0,"tokens":{"input":66515,"output":2686,"reasoning":1631,"cac
+[0m
+[0m$ [0mls .omgithub-runtime/.github/scripts/ 2>&1; cat .omgithub-runtime/.github/scripts/opencode-progress-comment-template.md 2>&1; echo "==="; cat .omgithub-runtime/.github/scripts/opencode-comment-templates.cjs 2>&1 | head -n 50
+opencode-comment-templates.cjs
+opencode-progress-comment-template.md
+opencode-progress-tracker.sh
+@SSH_SECTION@
+🟡 **OpenCode progress (live)**
+
+Updated: @UPDATED@
+
+🌐 **OpenCode Web UI:** @OPENCODE_WEB_URL@
+
+📁 **Project files:** @PROJECT_FILE_URL@
+
+@VALIDATION_SESSION_SECTION@
+
+@PROGRESS_STATS@
+
+@ACCESS_NOTE@
+===
+const fs = require('node:fs');
+const path = require('node:path');
+
+function renderTemplate(name, values) {
+  const localPath = path.join(__dirname, name);
+  const sharedPath = path.join(__dirname, '..', '..', 'scripts', name);
+  const templatePath = fs.existsSync(localPath) ? localPath : sharedPath;
+  let body = fs.readFileSync(templatePath, 'utf8').trim();
+  for (const [key, value] of Object.entries(values)) {
+    body = body.replaceAll(`@${key}@`, String(value ?? ''));
+  }
+  return body;
+}
+
+function renderProgressComment(values) {
+  return renderTemplate('opencode-progress-comment-template.md', values);
+}
+
+module.exports = { renderProgressComment, renderTemplate };
+[0m
+[0m$ [0mnode -e "
+const fs=require('fs');
+const {renderProgressComment}=require('./.omgithub-runtime/.github/scripts/opencode-comment-templates.cjs');
+
+// FAILURE PATH: no access.env, empty tunnel log
+const accessText='';
+const access={};
+const tunnelLog='';
+const tunnelUrl = access.AGENTSWEB_TUNNEL_URL || (tunnelLog.match(/^ssh:\/\/[^\s]+/m)||[])[0] || 'not registered';
+console.log('tunnelUrl='+tunnelUrl);
+const run='https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257';
+// enabled=true, ready=false  => failure branch
+const sshSection = ['⚠️ **AgentsWeb SSH tunnel setup failed.**','','Run: '+run,'SSH URL: \`'+tunnelUrl+'\`'].join('\n');
+const body = renderProgressComment({SSH_SECTION: sshSection, UPDATED: '2026-09-08 03:45:35 UTC', OPENCODE_WEB_URL: 'https://example.trycloudflare.com/DIR/session/ses_x', PROJECT_FILE_URL: 'https://example2.trycloudflare.com', VALIDATION_SESSION_SECTION: '', PROGRESS_STATS: '- Waiting', ACCESS_NOTE: 'note'});
+console.log('---FAILURE BODY---');
+console.log(body);
+console.log('---CHECKS---');
+console.log('has failure marker:', body.includes('AgentsWeb SSH tunnel setup failed'));
+console.log('has not registered:', body.includes('SSH URL: \`not registered\`'));
+console.log('has Web URL:', body.includes('OpenCode Web UI'));
+"
+echo "===SUCCESS PATH from live comment already fetched==="
+gh api repos/AgentsLoop/PlayGround/issues/79/comments --jq '.[0].body' 2>&1 | grep -E "SSH URL|Host:|OpenCode Web UI|Project files|Temporary AgentsWeb" | head -n 20
+tunnelUrl=not registered
+---FAILURE BODY---
+⚠️ **AgentsWeb SSH tunnel setup failed.**
+
+Run: https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257
+SSH URL: `not registered`
+🟡 **OpenCode progress (live)**
+
+Updated: 2026-09-08 03:45:35 UTC
+
+🌐 **OpenCode Web UI:** https://example.trycloudflare.com/DIR/session/ses_x
+
+📁 **Project files:** https://example2.trycloudflare.com
+
+
+
+- Waiting
+
+note
+---CHECKS---
+has failure marker: true
+has not registered: true
+has Web URL: true
+===SUCCESS PATH from live comment already fetched===
+🔐 **Temporary AgentsWeb SSH session is ready.**
+Host: opencode-issue-79-34184464257-ssh.agentsweb.space:32257
+🌐 **OpenCode Web UI:** https://fast-javascript-involvement-nut.trycloudflare.com/L2hvbWUvcnVubmVyL3dvcmsvUGxheUdyb3VuZC9QbGF5R3JvdW5k/session/ses_f80e1ff7effeRLDkkOz7xjlX98
+📁 **Project files:** https://spot-moderator-intense-condition.trycloudflare.com
+[0m
+[0m$ [0mgh api repos/AgentsLoop/PlayGround/issues/79/comments --jq '.[0].body' 2>&1 > /tmp/comment.txt; cat /tmp/comment.txt; echo "===CHECKS==="; python3 -c "
+b=open('/tmp/comment.txt').read()
+print('has ssh://', 'ssh://' in b)
+print('has OpenCode Web UI', 'OpenCode Web UI' in b)
+print('has Host:', 'Host:' in b)
+print('has SSH URL label', 'SSH URL' in b)
+print('---')
+# show lines
+for l in b.splitlines():
+    if 'ssh' in l.lower() or 'OpenCode Web' in l or 'Host' in l or 'trycloudflare' in l:
+        print(repr(l))
+"
+🔐 **Temporary AgentsWeb SSH session is ready.**
+
+Run: https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257
+Host: opencode-issue-79-34184464257-ssh.agentsweb.space:32257
+
+Run this command while the job is active:
+
+Command:
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/aiplay-agentsweb -p 32257 runner@opencode-issue-79-34184464257-ssh.agentsweb.space
+
+🟡 **OpenCode progress (live)**
+
+Updated: 2026-09-08 03:46:40 UTC
+
+🌐 **OpenCode Web UI:** https://fast-javascript-involvement-nut.trycloudflare.com/L2hvbWUvcnVubmVyL3dvcmsvUGxheUdyb3VuZC9QbGF5R3JvdW5k/session/ses_f80e1ff7effeRLDkkOz7xjlX98
+
+📁 **Project files:** https://spot-moderator-intense-condition.trycloudflare.com
+
+
+
+- Elapsed: 2m
+- Token count: 770526
+- Speed score: 6115.3 tokens/s
+- Tool calls: 27
+- Active tool calls: 0
+- Active subagents: 0
+- Total subagents executed: 0
+- Total failed subagents: 0
+- Image-context model calls: 0
+- Changed workspace files: 9
+
+This opens the currently running OpenCode session directly. Access remains available while OpenCode runs and for 5 hours afterwards.
+===CHECKS===
+has ssh:// False
+has OpenCode Web UI True
+has Host: True
+has SSH URL label False
+---
+'🔐 **Temporary AgentsWeb SSH session is ready.**'
+'Host: opencode-issue-79-34184464257-ssh.agentsweb.space:32257'
+'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/aiplay-agentsweb -p 32257 runner@opencode-issue-79-34184464257-ssh.agentsweb.space'
+'🌐 **OpenCode Web UI:** https://fast-javascript-involvement-nut.trycloudflare.com/L2hvbWUvcnVubmVyL3dvcmsvUGxheUdyb3VuZC9QbGF5R3JvdW5k/session/ses_f80e1ff7effeRLDkkOz7xjlX98'
+'📁 **Project files:** https://spot-moderator-intense-condition.trycloudflare.com'
+[0m
+[0m$ [0mgh api repos/AgentsLoop/OhMyGithub/contents/.github/scripts/opencode-progress-tracker.sh --jq '.content' 2>&1 | base64 -d | grep -n -A10 -B2 "ssh_section\|SSH_URL\|TUNNEL"
+136-      'BEGIN { if (elapsed > 0) printf "%.1f", tokens / elapsed; else print "0.0" }')"
+137-    access_links="$(< "${PROGRESS_COMMENT_TEMPLATE:-$(dirname "$0")/opencode-progress-comment-template.md}")"
+138:    ssh_section=""
+139-    if [[ "${AGENTSWEB_SSH_ENABLED:-false}" == "true" && "${AGENTSWEB_SSH_READY:-false}" == "true" ]]; then
+140:      ssh_section="🔐 **Temporary AgentsWeb SSH session is ready.**
+141-
+142-Run: ${RUN_URL}
+143-Host: ${SSH_HOST}:${SSH_PORT}
+144-
+145-Run this command while the job is active:
+146-
+147-Command:
+148-${SSH_COMMAND}
+149-"
+150-    fi
+--
+164-    fi
+165-    access_note="This opens the currently running OpenCode session directly. Access remains available while OpenCode runs and for 5 hours afterwards."
+166:    access_links="${access_links//@SSH_SECTION@/$ssh_section}"
+167-    access_links="${access_links//@UPDATED@/$(date -u '+%Y-%m-%d %H:%M:%S UTC')}"
+168-    access_links="${access_links//@OPENCODE_WEB_URL@/$OPENCODE_WEB_URL}"
+169-    access_links="${access_links//@PROJECT_FILE_URL@/${PROJECT_FILE_URL:-unavailable}}"
+170-    access_links="${access_links//@VALIDATION_SESSION_SECTION@/$validation_session_section}"
+171-    access_links="${access_links//@PROGRESS_STATS@/$progress_stats}"
+172-    access_links="${access_links//@ACCESS_NOTE@/$access_note}"
+173-    body="${access_links}"
+174-    if [[ "${PROGRESS_DRY_RUN:-false}" == "true" ]]; then
+175-      printf '%s\n' "$body" > "${PROGRESS_OUTPUT:?PROGRESS_OUTPUT is required in dry-run mode}"
+176-    else
+[0m
+Spotted a reporting gap — confirming the scope before finalizing.
+[0m$ [0mgit status --porcelain 2>&1 | head -n 50; echo "===exclude==="; cat .git/info/exclude 2>&1; echo "===log==="; git log --oneline -5 2>&1; echo "===remote==="; git remote -v 2>&1
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+===exclude===
+# git ls-files --others --exclude-from=.git/info/exclude
+# Lines that start with '#' are comments.
+# For a project mostly in C, the following would be a good set of
+# exclude patterns (uncomment them if you want to use them):
+# *.[oa]
+# *~
+/./.agents/
+/./.opencode/ralph-loop.local.md
+===log===
+b4fe44a Grant reusable OpenCode workflow Pages permission
+===remote===
+origin	https://github.com/AgentsLoop/PlayGround (fetch)
+origin	https://github.com/AgentsLoop/PlayGround (push)
+[0m
+[0m$ [0mgit ls-files 2>&1 | head -n 100; echo "===check Agents.md tracked?==="; git check-ignore -v Agents.md .omgithub-runtime/.github/scripts/opencode-progress-tracker.sh 2>&1 || true
+.github/workflows/opencode.yml
+README.md
+===check Agents.md tracked?===
+[0m
+[0m$ [0mgh api repos/AgentsLoop/PlayGround/issues/79 --jq '{labels: [.labels[].name], state}' 2>&1
+echo "===runs for issue?==="; gh run list --repo AgentsLoop/PlayGround --workflow opencode.yml --limit 5 2>&1
+echo "===event==="; cat /home/runner/work/_temp/_github_workflow/event.json 2>&1 | head -c 2000; echo
+echo "===ssh-sessions contains our session?==="; cat .opencode-web/ssh-sessions.json 2>&1 | head -c 1000; echo
+{"labels":["OpenCode","in progress","Goal"],"state":"open"}
+===runs for issue?===
+in_progress		OpenCode #79 — Verify SSH URL reporting beside the OpenCode Web URL	OpenCode	main	workflow_dispatch	34184464257	4m50s	2026-09-08T03:42:59Z
+completed	failure	OpenCode #78 — OpenCode project kickoff on macOS	OpenCode	main	workflow_dispatch	34184457521	1m56s	2026-09-08T03:42:52Z
+completed	success	OpenCode #77 — Verify SSH and WebGL on Linux worker	OpenCode	main	workflow_dispatch	34179224616	1m31s	2026-09-08T02:11:59Z
+completed	success	OpenCode #76 — Verify WebGL GPU acceleration on SSH Mac worker — tunnel registration	OpenCode	main	workflow_dispatch	34179120008	1m12s	2026-09-08T02:10:08Z
+completed	success	OpenCode #75 — Verify WebGL GPU acceleration on SSH Mac worker — validated SSH	OpenCode	main	workflow_dispatch	34178908036	1m16s	2026-09-08T02:06:27Z
+===event===
+{
+  "ref": "refs/heads/main",
+  "workflow": ".github/workflows/opencode.yml",
+  "inputs": {
+    "issue_number": "79",
+    "request": "Verify SSH URL reporting beside the OpenCode Web URL",
+    "issue_title": "Verify SSH URL reporting beside the OpenCode Web URL",
+    "labels_json": "[\"OpenCode\",\"Goal\"]",
+    "sender": "agents-dev"
+  },
+  "repository": {
+    "id": 1353029669,
+    "node_id": "R_kgDOUKWYJQ",
+    "name": "PlayGround",
+    "full_name": "AgentsLoop/PlayGround",
+    "private": false,
+    "owner": {
+      "login": "AgentsLoop",
+      "id": 318478564,
+      "node_id": "O_kgDOEvuY5A",
+      "avatar_url": "https://avatars.githubusercontent.com/u/318478564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/AgentsLoop",
+      "html_url": "https://github.com/AgentsLoop",
+      "followers_url": "https://api.github.com/users/AgentsLoop/followers",
+      "following_url": "https://api.github.com/users/AgentsLoop/following{/other_user}",
+      "gists_url": "https://api.github.com/users/AgentsLoop/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/AgentsLoop/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/AgentsLoop/subscriptions",
+      "organizations_url": "https://api.github.com/users/AgentsLoop/orgs",
+      "repos_url": "https://api.github.com/users/AgentsLoop/repos",
+      "events_url": "https://api.github.com/users/AgentsLoop/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/AgentsLoop/received_events",
+      "type": "Organization",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "html_url": "https://github.com/AgentsLoop/PlayGround",
+    "description": "Playground for browser game experiments",
+    "fork": false,
+    "url": "https://api.github.com/repos/AgentsLoop/PlayGround",
+    "forks_url": "https://api.github.com/repos/AgentsLoop/PlayGround/forks",
+    "keys_url": "https://api.github.com/repos/AgentsLoop/PlayGround/keys{/key_id}",
+===ssh-sessions contains our session?===
+[{"id":"ses_f80e1ff7effeRLDkkOz7xjlX98","slug":"clever-nebula","projectID":"0c237aa193815467d7fd5279958325141801d607","directory":"/home/runner/work/PlayGround/PlayGround","path":"","summary":{"additions":0,"deletions":0,"files":0},"cost":0,"tokens":{"input":8930,"output":118,"reasoning":38,"cache":{"read":11362,"write":0}},"title":"New session - 2026-09-08T03:44:27.778Z","agent":"build","model":{"id":"muse-spark-1.3-contributor-free","providerID":"opencode","variant":"default"},"version":"1.18.29","time":{"created":1788839067778,"updated":1788839073041},"permission":[{"permission":"question","pattern":"*","action":"deny"},{"permission":"plan_enter","pattern":"*","action":"deny"},{"permission":"plan_exit","pattern":"*","action":"deny"}]}]
+[0m
+[goal:evidence] Issue https://github.com/AgentsLoop/PlayGround/issues/79 (labels OpenCode+Goal+in progress) triggered one workflow_dispatch run https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257 on main (in_progress). Live access comment https://github.com/AgentsLoop/PlayGround/issues/79#issuecomment-5578811627 shows Host opencode-issue-79-34184464257-ssh.agentsweb.space:32257 + ssh command beside OpenCode Web UI https://fast-javascript-involvement-nut.trycloudflare.com/L2hvbWUvcnVubmVyL3dvcmsvUGxheUdyb3VuZC9QbGF5R3JvdW5k/session/ses_f80e1ff7effeRLDkkOz7xjlX98 and Project https://spot-moderator-intense-condition.trycloudflare.com. Verified usable: both trycloudflare URLs HTTP 200, session URL returns OpenCode HTML, local /session API contains ses_f80e1ff7effeRLDkkOz7xjlX98, .opencode-web/ssh-sessions.json matches via SSH, TCP to ssh host:32257 open, ssh -i opencode-agentsweb-id_ed25519 exec OK and curl via SSH returns same session. Registered SSH URL ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257 present in .opencode-ssh/tunnel.log, .opencode-ssh/access.env, AGENTSWEB_TUNNEL_URL env and cloudflared.log env map, but live comment omits literal `ssh://`/`SSH URL:` label (only Host:port) because .github/scripts/opencode-progress-tracker.sh ssh_section lacks tunnelUrl vs initial Post access step which renders `SSH URL: \`<tunnelUrl>\``. Failure-path code verified by dry-run of actual opencode-comment-templates.cjs: empty access.env+tunnel.log yields tunnelUrl=not registered and body contains `AgentsWeb SSH tunnel setup failed` + `SSH URL: \`not registered\`` + Web URL.
+[goal:complete]

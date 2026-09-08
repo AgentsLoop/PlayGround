@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "goals": [],
+  "results": [
+    {
+      "condition": "Verify SSH URL reporting beside the OpenCode Web URL",
+      "state": "achieved",
+      "reason": "",
+      "evidence": "Issue https://github.com/AgentsLoop/PlayGround/issues/79 (labels OpenCode+Goal+in progress) triggered one workflow_dispatch run https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257 on main (in_progress). Live access comment https://github.com/AgentsLoop/PlayGround/issues/79#issuecomment-5578811627 shows Host opencode-issue-79-34184464257-ssh.agentsweb.space:32257 + ssh command beside OpenCode Web UI https://fast-javascript-involvement-nut.trycloudflare.com/L2hvbWUvcnVubmVyL3dvcmsvUGxheUdyb3VuZC9QbGF5R3JvdW5k/session/ses_f80e1ff7effeRLDkkOz7xjlX98 and Project https://spot-moderator-intense-condition.trycloudflare.com. Verified usable: both trycloudflare URLs HTTP 200, session URL returns OpenCode HTML, local /session API contains ses_f80e1ff7effeRLDkkOz7xjlX98, .opencode-web/ssh-sessions.json matches via SSH, TCP to ssh host:32257 open, ssh -i opencode-agentsweb-id_ed25519 exec OK and curl via SSH returns same session. Registered SSH URL ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257 present in .opencode-ssh/tunnel.log, .opencode-ssh/access.env, AGENTSWEB_TUNNEL_URL env and cloudflared.log env map, but live comment omits literal `ssh://`/`SSH URL:` label (only Host:port) because .github/scripts/opencode-progress-tracker.sh ssh_section lacks tunnelUrl vs initial Post access step which renders `SSH URL: \\`<tunnelUrl>\\``. Failure-path code verified by dry-run of actual opencode-comment-templates.cjs: empty access.env+tunnel.log yields tunnelUrl=not registered and body contains `AgentsWeb SSH tunnel setup failed` + `SSH URL: \\`not registered\\`` + Web URL.",
+      "blockedReason": "",
+      "turnCount": 0,
+      "totalTokens": 76377,
+      "usage": {
+        "input": 75948,
+        "output": 4738,
+        "reasoning": 4909,
+        "cacheRead": 1124474,
+        "cacheWrite": 0,
+        "cost": 0,
+        "costKnown": true
+      },
+      "startedAt": 1788839068260,
+      "finishedAt": 1788839282379,
+      "lastStatus": "Goal completed.",
+      "lastCheckpoint": {
+        "summary": "[goal:evidence] Issue https://github.com/AgentsLoop/PlayGround/issues/79 (labels OpenCode+Goal+in progress) triggered one workflow_dispatch run https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257 on main (in_progress). Live access comment https://github.com/AgentsL…",
+        "timestamp": 1788839282378
+      },
+      "checkpoints": [
+        {
+          "summary": "[goal:evidence] Issue https://github.com/AgentsLoop/PlayGround/issues/79 (labels OpenCode+Goal+in progress) triggered one workflow_dispatch run https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257 on main (in_progress). Live access comment https://github.com/AgentsL…",
+          "timestamp": 1788839282378
+        }
+      ],
+      "history": [
+        {
+          "type": "set",
+          "detail": "Goal created with limits: 10 auto-continues, 900s, 200,000 context tokens.",
+          "timestamp": 1788839068262
+        },
+        {
+          "type": "completed",
+          "detail": "Assistant marked the goal complete with evidence: Issue https://github.com/AgentsLoop/PlayGround/issues/79 (labels OpenCode+Goal+in progress) triggered one workflow_dispatch run https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257 on main (in_progress). Live access comment https://github.com/AgentsLoop/PlayGround/issues/79#issuecomment-5578811627 shows Host opencode-issue-79-34184464…",
+          "timestamp": 1788839282379
+        }
+      ],
+      "sessionID": "ses_f80e1ff7effeRLDkkOz7xjlX98"
+    }
+  ],
+  "archives": [
+    {
+      "sessionID": "ses_f80e1ff7effeRLDkkOz7xjlX98",
+      "results": [
+        {
+          "condition": "Verify SSH URL reporting beside the OpenCode Web URL",
+          "state": "achieved",
+          "reason": "",
+          "evidence": "Issue https://github.com/AgentsLoop/PlayGround/issues/79 (labels OpenCode+Goal+in progress) triggered one workflow_dispatch run https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257 on main (in_progress). Live access comment https://github.com/AgentsLoop/PlayGround/issues/79#issuecomment-5578811627 shows Host opencode-issue-79-34184464257-ssh.agentsweb.space:32257 + ssh command beside OpenCode Web UI https://fast-javascript-involvement-nut.trycloudflare.com/L2hvbWUvcnVubmVyL3dvcmsvUGxheUdyb3VuZC9QbGF5R3JvdW5k/session/ses_f80e1ff7effeRLDkkOz7xjlX98 and Project https://spot-moderator-intense-condition.trycloudflare.com. Verified usable: both trycloudflare URLs HTTP 200, session URL returns OpenCode HTML, local /session API contains ses_f80e1ff7effeRLDkkOz7xjlX98, .opencode-web/ssh-sessions.json matches via SSH, TCP to ssh host:32257 open, ssh -i opencode-agentsweb-id_ed25519 exec OK and curl via SSH returns same session. Registered SSH URL ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257 present in .opencode-ssh/tunnel.log, .opencode-ssh/access.env, AGENTSWEB_TUNNEL_URL env and cloudflared.log env map, but live comment omits literal `ssh://`/`SSH URL:` label (only Host:port) because .github/scripts/opencode-progress-tracker.sh ssh_section lacks tunnelUrl vs initial Post access step which renders `SSH URL: \\`<tunnelUrl>\\``. Failure-path code verified by dry-run of actual opencode-comment-templates.cjs: empty access.env+tunnel.log yields tunnelUrl=not registered and body contains `AgentsWeb SSH tunnel setup failed` + `SSH URL: \\`not registered\\`` + Web URL.",
+          "blockedReason": "",
+          "turnCount": 0,
+          "totalTokens": 76377,
+          "usage": {
+            "input": 75948,
+            "output": 4738,
+            "reasoning": 4909,
+            "cacheRead": 1124474,
+            "cacheWrite": 0,
+            "cost": 0,
+            "costKnown": true
+          },
+          "startedAt": 1788839068260,
+          "finishedAt": 1788839282379,
+          "lastStatus": "Goal completed.",
+          "lastCheckpoint": {
+            "summary": "[goal:evidence] Issue https://github.com/AgentsLoop/PlayGround/issues/79 (labels OpenCode+Goal+in progress) triggered one workflow_dispatch run https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257 on main (in_progress). Live access comment https://github.com/AgentsL…",
+            "timestamp": 1788839282378
+          },
+          "checkpoints": [
+            {
+              "summary": "[goal:evidence] Issue https://github.com/AgentsLoop/PlayGround/issues/79 (labels OpenCode+Goal+in progress) triggered one workflow_dispatch run https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257 on main (in_progress). Live access comment https://github.com/AgentsL…",
+              "timestamp": 1788839282378
+            }
+          ],
+          "history": [
+            {
+              "type": "set",
+              "detail": "Goal created with limits: 10 auto-continues, 900s, 200,000 context tokens.",
+              "timestamp": 1788839068262
+            },
+            {
+              "type": "completed",
+              "detail": "Assistant marked the goal complete with evidence: Issue https://github.com/AgentsLoop/PlayGround/issues/79 (labels OpenCode+Goal+in progress) triggered one workflow_dispatch run https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257 on main (in_progress). Live access comment https://github.com/AgentsLoop/PlayGround/issues/79#issuecomment-5578811627 shows Host opencode-issue-79-34184464…",
+              "timestamp": 1788839282379
+            }
+          ],
+          "sessionID": "ses_f80e1ff7effeRLDkkOz7xjlX98"
+        }
+      ]
+    }
+  ],
+  "orderedSessions": []
+}

@@ -1,0 +1,149 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Capturing final evidence for the public game URL — verifying deployment and screenshots.
+[0m$ [0mgit branch --show-current; git status --porcelain | head -n 20; ls -la screenshots/ 2>&1; curl -s -o /tmp/pub.html -w "HTTP %{http_code} %{size_download}b\n" --max-time 20 https://notre-logan-less-dui.trycloudflare.com/ 2>&1; head -c 400 /tmp/pub.html 2>&1; echo; tmux ls 2>&1; curl -s -o /dev/null -w "local3000 %{http_code}\n" --max-time 10 http://127.0.0.1:3000/
+opencode/34184464257
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? package.json
+?? screenshots/
+total 124
+drwxr-xr-x  2 runner runner   4096 Sep  8 03:49 .
+drwxr-xr-x 11 runner runner   4096 Sep  8 03:49 ..
+-rw-r--r--  1 runner runner 116323 Sep  8 03:49 final-verification.png
+HTTP 200 4294b
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SSH URL Reporting Verification — PlayGround</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 24px; max-width: 900px; margin-inline: auto; }
+  header { border-bottom: 2px solid #ccc; pad
+app-server: 1 windows (created Tue Sep  8 03:48:44 2026)
+local3000 200
+[0m
+[0m$ [0mnpx --yes playwright@latest screenshot --browser chromium --viewport-size=1280,1000 --wait-for-timeout=1500 https://notre-logan-less-dui.trycloudflare.com/ screenshots/final-public-game.png 2>&1 | tail -n 3; ls -la screenshots/; python3 -c "import os; [print(f, os.path.getsize('screenshots/'+f)) for f in sorted(os.listdir('screenshots'))]"
+Navigating to https://notre-logan-less-dui.trycloudflare.com/
+Waiting for timeout 1500...
+Capturing screenshot into screenshots/final-public-game.png
+total 240
+drwxr-xr-x  2 runner runner   4096 Sep  8 03:51 .
+drwxr-xr-x 11 runner runner   4096 Sep  8 03:49 ..
+-rw-r--r--  1 runner runner 116323 Sep  8 03:51 final-public-game.png
+-rw-r--r--  1 runner runner 116323 Sep  8 03:49 final-verification.png
+final-public-game.png 116323
+final-verification.png 116323
+[0m
+[0m→ [0mRead screenshots/final-public-game.png
+[0m
+[0m$ [0mgit config user.name 2>&1; git config user.email 2>&1; git log --oneline -3 2>&1; git status --porcelain 2>&1 | head -n 20
+opencode[bot]
+41898282+github-actions[bot]@users.noreply.github.com
+b4fe44a Grant reusable OpenCode workflow Pages permission
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? package.json
+?? screenshots/
+[0m
+[0m$ [0mgit add index.html screenshots/final-verification.png screenshots/final-public-game.png && git status --porcelain | head -n 20 && git commit -m "Add SSH URL verification playable page with final screenshots
+
+Playable index.html shows registered AgentsWeb SSH URL beside the
+OpenCode Web URL with an interactive canvas check. Captured
+screenshots/final-verification.png (local port 3000) and
+screenshots/final-public-game.png (public trycloudflare URL), both
+verified via Playwright with no JS errors." 2>&1 | tail -n 5; git log --oneline -3 2>&1; git show --stat HEAD 2>&1 | head -n 20
+A  index.html
+A  screenshots/final-public-game.png
+A  screenshots/final-verification.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? package.json
+[opencode/34184464257 7b3de90] Add SSH URL verification playable page with final screenshots
+ 3 files changed, 69 insertions(+)
+ create mode 100644 index.html
+ create mode 100644 screenshots/final-public-game.png
+ create mode 100644 screenshots/final-verification.png
+7b3de90 Add SSH URL verification playable page with final screenshots
+b4fe44a Grant reusable OpenCode workflow Pages permission
+commit 7b3de903125c39d9ff767010ffc8602cb6886326
+Author: opencode[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+Date:   Tue Sep 8 03:51:11 2026 +0000
+
+    Add SSH URL verification playable page with final screenshots
+    
+    Playable index.html shows registered AgentsWeb SSH URL beside the
+    OpenCode Web URL with an interactive canvas check. Captured
+    screenshots/final-verification.png (local port 3000) and
+    screenshots/final-public-game.png (public trycloudflare URL), both
+    verified via Playwright with no JS errors.
+
+ index.html                         |  69 +++++++++++++++++++++++++++++++++++++
+ screenshots/final-public-game.png  | Bin 0 -> 116323 bytes
+ screenshots/final-verification.png | Bin 0 -> 116323 bytes
+ 3 files changed, 69 insertions(+)
+[0m
+[0m$ [0mgit push -u origin opencode/34184464257 2>&1 | tail -n 5; git rev-parse HEAD 2>&1
+remote:      https://github.com/AgentsLoop/PlayGround/pull/new/opencode/34184464257        
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34184464257 -> opencode/34184464257
+branch 'opencode/34184464257' set up to track 'origin/opencode/34184464257'.
+7b3de903125c39d9ff767010ffc8602cb6886326
+[0m
+Screenshots committed and pushed — posting the final completion comment.
+[0m$ [0mCOMMIT=7b3de903125c39d9ff767010ffc8602cb6886326; cat > /tmp/final-body.md <<EOF
+✅ **Game complete and publicly verified.**
+
+[Open Project](https://notre-logan-less-dui.trycloudflare.com)
+Final commit: [\`${COMMIT}\`](https://github.com/AgentsLoop/PlayGround/commit/${COMMIT})
+Branch: [\`opencode/34184464257\`](https://github.com/AgentsLoop/PlayGround/tree/opencode/34184464257)
+Run: https://github.com/AgentsLoop/PlayGround/actions/runs/34184464257
+
+**Deployment:** \`./index.html\` served locally from tmux \`app-server\` on port 3000 (HTTP 200 on \`/\` and \`/index.html\`) and publicly at https://notre-logan-less-dui.trycloudflare.com (HTTP 200, same page). No build step; root \`index.html\` is the entrypoint.
+
+**Tests:** Playwright chromium against \`http://127.0.0.1:3000/\` — \`app-title\`, \`ssh-url\`, \`ssh-command\`, \`web-url\`, \`game-canvas\`, \`score\` all PASS; \`ssh-url\` text exactly \`ssh://opencode-issue-79-34184464257-ssh.agentsweb.space:32257\`; no page/console errors. SSH verified separately: TCP OPEN on port 32257, \`ssh\` exec OK, sessions API via SSH returns \`ses_f80e1ff7effeRLDkkOz7xjlX98\`. OpenCode Web UI session URL returns HTTP 200 OpenCode HTML.
+
+<details><summary>Final screenshots</summary>
+
+![final-verification](https://github.com/AgentsLoop/PlayGround/blob/${COMMIT}/screenshots/final-verification.png?raw=true)
+![final-public-game](https://github.com/AgentsLoop/PlayGround/blob/${COMMIT}/screenshots/final-public-game.png?raw=true)
+
+</details>
+
+**Known limitations:** live issue access comment renders SSH as \`Host:port\` + full \`ssh\` command (from the progress tracker) rather than the literal \`SSH URL: \\\`ssh://…\\\`\` label used by the initial access step; the registered \`ssh://\` URL itself is valid and usable (see evidence above). Failure-path renderer check confirms empty registration yields \`SSH URL: \\\`not registered\\\`\` alongside the Web URL.
+EOF
+jq -n --rawfile body /tmp/final-body.md '{body: $body}' > /tmp/final-payload.json; gh api repos/AgentsLoop/PlayGround/issues/79/comments --method POST --input /tmp/final-payload.json --jq '{id, html_url}' 2>&1
+{"html_url":"https://github.com/AgentsLoop/PlayGround/issues/79#issuecomment-5578879133","id":5578879133}
+[0m
+Done:
+
+- **Screenshots:** `screenshots/final-verification.png` (local port 3000) and `screenshots/final-public-game.png` (public URL), both `final-*`, verified visually showing SSH + Web URL cards and playable canvas.
+- **Commit + push:** `7b3de90` on branch `opencode/34184464257` with `index.html` + 2 screenshots; pushed to origin.
+- **Completion comment:** Posted to issue #79 as https://github.com/AgentsLoop/PlayGround/issues/79#issuecomment-5578879133, including public game URL https://notre-logan-less-dui.trycloudflare.com, embedded screenshots via immutable commit URLs, final commit link, deployment/test status, and known limitation about the tracker's `Host:port` vs literal `SSH URL: ssh://…` label.

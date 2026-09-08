@@ -1,0 +1,1 @@
+Verify SSH URL reporting beside the OpenCode Web URL
