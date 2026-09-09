@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cube Tapper — WebGL Hardware Playable</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #0b0e14; color: #e8eef7; font-family: system-ui, sans-serif; }
+  header { padding: 12px 16px; border-bottom: 1px solid #263; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  #hud { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; padding: 8px 16px; }
+  #hud b { color: #8fd18f; }
+  #wrap { display: flex; justify-content: center; padding: 12px; }
+  canvas { border: 1px solid #345; border-radius: 8px; cursor: crosshair; touch-action: none; }
+  #msg { text-align: center; min-height: 24px; font-size: 15px; }
+  #gpu-info { padding: 8px 16px; font-size: 12px; color: #9fb3c8; white-space: pre-wrap; }
+  #selftest { padding: 8px 16px; font-size: 13px; white-space: pre-wrap; }
+  button { background: #1d3; border: 0; border-radius: 6px; padding: 8px 14px; font-size: 14px; cursor: pointer; }
+</style>
+</head>
+<body>
+<header><h1>Cube Tapper</h1><div>Click / tap the spinning cube when the crosshair is over it. Space = tap, R = restart.</div></header>
+<div id="hud">
+  <span>Score: <b id="score">0</b></span>
+  <span>Hits: <b id="hits">0</b> / Shots: <b id="shots">0</b></span>
+  <span>Time: <b id="time">30</b>s</span>
+  <span>Status: <b id="status">playing</b></span>
+  <button id="restart">Restart (R)</button>
+</div>
+<div id="wrap"><canvas id="game" width="480" height="480"></canvas></div>
+<div id="msg" role="status"></div>
+<pre id="gpu-info">probing GPU…</pre>
+<pre id="selftest"></pre>
+<script>
+"use strict";
+// ---------- GPU probe (real hardware path, same signals as GPU_REPORT) ----------
+const gpuLines = [];
+function gpuLog(s){ gpuLines.push(s); document.getElementById("gpu-info").textContent = gpuLines.join("\n"); }
+let gl = null, glRenderer = "unknown", glVersion = "unknown", hwContext = false, softSuspect = true;
+try {
+  const c = document.getElementById("game");
+  gl = c.getContext("webgl2") || c.getContext("webgl");
+  if (gl) {
+    const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+    glRenderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+    glVersion = gl.getParameter(gl.VERSION);
+    softSuspect = /swiftshader|llvmpipe|softpipe|software|basic render/i.test(glRenderer || "");
+    const probe = document.createElement("canvas").getContext("webgl2", { failIfMajorPerformanceCaveat: true })
+      || document.createElement("canvas").getContext("webgl", { failIfMajorPerformanceCaveat: true });
+    hwContext = !!probe;
+  }
+} catch (e) { gpuLog("probe exception: " + e); }
+gpuLog("renderer=" + glRenderer);
+gpuLog("version=" + glVersion);
+gpuLog("softwareFallbackSuspected=" + softSuspect);
+gpuLog("failIfMajorPerformanceCaveat=" + (hwContext ? "OK(HW)" : "NULL(SW-or-blocked)"));
+// ---------- Game ----------
+const canvas = document.getElementById("game");
+const scoreEl = document.getElementById("score"), hitsEl = document.getElementById("hits"),
+      shotsEl = document.getElementById("shots"), timeEl = document.getElementById("time"),
+      statusEl = document.getElementById("status"), msgEl = document.getElementById("msg");
+const state = { score: 0, hits: 0, shots: 0, timeLeft: 30, playing: true, angle: 0.6, target: { x: 0, y: 0, r: 46 }, lastTick: 0 };
+// WebGL scene: rotating gradient square (the "cube") + crosshair, drawn every frame (sync draw for headless paint)
+let prog = null, locP = 0, locT = null;
+function initGL(){
+  if (!gl) return false;
+  const vs = "attribute vec2 p;uniform float t;void main(){float a=t;mat2 r=mat2(cos(a),-sin(a),sin(a),cos(a));gl_Position=vec4(r*p*0.55,0.,1.);}";
+  const fs = "precision mediump float;uniform float t;void main(){gl_FragColor=vec4(0.25+0.75*abs(sin(t*2.0)),0.45,0.3+0.7*abs(cos(t*1.7)),1.);}";
+  function sh(t, s){ const h = gl.createShader(t); gl.shaderSource(h, s); gl.compileShader(h); return h; }
+  prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, 1,1, -1,-1, 1,1, -1,1]), gl.STATIC_DRAW);
+  locP = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(locP); gl.vertexAttribPointer(locP, 2, gl.FLOAT, false, 0, 0);
+  locT = gl.getUniformLocation(prog, "t");
+  return true;
+}
+const glOK = initGL();
+function drawFrame(){
+  if (!gl) return;
+  gl.uniform1f(locT, state.angle);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.clearColor(0.04, 0.05, 0.08, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+  gl.finish();
+}
+function targetScreen(){
+  // target orbits with the same angle so hits require timing (playable skill element)
+  const cx = canvas.width / 2 + Math.cos(state.angle * 1.3) * 130;
+  const cy = canvas.height / 2 + Math.sin(state.angle * 1.7) * 130;
+  state.target.x = cx; state.target.y = cy;
+}
+function loop(ts){
+  if (state.playing) {
+    state.angle += 0.03;
+    targetScreen(); drawFrame();
+    if (!state.lastTick || ts - state.lastTick > 1000) {
+      state.lastTick = ts;
+      state.timeLeft -= 1; timeEl.textContent = state.timeLeft;
+      if (state.timeLeft <= 0) endGame();
+    }
+  }
+  requestAnimationFrame(loop);
+}
+function canvasPos(evt){
+  const r = canvas.getBoundingClientRect();
+  const x = (evt.clientX - r.left) * (canvas.width / r.width);
+  const y = (evt.clientY - r.top) * (canvas.height / r.height);
+  return { x, y: canvas.height - y }; // GL coords (y-flip for readback parity)
+}
+function shoot(x, y){
+  if (!state.playing) return false;
+  state.shots += 1; shotsEl.textContent = state.shots;
+  const dx = x - state.target.x, dy = y - state.target.y;
+  const hit = Math.hypot(dx, dy) <= state.target.r;
+  if (hit) { state.hits += 1; state.score += 10; msgEl.textContent = "Hit! +10"; }
+  else { state.score = Math.max(0, state.score - 1); msgEl.textContent = "Miss…"; }
+  hitsEl.textContent = state.hits; scoreEl.textContent = state.score;
+  return hit;
+}
+canvas.addEventListener("pointerdown", e => shoot(canvasPos(e).x, canvasPos(e).y));
+window.addEventListener("keydown", e => {
+  if (e.code === "Space") { e.preventDefault(); shoot(state.target.x, state.target.y); }
+  if (e.key === "r" || e.key === "R") restart();
+});
+function endGame(){
+  state.playing = false; statusEl.textContent = "game-over";
+  msgEl.textContent = "Game over! Score " + state.score + ". Press R to restart.";
+}
+function restart(){
+  state.score = 0; state.hits = 0; state.shots = 0; state.timeLeft = 30; state.playing = true; state.lastTick = 0;
+  scoreEl.textContent = "0"; hitsEl.textContent = "0"; shotsEl.textContent = "0"; timeEl.textContent = "30";
+  statusEl.textContent = "playing"; msgEl.textContent = "";
+}
+// test hooks (used by headless browser tests; harmless in play)
+window.__game = {
+  state, shoot, restart,
+  target: () => ({ ...state.target }),
+  pixelSum: () => {
+    if (!gl) return -1;
+    drawFrame();
+    const px = new Uint8Array(4 * 16);
+    gl.readPixels(232, 232, 4, 4, gl.RGBA, gl.UNSIGNED_BYTE, px);
+    let s = 0; for (const v of px) s += v; return s;
+  },
+  info: () => ({ renderer: glRenderer, version: glVersion, softSuspect, hwContext, glOK })
+};
+// ---------- Built-in self test (?selftest=1): deterministic, writes PASS/FAIL into DOM ----------
+async function selftest(){
+  const out = [];
+  const ok = (name, cond, extra) => out.push((cond ? "PASS " : "FAIL ") + name + (extra ? " :: " + extra : ""));
+  try {
+    ok("canvas-present", !!canvas);
+    ok("webgl-context", !!gl, glVersion);
+    ok("renderer-string", typeof glRenderer === "string" && glRenderer.length > 0, glRenderer);
+    ok("no-software-renderer", !softSuspect, glRenderer);
+    ok("hw-gated-context", hwContext === true);
+    drawFrame();
+    const px = new Uint8Array(4); gl.readPixels(240, 240, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+    ok("framebuffer-readback", (px[0] + px[1] + px[2] + px[3]) > 0, "rgba=" + [...px].join(","));
+    ok("pixelhook-positive", window.__game.pixelSum() > 0);
+    const t = window.__game.target();
+    const before = state.score;
+    const hit = window.__game.shoot(t.x, t.y);
+    ok("direct-hit-scores", hit === true && state.score === before + 10, "score=" + state.score);
+    const missBefore = state.score;
+    window.__game.shoot(-9999, -9999);
+    ok("miss-penalized", state.score === Math.max(0, missBefore - 1), "score=" + state.score);
+    window.__game.restart();
+    ok("restart-resets", state.score === 0 && state.shots === 0 && state.playing === true);
+    ok("hud-synced", scoreEl.textContent === "0" && statusEl.textContent === "playing");
+  } catch (e) { out.push("FAIL exception :: " + (e && e.stack || e)); }
+  document.getElementById("selftest").textContent = out.join("\n");
+  document.title = out.some(l => l.startsWith("FAIL")) ? "SELFTEST-FAIL" : "SELFTEST-PASS";
+}
+targetScreen(); drawFrame();
+requestAnimationFrame(loop);
+if (new URLSearchParams(location.search).has("selftest")) selftest();
+</script>
+</body>
+</html>
