@@ -52,7 +52,7 @@ Local validation plan (this session = build phase; workflow verify phase follows
 - Browser inspection: screenshots/final-dashboard.png (120027 B, build) + screenshots/final-verify.png (120027 B, verify session), both visually confirmed (9 stage cards, evidence links, Health ok).
 - Verification-session update posted to issue #87 (comment 5593816581): entrypoint, tmux app-server, curl/DOM results, screenshots; branch commit/publish left to workflow Push step.
 - Recovery behavior: workflow provides 3x entrypoint checks, 3x public-app expose w/ `03-public-app-fix.md`, 3x screenshot evidence w/ `05-screenshot-evidence.md`, `failed` label + `opencode-failed-comment.md` listing `job: step`. Prior failed runs (#84/#78/...) prove failure path exists.
-- Delivery links: TBD after workflow completes (branch `opencode/34294119903`, commit SHA, `https://omgithub.com/AgentsLoop/PlayGround/tree/main`, release `opencode-logs-34294119903`, final report comment).
+- Delivery links: branch opencode/34294119903 pushed (commit b888bfc6ff78af20da18ad5410c17924ccf0dbab); public URL https://beth-doctrine-lawyer-sega.trycloudflare.com verified 200 + marker; completion comment posted to issue #87; release + complete label pending workflow tail steps.
 
 ## 8. Routing / recovery / error-path matrix (observed + documented)
 
