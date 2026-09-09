@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>PlayGround — Hermes Game</title>
+<style>
+  body { margin: 0; background: #0b0e12; color: #e8eef4; font-family: monospace; display: flex; flex-direction: column; align-items: center; }
+  h1 { font-size: 18px; margin: 16px 0 4px; }
+  p { font-size: 12px; color: #9fb0bf; margin: 4px 0 12px; }
+  #game { border: 1px solid #2a3542; background: #101418; image-rendering: pixelated; }
+  #hud { font-size: 13px; margin-top: 8px; }
+  kbd { background: #1c2530; border: 1px solid #33404f; border-radius: 3px; padding: 0 4px; }
+</style>
+</head>
+<body>
+<h1>PlayGround — Hermes Game</h1>
+<p>Move with <kbd>WASD</kbd> / arrows. Same deterministic sim as <code>examples/hermes-game/core/game.js</code> (Hermes-safe, DOM-free core).</p>
+<canvas id="game" width="600" height="360"></canvas>
+<div id="hud">tick 0 · score 0</div>
+<script>
+'use strict';
+/* Inline copy of the deterministic sim core (mirrors examples/hermes-game/core/game.js).
+   Kept dependency-free so this page runs with no build step. */
+var WORLD_W = 20, WORLD_H = 12, MAX_SPEED = 2;
+function toUint32(n) { return n >>> 0; }
+function mulberry32(seed) {
+  var a = toUint32(seed);
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    var t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
+function nextPickup(rand) { return { x: Math.floor(rand() * WORLD_W), y: Math.floor(rand() * WORLD_H) }; }
+function createGame(seed) {
+  var s = toUint32(typeof seed === 'number' ? seed : 1);
+  var rand = mulberry32(s); rand();
+  var state = { v: 1, tick: 0, seed: s, rngCalls: 1,
+    x: Math.floor(rand() * WORLD_W), y: Math.floor(rand() * WORLD_H),
+    vx: 0, vy: 0, score: 0, pickup: null };
+  state.rngCalls += 2; state.pickup = nextPickup(rand); state.rngCalls += 2;
+  return state;
+}
+function step(state, input) {
+  input = input || {};
+  var dx = clamp(typeof input.dx === 'number' ? input.dx : 0, -1, 1);
+  var dy = clamp(typeof input.dy === 'number' ? input.dy : 0, -1, 1);
+  state.vx = clamp(dx * MAX_SPEED, -MAX_SPEED, MAX_SPEED);
+  state.vy = clamp(dy * MAX_SPEED, -MAX_SPEED, MAX_SPEED);
+  state.x = clamp(state.x + state.vx, 0, WORLD_W - 1);
+  state.y = clamp(state.y + state.vy, 0, WORLD_H - 1);
+  state.tick += 1;
+  if (state.pickup && state.x === state.pickup.x && state.y === state.pickup.y) {
+    state.score += 1;
+    var rand = mulberry32((state.seed ^ Math.imul(state.tick + 1, 0x9E3779B1)) >>> 0);
+    state.pickup = nextPickup(rand);
+    state.rngCalls += 2;
+  }
+  return state;
+}
+
+var canvas = document.getElementById('game');
+var ctx = canvas.getContext('2d');
+var hud = document.getElementById('hud');
+var state = createGame(42);
+var pressed = {};
+var input = { dx: 0, dy: 0 };
+function recompute() {
+  input.dx = ((pressed.ArrowRight || pressed.d) ? 1 : 0) - ((pressed.ArrowLeft || pressed.a) ? 1 : 0);
+  input.dy = ((pressed.ArrowDown || pressed.s) ? 1 : 0) - ((pressed.ArrowUp || pressed.w) ? 1 : 0);
+}
+window.addEventListener('keydown', function (e) {
+  pressed[e.key] = true;
+  if (e.key.length === 1) pressed[e.key.toLowerCase()] = true;
+  recompute();
+  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].indexOf(e.key) !== -1) e.preventDefault();
+});
+window.addEventListener('keyup', function (e) {
+  pressed[e.key] = false;
+  if (e.key.length === 1) pressed[e.key.toLowerCase()] = false;
+  recompute();
+});
+var TICK_MS = 100, last = performance.now(), acc = 0;
+function draw() {
+  var cw = canvas.width / WORLD_W, ch = canvas.height / WORLD_H;
+  ctx.fillStyle = '#101418'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if (state.pickup) { ctx.fillStyle = '#ffd54a'; ctx.fillRect(state.pickup.x * cw + 1, state.pickup.y * ch + 1, cw - 2, ch - 2); }
+  ctx.fillStyle = '#5ad1ff'; ctx.fillRect(state.x * cw + 1, state.y * ch + 1, cw - 2, ch - 2);
+  ctx.fillStyle = '#fff'; ctx.font = '12px monospace';
+  ctx.fillText('tick ' + state.tick + '  score ' + state.score, 8, 14);
+  hud.textContent = 'tick ' + state.tick + ' · score ' + state.score;
+}
+function frame(now) {
+  acc += now - last; last = now;
+  var guard = 0;
+  while (acc >= TICK_MS && guard++ < 5) { step(state, input); acc -= TICK_MS; }
+  draw();
+  window.requestAnimationFrame(frame);
+}
+window.__game = { state: state, step: step, createGame: createGame };
+draw();
+window.requestAnimationFrame(frame);
+</script>
+</body>
+</html>

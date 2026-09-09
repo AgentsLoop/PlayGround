@@ -1,0 +1,20 @@
+{
+  "name": "playground",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Playground for browser game experiments (Hermes support)",
+  "type": "commonjs",
+  "scripts": {
+    "hermes:compat": "node tools/hermes/compat-check.js",
+    "hermes:build": "node tools/hermes/build.js",
+    "hermes:run": "node tools/hermes/run.js",
+    "hermes:verify": "node tools/hermes/verify.js",
+    "test": "node --test \"tools/hermes/__tests__/compat-check.test.js\" \"tools/hermes/__tests__/game.test.js\" \"tools/hermes/__tests__/build-verify.test.js\""
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "puppeteer-core": "^25.10.0"
+  }
+}

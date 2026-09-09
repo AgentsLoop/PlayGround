@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "hermes.config.json schema",
+  "description": "Configuration for PlayGround Hermes bytecode toolchain.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["engineVersion", "bytecodeTarget", "entry", "coreDir", "outDir", "bundle", "bytecode", "compat", "hermes"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "engineVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Hermes engine version the bytecode is built for (bytecode is version-coupled; rebuild on upgrade)."
+    },
+    "bytecodeTarget": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Expected Hermes bytecode version (e.g. 96 for Hermes 0.12.0). Verified against the .hbc header."
+    },
+    "entry": { "type": "string", "description": "Hermes-safe entry file (DOM-free), bundled into the HBC." },
+    "coreDir": { "type": "string", "description": "Directory of DOM-free Hermes-safe core game files." },
+    "browserEntry": { "type": "string", "description": "DOM adapter entry. Excluded from HBC bundle." },
+    "outDir": { "type": "string" },
+    "bundle": { "type": "string", "description": "Concatenated JS bundle path (input to hermes -emit-binary)." },
+    "bytecode": { "type": "string", "description": "Output .hbc path." },
+    "fallbackManifest": { "type": "string", "description": "Fallback manifest path written when no hermes binary is available." },
+    "compat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "forbidDomInCore"],
+      "properties": {
+        "level": { "enum": ["strict", "lax"], "description": "strict forbids Node-isms and dynamic import in core." },
+        "forbidDomInCore": { "type": "boolean" }
+      }
+    },
+    "hermes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["binary", "allowFallback"],
+      "properties": {
+        "binary": { "type": "string" },
+        "compiler": { "type": "string" },
+        "dumper": { "type": "string" },
+        "allowFallback": { "type": "boolean" }
+      }
+    }
+  }
+}

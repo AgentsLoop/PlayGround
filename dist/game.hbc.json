@@ -1,0 +1,10 @@
+{
+  "fallback": true,
+  "code": "FALLBACK_NO_BINARY",
+  "engineVersion": "0.12.0",
+  "bytecodeTarget": 96,
+  "bundle": "dist/game.bundle.js",
+  "sha256": "b96465ee865ea883d8735434c63598b2d2397505782bb69b55b3ed99fe491567",
+  "bytes": 7777,
+  "hint": "hermes/hermesc binary not found on PATH (tried $HERMES_BIN, config hermes.binary/compiler, PATH). Bundle is runnable via `npm run hermes:run -- --mode node`. To emit real bytecode, install Hermes and re-run `npm run hermes:build`."
+}

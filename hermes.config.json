@@ -1,0 +1,22 @@
+{
+  "$schema": "./hermes.schema.json",
+  "engineVersion": "0.12.0",
+  "bytecodeTarget": 96,
+  "entry": "examples/hermes-game/hermes-entry.js",
+  "coreDir": "examples/hermes-game/core",
+  "browserEntry": "examples/hermes-game/browser.js",
+  "outDir": "dist",
+  "bundle": "dist/game.bundle.js",
+  "bytecode": "dist/game.hbc",
+  "fallbackManifest": "dist/game.hbc.json",
+  "compat": {
+    "level": "strict",
+    "forbidDomInCore": true
+  },
+  "hermes": {
+    "binary": "hermes",
+    "compiler": "hermesc",
+    "dumper": "hbcdump",
+    "allowFallback": true
+  }
+}
