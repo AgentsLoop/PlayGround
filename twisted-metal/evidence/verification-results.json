@@ -1,0 +1,188 @@
+{
+ "errors": [],
+ "steps": [
+  {
+   "name": "load-title",
+   "ok": true,
+   "titleVisible": true
+  },
+  {
+   "name": "select-vehicle",
+   "ok": true
+  },
+  {
+   "name": "start-countdown",
+   "ok": true,
+   "screen": "countdown",
+   "level": 0,
+   "score": 0,
+   "lives": 3,
+   "playerHp": 120,
+   "playerAlive": true,
+   "enemiesLeft": 2,
+   "enemies": [
+    170,
+    90
+   ],
+   "shots": 0,
+   "hi": 0,
+   "foePos": [
+    [
+     810,
+     450,
+     true
+    ],
+    [
+     810,
+     150,
+     true
+    ]
+   ],
+   "foeShots": 0,
+   "fps": 60
+  },
+  {
+   "name": "drive-and-fire-mg",
+   "ok": true,
+   "foeHpBefore": [
+    170,
+    90
+   ],
+   "foeHpAfter": [
+    152,
+    90
+   ],
+   "midShots": 1,
+   "score": 6,
+   "playerHp": 120,
+   "screen": "play"
+  },
+  {
+   "name": "ai-acts",
+   "ok": true,
+   "fps": 12,
+   "foeMoved": true,
+   "foeShots": 0,
+   "playerHp": 120,
+   "scoreDelta": 0
+  },
+  {
+   "name": "pause-resume",
+   "ok": true,
+   "paused": "pause",
+   "resumed": "play"
+  },
+  {
+   "name": "full-run-to-victory",
+   "ok": true,
+   "screen": "win",
+   "level": 2,
+   "score": 229836,
+   "lives": 3,
+   "playerHp": 120,
+   "playerAlive": true,
+   "enemiesLeft": 0,
+   "enemies": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "shots": 0,
+   "hi": 229836,
+   "foePos": [
+    [
+     803,
+     469,
+     false
+    ],
+    [
+     534,
+     160,
+     false
+    ],
+    [
+     58,
+     472,
+     false
+    ],
+    [
+     496,
+     231,
+     false
+    ]
+   ],
+   "foeShots": 0,
+   "fps": 60
+  },
+  {
+   "name": "game-over-path",
+   "ok": true,
+   "livesTrace": [
+    2,
+    1,
+    0
+   ],
+   "final": {
+    "screen": "over",
+    "level": 0,
+    "score": 0,
+    "lives": 0,
+    "playerHp": 0,
+    "playerAlive": false,
+    "enemiesLeft": 2,
+    "enemies": [
+     131,
+     49
+    ],
+    "shots": 0,
+    "hi": 229836,
+    "foePos": [
+     [
+      760,
+      342,
+      true
+     ],
+     [
+      792,
+      365,
+      true
+     ]
+    ],
+    "foeShots": 0,
+    "fps": 9
+   }
+  },
+  {
+   "name": "retry-from-gameover",
+   "ok": true,
+   "screen": "countdown",
+   "level": 0,
+   "score": 0,
+   "lives": 3,
+   "playerHp": 120,
+   "playerAlive": true,
+   "enemiesLeft": 2,
+   "enemies": [
+    170,
+    90
+   ],
+   "shots": 0,
+   "hi": 229836,
+   "foePos": [
+    [
+     810,
+     450,
+     true
+    ],
+    [
+     810,
+     150,
+     true
+    ]
+   ],
+   "foeShots": 0,
+   "fps": 60
+  }
+ ]
+}

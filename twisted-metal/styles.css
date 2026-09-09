@@ -1,0 +1,26 @@
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#0b0d12;color:#e8eaf0;font-family:"Segoe UI",Verdana,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden}
+#wrap{position:relative;width:min(98vw,1180px,calc((100vh - 24px) * 1.6))}
+#game{display:block;width:100%;height:auto;background:#14161c;border:2px solid #2a2f3d;border-radius:10px;box-shadow:0 0 60px #000}
+#overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;text-align:center}
+.panel{pointer-events:auto;background:rgba(8,10,15,.92);border:1px solid #f33a2c;border-radius:12px;padding:28px 34px;max-width:620px;box-shadow:0 0 40px rgba(243,58,44,.25)}
+.panel h1{color:#f33a2c;letter-spacing:3px;font-size:34px;text-shadow:0 0 18px rgba(243,58,44,.6)}
+.panel h2{color:#ffb02e;letter-spacing:2px;margin-bottom:10px}
+.panel p{margin:8px 0;color:#c9cedb;font-size:14px;line-height:1.5}
+.panel .keys{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;text-align:left;font-size:13px;margin:12px 0}
+.panel .keys b{color:#ffb02e;font-weight:600}
+.btnrow{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+button{pointer-events:auto;background:#f33a2c;color:#fff;border:none;border-radius:6px;padding:10px 20px;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer}
+button:hover{background:#ff5443}
+button.ghost{background:#232838;border:1px solid #4a5268}
+button.ghost:hover{background:#2e3547}
+button.sel{outline:3px solid #ffb02e}
+.cards{display:flex;gap:10px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.card{background:#161a24;border:1px solid #3a4155;border-radius:8px;padding:10px 12px;width:165px;cursor:pointer;pointer-events:auto}
+.card:hover{border-color:#ffb02e}
+.card.sel{border-color:#ffb02e;box-shadow:0 0 12px rgba(255,176,46,.5)}
+.card h3{font-size:15px;margin-bottom:4px}
+.card small{color:#9aa1b5;font-size:12px;line-height:1.4;display:block}
+.big{font-size:44px;font-weight:800;color:#ffb02e}
+.score{font-size:20px;color:#fff;margin:6px 0}

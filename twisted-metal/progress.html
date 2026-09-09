@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TWISTED ARENA — live progress</title>
+<style>
+body{background:#0b0d12;color:#e8eaf0;font-family:"Segoe UI",Verdana,system-ui,sans-serif;max-width:900px;margin:0 auto;padding:24px}
+h1{color:#f33a2c;letter-spacing:2px}h2{color:#ffb02e;border-bottom:1px solid #333;padding-bottom:4px}
+a{color:#5ac8ff}.ok{color:#3aff7b}.gap{color:#ff8a7a}
+table{border-collapse:collapse;width:100%;font-size:14px}td,th{border:1px solid #333;padding:6px 8px;text-align:left}
+code{background:#161a24;padding:1px 5px;border-radius:4px}
+img{max-width:140px;border:1px solid #333;border-radius:4px}
+.imgs{display:flex;gap:8px;flex-wrap:wrap}
+figure{margin:0;text-align:center;font-size:11px;color:#9aa1b5}
+</style>
+</head>
+<body>
+<h1>🏁 TWISTED ARENA — live progress</h1>
+<p>Browser vehicular-combat recreation of <b>Twisted Metal</b> gameplay. Play: <a href="twisted-metal/index.html">twisted-metal/index.html</a></p>
+
+<h2>References (sources in <code>reference-assets/SOURCES.md</code>)</h2>
+<ul>
+<li>GamesRadar vehicles &amp; weapons guide — special-weapon recharge, MG chip-damage role</li>
+<li>Retro-Replay TM overview — 12 drivers, 6 stages, pickup arsenal, repair zones</li>
+<li>Gematsu arena footage notes — destructible-level pacing</li>
+<li>IGN weapon categories + TM:Black overheat rules + Fandom special/strategy notes (consulted via search)</li>
+<li>6 visual mood refs in <code>reference-assets/</code>: arena-asphalt, vehicle-brawler, explosion-vfx, pickup-icon, chase-cam, demolition-derby</li>
+</ul>
+<div class="imgs">
+<figure><img src="../reference-assets/arena-asphalt.jpg" alt=""><figcaption>arena-asphalt</figcaption></figure>
+<figure><img src="../reference-assets/vehicle-brawler.jpg" alt=""><figcaption>vehicle-brawler</figcaption></figure>
+<figure><img src="../reference-assets/explosion-vfx.jpg" alt=""><figcaption>explosion-vfx</figcaption></figure>
+<figure><img src="../reference-assets/pickup-icon.jpg" alt=""><figcaption>pickup-icon</figcaption></figure>
+<figure><img src="../reference-assets/chase-cam.jpg" alt=""><figcaption>chase-cam</figcaption></figure>
+<figure><img src="../reference-assets/demolition-derby.jpg" alt=""><figcaption>demolition-derby</figcaption></figure>
+</div>
+
+<h2>Mechanics mapped from source</h2>
+<table>
+<tr><th>Source mechanic</th><th>Our implementation</th><th>Status</th></tr>
+<tr><td>Infinite MG side-arms + overheat (TM:Black)</td><td>J/click MG, heat bar, lockout + cooldown</td><td class="ok">done</td></tr>
+<tr><td>Scattered pickup arsenal (homing/fire/mine)</td><td>Respawning pads, 1/2/3 selection, AI also collects</td><td class="ok">done</td></tr>
+<tr><td>Per-vehicle recharging specials</td><td>Napalm cone / Patriot volley / Rat rocket, per-vehicle CDs</td><td class="ok">done</td></tr>
+<tr><td>Ram damage</td><td>Speed-based mutual damage, faster car wins trade</td><td class="ok">done</td></tr>
+<tr><td>Repair zones + explosive barrels</td><td>✚ pads heal over time; ! barrels chain-explode</td><td class="ok">done</td></tr>
+<tr><td>Chase camera, screen shake</td><td>Follow + velocity lookahead + shake decay, minimap</td><td class="ok">done</td></tr>
+<tr><td>Multi-arena progression + score</td><td>3 arenas, kill/damage/time scoring, lives, localStorage hi-score</td><td class="ok">done</td></tr>
+<tr><td>Pause / game-over / victory / retry</td><td>Title→select→countdown→play⇄pause→clear→win/over; retry arena refills lives</td><td class="ok">done</td></tr>
+</table>
+
+<h2>Verification evidence (Chromium headless + Playwright, <code>evidence/verification-results.json</code>)</h2>
+<ul id="evidence">
+<li>node --check game.js: SYNTAX_OK</li>
+<li>Console/page errors during full run: <b>0</b></li>
+<li>9/9 scripted browser steps pass: title → select → countdown → keyboard drive + MG fire (foe 170→152 HP, score +6 via real input) → AI moves/fires on its own → pause/resume → 3-arena run to <b>victory</b> (hi-score 229836 persisted) → lives 3→2→1→0 to <b>game over</b> → retry restarts arena with lives refilled</li>
+<li>Bugs found by the loop and fixed: keyboard fire keys never registered (<code>keys.J</code> vs <code>keys.KeyJ</code>), AI tick called nonexistent <code>updateAI</code>, death/clear timers desynced by pause (converted to in-update timers)</li>
+<li>60 fps in headless software rendering during combat</li>
+</ul>
+<div class="imgs">
+<figure><img src="evidence/01-title.png" alt=""><figcaption>title</figcaption></figure>
+<figure><img src="evidence/04-gameplay.png" alt=""><figcaption>combat HUD</figcaption></figure>
+<figure><img src="evidence/07-victory.png" alt=""><figcaption>victory</figcaption></figure>
+<figure><img src="evidence/08-gameover.png" alt=""><figcaption>game over</figcaption></figure>
+<figure><img src="evidence/09-retry.png" alt=""><figcaption>retry countdown</figcaption></figure>
+</div>
+
+<h2>Decisions</h2>
+<ul>
+<li>Top-down follow camera instead of behind-car 3D: keeps combat readable + scope shippable; lookahead + shake preserve chase feel.</li>
+<li>Free-for-all AI (everyone hunts nearest) mirrors TM deathmatch; AI uses same weapons/specials as player.</li>
+<li>Parody roster (Sweet Fang / Warhog / Road Rat) keeps Sweet-Tooth archetype without copying assets.</li>
+<li>All art + audio procedural (canvas/WebAudio): zero external runtime deps.</li>
+</ul>
+
+<h2>Known gaps / next</h2>
+<ul>
+<li>AI difficulty tuning from real playtime observations.</li>
+<li>Split-screen/co-op explicitly out of scope (single-player vs AI).</li>
+<li>Mobile/touch controls out of scope (desktop web target).</li>
+</ul>
+<p><i>Updated 2026-09-09 · session 1</i></p>
+</body>
+</html>

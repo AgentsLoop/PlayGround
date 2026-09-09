@@ -1,0 +1,36 @@
+{
+ "errors": [],
+ "steps": [
+  {
+   "name": "serve-root-index",
+   "ok": true,
+   "http": 200,
+   "title": "TWISTED ARENA — vehicular combat",
+   "iframes": 1
+  },
+  {
+   "name": "game-boots-in-iframe",
+   "ok": true,
+   "screen": "title"
+  },
+  {
+   "name": "start-and-play",
+   "ok": true,
+   "dmg": 27,
+   "score": 8
+  },
+  {
+   "name": "run-to-victory",
+   "ok": true,
+   "score": 229929,
+   "hi": 229929
+  },
+  {
+   "name": "game-over-and-retry",
+   "ok": true,
+   "lives": 0,
+   "retried": "play",
+   "livesRefilled": 3
+  }
+ ]
+}
