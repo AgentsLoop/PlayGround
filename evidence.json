@@ -1,0 +1,23 @@
+{
+  "issue": "https://github.com/AgentsLoop/PlayGround/issues/87",
+  "run": "https://github.com/AgentsLoop/PlayGround/actions/runs/34294119903",
+  "target_ref": "main",
+  "target_sha": "93e66ba2937754ccb8a327b584bbb9005a5a7890",
+  "branch": "opencode/34294119903",
+  "labels": ["OpenCode", "Goal", "in progress"],
+  "stages": {
+    "trigger": "pass",
+    "prepare": "pass",
+    "build": "active",
+    "verify": "pending",
+    "expose": "pending",
+    "screenshots": "pending",
+    "push": "pending",
+    "release": "pending",
+    "report": "pending"
+  },
+  "entrypoint": "index.html",
+  "server": "npm run start -- --port 3000",
+  "screenshots": ["final-dashboard.png", "final-verify.png", "final-public.png"],
+  "public_url": "https://beth-doctrine-lawyer-sega.trycloudflare.com"
+}

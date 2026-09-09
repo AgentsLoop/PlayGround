@@ -1,0 +1,21 @@
+# OMG E2E validation: keep delivery commit to project files only.
+# The workflow pushes `git add -A -- .`; these entries stop runner
+# state, secrets, logs, and nested checkouts from leaking into the
+# immutable project branch (see OMG-E2E-PROGRESS.md section 8).
+node_modules/
+.opencode/
+.opencode-web/
+.opencode-ssh/
+.agents/
+.agentsweb/
+.omgithub-runtime/
+opencode-agentsweb-id_ed25519
+opencode-agentsweb-id_ed25519.pub
+# Generic runtime secrets/logs the push sweep (`git add -A`) must never catch.
+*.log
+*.pid
+.env
+access.env
+*.pem
+*.key
+*.pfx

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OMG E2E Validation — Issue #87</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body data-testid="omg-e2e-dashboard">
+    <header>
+      <span class="eyebrow">OMG ISSUE-TO-PROJECT · END-TO-END VALIDATION</span>
+      <h1>OMG E2E Validation — Issue #87</h1>
+      <p>Validates the real OMG workflow: GitHub issue → Actions → OpenCode session → checkout → browser artifact → verification → published project.</p>
+    </header>
+    <main>
+      <section id="stages" aria-label="Workflow stages"></section>
+      <section id="evidence" aria-label="Evidence links">
+        <h2>Evidence</h2>
+        <ul>
+          <li><a href="https://github.com/AgentsLoop/PlayGround/issues/87">Triggering issue #87</a></li>
+          <li><a href="https://github.com/AgentsLoop/PlayGround/actions/runs/34294119903">Action run 34294119903</a></li>
+          <li><a href="OMG-E2E-PROGRESS.md">Live progress page (OMG-E2E-PROGRESS.md)</a></li>
+          <li><a href="evidence.json">Machine-readable evidence (evidence.json)</a></li>
+          <li><a href="https://omgithub.com/AgentsLoop/PlayGround/tree/main">Open Project (OmGithub tree URL)</a></li>
+        </ul>
+        <p id="health">Health: unknown — press Verify.</p>
+        <button id="verify-btn" type="button">Verify</button>
+      </section>
+    </main>
+    <footer>
+      <p>Target: <code>main @ 93e66ba2937754ccb8a327b584bbb9005a5a7890</code> · Branch: <code>opencode/34294119903</code> · Serve: <code>npm run start -- --port 3000</code></p>
+    </footer>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
