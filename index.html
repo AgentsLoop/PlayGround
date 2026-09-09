@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lantern Dash — Night-Market Courier</title>
+<style>
+  :root{
+    --bg:#0b0918; --panel:#141126; --ink:#f5efe0; --muted:#b9aecb;
+    --amber:#ffb43a; --red:#ff4d4d; --jade:#2fe6a8; --gold:#ffd34d;
+    --magenta:#ff4dd2; --cyan:#57e6ff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:radial-gradient(1200px 700px at 50% -10%,#1b1440 0%,var(--bg) 60%) fixed,var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Verdana,system-ui,sans-serif;min-height:100%}
+  #wrap{max-width:1020px;margin:0 auto;padding:12px 12px 28px}
+  header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  header h1{font-size:clamp(22px,3.4vw,34px);margin:6px 0;letter-spacing:.5px;color:var(--amber);
+    text-shadow:0 0 18px rgba(255,180,58,.35)}
+  header p{margin:0;color:var(--muted);font-size:14px}
+  #stage{position:relative;margin-top:10px;border:2px solid #3a2c12;border-radius:14px;overflow:hidden;
+    background:#0d0b1e;box-shadow:0 0 0 1px #000,0 0 42px rgba(255,150,40,.12)}
+  canvas{display:block;width:100%;height:auto;aspect-ratio:960/640;background:#0d0b1e}
+  /* HUD */
+  #hud{position:absolute;top:0;left:0;right:0;display:flex;gap:6px;align-items:center;justify-content:flex-start;flex-wrap:wrap;
+    padding:8px 10px;font-size:14px;background:linear-gradient(180deg,rgba(5,3,14,.85),rgba(5,3,14,0));
+    pointer-events:none}
+  #hud .pill{background:rgba(10,8,24,.78);border:1px solid #4a3a1c;border-radius:999px;padding:4px 12px;white-space:nowrap}
+  #hud button.pill{font:inherit;color:var(--ink);cursor:pointer;pointer-events:auto}
+  #hud button.pill:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+  @media (max-width:640px){ #hud{font-size:12px;gap:4px} #hud .pill{padding:3px 9px} }
+  #hud b{color:var(--gold)}
+  #timer.low{color:#ff7b7b;animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:.45}}
+  /* Overlays */
+  .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;
+    background:rgba(6,4,16,.78);backdrop-filter:blur(2px);padding:20px}
+  .overlay[hidden]{display:none}
+  .card{max-width:560px;background:var(--panel);border:1px solid #5a451f;border-radius:16px;padding:22px 26px;
+    box-shadow:0 0 36px rgba(255,170,50,.18)}
+  .card h2{margin:.2em 0;color:var(--amber);font-size:clamp(20px,3vw,28px)}
+  .card p{color:var(--ink);line-height:1.5;margin:.5em 0}
+  .card .keys{display:inline-block;background:#0b0918;border:1px solid #55452a;border-radius:8px;padding:6px 10px;margin:2px}
+  .btn{pointer-events:auto;cursor:pointer;font:inherit;font-weight:700;color:#1a1005;background:linear-gradient(180deg,#ffd97a,#ff9d2e);
+    border:0;border-radius:999px;padding:10px 26px;margin-top:12px;font-size:16px;box-shadow:0 2px 14px rgba(255,170,50,.4)}
+  .btn:hover{filter:brightness(1.07)} .btn:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+  .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--amber);box-shadow:none}
+  #status{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+  footer{color:var(--muted);font-size:12.5px;margin-top:10px;line-height:1.6}
+  footer kbd{background:#221c38;border:1px solid #4a3f6b;border-radius:4px;padding:0 5px;font-family:inherit}
+  #selftest-output{display:none;font-family:monospace;white-space:pre-wrap;background:#000;color:#0f0;padding:10px}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>🏮 Lantern Dash</h1>
+    <p>Top-down night-market courier run — grab every glowing parcel, dodge the patrol carts, reach the exit before the lamps burn out.</p>
+  </header>
+
+  <div id="stage">
+    <canvas id="game" width="960" height="640" aria-label="Lantern Dash playfield"></canvas>
+    <div id="hud" aria-hidden="false">
+      <span class="pill">⭐ Score <b id="h-score">0</b></span>
+      <span class="pill">📦 Parcels <b id="h-parcels">0/6</b></span>
+      <span class="pill" id="timer">⏳ Time <b id="h-timer">90</b></span>
+      <span class="pill">❤ <b id="h-hearts">❤❤❤</b></span>
+      <span class="pill">🏆 Best <b id="h-best">0</b></span>
+      <button class="pill" id="btn-pause-hud" aria-label="Pause or resume">⏸ Pause</button>
+    </div>
+
+    <div class="overlay" id="ov-title">
+      <div class="card" role="dialog" aria-labelledby="t-title">
+        <h2 id="t-title">🏮 Lantern Dash</h2>
+        <p>You are the night-market courier. The street is lit, the stalls are busy, and <b>6 glowing parcels</b> need collecting before you can slip out the <b>east gate</b>.</p>
+        <p><span class="keys">WASD / Arrows</span> move &nbsp; <span class="keys">P</span> pause &nbsp; <span class="keys">R</span> restart &nbsp; <span class="keys">Enter</span> start</p>
+        <p>⚠️ Patrol carts cost one heart on contact (3 hearts). ⏳ 90 seconds on the clock. Mute with <span class="keys">M</span>.</p>
+        <button class="btn" id="btn-start">Light the lanterns — Start</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="ov-pause" hidden>
+      <div class="card" role="dialog" aria-labelledby="t-pause">
+        <h2 id="t-pause">Paused</h2>
+        <p>The market holds its breath…</p>
+        <button class="btn" id="btn-resume">Resume</button><br>
+        <button class="btn ghost" id="btn-restart-p">Restart run</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="ov-end" hidden>
+      <div class="card" role="dialog" aria-labelledby="t-end">
+        <h2 id="t-end">—</h2>
+        <p id="p-end">—</p>
+        <button class="btn" id="btn-restart">Run it again (R)</button>
+      </div>
+    </div>
+
+    <div id="status" role="status" aria-live="polite"></div>
+  </div>
+  <pre id="selftest-output"></pre>
+
+  <footer>
+    <kbd>WASD</kbd>/<kbd>←↑↓→</kbd> move · <kbd>P</kbd> pause · <kbd>R</kbd> restart · <kbd>M</kbd> mute · <kbd>Enter</kbd> start.
+    Collect all 6 parcels to unlock the east gate. Best score is saved on this device.
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   LANTERN DASH — single-file top-down night-market arcade game
+   ============================================================ */
+const TILE = 48, COLS = 20, ROWS = 13, W = COLS*TILE, H = 640;
+const PLAY_H = ROWS*TILE; // 624; bottom 16px is trim
+const TIME_LIMIT = 90, PARCEL_TOTAL = 6, MAX_HEARTS = 3;
+const PLAYER_R = 14, SPEED = 235;
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const el = id => document.getElementById(id);
+const hud = { score: el('h-score'), parcels: el('h-parcels'), timer: el('h-timer'), hearts: el('h-hearts'), best: el('h-best') };
+const ovTitle = el('ov-title'), ovPause = el('ov-pause'), ovEnd = el('ov-end');
+const statusEl = el('status');
+
+// Map: 1 = stall/wall block, 0 = walkable. Compact lantern street.
+const MAP = [
+  "XXXXXXXXXXXXXXXXXXXX",
+  "X......XX......XX..X",
+  "X.L....XX..L...XX..X",
+  "X......XX......XX..X",
+  "XXX.XXXX.XXXX.XXX..X",
+  "X......P......L....X",
+  "X..L...XXXXXX...L..X",
+  "X......XXXXXX......X",
+  "XXX.XX........XX.XXX",
+  "X......L..L.......GX",
+  "X..L.............L.X",
+  "X.....XX....XX.....X",
+  "XXXXXXXXXXXXXXXXXXXX",
+];
+function solidAt(tx,ty){
+  if(tx<0||ty<0||tx>=COLS||ty>=ROWS) return true;
+  return MAP[ty][tx] === 'X';
+}
+function circleHitsWall(x,y,r){
+  const x0=Math.floor((x-r)/TILE), x1=Math.floor((x+r)/TILE);
+  const y0=Math.floor((y-r)/TILE), y1=Math.floor((y+r)/TILE);
+  for(let ty=y0;ty<=y1;ty++) for(let tx=x0;tx<=x1;tx++){
+    if(!solidAt(tx,ty)) continue;
+    const nx=Math.max(tx*TILE,Math.min(x,tx*TILE+TILE));
+    const ny=Math.max(ty*TILE,Math.min(y,ty*TILE+TILE));
+    if((x-nx)*(x-nx)+(y-ny)*(y-ny) < r*r) return true;
+  }
+  return false;
+}
+function moveCircle(p,dx,dy){
+  // axis-separated slide
+  if(dx!==0 && !circleHitsWall(p.x+dx,p.y,PLAYER_R)) p.x+=dx;
+  if(dy!==0 && !circleHitsWall(p.x,p.y+dy,PLAYER_R)) p.y+=dy;
+  p.x=Math.max(PLAYER_R+2,Math.min(W-PLAYER_R-2,p.x));
+  p.y=Math.max(PLAYER_R+2,Math.min(PLAY_H-PLAYER_R-2,p.y));
+}
+
+// Lantern positions (walkable edge lights) — derived from 'L' marks
+const lanterns=[];
+for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++) if(MAP[y][x]==='L') lanterns.push({x:x*TILE+TILE/2,y:y*TILE+TILE/2,phase:Math.random()*6.28});
+
+const PARCEL_SPOTS=[{x:3.5*TILE,y:1.5*TILE},{x:12.5*TILE,y:2.5*TILE},{x:1.5*TILE,y:5.5*TILE},
+  {x:17.5*TILE,y:5.5*TILE},{x:9.5*TILE,y:9.5*TILE},{x:5.5*TILE,y:10.5*TILE}];
+const EXIT={x:18.5*TILE,y:9.5*TILE,r:22};
+const START={x:1.5*TILE,y:10.5*TILE};
+
+// Patrol carts: rect patrollers on ping-pong paths
+function makeCarts(){
+  return [
+    {x:6*TILE, y:3.5*TILE-12, w:44,h:24, ax:6*TILE, bx:12*TILE, y0:3.5*TILE-12, t:0,      sp:.55, horiz:true},
+    {x:13*TILE,y:5.5*TILE,    w:44,h:24, ax:13*TILE,bx:17*TILE, y0:5.5*TILE,    t:.4,     sp:.7,  horiz:true},
+    {x:4.5*TILE,y:8*TILE,     w:26,h:44, x0:4.5*TILE, ay:6*TILE,by:10*TILE,     t:.2,     sp:.5,  horiz:false},
+    {x:14.5*TILE,y:7*TILE,    w:26,h:44, x0:14.5*TILE,ay:6*TILE,by:11*TILE,     t:.7,     sp:.62, horiz:false},
+  ];
+}
+
+// ---- audio (tiny WebAudio blips, created lazily on first gesture) ----
+let AC=null, muted=false;
+function beep(freq,dur,type,vol){
+  if(muted) return;
+  try{
+    if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended') AC.resume();
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type=type||'square'; o.frequency.value=freq;
+    g.gain.setValueAtTime(vol||.06,AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+dur);
+    o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime+dur);
+  }catch(e){/* audio unavailable — game continues silently */}
+}
+
+// ---- state ----
+let S=null;
+function best(){
+  try{ return parseInt(localStorage.getItem('lanternDashBest')||'0',10)||0; }catch(e){ return 0; }
+}
+function saveBest(v){
+  try{ localStorage.setItem('lanternDashBest',String(v)); }catch(e){/* private mode — ignore */}
+}
+function reset(){
+  S={ mode:'title', score:0, collected:0, timeLeft:TIME_LIMIT, hearts:MAX_HEARTS,
+      player:{x:START.x,y:START.y,vx:0,vy:0,face:1,invuln:0},
+      parcels:PARCEL_SPOTS.map(p=>({x:p.x,y:p.y,taken:false,phase:Math.random()*6.28})),
+      carts:makeCarts(), particles:[], floats:[], shake:0, t:0, won:false, msg:'' };
+  hud.best.textContent=best();
+  updateHUD(); setOverlay();
+}
+function startGame(){
+  reset(); S.mode='play'; setOverlay(); say('Run started. Collect 6 parcels, then reach the east gate.');
+  beep(660,.12,'square'); setTimeout(()=>beep(880,.14,'square'),120);
+}
+function endGame(win,reason){
+  S.mode = win?'win':'lose'; S.won=win;
+  if(win){
+    const bonus=Math.ceil(S.timeLeft)*10 + S.hearts*50;
+    S.score+=bonus; S.msg=`Finished with ${Math.ceil(S.timeLeft)}s left and ${S.hearts} ❤ — time+heart bonus +${bonus}.`;
+    if(S.score>best()) saveBest(S.score);
+    beep(523,.12,'square'); setTimeout(()=>beep(659,.12,'square'),130); setTimeout(()=>beep(784,.22,'square'),260);
+    confetti(EXIT.x,EXIT.y);
+  }else{
+    S.msg=reason; beep(220,.3,'sawtooth');
+    if(S.score>best()) saveBest(S.score);
+  }
+  hud.best.textContent=best(); updateHUD(); setOverlay();
+  say(win?('Victory! Score '+S.score):('Run over. '+reason));
+}
+function setOverlay(){
+  ovTitle.hidden = S.mode!=='title';
+  ovPause.hidden = S.mode!=='pause';
+  const end = (S.mode==='win'||S.mode==='lose');
+  ovEnd.hidden = !end;
+  if(end){
+    el('t-end').textContent = S.mode==='win' ? '🎉 Delivery complete!' : '🌧️ Run failed';
+    el('p-end').textContent = `Score ${S.score} · Parcels ${S.collected}/${PARCEL_TOTAL} · Best ${best()}. ${S.msg}`;
+  }
+  const btn = S.mode==='title'?el('btn-start'):el('btn-restart');
+  if(btn && document.activeElement && document.activeElement.blur) { /* keep focus sane */ }
+}
+function say(msg){ statusEl.textContent=msg; }
+function updateHUD(){
+  hud.score.textContent=S.score;
+  hud.parcels.textContent=S.collected+'/'+PARCEL_TOTAL;
+  const t=Math.max(0,Math.ceil(S.timeLeft));
+  hud.timer.textContent=t;
+  el('timer').classList.toggle('low', S.timeLeft<=15 && S.mode==='play');
+  hud.hearts.textContent='❤'.repeat(S.hearts)+'🖤'.repeat(MAX_HEARTS-S.hearts);
+}
+
+// ---- effects ----
+function burst(x,y,color,n){ for(let i=0;i<(n||14);i++){ const a=Math.random()*6.28, sp=40+Math.random()*140;
+  S.particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.5+Math.random()*.4,color}); } }
+function confetti(x,y){ const c=['#ffd34d','#ff4dd2','#2fe6a8','#57e6ff','#ff9d2e'];
+  for(let i=0;i<70;i++){ const a=Math.random()*6.28, sp=60+Math.random()*220;
+    S.particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-60,life:.9+Math.random()*.9,color:c[i%5]}); } }
+function floatText(x,y,text,color){ S.floats.push({x,y,text,life:1.1,color:color||'#ffd34d'}); }
+
+// ---- input ----
+const keys={};
+addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k===' '?' ':k)) e.preventDefault();
+  if(e.key==='Enter' && S.mode==='title'){ startGame(); return; }
+  if(k==='m'){ muted=!muted; say(muted?'Sound muted.':'Sound on.'); return; }
+  if(k==='r' && S.mode!=='title'){ startGame(); return; }
+  if((k==='p'||e.key==='Escape')){
+    if(S.mode==='play'){S.mode='pause';setOverlay();say('Paused.');}
+    else if(S.mode==='pause'){S.mode='play';setOverlay();say('Resumed.');}
+    return;
+  }
+  keys[k]=true;
+});
+addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
+addEventListener('blur',()=>{ for(const k in keys) keys[k]=false; });
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden && S && S.mode==='play'){ S.mode='pause'; setOverlay(); say('Paused (tab hidden).'); }
+});
+el('btn-start').addEventListener('click',startGame);
+function togglePause(){
+  if(!S) return;
+  if(S.mode==='play'){S.mode='pause';setOverlay();say('Paused.');}
+  else if(S.mode==='pause'){S.mode='play';setOverlay();say('Resumed.');}
+}
+el('btn-pause-hud').addEventListener('click',()=>{ if(S.mode==='title'){startGame();} else togglePause(); });
+el('btn-resume').addEventListener('click',()=>{ S.mode='play'; setOverlay(); });
+el('btn-restart').addEventListener('click',startGame);
+el('btn-restart-p').addEventListener('click',startGame);
+canvas.tabIndex=0;
+
+// ---- update ----
+function cartPos(c, t){
+  const k=(Math.sin(t*c.sp*Math.PI*2 + c.t*6.28)+1)/2; // 0..1 ping-pong
+  if(c.horiz) return {x:c.ax+(c.bx-c.ax)*k, y:c.y0};
+  return {x:c.x0, y:c.ay+(c.by-c.ay)*k};
+}
+function rectCircle(rx,ry,rw,rh,cx,cy,cr){
+  const nx=Math.max(rx,Math.min(cx,rx+rw)), ny=Math.max(ry,Math.min(cy,ry+rh));
+  const dx=cx-nx, dy=cy-ny; return dx*dx+dy*dy < cr*cr;
+}
+function update(dt){
+  if(S.mode!=='play') return;
+  S.t+=dt;
+  S.timeLeft-=dt;
+  if(S.timeLeft<=0){ S.timeLeft=0; updateHUD(); endGame(false,'The lanterns burned out — time expired.'); return; }
+  const p=S.player;
+  let ix=((keys['d']||keys['arrowright'])?1:0)-((keys['a']||keys['arrowleft'])?1:0);
+  let iy=((keys['s']||keys['arrowdown'])?1:0)-((keys['w']||keys['arrowup'])?1:0);
+  if(ix||iy){ const l=Math.hypot(ix,iy); ix/=l; iy/=l; p.face = ix!==0?Math.sign(ix):p.face; }
+  moveCircle(p, ix*SPEED*dt, iy*SPEED*dt);
+  if(p.invuln>0) p.invuln-=dt;
+  for(const c of S.carts){
+    const pos=cartPos(c,S.t);
+    if(p.invuln<=0 && rectCircle(pos.x,pos.y,c.w,c.h,p.x,p.y,PLAYER_R-2)){
+      S.hearts--; p.invuln=1.4; S.shake = reducedMotion?0:.35;
+      burst(p.x,p.y,'#ff4d4d',18); beep(180,.25,'sawtooth');
+      // knockback away from cart
+      const cx=pos.x+c.w/2, cy=pos.y+c.h/2;
+      const dx=p.x-cx, dy=p.y-cy, l=Math.hypot(dx,dy)||1;
+      moveCircle(p, dx/l*36, dy/l*36);
+      say(`Bumped by a patrol cart! ${S.hearts} hearts left.`);
+      if(S.hearts<=0){ updateHUD(); endGame(false,'Knocked out by patrol carts — no hearts left.'); return; }
+    }
+  }
+  for(const pc of S.parcels){
+    if(!pc.taken && Math.hypot(p.x-pc.x,p.y-pc.y)<PLAYER_R+13){
+      pc.taken=true; S.collected++; S.score+=100;
+      burst(pc.x,pc.y,'#ffd34d'); floatText(pc.x,pc.y-18,'+100'); beep(990,.1,'square');
+      say(`Parcel ${S.collected} of ${PARCEL_TOTAL} collected.`);
+      if(S.collected===PARCEL_TOTAL){ say('All parcels collected — the east gate is open!'); beep(784,.15,'square'); setTimeout(()=>beep(1046,.2,'square'),140); }
+    }
+  }
+  if(S.collected===PARCEL_TOTAL && Math.hypot(p.x-EXIT.x,p.y-EXIT.y)<EXIT.r+PLAYER_R){
+    updateHUD(); endGame(true); return;
+  }
+  // particles
+  for(const q of S.particles){ q.x+=q.vx*dt; q.y+=q.vy*dt; q.vy+=160*dt; q.life-=dt; }
+  S.particles=S.particles.filter(q=>q.life>0);
+  for(const f of S.floats){ f.y-=34*dt; f.life-=dt; }
+  S.floats=S.floats.filter(f=>f.life>0);
+  if(S.shake>0) S.shake-=dt;
+  updateHUD();
+}
+
+// ---- render ----
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let glowAmber=null, glowRed=null, glowGold=null, glowMagenta=null, glowJade=null;
+function glowSprite(color){
+  const c=document.createElement('canvas'); c.width=c.height=128;
+  const g=c.getContext('2d');
+  const gr=g.createRadialGradient(64,64,4,64,64,64);
+  gr.addColorStop(0,color); gr.addColorStop(.35,color.replace('1)','0.45)')); gr.addColorStop(1,color.replace('1)','0)'));
+  g.fillStyle=gr; g.fillRect(0,0,128,128); return c;
+}
+function initSprites(){
+  glowAmber=glowSprite('rgba(255,170,60,1)'); glowRed=glowSprite('rgba(255,70,70,1)');
+  glowGold=glowSprite('rgba(255,211,77,1)'); glowMagenta=glowSprite('rgba(255,77,210,1)');
+  glowJade=glowSprite('rgba(47,230,168,1)');
+}
+function drawGlow(sprite,x,y,size,alpha){
+  ctx.globalAlpha=alpha; ctx.drawImage(sprite,x-size/2,y-size/2,size,size); ctx.globalAlpha=1;
+}
+function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+function render(){
+  ctx.save();
+  if(S.shake>0 && !reducedMotion) ctx.translate((Math.random()-.5)*8*S.shake*3,(Math.random()-.5)*8*S.shake*3);
+  // floor
+  ctx.fillStyle='#141126'; ctx.fillRect(-20,-20,W+40,H+40);
+  // stone tiles
+  ctx.strokeStyle='rgba(120,100,170,0.10)'; ctx.lineWidth=1;
+  for(let x=0;x<=COLS;x++){ ctx.beginPath();ctx.moveTo(x*TILE,0);ctx.lineTo(x*TILE,PLAY_H);ctx.stroke(); }
+  for(let y=0;y<=ROWS;y++){ ctx.beginPath();ctx.moveTo(0,y*TILE);ctx.lineTo(W,y*TILE);ctx.stroke(); }
+  // main street runner carpet (walkable warm path)
+  ctx.fillStyle='rgba(255,150,50,0.055)'; ctx.fillRect(0,4*TILE,W,5*TILE);
+  // stalls / walls
+  for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++){
+    if(MAP[y][x]!=='X') continue;
+    const px=x*TILE, py=y*TILE, edge=(x===0||y===0||x===COLS-1||y===ROWS-1);
+    ctx.fillStyle= edge ? '#241b3d' : '#3a2b55';
+    roundRect(px+2,py+2,TILE-4,TILE-4,7); ctx.fill();
+    ctx.strokeStyle= edge ? '#4d3a7a' : '#6b4d8f'; ctx.lineWidth=2; ctx.stroke();
+    if(!edge){ // awning stripes
+      ctx.fillStyle = ((x+y)%2===0)?'rgba(255,90,90,0.75)':'rgba(245,239,224,0.75)';
+      ctx.fillRect(px+6,py+6,TILE-12,10);
+      ctx.fillStyle='rgba(0,0,0,0.25)'; ctx.fillRect(px+6,py+16,TILE-12,4);
+    }
+  }
+  // lantern glows
+  const flick = reducedMotion?0:1;
+  for(const L of lanterns){
+    const pulse = 1 + (flick? Math.sin(S.t*3+L.phase)*0.08 : 0);
+    drawGlow(glowAmber, L.x, L.y, 120*pulse, .5);
+    // lantern body
+    ctx.fillStyle='#ff5a3c'; ctx.beginPath(); ctx.ellipse(L.x,L.y,9,11,0,0,6.29); ctx.fill();
+    ctx.fillStyle='#ffe9a8'; ctx.beginPath(); ctx.ellipse(L.x,L.y,5,7,0,0,6.29); ctx.fill();
+    ctx.fillStyle='#7a2b12'; ctx.fillRect(L.x-4,L.y-15,8,4); ctx.fillRect(L.x-4,L.y+11,8,4);
+  }
+  // exit gate
+  const open = S.collected===PARCEL_TOTAL;
+  const pulse = 1+(reducedMotion?0:Math.sin(S.t*4)*0.12);
+  drawGlow(glowMagenta, EXIT.x, EXIT.y, (open?190:120)*pulse, open?.8:.4);
+  ctx.fillStyle= open?'#ff4dd2':'#5b5570';
+  roundRect(EXIT.x-20,EXIT.y-30,40,60,8); ctx.fill();
+  ctx.strokeStyle= open?'#ffe9a8':'#3a3550'; ctx.lineWidth=3; ctx.stroke();
+  ctx.fillStyle='#0d0b1e'; ctx.font='bold 26px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle= open?'#1a1005':'#8f86a8';
+  ctx.fillText(open?'★':'🔒',EXIT.x,EXIT.y-4);
+  if(!open){ ctx.fillStyle='#cfc6e4'; ctx.font='12px sans-serif';
+    ctx.fillText(`${PARCEL_TOTAL-S.collected} 📦`,EXIT.x,EXIT.y+22); }
+  // parcels
+  for(const pc of S.parcels){
+    if(pc.taken) continue;
+    const b=1+(reducedMotion?0:Math.sin(S.t*5+pc.phase)*0.12);
+    drawGlow(glowGold,pc.x,pc.y,90*b,.65);
+    ctx.fillStyle='#8a5a00'; roundRect(pc.x-11,pc.y-9,22,18,3); ctx.fill();
+    ctx.fillStyle='#ffd34d'; roundRect(pc.x-11,pc.y-9,22,7,3); ctx.fill();
+    ctx.fillStyle='#ff9d2e'; ctx.fillRect(pc.x-2,pc.y-9,4,18);
+    ctx.strokeStyle='#3a2c12'; ctx.lineWidth=2; roundRect(pc.x-11,pc.y-9,22,18,3); ctx.stroke();
+  }
+  // carts (obstacles): bold readable silhouettes + blinking warning lamp
+  for(const c of S.carts){
+    const pos=cartPos(c,S.t);
+    ctx.fillStyle='rgba(0,0,0,0.4)'; roundRect(pos.x+3,pos.y+5,c.w,c.h,8); ctx.fill();
+    const grad=ctx.createLinearGradient(pos.x,pos.y,pos.x,pos.y+c.h);
+    grad.addColorStop(0,'#a8326e'); grad.addColorStop(1,'#5e1f4d');
+    ctx.fillStyle=grad; roundRect(pos.x,pos.y,c.w,c.h,8); ctx.fill();
+    ctx.strokeStyle='#ffdfe9'; ctx.lineWidth=2.5; roundRect(pos.x,pos.y,c.w,c.h,8); ctx.stroke();
+    // wheels
+    ctx.fillStyle='#141126';
+    if(c.horiz){ for(const wx of [pos.x+8,pos.x+c.w-8]){ ctx.beginPath();ctx.arc(wx,pos.y+c.h/2,7,0,6.29);ctx.fill(); } }
+    else { for(const wy of [pos.y+8,pos.y+c.h-8]){ ctx.beginPath();ctx.arc(pos.x+c.w/2,wy,7,0,6.29);ctx.fill(); } }
+    // warning lamp
+    const on = reducedMotion ? true : (Math.sin(S.t*8+c.t*9)>0);
+    ctx.fillStyle= on?'#ffdf3c':'#7a5a10';
+    ctx.beginPath(); ctx.arc(pos.x+c.w/2,pos.y+(c.horiz?4:c.h/2),5,0,6.29); ctx.fill();
+    ctx.fillStyle='#2b0a1e'; ctx.font='bold 13px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('!',pos.x+c.w/2,pos.y+c.h/2+1);
+  }
+  // player courier
+  const p=S.player;
+  const blinkOff = p.invuln>0 && !reducedMotion && Math.floor(S.t*12)%2===0;
+  if(!blinkOff){
+    drawGlow(glowJade,p.x,p.y,110,.55);
+    ctx.fillStyle='rgba(0,0,0,0.45)'; ctx.beginPath(); ctx.ellipse(p.x,p.y+12,12,5,0,0,6.29); ctx.fill();
+    ctx.fillStyle='#0e6e52'; ctx.beginPath(); ctx.arc(p.x,p.y,PLAYER_R,0,6.29); ctx.fill();
+    ctx.strokeStyle='#eafff5'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(p.x,p.y,PLAYER_R,0,6.29); ctx.stroke();
+    // face + satchel
+    ctx.fillStyle='#eafff5';
+    ctx.beginPath(); ctx.arc(p.x+p.face*6,p.y-3,3.4,0,6.29); ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x+p.face*6,p.y+4,3.4,0,6.29); ctx.fill();
+    ctx.fillStyle='#ffb43a'; ctx.fillRect(p.x-p.face*12-5,p.y-6,10,12);
+    ctx.strokeStyle='#5a3a00'; ctx.lineWidth=1.5; ctx.strokeRect(p.x-p.face*12-5,p.y-6,10,12);
+    // headlamp cone (faces movement direction)
+    const aim = p.face>=0 ? 0 : Math.PI;
+    ctx.fillStyle='rgba(255,220,130,0.18)';
+    ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.arc(p.x,p.y,54,aim-.55,aim+.55); ctx.lineTo(p.x,p.y); ctx.fill();
+  }
+  // particles & floats
+  for(const q of S.particles){ ctx.globalAlpha=Math.max(0,Math.min(1,q.life*1.6)); ctx.fillStyle=q.color;
+    ctx.fillRect(q.x-2,q.y-2,4,4); }
+  ctx.globalAlpha=1;
+  ctx.textAlign='center'; ctx.font='bold 15px sans-serif';
+  for(const f of S.floats){ ctx.globalAlpha=Math.max(0,Math.min(1,f.life)); ctx.fillStyle=f.color||'#ffd34d';
+    ctx.fillText(f.text,f.x,f.y); }
+  ctx.globalAlpha=1;
+  // vignette
+  const v=ctx.createRadialGradient(W/2,PLAY_H/2,260,W/2,PLAY_H/2,640);
+  v.addColorStop(0,'rgba(0,0,0,0)'); v.addColorStop(1,'rgba(0,0,0,0.5)');
+  ctx.fillStyle=v; ctx.fillRect(0,0,W,PLAY_H);
+  // bottom trim
+  ctx.fillStyle='#0b0918'; ctx.fillRect(0,PLAY_H,W,H-PLAY_H);
+  ctx.restore();
+}
+
+// ---- main loop ----
+let last=performance.now();
+function frame(now){
+  let dt=(now-last)/1000; last=now;
+  if(dt>0.05) dt=0.05; // clamp tab-switch jumps
+  try{ update(dt); render(); }catch(err){
+    if(!S.crashed){ S.crashed=true; say('Something hiccuped — press R to restart the run.');
+      const d=document.createElement('div'); d.style.cssText='position:absolute;inset:auto 10px 10px 10px;background:#3d0d0d;color:#fff;padding:8px;border-radius:8px;font-size:13px';
+      d.textContent='Recovered from a render hiccup. Press R to restart.'; el('stage').appendChild(d);
+      setTimeout(()=>d.remove(),4000);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+// ---- resize: canvas keeps internal res; CSS scales responsively ----
+function fit(){
+  // aspect-ratio CSS handles it; hook exists for verification + future DPR work
+  canvas.style.width='100%';
+}
+addEventListener('resize',fit);
+
+// ---- boot ----
+initSprites(); reset(); fit();
+requestAnimationFrame(n=>{last=n;requestAnimationFrame(frame);});
+
+// ---- test / automation hooks (used by headless verification) ----
+window.LanternDash={ get state(){return S;}, start:startGame, reset, update,
+  collectAll(){ for(const pc of S.parcels) if(!pc.taken){pc.taken=true;S.collected++;S.score+=100;} updateHUD(); },
+  teleport(x,y){ S.player.x=x; S.player.y=y; }, press(k,down){ keys[k]=!!down; }, EXIT, TIME_LIMIT };
+
+// self-test mode: ?selftest=1 — exercises real systems, writes report to DOM
+(function(){
+  const q=new URLSearchParams(location.search);
+  if(q.get('autoplay')==='1'){ startGame(); }
+  const scene=q.get('scene');
+  if(scene==='win'||scene==='lose'){
+    startGame();
+    if(scene==='win'){ window.LanternDash.collectAll(); S.player.x=EXIT.x; S.player.y=EXIT.y; update(1/60); }
+    else { S.timeLeft=0.05; update(0.1); }
+  }
+  if(q.get('selftest')!=='1') return;
+  const out=[]; const ok=(n,c)=>out.push((c?'PASS':'FAIL')+' '+n);
+  try{
+    startGame();
+    ok('boot-into-play', S.mode==='play');
+    const x0=S.player.x; S.player.y=START.y;
+    // simulate real movement input through update()
+    keys['d']=true; for(let i=0;i<30;i++) update(1/60); keys['d']=false;
+    ok('movement-right', S.player.x>x0+50);
+    const y0=S.player.y; keys['w']=true; for(let i=0;i<20;i++) update(1/60); keys['w']=false;
+    ok('movement-up', S.player.y<y0);
+    // wall collision: push into border wall, must not escape
+    S.player.x=PLAYER_R+3; S.player.y=2.5*TILE; keys['a']=true; for(let i=0;i<30;i++) update(1/60); keys['a']=false;
+    ok('wall-blocks', S.player.x>=PLAYER_R+1 && S.player.x<W-PLAYER_R);
+    // collection via real proximity path
+    S.player.x=PARCEL_SPOTS[0].x; S.player.y=PARCEL_SPOTS[0].y; update(1/60);
+    ok('collect-parcel', S.collected>=1 && S.score>=100);
+    // obstacle collision via real cart overlap
+    const h0=S.hearts, c0=S.carts[0], cp=cartPos(c0,S.t);
+    S.player.invuln=0; S.player.x=cp.x+c0.w/2; S.player.y=cp.y+c0.h/2; update(1/60);
+    ok('obstacle-costs-heart', S.hearts===h0-1);
+    // timer expiry -> loss
+    S.hearts=MAX_HEARTS; S.timeLeft=0.05; update(0.1);
+    ok('timer-expiry-loss', S.mode==='lose');
+    // restart
+    startGame(); ok('restart-resets', S.mode==='play'&&S.score===0&&S.collected===0&&S.hearts===3&&Math.abs(S.timeLeft-TIME_LIMIT)<1);
+    // win path: collect all + reach exit
+    window.LanternDash.collectAll();
+    S.player.x=EXIT.x; S.player.y=EXIT.y; update(1/60);
+    ok('win-at-exit', S.mode==='win' && S.score>PARCEL_TOTAL*100);
+    // resize hook
+    try{ fit(); dispatchEvent(new Event('resize')); ok('resize-hook', true); }catch(e){ ok('resize-hook', false); }
+    // localStorage recovery (best-score never throws)
+    try{ saveBest(1234); ok('best-save', best()>=0); }catch(e){ ok('best-save', false); }
+  }catch(e){ out.push('FAIL exception: '+(e&&e.message)); }
+  const passed=out.filter(l=>l.startsWith('PASS')).length;
+  const report=`SELFTEST ${passed}/${out.length}\n`+out.join('\n');
+  const pre=el('selftest-output'); pre.style.display='block'; pre.textContent=report;
+  document.title=`SELFTEST ${passed}/${out.length}`;
+  console.log(report);
+})();
+</script>
+</body>
+</html>
