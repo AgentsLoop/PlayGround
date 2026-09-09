@@ -1,0 +1,147 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Starting with state checks: branch, server, and the public URL.
+[0m# [0mTodos
+[•] Verify public URL + repo/branch state
+[ ] Capture final-* playable screenshots under screenshots/
+[ ] Commit + push branch
+[ ] Post final completion comment to issue #94
+[0m
+[0m$ [0mgit branch --show-current; git status --short | head -15; echo ---; tmux ls 2>&1; echo ---; curl -s --max-time 15 -o /dev/null -w "public:%{http_code} t:%{time_total}\n" https://worcester-seem-backed-appointment.trycloudflare.com/index.html
+opencode/34323586585
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+---
+app-server: 1 windows (created Wed Sep  9 07:46:44 2026)
+---
+public:200 t:0.160859
+[0m
+Branch, server, and public URL all healthy. Setting up the screenshot run against the public URL.
+[0m✗ [0mmkdir -p /tmp/tm-final && npm init -y >/dev/null 2>&1 && npm i -D playwright-core >/dev/null 2>&1 && node -e "require('playwright-core'); console.log('PW_OK')" failed
+[91m[1mError: [0mNotFound: FileSystem.access (/tmp/tm-final)
+[0m
+[0m$ [0mmkdir -p /tmp/tm-final && npm --prefix /tmp/tm-final init -y >/dev/null 2>&1 && npm --prefix /tmp/tm-final i -D playwright-core >/dev/null 2>&1 && NODE_PATH=/tmp/tm-final/node_modules node -e "require('playwright-core'); console.log('PW_OK')"
+PW_OK
+[0m
+[0m← [0mWrite /tmp/tm-final/shoot-public.js
+Wrote file successfully.
+[0m
+[0m$ [0mNODE_PATH=/tmp/tm-final/node_modules node /tmp/tm-final/shoot-public.js > /tmp/tm-final/out.json 2>&1; python3 -c "import json; d=json.load(open('/tmp/tm-final/out.json')); print('ERRORS:', d['errors']); [print(s['name'], 'OK' if s['ok'] else 'FAIL', json.dumps(s)[:250]) for s in d['steps']]"
+ERRORS: []
+public-root OK {"name": "public-root", "ok": true, "http": 200, "title": "TWISTED ARENA \u2014 vehicular combat"}
+public-game-boots OK {"name": "public-game-boots", "ok": true, "screen": "title"}
+public-play OK {"name": "public-play", "ok": true, "score": 8}
+public-victory OK {"name": "public-victory", "ok": true, "score": 229936}
+[0m
+Public deployment passes end-to-end. Checking the captured shots.
+[0m→ [0mRead screenshots/final-public-gameplay.png
+[0m
+[0m$ [0mls -la screenshots/
+total 1560
+drwxr-xr-x  12 runner  staff    384 Sep  9 08:02 .
+drwxr-xr-x  19 runner  staff    608 Sep  9 08:01 ..
+-rw-r--r--   1 runner  staff  73151 Sep  9 07:58 final-gameover.png
+-rw-r--r--   1 runner  staff  87609 Sep  9 07:58 final-gameplay.png
+-rw-r--r--   1 runner  staff  79908 Sep  9 08:02 final-public-gameplay.png
+-rw-r--r--   1 runner  staff  92294 Sep  9 08:02 final-public-root.png
+-rw-r--r--   1 runner  staff  92294 Sep  9 08:02 final-public-title.png
+-rw-r--r--   1 runner  staff  88261 Sep  9 08:02 final-public-victory.png
+-rw-r--r--   1 runner  staff    536 Sep  9 07:59 final-results.json
+-rw-r--r--   1 runner  staff  87134 Sep  9 07:59 final-retry.png
+-rw-r--r--   1 runner  staff  92294 Sep  9 07:58 final-root.png
+-rw-r--r--   1 runner  staff  84057 Sep  9 07:58 final-victory.png
+[0m
+[0m# [0mTodos
+[✓] Verify public URL + repo/branch state
+[✓] Capture final-* playable screenshots under screenshots/
+[•] Commit + push branch
+[ ] Post final completion comment to issue #94
+[0m
+[0m$ [0mgit status --short | grep -v "^\?\? \(.agents\|.agentsweb\|.omgithub\|.opencode\|Agents.md\|opencode-agentsweb\)" ; git add screenshots/final-public-root.png screenshots/final-public-title.png screenshots/final-public-gameplay.png screenshots/final-public-victory.png && git status --short | grep "^A"
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? package.json
+?? screenshots/final-public-gameplay.png
+?? screenshots/final-public-root.png
+?? screenshots/final-public-title.png
+?? screenshots/final-public-victory.png
+A  screenshots/final-public-gameplay.png
+A  screenshots/final-public-root.png
+A  screenshots/final-public-title.png
+A  screenshots/final-public-victory.png
+[0m
+[0m$ [0mrm -f package.json && git commit -m "Verify public game: final playable screenshots from public URL" && git push origin opencode/34323586585 2>&1 | tail -2 && git log --oneline -2 && git status --short | grep -v "^\?\?" | head -3; echo CLEAN_CHECK_DONE
+[opencode/34323586585 5d0e065] Verify public game: final playable screenshots from public URL
+ 4 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 screenshots/final-public-gameplay.png
+ create mode 100644 screenshots/final-public-root.png
+ create mode 100644 screenshots/final-public-title.png
+ create mode 100644 screenshots/final-public-victory.png
+To https://github.com/AgentsLoop/PlayGround
+   2c7e756..5d0e065  opencode/34323586585 -> opencode/34323586585
+5d0e065 Verify public game: final playable screenshots from public URL
+2c7e756 Twisted Arena: browser vehicular combat + verified port-3000 entrypoint
+CLEAN_CHECK_DONE
+[0m
+[0m# [0mTodos
+[✓] Verify public URL + repo/branch state
+[✓] Capture final-* playable screenshots under screenshots/
+[✓] Commit + push branch
+[•] Post final completion comment to issue #94
+[0m
+[0m$ [0mgh issue comment 94 --body "## 🏁 Final completion — Twisted Arena verified on the public URL
+
+**🎮 Play it:** https://worcester-seem-backed-appointment.trycloudflare.com
+
+**Final commit:** \`5d0e065\` on branch \`opencode/34323586585\` (pushed; prior commit \`2c7e756\`).
+
+### Screenshots (captured live from the public URL, committed under \`screenshots/\`)
+
+![public root](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34323586585/screenshots/final-public-root.png)
+![public gameplay](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34323586585/screenshots/final-public-gameplay.png)
+![public victory](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34323586585/screenshots/final-public-victory.png)
+
+### Deployment status
+- Local app server: tmux session \`app-server\`, port 3000, HTTP 200 (~8ms); served bytes byte-identical to \`./index.html\`.
+- Public URL: HTTP 200; game boots in the embedded iframe; full loop verified remotely.
+
+### Test status (Chromium headless vs public URL, 0 console/page errors)
+- Root serves with correct title + game iframe; game reaches title screen
+- Real keyboard input: drive + MG fire scores (foe HP drops, score credits)
+- Full 3-arena run reaches CHAMPION/victory with hi-score persisted
+- Earlier rounds also verified locally: pause/resume, lives 3→0 game-over, retry refill
+
+### Known limitations
+- Single-player vs AI only; no split-screen co-op or online multiplayer.
+- Desktop keyboard/mouse; no touch controls.
+- AI difficulty is heuristic-tuned, not playtested against humans.
+- Reference visual assets are mood/composition refs (picsum seeds); all game art/audio is procedural." 2>&1 | tail -2
+https://github.com/AgentsLoop/PlayGround/issues/94#issuecomment-5598395931
+[0m
+[0m# [0mTodos
+[✓] Verify public URL + repo/branch state
+[✓] Capture final-* playable screenshots under screenshots/
+[✓] Commit + push branch
+[✓] Post final completion comment to issue #94
+[0m
+Done, per AGENTS.md throughout (tmux `app-server` session for the server, endpoint inspected before retrying when loopback initially failed):
+
+- **Public URL verified**: `https://worcester-seem-backed-appointment.trycloudflare.com` — HTTP 200, game boots, keyboard combat scores, full run reaches victory, 0 console/page errors.
+- **Screenshots**: `final-public-root/title/gameplay/victory.png` captured from the public URL, committed under `screenshots/`.
+- **Branch pushed**: `opencode/34323586585` at commit `5d0e065` (test-only `package.json` removed before committing; secrets/infra left untracked).
+- **Issue updated**: final completion comment posted to #94 with the public URL, embedded screenshots, final commit, deployment/test status, and known limitations.

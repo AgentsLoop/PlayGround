@@ -1,0 +1,28 @@
+# twisted metal
+
+## Objective
+
+Deliver a small production-quality, browser-based recreation of **Twisted Metal** gameplay for desktop web with playable vehicle combat, level progression, and score feedback.
+
+## Quality bar
+
+- Research authoritative references and collect real references before coding.
+- Download at least six high-signal visual/reference assets or screenshots into a local `reference-assets` directory and record source URLs beside each local filename.
+- Inspect the actual artifact with real browser interaction tools and compare behavior against the source references.
+- Preserve core input, combat, camera, and pacing mechanics that are visible in the requested source.
+- Provide recovery and failure states, restart/resume flow, and clear game-over and win conditions.
+
+## Execution
+
+- Split the work into judgeable pieces and assign each piece a builder and a fresh-context verifier.
+- Build iteratively across sessions until the acceptance bar is met, prioritizing gameplay responsiveness and polish.
+- Keep implementation and verification evidence tied to the requested visual and mechanical targets.
+
+## Verification
+
+- Compare the current result with each acceptance point from the quality bar and fix the largest remaining gap first.
+- Record concrete evidence of behavior, performance, and UX quality after each improvement loop.
+
+## Progress
+
+Maintain a resumable live progress page with references, evidence, decisions, blockers, gaps, and next actions.
