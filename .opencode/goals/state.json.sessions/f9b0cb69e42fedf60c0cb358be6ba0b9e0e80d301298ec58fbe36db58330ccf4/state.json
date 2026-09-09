@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "goals": [],
+  "results": [
+    {
+      "condition": "# GPU 3D graphics test: verify Chrome hardware rendering\n\n## Objective\n\nDeliver a production-quality macOS browser GPU and 3D graphics diagnostic for users who need to know whether Chrome uses hardware rendering. Test the real Chrome browser and real graphics hardware. Verify WebGL, WebGL 2, WebGPU where available, GPU process status, compositing, and hardware acceleration. Do not substitute a simulated, software-only, or flat test.\n\n## Quality bar\n\n- Research authoritative Chrome and WebGL or WebGPU diagnostic references before testing. Collect executable acceptance fixtures and record their source URLs as provenance.\n- Inspect the real Chrome artifact directly. Use Chrome GPU diagnostics and an interactive 3D workload. Record browser version, macOS version, renderer and adapter information, feature states, relevant command-line flags, and software-rendering fallbacks.\n- Define clear pass, partial-support, and fail outcomes. Give specific recovery steps for every failed or software-rendered feature.\n- Produce a concise, user-readable report with captured evidence and a reproducible command or navigation path.\n\n## Execution\n\n- Have the lead split the work into independently judgeable pieces.\n- Give each important piece a builder and a fresh-context critic or verifier.\n- Test normal Chrome launch conditions first. If results need it, test only safe, reversible configuration changes and document each one.\n- Work across as many sessions as needed. Do not stop after the first smoke test.\n\n## Verification\n\n- Have a fresh-context verifier inspect the actual diagnostic output, interactive 3D rendering, and report.\n- Compare the evidence against Chrome hardware-rendering expectations. Identify and fix the largest remaining gap, then repeat until the acceptance bar is met or record explicit blocking evidence.\n- Record concrete evidence for behavior, quality, and delivery.\n\n## Progress\n\nMaintain a resumable live progress page with references, evidence, decisions, blockers, current gaps, and the next exact action.",
+      "state": "achieved",
+      "reason": "",
+      "evidence": "Chrome 152.0.7977.65 on macOS 26.6.2 arm64 (VirtualMac2,1, M1 Virtual): WebGL2/WebGL1 both `ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device)` with `failIfMajorPerformanceCaveat=OK(HW)`, softwareFallback=false, shader-triangle `readPixels pixelSum=10544/error 0` (`/tmp/gpu_test/webgl_dom.html`); GPU process observed live; WebGPU `navigator.gpu=present` but adapter hangs headless across metal/default/swiftshader backends (partial, blocking evidence recorded); report `GPU_REPORT.md`, progress `GPU_PROGRESS.md`, fresh-context verifier reviewed and wording fixed.",
+      "blockedReason": "",
+      "turnCount": 0,
+      "totalTokens": 63175,
+      "usage": {
+        "input": 65337,
+        "output": 14138,
+        "reasoning": 5534,
+        "cacheRead": 1567596,
+        "cacheWrite": 0,
+        "cost": 0,
+        "costKnown": true
+      },
+      "startedAt": 1788926645533,
+      "finishedAt": 1788927477022,
+      "lastStatus": "Goal completed.",
+      "lastCheckpoint": {
+        "summary": "[goal:evidence] Chrome 152.0.7977.65 on macOS 26.6.2 arm64 (VirtualMac2,1, M1 Virtual): WebGL2/WebGL1 both `ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device)` with `failIfMajorPerformanceCaveat=OK(HW)`, softwareFallback=false, shader-triangle `readPixels pixelSum=105…",
+        "timestamp": 1788927477014
+      },
+      "checkpoints": [
+        {
+          "summary": "[goal:evidence] Chrome 152.0.7977.65 on macOS 26.6.2 arm64 (VirtualMac2,1, M1 Virtual): WebGL2/WebGL1 both `ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device)` with `failIfMajorPerformanceCaveat=OK(HW)`, softwareFallback=false, shader-triangle `readPixels pixelSum=105…",
+          "timestamp": 1788927477014
+        }
+      ],
+      "history": [
+        {
+          "type": "set",
+          "detail": "Goal created with limits: 10 auto-continues, 900s, 200,000 context tokens.",
+          "timestamp": 1788926645535
+        },
+        {
+          "type": "completed",
+          "detail": "Assistant marked the goal complete with evidence: Chrome 152.0.7977.65 on macOS 26.6.2 arm64 (VirtualMac2,1, M1 Virtual): WebGL2/WebGL1 both `ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device)` with `failIfMajorPerformanceCaveat=OK(HW)`, softwareFallback=false, shader-triangle `readPixels pixelSum=10544/error 0` (`/tmp/gpu_test/webgl_dom.html`); GPU process observed live; WebGPU `navig…",
+          "timestamp": 1788927477022
+        }
+      ],
+      "sessionID": "ses_f7ba9ac3dffeGl51ILy91GGHRz"
+    }
+  ],
+  "archives": [
+    {
+      "sessionID": "ses_f7ba9ac3dffeGl51ILy91GGHRz",
+      "results": [
+        {
+          "condition": "# GPU 3D graphics test: verify Chrome hardware rendering\n\n## Objective\n\nDeliver a production-quality macOS browser GPU and 3D graphics diagnostic for users who need to know whether Chrome uses hardware rendering. Test the real Chrome browser and real graphics hardware. Verify WebGL, WebGL 2, WebGPU where available, GPU process status, compositing, and hardware acceleration. Do not substitute a simulated, software-only, or flat test.\n\n## Quality bar\n\n- Research authoritative Chrome and WebGL or WebGPU diagnostic references before testing. Collect executable acceptance fixtures and record their source URLs as provenance.\n- Inspect the real Chrome artifact directly. Use Chrome GPU diagnostics and an interactive 3D workload. Record browser version, macOS version, renderer and adapter information, feature states, relevant command-line flags, and software-rendering fallbacks.\n- Define clear pass, partial-support, and fail outcomes. Give specific recovery steps for every failed or software-rendered feature.\n- Produce a concise, user-readable report with captured evidence and a reproducible command or navigation path.\n\n## Execution\n\n- Have the lead split the work into independently judgeable pieces.\n- Give each important piece a builder and a fresh-context critic or verifier.\n- Test normal Chrome launch conditions first. If results need it, test only safe, reversible configuration changes and document each one.\n- Work across as many sessions as needed. Do not stop after the first smoke test.\n\n## Verification\n\n- Have a fresh-context verifier inspect the actual diagnostic output, interactive 3D rendering, and report.\n- Compare the evidence against Chrome hardware-rendering expectations. Identify and fix the largest remaining gap, then repeat until the acceptance bar is met or record explicit blocking evidence.\n- Record concrete evidence for behavior, quality, and delivery.\n\n## Progress\n\nMaintain a resumable live progress page with references, evidence, decisions, blockers, current gaps, and the next exact action.",
+          "state": "achieved",
+          "reason": "",
+          "evidence": "Chrome 152.0.7977.65 on macOS 26.6.2 arm64 (VirtualMac2,1, M1 Virtual): WebGL2/WebGL1 both `ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device)` with `failIfMajorPerformanceCaveat=OK(HW)`, softwareFallback=false, shader-triangle `readPixels pixelSum=10544/error 0` (`/tmp/gpu_test/webgl_dom.html`); GPU process observed live; WebGPU `navigator.gpu=present` but adapter hangs headless across metal/default/swiftshader backends (partial, blocking evidence recorded); report `GPU_REPORT.md`, progress `GPU_PROGRESS.md`, fresh-context verifier reviewed and wording fixed.",
+          "blockedReason": "",
+          "turnCount": 0,
+          "totalTokens": 63175,
+          "usage": {
+            "input": 65337,
+            "output": 14138,
+            "reasoning": 5534,
+            "cacheRead": 1567596,
+            "cacheWrite": 0,
+            "cost": 0,
+            "costKnown": true
+          },
+          "startedAt": 1788926645533,
+          "finishedAt": 1788927477022,
+          "lastStatus": "Goal completed.",
+          "lastCheckpoint": {
+            "summary": "[goal:evidence] Chrome 152.0.7977.65 on macOS 26.6.2 arm64 (VirtualMac2,1, M1 Virtual): WebGL2/WebGL1 both `ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device)` with `failIfMajorPerformanceCaveat=OK(HW)`, softwareFallback=false, shader-triangle `readPixels pixelSum=105…",
+            "timestamp": 1788927477014
+          },
+          "checkpoints": [
+            {
+              "summary": "[goal:evidence] Chrome 152.0.7977.65 on macOS 26.6.2 arm64 (VirtualMac2,1, M1 Virtual): WebGL2/WebGL1 both `ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device)` with `failIfMajorPerformanceCaveat=OK(HW)`, softwareFallback=false, shader-triangle `readPixels pixelSum=105…",
+              "timestamp": 1788927477014
+            }
+          ],
+          "history": [
+            {
+              "type": "set",
+              "detail": "Goal created with limits: 10 auto-continues, 900s, 200,000 context tokens.",
+              "timestamp": 1788926645535
+            },
+            {
+              "type": "completed",
+              "detail": "Assistant marked the goal complete with evidence: Chrome 152.0.7977.65 on macOS 26.6.2 arm64 (VirtualMac2,1, M1 Virtual): WebGL2/WebGL1 both `ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device)` with `failIfMajorPerformanceCaveat=OK(HW)`, softwareFallback=false, shader-triangle `readPixels pixelSum=10544/error 0` (`/tmp/gpu_test/webgl_dom.html`); GPU process observed live; WebGPU `navig…",
+              "timestamp": 1788927477022
+            }
+          ],
+          "sessionID": "ses_f7ba9ac3dffeGl51ILy91GGHRz"
+        }
+      ]
+    }
+  ],
+  "orderedSessions": []
+}

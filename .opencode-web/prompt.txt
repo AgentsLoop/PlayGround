@@ -1,0 +1,29 @@
+# GPU 3D graphics test: verify Chrome hardware rendering
+
+## Objective
+
+Deliver a production-quality macOS browser GPU and 3D graphics diagnostic for users who need to know whether Chrome uses hardware rendering. Test the real Chrome browser and real graphics hardware. Verify WebGL, WebGL 2, WebGPU where available, GPU process status, compositing, and hardware acceleration. Do not substitute a simulated, software-only, or flat test.
+
+## Quality bar
+
+- Research authoritative Chrome and WebGL or WebGPU diagnostic references before testing. Collect executable acceptance fixtures and record their source URLs as provenance.
+- Inspect the real Chrome artifact directly. Use Chrome GPU diagnostics and an interactive 3D workload. Record browser version, macOS version, renderer and adapter information, feature states, relevant command-line flags, and software-rendering fallbacks.
+- Define clear pass, partial-support, and fail outcomes. Give specific recovery steps for every failed or software-rendered feature.
+- Produce a concise, user-readable report with captured evidence and a reproducible command or navigation path.
+
+## Execution
+
+- Have the lead split the work into independently judgeable pieces.
+- Give each important piece a builder and a fresh-context critic or verifier.
+- Test normal Chrome launch conditions first. If results need it, test only safe, reversible configuration changes and document each one.
+- Work across as many sessions as needed. Do not stop after the first smoke test.
+
+## Verification
+
+- Have a fresh-context verifier inspect the actual diagnostic output, interactive 3D rendering, and report.
+- Compare the evidence against Chrome hardware-rendering expectations. Identify and fix the largest remaining gap, then repeat until the acceptance bar is met or record explicit blocking evidence.
+- Record concrete evidence for behavior, quality, and delivery.
+
+## Progress
+
+Maintain a resumable live progress page with references, evidence, decisions, blockers, current gaps, and the next exact action.

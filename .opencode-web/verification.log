@@ -1,0 +1,415 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Verifying the playable build — checking the entrypoint and app server.
+[0m→ [0mRead Agents.md
+[0m
+[0m$ [0mls -la; echo "---"; ls index.html dist/index.html 2>&1; echo "---tmux---"; tmux ls 2>&1; echo "---port---"; (curl -m 5 -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/ 2>&1 || true)
+total 64
+drwxr-xr-x  16 runner  staff   512 Sep  9 04:16 .
+drwxr-xr-x   3 runner  staff    96 Sep  9 04:03 ..
+drwxr-xr-x   6 runner  staff   192 Sep  9 04:03 .agents
+drwxr-xr-x   5 runner  staff   160 Sep  9 04:03 .agentsweb
+drwxr-xr-x  15 runner  staff   480 Sep  9 04:18 .git
+drwxr-xr-x   3 runner  staff    96 Sep  9 04:03 .github
+drwxr-xr-x  11 runner  staff   352 Sep  9 04:03 .omgithub-runtime
+drwx------   3 runner  staff    96 Sep  9 04:04 .opencode
+drwx------   7 runner  staff   224 Sep  9 04:03 .opencode-ssh
+drwx------  20 runner  staff   640 Sep  9 04:17 .opencode-web
+-rw-r--r--   1 runner  staff   273 Sep  9 04:03 Agents.md
+-rw-r--r--   1 runner  staff  5244 Sep  9 04:17 GPU_PROGRESS.md
+-rw-r--r--   1 runner  staff  7516 Sep  9 04:17 GPU_REPORT.md
+-rw-------   1 runner  staff   484 Sep  9 04:03 opencode-agentsweb-id_ed25519
+-rw-r--r--   1 runner  staff   156 Sep  9 04:03 opencode-agentsweb-id_ed25519.pub
+-rw-r--r--   1 runner  staff    53 Sep  9 04:03 README.md
+---
+ls: dist/index.html: No such file or directory
+ls: index.html: No such file or directory
+---tmux---
+error connecting to /private/tmp/tmux-501/default (No such file or directory)
+---port---
+000
+[0m
+[0m→ [0mRead README.md
+[0m
+[0m$ [0mgit log --oneline -10 2>&1; echo "---status---"; git status --short 2>&1 | head -n 20; echo "---branch---"; git branch -a 2>&1 | head; echo "---github---"; ls .github/ 2>&1; ls .omgithub-runtime/ 2>&1 | head -n 20
+ad0e2a5 Forward OpenCode execution to the selected branch
+---status---
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? GPU_PROGRESS.md
+?? GPU_REPORT.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+---branch---
+* opencode/34309443121
+---github---
+workflows
+AGENTS.md
+ideas
+prompt.md
+README.md
+scripts
+wiki
+[0m
+[0m$ [0mls .omgithub-runtime/ .github/workflows/ 2>&1; echo "---"; env | grep -i -E "issue|github|branch" | head -n 20; echo "---"; git log -3 --format="%H %s %b" 2>&1 | head -n 20
+.github/workflows/:
+opencode.yml
+
+.omgithub-runtime/:
+AGENTS.md
+ideas
+prompt.md
+README.md
+scripts
+wiki
+---
+GITHUB_JOB=opencode
+GITHUB_TRIGGERING_ACTOR=agents-dev
+GITHUB_EVENT_PATH=/Users/runner/work/_temp/_github_workflow/event.json
+GITHUB_BASE_REF=
+GITHUB_REF_NAME=main
+GITHUB_REPOSITORY_OWNER=AgentsLoop
+GITHUB_ACTIONS=true
+GITHUB_RUN_NUMBER=116
+GITHUB_RUN_ATTEMPT=1
+BRANCH_NAME=opencode/34309443121
+GITHUB_REF_PROTECTED=false
+AGENTSWEB_HOST=opencode-issue-92-34309443121-ssh.agentsweb.space
+AGENTSWEB_COMMAND=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/aiplay-agentsweb -p 32121 runner@opencode-issue-92-34309443121-ssh.agentsweb.space
+GITHUB_REF=refs/heads/main
+GITHUB_WORKFLOW=OpenCode
+GITHUB_ACTION_REPOSITORY=
+GITHUB_SHA=ad0e2a5e11232833d44359e15b669707c39b1401
+GITHUB_EVENT_NAME=issues
+GITHUB_API_URL=https://api.github.com
+GITHUB_REF_TYPE=branch
+---
+ad0e2a5e11232833d44359e15b669707c39b1401 Forward OpenCode execution to the selected branch Let default-branch preparation dispatch the caller stored on the branch named by the issue title. Grant preparation Actions write permission for the dispatch.
+
+Chat-ID: 01a08346-6379-7970-8492-65766e25d5ba
+[0m
+[0m$ [0mcat /Users/runner/work/_temp/_github_workflow/event.json 2>&1 | head -c 2000; echo; echo "---gh---"; gh issue view 92 --json title,state,url 2>&1 | head -c 1000
+{
+  "action": "opened",
+  "issue": {
+    "active_lock_reason": null,
+    "assignee": null,
+    "assignees": [],
+    "author_association": "CONTRIBUTOR",
+    "body": "# GPU 3D graphics test: verify Chrome hardware rendering\n\n## Objective\n\nDeliver a production-quality macOS browser GPU and 3D graphics diagnostic for users who need to know whether Chrome uses hardware rendering. Test the real Chrome browser and real graphics hardware. Verify WebGL, WebGL 2, WebGPU where available, GPU process status, compositing, and hardware acceleration. Do not substitute a simulated, software-only, or flat test.\n\n## Quality bar\n\n- Research authoritative Chrome and WebGL or WebGPU diagnostic references before testing. Collect executable acceptance fixtures and record their source URLs as provenance.\n- Inspect the real Chrome artifact directly. Use Chrome GPU diagnostics and an interactive 3D workload. Record browser version, macOS version, renderer and adapter information, feature states, relevant command-line flags, and software-rendering fallbacks.\n- Define clear pass, partial-support, and fail outcomes. Give specific recovery steps for every failed or software-rendered feature.\n- Produce a concise, user-readable report with captured evidence and a reproducible command or navigation path.\n\n## Execution\n\n- Have the lead split the work into independently judgeable pieces.\n- Give each important piece a builder and a fresh-context critic or verifier.\n- Test normal Chrome launch conditions first. If results need it, test only safe, reversible configuration changes and document each one.\n- Work across as many sessions as needed. Do not stop after the first smoke test.\n\n## Verification\n\n- Have a fresh-context verifier inspect the actual diagnostic output, interactive 3D rendering, and report.\n- Compare the evidence against Chrome hardware-rendering expectations. Identify and fix the largest remaining gap, then repeat until the acceptance bar is met or record explici
+---gh---
+{"state":"OPEN","title":"GPU 3D graphics test: verify Chrome hardware rendering","url":"https://github.com/AgentsLoop/PlayGround/issues/92"}
+[0m
+[0m# [0mTodos
+[•] Create/verify playable index.html entrypoint (no deps, interactive 3D)
+[ ] Start app server in tmux session app-server on port 3000
+[ ] Run headless browser tests, fix failures, confirm port 3000
+[ ] Capture final screenshots under screenshots/final-*
+[ ] Publish completion update to GitHub issue #92
+[0m
+No app exists yet — building a playable WebGL entrypoint that doubles as hardware proof.
+[0m← [0mWrite index.html
+Wrote file successfully.
+[0m
+[0m$ [0mls -la index.html && tmux new-session -d -s app-server -c /Users/runner/work/PlayGround/PlayGround 'python3 -m http.server 3000' 2>&1; sleep 3; tmux ls 2>&1; curl -m 8 -s -o /dev/null -w "port3000:%{http_code}\n" http://localhost:3000/; curl -m 8 -s http://localhost:3000/ | head -c 300; echo
+-rw-r--r--  1 runner  staff  9218 Sep  9 04:19 index.html
+app-server: 1 windows (created Wed Sep  9 04:19:20 2026)
+port3000:000
+[0m
+[0m$ [0mtmux capture-pane -p -t app-server 2>&1 | head -n 20; echo "---"; ps aux | grep "http.server 3000" | grep -v grep | head; echo "---"; netstat -an 2>&1 | grep -E "\.3000|3000" | head
+---
+runner           39088   0.0  0.3 435279616  24720 s000  S<s+  4:19AM   0:00.07 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python -m http.server 3000
+runner           39087   0.0  0.1 435306096   3680   ??  S<s   4:19AM   0:00.01 tmux new-session -d -s app-server -c /Users/runner/work/PlayGround/PlayGround python3 -m http.server 3000
+---
+tcp46      0      0  *.3000                 *.*                    CLOSED
+[0m
+[0m$ [0menv | grep -i proxy; echo "---"; curl -m 8 --noproxy '*' -s -o /dev/null -w "noproxy:%{http_code}\n" http://127.0.0.1:3000/ 2>&1; curl -m 8 --noproxy '*' -s http://127.0.0.1:3000/ 2>&1 | head -c 200; echo; echo "---pane---"; tmux capture-pane -p -t app-server 2>&1 | tail -n 10
+---
+noproxy:000
+
+---pane---
+[0m
+Server process is up but not accepting connections — diagnosing the bind.
+[0m$ [0mtmux kill-session -t app-server 2>&1; sleep 1; tmux new-session -d -s app-server -c /Users/runner/work/PlayGround/PlayGround 'python3 -m http.server 3000 --bind 127.0.0.1' 2>&1; sleep 4; tmux capture-pane -p -t app-server | tail -n 5; python3 -c "import socket; s=socket.create_connection(('127.0.0.1',3000),timeout=5); s.sendall(b'GET / HTTP/1.0\r\nHost: x\r\n\r\n'); print(s.recv(200))"
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import socket; s=socket.create_connection(('127.0.0.1',3000),timeout=5); s.sendall(b'GET / HTTP/1.0\r\nHost: x\r\n\r\n'); print(s.recv(200))
+                     ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 874, in create_connection
+    raise exceptions[0]
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 859, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+TimeoutError: timed out
+[0m
+[0m$ [0mtmux list-panes -t app-server -F "#{pane_pid} #{pane_current_command} #{pane_current_path}" 2>&1; ps aux | grep -E "http.server" | grep -v grep; echo "---fg test---"; timeout 8 python3 -m http.server 3001 --bind 127.0.0.1 2>&1 | head -n 10; echo "exit:$?"
+40909 Python /Users/runner/work/PlayGround/PlayGround
+runner           40908   0.1  0.0 435306096   3616   ??  S<s   4:20AM   0:00.02 tmux new-session -d -s app-server -c /Users/runner/work/PlayGround/PlayGround python3 -m http.server 3000 --bind 127.0.0.1
+runner           40909   0.0  0.3 435279280  24560 s000  S<s+  4:20AM   0:00.09 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python -m http.server 3000 --bind 127.0.0.1
+---fg test---
+/bin/bash: timeout: command not found
+exit:0
+[0m
+[0m$ [0mlsof -i :3000 -P -n 2>&1 | head; echo "---"; lsof -p 40909 2>&1 | head -n 20; echo "---send HUP? no---"; tmux send-keys -t app-server C-c 2>&1; sleep 1; tmux capture-pane -p -t app-server | tail -n 8
+COMMAND   PID   USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+Python  40909 runner    3u  IPv4 0xcfcdd178aad7d066      0t0  TCP 127.0.0.1:3000 (CLOSED)
+---
+COMMAND   PID   USER   FD     TYPE             DEVICE SIZE/OFF                NODE NAME
+Python  40909 runner  cwd      DIR               1,12      544             2946667 /Users/runner/work/PlayGround/PlayGround
+Python  40909 runner  txt      REG               1,12    33568              406032 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python
+Python  40909 runner  txt      REG               1,12    93488              406991 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/lib-dynload/math.cpython-314-darwin.so
+Python  40909 runner  txt      REG               1,12    54416              406987 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/lib-dynload/binascii.cpython-314-darwin.so
+Python  40909 runner  txt      REG               1,12    77888              406972 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/lib-dynload/_struct.cpython-314-darwin.so
+Python  40909 runner  txt      REG               1,12    74992              406996 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/lib-dynload/select.cpython-314-darwin.so
+Python  40909 runner  txt      REG               1,12   115872              406968 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/lib-dynload/_socket.cpython-314-darwin.so
+Python  40909 runner  txt      REG               1,12    76176              407003 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/lib-dynload/zlib.cpython-314-darwin.so
+Python  40909 runner  txt      REG               1,12    55056              406931 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/lib-dynload/_bz2.cpython-314-darwin.so
+Python  40909 runner  txt      REG               1,12    74704              406954 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/lib-dynload/_lzma.cpython-314-darwin.so
+Python  40909 runner  txt      REG               1,12    96752              406985 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/lib-dynload/_zstd.cpython-314-darwin.so
+Python  40909 runner  txt      REG               1,12  2562000 1152921500312573255 /usr/lib/dyld
+Python  40909 runner  txt      REG               1,12   205312              406970 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/lib-dynload/_ssl.cpython-314-darwin.so
+Python  40909 runner  txt      REG               1,12   167472              244756 /opt/homebrew/Cellar/xz/5.8.3/lib/liblzma.5.dylib
+Python  40909 runner  txt      REG               1,12  5452528              406025 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/Python
+Python  40909 runner  txt      REG               1,12   872080              243550 /opt/homebrew/Cellar/openssl@3/3.6.3/lib/libssl.3.dylib
+Python  40909 runner  txt      REG               1,12   635328              244567 /opt/homebrew/Cellar/zstd/1.5.7_1/lib/libzstd.1.5.7.dylib
+Python  40909 runner  txt      REG               1,12   783632              406999 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/lib-dynload/unicodedata.cpython-314-darwin.so
+Python  40909 runner  txt      REG               1,12  4856256              243497 /opt/homebrew/Cellar/openssl@3/3.6.3/lib/libcrypto.3.dylib
+---send HUP? no---
+[0m
+[0m$ [0mtmux ls 2>&1; tmux capture-pane -p -t app-server 2>&1 | head -n 30; echo "===direct listen test==="; python3 -c "import socket; s=socket.socket(); s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1); s.bind(('127.0.0.1', 3999)); s.listen(1); print('LISTEN-OK')" 2>&1
+no server running on /private/tmp/tmux-501/default
+no server running on /private/tmp/tmux-501/default
+===direct listen test===
+LISTEN-OK
+[0m
+tmux session died with the interrupt — recreating it and retesting the endpoint.
+[0m$ [0mtmux new-session -d -s app-server -c /Users/runner/work/PlayGround/PlayGround 'python3 -u -m http.server 3000 --bind 127.0.0.1 2>&1 | tee /tmp/app-server.log' ; sleep 4; tmux ls; echo "---log---"; cat /tmp/app-server.log 2>&1 | head; echo "---lsof---"; lsof -i :3000 -P -n 2>&1 | head
+app-server: 1 windows (created Wed Sep  9 04:21:02 2026)
+---log---
+---lsof---
+COMMAND   PID   USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+Python  42478 runner    3u  IPv4 0x322f79ddff1396cb      0t0  TCP 127.0.0.1:3000 (CLOSED)
+[0m
+[0m$ [0mps -o pid,stat,wchan:30,command -p 42478 2>&1; echo "---sample---"; sample 42478 1 2>&1 | tail -n 15; echo "---pane---"; tmux capture-pane -p -t app-server 2>&1 | head -n 10
+ps: wchan:30: keyword not found
+  PID STAT COMMAND
+42478 S<+  /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python -u -m http.server 3000 --bind 127.0.0.1
+---sample---
+       0x294568000 -        0x29457b8ef  libswiftSynchronization.dylib (6.3.2 - 6.3.2.1.11) <FDFD191A-CA23-3D4A-9875-C7748238830A> /usr/lib/swift/libswiftSynchronization.dylib
+       0x29457c000 -        0x294594e60  libswiftSystem.dylib (75) <7CD9BDE7-F36B-3471-9295-38E181D6D9E5> /usr/lib/swift/libswiftSystem.dylib
+       0x294596000 -        0x2945ac79f  libswiftVideoToolbox.dylib (3330.13.2) <9247A5B6-A883-3A07-BEE7-A223840317A4> /usr/lib/swift/libswiftVideoToolbox.dylib
+       0x2945ae000 -        0x2945ae669  libswift_Builtin_float.dylib (6.3.2.1.11) <52F59382-A6A6-3F55-8A85-D9FB822D370F> /usr/lib/swift/libswift_Builtin_float.dylib
+       0x2945af000 -        0x29463a095  libswift_Concurrency.dylib (6.3.2 - 6.3.2.1.11) <8E168857-47F4-349F-A718-A18DB144FCB0> /usr/lib/swift/libswift_Concurrency.dylib
+       0x29463b000 -        0x29463df83  libswift_DarwinFoundation1.dylib (377.160.5) <85246B9A-A757-3F67-B792-3A2F7BB2BB25> /usr/lib/swift/libswift_DarwinFoundation1.dylib
+       0x29463e000 -        0x29463eeeb  libswift_DarwinFoundation2.dylib (377.160.5) <AF5AF4DC-D24A-3073-BD23-4CEAD8C3AEE4> /usr/lib/swift/libswift_DarwinFoundation2.dylib
+       0x29463f000 -        0x29463f7a7  libswift_DarwinFoundation3.dylib (377.160.5) <8D2C31B5-FB10-3BF6-8566-F0DCD56C8582> /usr/lib/swift/libswift_DarwinFoundation3.dylib
+       0x294640000 -        0x2946de49f  libswift_RegexParser.dylib (6.3.2 - 6.3.2.1.11) <7B63C2BF-8C7C-3ECA-ACD9-F1B75DBE018C> /usr/lib/swift/libswift_RegexParser.dylib
+       0x2946df000 -        0x29476b0cd  libswift_StringProcessing.dylib (6.3.2 - 6.3.2.1.11) <8DF0116D-DFC9-3906-9DF6-F1DBC47E324B> /usr/lib/swift/libswift_StringProcessing.dylib
+       0x2948d0000 -        0x2948d3a4b  libsystem_darwindirectory.dylib (122) <971A4F65-493D-39F3-846D-0D33FA2769FD> /usr/lib/system/libsystem_darwindirectory.dylib
+       0x2948d4000 -        0x2948de39b  libsystem_eligibility.dylib (319.160.17) <750CA446-92EA-3A56-9A7B-CC0841686C50> /usr/lib/system/libsystem_eligibility.dylib
+       0x2948df000 -        0x2948e688b  libsystem_sanitizers.dylib (26.1) <D88EC709-9AA8-3083-B22B-D3CB39678D71> /usr/lib/system/libsystem_sanitizers.dylib
+       0x2948e7000 -        0x2948e7bb7  libsystem_trial.dylib (474.2.18.2) <7194FF5B-A6C5-3D67-B00A-90209F10D603> /usr/lib/system/libsystem_trial.dylib
+
+---pane---
+[0m
+[0m$ [0mpython3 -c "
+import socket, threading, time
+srv = socket.socket()
+srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+srv.bind(('127.0.0.1', 3998)); srv.listen(1)
+print('LISTEN-OK', srv.getsockname(), flush=True)
+def serve():
+    c, a = srv.accept()
+    req = c.recv(1024)
+    c.sendall(b'HTTP/1.0 200 OK\r\nContent-Length: 2\r\n\r\nOK')
+    c.close()
+t = threading.Thread(target=serve, daemon=True); t.start()
+time.sleep(0.2)
+c = socket.create_connection(('127.0.0.1', 3998), timeout=5)
+c.sendall(b'GET / HTTP/1.0\r\n\r\n')
+print('CLIENT-GOT:', c.recv(100), flush=True)
+"
+LISTEN-OK ('127.0.0.1', 3998)
+CLIENT-GOT: b'HTTP/1.0 200 OK\r\nContent-Length: 2\r\n\r\nOK'
+[0m
+Loopback works in this shell — isolating whether tmux-spawned processes specifically can't serve.
+[0m$ [0mnohup python3 -u -m http.server 3002 --bind 127.0.0.1 > /tmp/direct-server.log 2>&1 & echo "bg pid $!"; sleep 3; cat /tmp/direct-server.log; lsof -i :3002 -P -n 2>&1 | head -n 5; curl -m 8 --noproxy '*' -s -o /dev/null -w "direct:%{http_code}\n" http://127.0.0.1:3002/
+bg pid 44507
+COMMAND   PID   USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+Python  44507 runner    3u  IPv4 0xd2175566c47fbfac      0t0  TCP 127.0.0.1:3002 (CLOSED)
+direct:000
+[0m
+[0m$ [0msample 44507 2 2>&1 | grep -i -E "listen|bind|socket|select|kevent|poll|accept|print|write| đón|server|serve|run|thread| fá|__" | head -n 30; echo "===full main thread==="; sample 44507 1 2>&1 | grep -A 40 "Thread 0" | head -n 45
+sample[45596]: sample cannot examine process 44507 (with name like '44507') because it no longer appears to be running.
+===full main thread===
+[0m
+Background jobs die with the bounded shell — and the tmux server may just be slow-starting on this cold VM. Giving it time and re-checking.
+[0m$ [0msleep 20; echo "---log---"; cat /tmp/app-server.log 2>&1 | head; echo "---lsof---"; lsof -i :3000 -P -n 2>&1 | head -n 5; echo "---curl---"; curl -m 10 --noproxy '*' -s -o /dev/null -w "tmux3000:%{http_code}\n" http://127.0.0.1:3000/; tmux ls 2>&1
+---log---
+Serving HTTP on 127.0.0.1 port 3000 (http://127.0.0.1:3000/) ...
+---lsof---
+COMMAND   PID   USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+Python  42478 runner    3u  IPv4 0x322f79ddff1396cb      0t0  TCP 127.0.0.1:3000 (LISTEN)
+---curl---
+tmux3000:200
+app-server: 1 windows (created Wed Sep  9 04:21:02 2026)
+[0m
+Server is live on 3000 — now proving it serves the game and passes browser tests.
+[0m# [0mTodos
+[✓] Create/verify playable index.html entrypoint (no deps, interactive 3D)
+[✓] Start app server in tmux session app-server on port 3000
+[•] Run headless browser tests, fix failures, confirm port 3000
+[ ] Capture final screenshots under screenshots/final-*
+[ ] Publish completion update to GitHub issue #92
+[0m
+[0m$ [0mcurl -m 10 --noproxy '*' -s http://127.0.0.1:3000/ | head -c 200; echo; echo "---title check---"; curl -m 10 --noproxy '*' -s http://127.0.0.1:3000/ | grep -o "<title>[^<]*</title>"
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cube Tapper — WebGL Hardware Playable</title>
+<style>
+  :ro
+---title check---
+<title>Cube Tapper — WebGL Hardware Playable</title>
+[0m
+[0m$ [0mrm -rf /tmp/gpu_test/app-profile /tmp/gpu_test/app_dom.html
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+nohup "$CHROME" --headless=new --no-sandbox --no-first-run --no-default-browser-check --disable-dev-shm-usage --use-angle=metal --user-data-dir=/tmp/gpu_test/app-profile --timeout=15000 --dump-dom "http://127.0.0.1:3000/?selftest=1" > /tmp/gpu_test/app_dom.html 2> /tmp/gpu_test/app_stderr.txt & echo started; sleep 19; echo after; python3 -c "
+import re,html
+t=open('/tmp/gpu_test/app_dom.html').read()
+m=re.search(r'<pre id=\"selftest\">(.*?)</pre>',t,re.S)
+print('SELFTEST-BLOCK:'); print(html.unescape(m.group(1)) if m else 'NOT-FOUND')
+m2=re.search(r'<pre id=\"gpu-info\">(.*?)</pre>',t,re.S)
+print('GPU-BLOCK:'); print(html.unescape(m2.group(1)) if m2 else 'NOT-FOUND')
+m3=re.search(r'<title>(.*?)</title>',t)
+print('TITLE:',m3.group(1) if m3 else '?')
+"; pkill -f app-profile 2>&1; echo cleaned
+started
+after
+SELFTEST-BLOCK:
+PASS canvas-present
+PASS webgl-context :: WebGL 2.0 (OpenGL ES 3.0 Chromium)
+PASS renderer-string :: ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)
+PASS no-software-renderer :: ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)
+PASS hw-gated-context
+PASS framebuffer-readback :: rgba=10,13,20,255
+PASS pixelhook-positive
+PASS direct-hit-scores :: score=10
+PASS miss-penalized :: score=9
+PASS restart-resets
+PASS hud-synced
+GPU-BLOCK:
+renderer=ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)
+version=WebGL 2.0 (OpenGL ES 3.0 Chromium)
+softwareFallbackSuspected=false
+failIfMajorPerformanceCaveat=OK(HW)
+TITLE: SELFTEST-PASS
+cleaned
+[0m
+All 11 browser tests pass on hardware — capturing final screenshots.
+[0m$ [0mls index.html && mkdir -p screenshots && rm -rf /tmp/gpu_test/shot-profile
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+nohup "$CHROME" --headless=new --no-sandbox --no-first-run --no-default-browser-check --disable-dev-shm-usage --use-angle=metal --user-data-dir=/tmp/gpu_test/shot-profile --timeout=15000 --run-all-compositor-stages-before-draw --screenshot=/Users/runner/work/PlayGround/PlayGround/screenshots/final-app.png --window-size=820,900 "http://127.0.0.1:3000/" > /tmp/gpu_test/shot_app_out.txt 2>&1 & echo started; sleep 19; ls -la /Users/runner/work/PlayGround/PlayGround/screenshots/; file /Users/runner/work/PlayGround/PlayGround/screenshots/final-app.png; pkill -f shot-profile 2>&1; echo cleaned
+index.html
+started
+total 80
+drwxr-xr-x   3 runner  staff     96 Sep  9 04:23 .
+drwxr-xr-x  18 runner  staff    576 Sep  9 04:23 ..
+-rw-r--r--@  1 runner  staff  40872 Sep  9 04:23 final-app.png
+/Users/runner/work/PlayGround/PlayGround/screenshots/final-app.png: PNG image data, 820 x 900, 8-bit/color RGB, non-interlaced
+cleaned
+[0m
+[0m$ [0mpython3 -c "
+import struct,zlib
+d=open('screenshots/final-app.png','rb').read()
+print('bytes',len(d))
+pos=8;raw=b''
+while pos < len(d):
+    ln=struct.unpack('>I',d[pos:pos+4])[0]; typ=d[pos+4:pos+8]; data=d[pos+8:pos+8+ln]
+    if typ==b'IDAT': raw+=data
+    pos+=12+ln
+px=zlib.decompress(raw)
+samp=px[::401]
+print('distinct-bytes',len(set(samp)),'nonzero-frac',round(sum(1 for b in samp if b!=0)/len(samp),3))
+"; ls -la index.html; curl -m 10 --noproxy '*' -s -o /dev/null -w "serve:%{http_code}\n" http://127.0.0.1:3000/; tmux ls
+bytes 40872
+distinct-bytes 89 nonzero-frac 0.019
+-rw-r--r--  1 runner  staff  9218 Sep  9 04:19 index.html
+serve:200
+app-server: 1 windows (created Wed Sep  9 04:21:02 2026)
+[0m
+[0m$ [0mrm -rf /tmp/gpu_test/shot2-profile
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+nohup "$CHROME" --headless=new --no-sandbox --no-first-run --no-default-browser-check --disable-dev-shm-usage --use-angle=metal --user-data-dir=/tmp/gpu_test/shot2-profile --timeout=15000 --run-all-compositor-stages-before-draw --screenshot=screenshots/final-selftest.png --window-size=820,1100 "http://127.0.0.1:3000/?selftest=1" > /tmp/gpu_test/shot2_out.txt 2>&1 & echo started; sleep 19; ls -la screenshots/; file screenshots/final-selftest.png 2>&1; pkill -f shot2-profile 2>&1; echo cleaned; ls index.html && curl -m 10 --noproxy '*' -s http://127.0.0.1:3000/ | grep -o "<title>[^<]*</title>"
+started
+total 256
+drwxr-xr-x   4 runner  staff    128 Sep  9 04:24 .
+drwxr-xr-x  18 runner  staff    576 Sep  9 04:23 ..
+-rw-r--r--@  1 runner  staff  40872 Sep  9 04:23 final-app.png
+-rw-r--r--@  1 runner  staff  86935 Sep  9 04:24 final-selftest.png
+screenshots/final-selftest.png: PNG image data, 820 x 1100, 8-bit/color RGB, non-interlaced
+cleaned
+index.html
+<title>Cube Tapper — WebGL Hardware Playable</title>
+[0m
+[0m# [0mTodos
+[✓] Create/verify playable index.html entrypoint (no deps, interactive 3D)
+[✓] Start app server in tmux session app-server on port 3000
+[✓] Run headless browser tests, fix failures, confirm port 3000
+[✓] Capture final screenshots under screenshots/final-*
+[•] Publish completion update to GitHub issue #92
+[0m
+[0m$ [0mgh issue comment 92 --body "## App verification complete ✅
+
+**Playable entrypoint:** \`./index.html\` — **Cube Tapper**, a dependency-free WebGL game (click/tap the orbiting cube, Space = tap, R = restart, 30s timer, score HUD). It doubles as the interactive 3D workload for the GPU verdict: it probes and displays the real \`UNMASKED_RENDERER\` plus a hardware-gated context check on every load.
+
+**Server:** persistent tmux session \`app-server\` serving the repo root on port 3000 (\`python3 -m http.server 3000\`, verified \`200 OK\` and correct \`<title>\`). Note: cold start on this VM takes ~20s before first 200 — endpoint was re-checked after every step.
+
+**Browser tests (real Chrome 152 headless, served from :3000, \`?selftest=1\`): 11/11 PASS, 0 failures**
+- canvas-present, webgl-context (WebGL 2.0), renderer-string = \`ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device)\`, no-software-renderer, hw-gated-context (failIfMajorPerformanceCaveat OK), framebuffer-readback, pixelhook-positive, direct-hit-scores, miss-penalized, restart-resets, hud-synced — page title \`SELFTEST-PASS\`.
+- No fixes were needed; no failures to retry.
+
+**Screenshots (in \`screenshots/\`):** \`final-app.png\` (820×900 gameplay) and \`final-selftest.png\` (820×1100 self-test evidence).
+
+**GPU verdict recap:** WebGL/WebGL2 hardware PASS (same ANGLE Metal renderer strings in-app); WebGPU PARTIAL (API present, adapter hangs headless — headed retest path in GPU_REPORT.md). Full diagnostics: \`GPU_REPORT.md\`, \`GPU_PROGRESS.md\`." 2>&1
+https://github.com/AgentsLoop/PlayGround/issues/92#issuecomment-5595763199
+[0m
+[0m$ [0mls -la index.html screenshots/final-app.png screenshots/final-selftest.png; curl -m 10 --noproxy '*' -s -o /dev/null -w "serve:%{http_code}\n" http://127.0.0.1:3000/; tmux ls; git status --short | head -n 10
+-rw-r--r--  1 runner  staff   9218 Sep  9 04:19 index.html
+-rw-r--r--@ 1 runner  staff  40872 Sep  9 04:23 screenshots/final-app.png
+-rw-r--r--@ 1 runner  staff  86935 Sep  9 04:24 screenshots/final-selftest.png
+serve:200
+app-server: 1 windows (created Wed Sep  9 04:21:02 2026)
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? GPU_PROGRESS.md
+?? GPU_REPORT.md
+?? index.html
+[0m
+[0m# [0mTodos
+[✓] Create/verify playable index.html entrypoint (no deps, interactive 3D)
+[✓] Start app server in tmux session app-server on port 3000
+[✓] Run headless browser tests, fix failures, confirm port 3000
+[✓] Capture final screenshots under screenshots/final-*
+[✓] Publish completion update to GitHub issue #92
+[0m
+Done. App verified end to end:
+
+- **Entrypoint:** `./index.html` created (no prior app existed) — Cube Tapper, a dependency-free playable WebGL game that also surfaces the real GPU renderer string. Verified as the exact page served on port 3000.
+- **Server:** persistent tmux session `app-server` on port 3000, `200 OK`. Finding: cold start takes ~20s on this VM; endpoint re-checked after every step per Agents.md.
+- **Browser tests:** 11/11 PASS in real Chrome 152 served from :3000 (`?selftest=1`), including hardware renderer (`ANGLE Metal Paravirtual`), framebuffer readback, and gameplay (hit/miss/restart). Zero failures, no fixes needed.
+- **Screenshots:** `screenshots/final-app.png` and `screenshots/final-selftest.png`.
+- **Issue update:** published to #92 (comment 5595763199). New files (`index.html`, `screenshots/`, GPU reports) left in the working tree for the workflow to commit to the project branch.
