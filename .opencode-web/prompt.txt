@@ -1,0 +1,28 @@
+# Build Lantern Dash
+
+## Objective
+
+Deliver a polished small browser game called Lantern Dash for casual desktop players. Create a replayable top-down night-market game in which the player moves a courier through a compact lantern-lit street, collects glowing parcels, avoids moving obstacles, and reaches the exit before the timer expires. Make the game immediately playable in a real browser with keyboard controls, a clear start flow, score and timer feedback, win and loss states, restart behavior, and responsive presentation.
+
+## Quality bar
+
+- Use research before coding. Select a concrete visual reference direction from polished top-down arcade games and night-market lighting. Search screenshots or footage, download at least six high-signal visual anchors into a clearly named local reference-assets directory, inspect the files directly, and record each source URL beside its local filename as provenance.
+- Make the visual language coherent: readable player and obstacle silhouettes, strong lantern lighting, clear walkable space, satisfying collection feedback, and a compact interface that protects the playfield.
+- Inspect the actual running game with browser tools and vision. Compare captures side by side or with a blind A/B review when practical.
+- Meet a production-quality bar: complete start, play, success, failure, restart, keyboard, resize, and recovery flows; accessible contrast and readable status; no placeholder content; and evidence that the delivered game runs from the project entry point.
+
+## Execution
+
+- Have the lead choose the route and divide the project into independently judgeable pieces.
+- Give every important piece a builder and a fresh-context critic or verifier. Require each verifier to inspect the actual artifact, compare it with the quality bar, identify the largest remaining gap, and send the work back for improvement.
+- Sustain the build, verify, and improve loop across as many sessions as necessary. Let the lead choose the tools and implementation.
+
+## Verification
+
+- Test the real browser artifact, not only source code. Exercise movement, collection, obstacle collisions, timer expiry, win, loss, restart, resize, and recovery behavior.
+- Fix the largest remaining gap and repeat until the acceptance bar is met or the run stops with explicit evidence.
+- Record concrete evidence for gameplay behavior, visual quality, accessibility, and delivery.
+
+## Progress
+
+Maintain a canonical live progress page that another agent can resume. Record references and provenance, decisions, completed work, evidence, blockers, current gaps, and the next exact action.
