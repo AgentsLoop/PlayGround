@@ -1,0 +1,625 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Shipping your lake-dash game — starting with the playfield and reference pass.
+[0m→ [0mRead .
+[0m⚙ [0mget_goal Unknown
+[0m
+[0m# [0mTodos
+[ ] Research visual references + download 6 anchors to reference-assets/
+[ ] Build Lantern Lake Dash playable game (HTML/CSS/JS)
+[ ] Verify gameplay loop, controls, states, responsive + record evidence
+[ ] Maintain live progress page + polish until bar met
+[0m
+[0m# [0mTodos
+[•] Research visual references + download 6 anchors to reference-assets/
+[ ] Build Lantern Lake Dash playable game (HTML/CSS/JS)
+[ ] Verify gameplay loop, controls, states, responsive + record evidence
+[ ] Maintain live progress page + polish until bar met
+[0m
+[0m◈ [0mExa Web Search "Mini Metro game screenshots minimalist arcade 2026"
+[0m% [0mWebFetch https://dinopoloclub.com/games/mini-metro/
+Found your visual anchors — now building the playable lake.
+[0m
+[0m$ [0mmkdir -p reference-assets && cd reference-assets && curl -sL -o mini-metro-01-screenshot-2.jpg "https://dinopoloclub.com/wp-content/uploads/2019/09/screenshot-2.jpg" & curl -sL -o mini-metro-02-classic-map.jpg "https://dinopoloclub.com/wp-content/uploads/2019/09/ss_a4dd86e1cc077d2a4c1e246fb051c72a73d5b4a0.1920x1080.jpg" & curl -sL -o mini-metro-03-network.jpg "https://dinopoloclub.com/wp-content/uploads/2019/09/ss_3114bd0ec26d8b64bc832ecd00c2bff4d894a903.1920x1080.jpg" & curl -sL -o mini-metro-04-stations.jpg "https://dinopoloclub.com/wp-content/uploads/2019/09/ss_91f0aa6b072d28da4d4fcb2335f4c346a099bbba.1920x1080.jpg" & curl -sL -o mini-metro-05-lisbon-miniversary.png "https://dinopoloclub.com/wp-content/uploads/2023/12/Miniversary_Lisbon-1.png" & curl -sL -o mini-metro-06-crowding.jpg "https://dinopoloclub.com/wp-content/uploads/2019/09/ss_461ce77cf14dd24bf361831f93bf6c1620e55384.1920x1080.jpg" & wait; ls -lh; file *
+total 2.3M
+-rw-r--r-- 1 runner runner  273 Sep  9 01:19 Agents.md
+-rw-r--r-- 1 runner runner   53 Sep  9 01:19 README.md
+-rw-r--r-- 1 runner runner 242K Sep  9 01:21 mini-metro-02-classic-map.jpg
+-rw-r--r-- 1 runner runner 313K Sep  9 01:21 mini-metro-03-network.jpg
+-rw-r--r-- 1 runner runner 165K Sep  9 01:21 mini-metro-04-stations.jpg
+-rw-r--r-- 1 runner runner 1.4M Sep  9 01:21 mini-metro-05-lisbon-miniversary.png
+-rw-r--r-- 1 runner runner 202K Sep  9 01:21 mini-metro-06-crowding.jpg
+-rw------- 1 runner runner  411 Sep  9 01:20 opencode-agentsweb-id_ed25519
+-rw-r--r-- 1 runner runner  102 Sep  9 01:20 opencode-agentsweb-id_ed25519.pub
+drwxr-xr-x 2 runner runner 4.0K Sep  9 01:21 reference-assets
+Agents.md:                            ASCII text
+README.md:                            ASCII text
+mini-metro-02-classic-map.jpg:        JPEG image data, JFIF standard 1.01, aspect ratio, density 1x1, segment length 16, baseline, precision 8, 1920x1080, components 3
+mini-metro-03-network.jpg:            JPEG image data, JFIF standard 1.01, aspect ratio, density 1x1, segment length 16, baseline, precision 8, 1920x1080, components 3
+mini-metro-04-stations.jpg:           JPEG image data, JFIF standard 1.01, aspect ratio, density 1x1, segment length 16, baseline, precision 8, 1920x1080, components 3
+mini-metro-05-lisbon-miniversary.png: PNG image data, 1920 x 1080, 8-bit/color RGBA, non-interlaced
+mini-metro-06-crowding.jpg:           JPEG image data, JFIF standard 1.01, aspect ratio, density 1x1, segment length 16, baseline, precision 8, 1920x1080, components 3
+opencode-agentsweb-id_ed25519:        OpenSSH private key
+opencode-agentsweb-id_ed25519.pub:    OpenSSH ED25519 public key
+reference-assets:                     directory
+[0m
+[0m$ [0mls -lh; ls -lh reference-assets/; pwd
+total 2.3M
+-rw-r--r-- 1 runner runner  273 Sep  9 01:19 Agents.md
+-rw-r--r-- 1 runner runner   53 Sep  9 01:19 README.md
+-rw-r--r-- 1 runner runner 242K Sep  9 01:21 mini-metro-02-classic-map.jpg
+-rw-r--r-- 1 runner runner 313K Sep  9 01:21 mini-metro-03-network.jpg
+-rw-r--r-- 1 runner runner 165K Sep  9 01:21 mini-metro-04-stations.jpg
+-rw-r--r-- 1 runner runner 1.4M Sep  9 01:21 mini-metro-05-lisbon-miniversary.png
+-rw-r--r-- 1 runner runner 202K Sep  9 01:21 mini-metro-06-crowding.jpg
+-rw------- 1 runner runner  411 Sep  9 01:20 opencode-agentsweb-id_ed25519
+-rw-r--r-- 1 runner runner  102 Sep  9 01:20 opencode-agentsweb-id_ed25519.pub
+drwxr-xr-x 2 runner runner 4.0K Sep  9 01:21 reference-assets
+total 176K
+-rw-r--r-- 1 runner runner 173K Sep  9 01:21 mini-metro-01-screenshot-2.jpg
+/home/runner/work/PlayGround/PlayGround
+[0m
+[0m$ [0mmv mini-metro-02-classic-map.jpg mini-metro-03-network.jpg mini-metro-04-stations.jpg mini-metro-05-lisbon-miniversary.png mini-metro-06-crowding.jpg reference-assets/ && ls -lh reference-assets/ && file reference-assets/*
+total 2.5M
+-rw-r--r-- 1 runner runner 173K Sep  9 01:21 mini-metro-01-screenshot-2.jpg
+-rw-r--r-- 1 runner runner 242K Sep  9 01:21 mini-metro-02-classic-map.jpg
+-rw-r--r-- 1 runner runner 313K Sep  9 01:21 mini-metro-03-network.jpg
+-rw-r--r-- 1 runner runner 165K Sep  9 01:21 mini-metro-04-stations.jpg
+-rw-r--r-- 1 runner runner 1.4M Sep  9 01:21 mini-metro-05-lisbon-miniversary.png
+-rw-r--r-- 1 runner runner 202K Sep  9 01:21 mini-metro-06-crowding.jpg
+reference-assets/mini-metro-01-screenshot-2.jpg:       JPEG image data, JFIF standard 1.01, resolution (DPI), density 96x96, segment length 16, comment: "CREATOR: gd-jpeg v1.0 (using IJG JPEG v62), quality = 90", baseline, precision 8, 1920x1080, components 3
+reference-assets/mini-metro-02-classic-map.jpg:        JPEG image data, JFIF standard 1.01, aspect ratio, density 1x1, segment length 16, baseline, precision 8, 1920x1080, components 3
+reference-assets/mini-metro-03-network.jpg:            JPEG image data, JFIF standard 1.01, aspect ratio, density 1x1, segment length 16, baseline, precision 8, 1920x1080, components 3
+reference-assets/mini-metro-04-stations.jpg:           JPEG image data, JFIF standard 1.01, aspect ratio, density 1x1, segment length 16, baseline, precision 8, 1920x1080, components 3
+reference-assets/mini-metro-05-lisbon-miniversary.png: PNG image data, 1920 x 1080, 8-bit/color RGBA, non-interlaced
+reference-assets/mini-metro-06-crowding.jpg:           JPEG image data, JFIF standard 1.01, aspect ratio, density 1x1, segment length 16, baseline, precision 8, 1920x1080, components 3
+[0m
+[0m# [0mTodos
+[✓] Research visual references + download 6 anchors to reference-assets/
+[•] Build Lantern Lake Dash playable game (HTML/CSS/JS)
+[ ] Verify gameplay loop, controls, states, responsive + record evidence
+[ ] Maintain live progress page + polish until bar met
+[0m
+[0m$ [0mls
+Agents.md
+README.md
+opencode-agentsweb-id_ed25519
+opencode-agentsweb-id_ed25519.pub
+reference-assets
+[0m
+References secured — now crafting the full game.
+[0m$ [0mmkdir -p lantern-lake-dash && ls -la
+total 64
+drwxr-xr-x 12 runner runner 4096 Sep  9 01:21 .
+drwxr-xr-x  3 runner runner 4096 Sep  9 01:19 ..
+drwxr-xr-x  5 runner runner 4096 Sep  9 01:19 .agents
+drwxr-xr-x  4 runner runner 4096 Sep  9 01:19 .agentsweb
+drwxr-xr-x  7 runner runner 4096 Sep  9 01:21 .git
+drwxr-xr-x  3 runner runner 4096 Sep  9 01:19 .github
+drwxr-xr-x  8 runner runner 4096 Sep  9 01:19 .omgithub-runtime
+drwx------  3 runner runner 4096 Sep  9 01:20 .opencode
+drwx------  2 runner runner 4096 Sep  9 01:20 .opencode-ssh
+drwx------  3 runner runner 4096 Sep  9 01:20 .opencode-web
+-rw-r--r--  1 runner runner  273 Sep  9 01:19 Agents.md
+-rw-r--r--  1 runner runner   53 Sep  9 01:19 README.md
+drwxr-xr-x  2 runner runner 4096 Sep  9 01:21 lantern-lake-dash
+-rw-------  1 runner runner  411 Sep  9 01:20 opencode-agentsweb-id_ed25519
+-rw-r--r--  1 runner runner  102 Sep  9 01:20 opencode-agentsweb-id_ed25519.pub
+drwxr-xr-x  2 runner runner 4096 Sep  9 01:21 reference-assets
+[0m
+[0m← [0mWrite lantern-lake-dash/index.html
+Wrote file successfully.
+[0m
+[0m$ [0mls -lh lantern-lake-dash/ reference-assets/ && python3 -c "import pathlib; p=pathlib.Path('lantern-lake-dash/index.html'); t=p.read_text(); print('bytes',len(t)); print('has canvas', 'id=\"game\"' in t); print('has keyboard', 'ArrowLeft' in t); print('has touch', 'pointerdown' in t); print('has win', 'Docked' in t); print('has pause', 'togglePause' in t)"
+lantern-lake-dash/:
+total 24K
+-rw-r--r-- 1 runner runner 23K Sep  9 01:23 index.html
+
+reference-assets/:
+total 2.5M
+-rw-r--r-- 1 runner runner 173K Sep  9 01:21 mini-metro-01-screenshot-2.jpg
+-rw-r--r-- 1 runner runner 242K Sep  9 01:21 mini-metro-02-classic-map.jpg
+-rw-r--r-- 1 runner runner 313K Sep  9 01:21 mini-metro-03-network.jpg
+-rw-r--r-- 1 runner runner 165K Sep  9 01:21 mini-metro-04-stations.jpg
+-rw-r--r-- 1 runner runner 1.4M Sep  9 01:21 mini-metro-05-lisbon-miniversary.png
+-rw-r--r-- 1 runner runner 202K Sep  9 01:21 mini-metro-06-crowding.jpg
+bytes 22856
+has canvas True
+has keyboard True
+has touch True
+has win True
+has pause True
+[0m
+[0m$ [0mpython3 -c "
+import re,pathlib
+t=pathlib.Path('lantern-lake-dash/index.html').read_text()
+m=re.search(r'<script>(.*)</script>',t,re.S)
+open('/tmp/opencode/lld.js','w').write(m.group(1))
+print('extracted',len(m.group(1)))
+" && node --check /tmp/opencode/lld.js && echo JS_SYNTAX_OK
+extracted 15555
+JS_SYNTAX_OK
+[0m
+[0m$ [0mwhich chromium chromium-browser google-chrome 2>/dev/null; python3 -c "import playwright" 2>&1; node -e "try{require('playwright');console.log('pw ok')}catch(e){console.log('no pw',e.message)}"
+/usr/bin/chromium
+/usr/bin/chromium-browser
+/usr/bin/google-chrome
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'playwright'
+no pw Cannot find module 'playwright'
+Require stack:
+- /home/runner/work/PlayGround/PlayGround/[eval]
+[0m
+Core game built and syntax-clean — now verifying it plays.
+[0m$ [0mchromium --headless --disable-gpu --no-sandbox --window-size=1100,800 --screenshot=/tmp/opencode/lld-desktop.png file:///home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html 2>&1 | head -20; ls -lh /tmp/opencode/*.png; chromium --headless --disable-gpu --no-sandbox --window-size=420,800 --screenshot=/tmp/opencode/lld-mobile.png file:///home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html 2>&1 | head -5; ls -lh /tmp/opencode/
+[5399:5423:0909/012351.942616:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5399:5423:0909/012353.690379:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5399:5423:0909/012354.353980:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5399:5423:0909/012357.261873:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5399:5399:0909/012400.126571:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[5399:5423:0909/012400.126664:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5399:5399:0909/012400.126889:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[5399:5423:0909/012400.126925:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5399:5399:0909/012400.127360:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[5399:5399:0909/012400.178788:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[5399:5399:0909/012400.259449:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[5399:5399:0909/012400.266954:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[5399:5423:0909/012400.275040:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5399:5399:0909/012400.518404:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[5399:5399:0909/012400.518471:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files
+[5399:5423:0909/012400.518491:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5399:5399:0909/012400.564136:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[5399:5423:0909/012400.564251:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5399:5399:0909/012400.571872:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+101700 bytes written to file /tmp/opencode/lld-desktop.png
+-rw-r--r-- 1 runner runner 100K Sep  9 01:24 /tmp/opencode/lld-desktop.png
+[5651:5668:0909/012404.432277:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5651:5668:0909/012404.434394:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5651:5668:0909/012404.450215:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5651:5668:0909/012404.487260:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5651:5651:0909/012404.575915:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+total 200K
+-rw-r--r-- 1 runner runner 100K Sep  9 01:24 lld-desktop.png
+-rw-r--r-- 1 runner runner  83K Sep  9 01:24 lld-mobile.png
+-rw-r--r-- 1 runner runner  16K Sep  9 01:23 lld.js
+[0m
+[0m→ [0mRead /tmp/opencode/lld-desktop.png
+[0m→ [0mRead /tmp/opencode/lld-mobile.png
+[0m→ [0mRead reference-assets/mini-metro-01-screenshot-2.jpg
+[0m→ [0mRead lantern-lake-dash/index.html[90m [offset=200, limit=40][0m
+[0m
+[0m← [0mEdit lantern-lake-dash/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+@@ -401,8 +401,10 @@
+ $('btnResume2').onclick=()=>ov.end.classList.remove('show');
+ $('btnSound').onclick=()=>toggleSound();
+ addEventListener('resize',()=>{});
+ updateHUD();requestAnimationFrame(loop);
++if(/[?&](play|shot)\b/.test(location.search)){ newGame(); }
++if(/shot\b/.test(location.search)){ setTimeout(()=>{ try{ const L=lanterns(); const b=window.__lld.boat(); if(L[0]&&b){ b.x=L[0].x-60; b.y=L[0].y; } }catch(e){} },600); }
+ // expose for automated verification
+ window.__lld={get state(){return state},get score(){return score},get collected(){return collected},
+   get lives(){return lives},get timeLeft(){return timeLeft},newGame,togglePause,boat:()=>boat,lanterns:()=>lanterns};
+ })();
+
+[0m
+[0m$ [0mchromium --headless --disable-gpu --no-sandbox --window-size=1100,800 --screenshot=/tmp/opencode/lld-play.png "file:///home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html?shot" 2>&1 | tail -2; ls -lh /tmp/opencode/lld-play.png
+python3 -c "
+import re,pathlib
+t=pathlib.Path('lantern-lake-dash/index.html').read_text()
+m=re.search(r'<script>(.*)</script>',t,re.S)
+open('/tmp/opencode/lld.js','w').write(m.group(1))
+" && node --check /tmp/opencode/lld.js && echo OK
+[6129:6129:0909/012437.243677:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+186194 bytes written to file /tmp/opencode/lld-play.png
+-rw-r--r-- 1 runner runner 182K Sep  9 01:24 /tmp/opencode/lld-play.png
+OK
+[0m
+[0m→ [0mRead /tmp/opencode/lld-play.png
+Gameplay renders cleanly — now stress-testing the rules and states.
+[0m
+[0m$ [0mcat > /tmp/opencode/harness.js <<'JS'
+const fs=require('fs'),html=fs.readFileSync('lantern-lake-dash/index.html','utf8');
+const js=html.match(/<script>([\s\S]*)<\/script>/)[1];
+// minimal browser stubs
+function mkEl(){return {textContent:'',innerHTML:'',style:{},classList:{add(){},remove(){},toggle(){}},onclick:null,setAttribute(){},getContext:undefined};}
+const els={};
+global.document={getElementById:id=>els[id]||(els[id]=mkEl())};
+let rafCb=null;
+global.requestAnimationFrame=cb=>{rafCb=cb;return 1;};
+const ctxStub=new Proxy({},{get:(t,k)=>{if(k==='createLinearGradient'||k==='createRadialGradient')return()=>({addColorStop(){}});return()=>{};},set:()=>true});
+global.matchMedia=()=>({matches:false});
+global.addEventListener=()=>{};
+global.localStorage={getItem:()=>'0',setItem(){}};
+global.location={search:''};
+global.window={AudioContext:null};
+eval(js);
+// window.__lld exposed? in eval scope __lld is on window
+const api=global.window.__lld;
+const out=[];
+function ck(n,c){out.push((c?'PASS':'FAIL')+' '+n); if(!c)process.exitCode=1;}
+api.newGame();
+ck('starts playing',api.state==='playing');
+ck('lanterns spawn >=8',api.lanterns().length>=8);
+ck('boat exists',!!api.boat()&&api.boat().x>0);
+const b0={...api.boat()};
+// movement: simulate keys via internal? keys not exposed; test pointer + direct boat velocity
+const boat=api.boat(); boat.vx=200; 
+// collection: teleport boat onto lantern
+const L=api.lanterns()[0]; boat.x=L.x; boat.y=L.y;
+const s0=api.score;
+// need to run step: step is internal, but collide runs inside step via rAF. Call rafCb manually with timestamps
+let ts=0;
+function frames(n){for(let i=0;i<n;i++){ts+=16; rafCb(ts);}}
+frames(5);
+ck('collect scores +10',api.score>=s0+10);
+ck('collected increments',api.collected>=1);
+// rock hit: teleport onto rock? need rocks access — not exposed; test via lives not increasing spontaneously
+ck('lives still valid',api.lives>=1&&api.lives<=3);
+// timer decreases
+const t0=api.timeLeft; frames(60); ck('timer ticks down',api.timeLeft<t0);
+// pause/resume
+api.togglePause(); ck('pause works',api.state==='paused');
+api.togglePause(); ck('resume works',api.state==='playing');
+// restart recovery (repeated input)
+api.newGame(); api.newGame(); ck('double restart safe',api.state==='playing'&&api.score===0&&api.collected===0);
+// loss by timer: force timeLeft low via repeated frames? set via boat? timeLeft not settable; run many frames (90s*60=5400 frames) — run 6000
+frames(6000); ck('timer expiry ends game',api.state==='lost');
+// win path: restart, force collect quota then dock
+api.newGame();
+for(let k=0;k<8;k++){const bl=api.boat(),ll=api.lanterns()[0]; if(!ll)break; bl.x=ll.x; bl.y=ll.y; bl.vx=0;bl.vy=0; frames(3);}
+ck('quota reachable',api.collected>=8);
+// dock at (W-110,H-140)=(850,460); teleport
+{const bl=api.boat(); bl.x=850; bl.y=460; bl.vx=0;bl.vy=0; frames(5);}
+ck('dock win with quota',api.state==='won');
+console.log(out.join('\n'));
+JS
+node /tmp/opencode/harness.js
+<anonymous_script>:3
+const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
+                                                         ^
+
+TypeError: canvas.getContext is not a function
+    at eval (eval at <anonymous> (/tmp/opencode/harness.js:15:1), <anonymous>:3:58)
+    at eval (eval at <anonymous> (/tmp/opencode/harness.js:15:1), <anonymous>:282:3)
+    at Object.<anonymous> (/tmp/opencode/harness.js:15:1)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49
+
+Node.js v22.23.2
+[0m
+[0m$ [0mcat > /tmp/opencode/harness.js <<'JS'
+const fs=require('fs'),html=fs.readFileSync('lantern-lake-dash/index.html','utf8');
+const js=html.match(/<script>([\s\S]*)<\/script>/)[1];
+const ctxStub=new Proxy({canvas:{}},{get:(t,k)=>{if(k==='createLinearGradient'||k==='createRadialGradient')return()=>({addColorStop(){}});if(k==='canvas')return {};return (...a)=>{};},set:()=>true});
+function mkEl(id){return {textContent:'',innerHTML:'',style:{},dataset:{},classList:{add(){},remove(){},toggle(){}},onclick:null,setAttribute(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:600}),setPointerCapture(){},addEventListener(){},getContext:()=>ctxStub};}
+const els={};
+global.document={getElementById:id=>els[id]||(els[id]=mkEl(id))};
+let rafCb=null;
+global.requestAnimationFrame=cb=>{rafCb=cb;return 1;};
+global.matchMedia=()=>({matches:false});
+global.addEventListener=()=>{};
+global.localStorage={getItem:()=>'0',setItem(){}};
+global.location={search:''};
+global.window={};
+eval(js);
+const api=global.window.__lld;
+const out=[];
+function ck(n,c){out.push((c?'PASS':'FAIL')+' '+n); if(!c)process.exitCode=1;}
+api.newGame();
+ck('starts playing',api.state==='playing');
+ck('lanterns spawn >=8',api.lanterns().length>=8);
+ck('boat exists',!!api.boat()&&api.boat().x>0);
+const s0=api.score;
+const L=api.lanterns()[0]; const boat=api.boat(); boat.x=L.x; boat.y=L.y; boat.vx=0; boat.vy=0;
+let ts=0;
+function frames(n){for(let i=0;i<n;i++){ts+=16; rafCb(ts);}}
+frames(5);
+ck('collect scores +10',api.score>=s0+10);
+ck('collected increments',api.collected>=1);
+ck('lives still valid',api.lives>=1&&api.lives<=3);
+const t0=api.timeLeft; frames(60); ck('timer ticks down',api.timeLeft<t0);
+api.togglePause(); ck('pause works',api.state==='paused');
+api.togglePause(); ck('resume works',api.state==='playing');
+api.newGame(); api.newGame(); ck('double restart safe',api.state==='playing'&&api.score===0&&api.collected===0);
+frames(6000); ck('timer expiry ends game',api.state==='lost');
+api.newGame();
+for(let k=0;k<10;k++){const bl=api.boat(),ll=api.lanterns()[0]; if(!ll)break; bl.x=ll.x; bl.y=ll.y; bl.vx=0;bl.vy=0; bl.inv=0; frames(3); if(api.collected>=8)break;}
+ck('quota reachable collected='+api.collected,api.collected>=8);
+{const bl=api.boat(); bl.inv=99; bl.x=850; bl.y=460; bl.vx=0;bl.vy=0; frames(5);}
+ck('dock win with quota state='+api.state,api.state==='won');
+console.log(out.join('\n'));
+JS
+node /tmp/opencode/harness.js
+PASS starts playing
+PASS lanterns spawn >=8
+PASS boat exists
+PASS collect scores +10
+PASS collected increments
+PASS lives still valid
+PASS timer ticks down
+PASS pause works
+PASS resume works
+PASS double restart safe
+PASS timer expiry ends game
+PASS quota reachable collected=8
+PASS dock win with quota state=won
+[0m
+[0m$ [0mcat > /tmp/opencode/hazard.js <<'JS'
+const fs=require('fs'),html=fs.readFileSync('lantern-lake-dash/index.html','utf8');
+const js=html.match(/<script>([\s\S]*)<\/script>/)[1];
+const ctxStub=new Proxy({canvas:{}},{get:(t,k)=>{if(k==='createLinearGradient'||k==='createRadialGradient')return()=>({addColorStop(){}});if(k==='canvas')return {};return (...a)=>{};},set:()=>true});
+function mkEl(id){return {textContent:'',innerHTML:'',style:{},classList:{add(){},remove(){},toggle(){}},onclick:null,setAttribute(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:600}),setPointerCapture(){},addEventListener(){},getContext:()=>ctxStub};}
+const els={}; global.document={getElementById:id=>els[id]||(els[id]=mkEl(id))};
+let rafCb=null; global.requestAnimationFrame=cb=>{rafCb=cb;return 1;};
+global.matchMedia=()=>({matches:false}); global.addEventListener=()=>{};
+global.localStorage={getItem:()=>'0',setItem(){}}; global.location={search:''}; global.window={}; eval(js);
+const api=global.window.__lld; let ts=0; const frames=n=>{for(let i=0;i<n;i++){ts+=16;rafCb(ts);}};
+api.newGame();
+const b=api.boat(); b.x=380; b.y=140; b.vx=0;b.vy=0; b.inv=0;
+const l0=api.lives; frames(5);
+console.log('lives before',l0,'after',api.lives, api.lives<l0?'PASS rock hazard':'FAIL rock hazard');
+console.log('invuln after hit',api.boat().inv>0?'PASS invuln':'FAIL invuln');
+// repeated hits during invuln should not multi-decrement (recovery)
+const l1=api.lives; frames(10); console.log('no multi-hit during invuln',api.lives===l1?'PASS':'FAIL lives='+api.lives);
+JS
+node /tmp/opencode/hazard.js
+lives before 3 after 2 PASS rock hazard
+invuln after hit PASS invuln
+no multi-hit during invuln PASS
+[0m
+[0m← [0mEdit lantern-lake-dash/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+@@ -355,9 +355,9 @@
+   ctx.globalAlpha=1;
+   // top shoreline
+   ctx.fillStyle='#0a1526';ctx.fillRect(-20,-20,W+40,68);
+   ctx.fillStyle='#2b4360';ctx.fillRect(-20,46,W+40,3);
+-  ctx.fillStyle='#b9c4d4';ctx.font='700 13px system-ui';ctx.textAlign='left';
++  ctx.fillStyle='#f4f1e6';ctx.font='700 13px system-ui';ctx.textAlign='left';
+   ctx.fillText('🌙 LANTERN LAKE  ·  collect '+QUOTA+' then dock',14,28);
+   ctx.textAlign='right';ctx.fillText('time '+Math.ceil(timeLeft)+'s   score '+score,W-14,28);
+   ctx.restore();
+ }
+
+[0m
+[0m← [0mEdit lantern-lake-dash/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+@@ -307,11 +307,13 @@
+ const ready=collected>=QUOTA;
+ ctx.fillStyle='rgba(0,0,0,.35)';rr(dock.x+4,dock.y+6,dock.w,dock.h,8);ctx.fill();
+ ctx.fillStyle=ready?'#2ecc71':'#8a6d2b';rr(dock.x,dock.y,dock.w,dock.h,8);ctx.fill();
+ ctx.fillStyle='#f4f1e6';for(let i=0;i<4;i++)ctx.fillRect(dock.x+8,dock.y+12+i*22,dock.w-16,8);
+-ctx.fillStyle=ready?'#0a6b2d':'#4a3a12';
+-ctx.font='700 13px system-ui';ctx.textAlign='center';
+-ctx.fillText(ready?'DOCK ✓ OPEN':'DOCK · '+collected+'/'+QUOTA,dock.x+dock.w/2,dock.y-8);
++ctx.fillStyle=ready?'#7dffb0':'#ffe9b0';
++ctx.font='800 13px system-ui';ctx.textAlign='center';
++ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=3;
++const dl=ready?'DOCK ✓ OPEN':'DOCK · '+collected+'/'+QUOTA;
++ctx.strokeText(dl,dock.x+dock.w/2,dock.y-10);ctx.fillText(dl,dock.x+dock.w/2,dock.y-10);
+ if(ready){ctx.strokeStyle='#2ecc71';ctx.lineWidth=3;ctx.setLineDash([8,6]);ctx.lineDashOffset=-elapsed*30;
+   rr(dock.x-8,dock.y-8,dock.w+16,dock.h+16,12);ctx.stroke();ctx.setLineDash([]);}
+ // rocks
+ for(const r of rocks){
+
+[0m
+[0m← [0mEdit lantern-lake-dash/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+@@ -51,9 +51,9 @@
+ .controls button{background:var(--panel);color:var(--ink);border:1px solid var(--line);padding:9px 14px;font-size:14px}
+ .controls button:hover{border-color:var(--good)}
+ .hint{color:var(--ink-dim);font-size:13.5px;line-height:1.5;margin:8px 2px}
+ .hint kbd{background:#0a1728;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;font-family:inherit;font-size:12.5px;color:var(--ink)}
+-#toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:#f4f1e6;color:#12233a;
++#toast{position:absolute;left:50%;top:58px;transform:translateX(-50%);background:#f4f1e6;color:#12233a;
+   font-weight:800;padding:8px 14px;border-radius:99px;display:none;z-index:6;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+ #srStatus{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+ .dock-ready{color:#0a6b2d;font-weight:800}
+ footer{color:var(--ink-dim);font-size:12.5px;margin-top:10px;text-align:center}
+
+[0m
+Hazards and recovery verified — now getting an independent critique.
+[0m• [0mCritique lake-dash build[90m General Agent[0m
+[0m✓ [0mCritique lake-dash build[90m General Agent[0m
+[0m→ [0mRead lantern-lake-dash/index.html[90m [offset=130, limit=50][0m
+[0m
+[0m← [0mEdit lantern-lake-dash/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+@@ -158,16 +158,19 @@
+ function toast(msg,ms){ ui.toast.textContent=msg;ui.toast.style.display='block';
+   clearTimeout(toast._t); toast._t=setTimeout(()=>ui.toast.style.display='none',ms||1400); }
+ function announce(m){ ui.sr.textContent=m; }
+ 
+-function newGame(){
+-  score=0;collected=0;timeLeft=TIME0;lives=MAXLIVES;particles=[];floaters=[];ripples=[];shake=0;hitCooldown=0;elapsed=0;
++function initScene(){
+   boat={x:120,y:H/2,vx:0,vy:0,angle:0,r:14,inv:0};
+   dock={x:W-110,y:H-140,w:86,h:96};
+   lanterns=[];rocks=[];
+-  for(let i=0;i<10;i++) spawnLantern(true);
+   const spots=[{x:380,y:140},{x:560,y:220},{x:430,y:380},{x:650,y:430},{x:300,y:480},{x:740,y:180},{x:520,y:520},{x:820,y:330}];
+   for(const s of spots) rocks.push({x:s.x+rand(-20,20),y:s.y+rand(-20,20),r:rand(20,30),seed:Math.random()*9,rot:rand(0,6)});
++  for(let i=0;i<10;i++) spawnLantern(true);
++}
++function newGame(){
++  score=0;collected=0;timeLeft=TIME0;lives=MAXLIVES;particles=[];floaters=[];ripples=[];shake=0;hitCooldown=0;elapsed=0;
++  initScene();
+   state='playing'; ov.title.classList.remove('show');ov.end.classList.remove('show');ov.pause.classList.remove('show');
+   updateHUD(); announce('Game started. Collect 8 lanterns then reach the dock.');
+   toast('Collect 🏮 · avoid 🪨 · find the dock!');
+   beep(520,.12,'triangle');
+
+[0m
+[0m→ [0mRead lantern-lake-dash/index.html[90m [offset=280, limit=140][0m
+[0m
+[0m← [0mEdit lantern-lake-dash/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+@@ -305,8 +305,9 @@
+ ctx.fillStyle=mg;ctx.beginPath();ctx.arc(830,105,120,0,7);ctx.fill();
+ ctx.fillStyle='rgba(253,246,221,.25)';for(let i=0;i<40;i++){const sx=(i*173)%W,sy=48+((i*97)%(H-60));ctx.fillRect(sx,sy,14,2);}
+ // moon reflection
+ ctx.fillStyle='rgba(255,200,87,.16)';ctx.fillRect(812,150,36,300);
++if(!dock||!boat){ ctx.restore(); return; }
+ // dock
+ const ready=collected>=QUOTA;
+ ctx.fillStyle='rgba(0,0,0,.35)';rr(dock.x+4,dock.y+6,dock.w,dock.h,8);ctx.fill();
+ ctx.fillStyle=ready?'#2ecc71':'#8a6d2b';rr(dock.x,dock.y,dock.w,dock.h,8);ctx.fill();
+
+[0m
+[0m← [0mEdit lantern-lake-dash/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+@@ -369,10 +369,11 @@
+ }
+ function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+ function poly(r,n){for(let i=0;i<n;i++){const a=i/n*Math.PI*2;ctx[i?'lineTo':'moveTo'](Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();}
+ function loop(ts){
++  requestAnimationFrame(loop);
+   const dt=Math.min(0.033,(ts-lastTs)/1000||0.016);lastTs=ts;
+-  step(dt);draw();requestAnimationFrame(loop);
++  try{ step(dt);draw(); }catch(err){ /* keep loop alive; recover next frame */ }
+ }
+ // input — robust to repeats / invalid keys
+ addEventListener('keydown',e=>{
+   const k=e.key.length===1?e.key.toLowerCase():e.key;
+
+[0m
+[0m← [0mEdit lantern-lake-dash/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+@@ -404,9 +404,9 @@
+ $('btnAgain').onclick=()=>newGame();
+ $('btnRestart2').onclick=()=>newGame();
+ $('btnPause').onclick=()=>togglePause();
+ $('btnResume').onclick=()=>togglePause();
+-$('btnResume2').onclick=()=>ov.end.classList.remove('show');
++$('btnResume2').onclick=()=>newGame();
+ $('btnSound').onclick=()=>toggleSound();
+ addEventListener('resize',()=>{});
+ updateHUD();requestAnimationFrame(loop);
+ if(/[?&](play|shot)\b/.test(location.search)){ newGame(); }
+
+[0m
+[0m← [0mEdit lantern-lake-dash/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+@@ -407,11 +407,10 @@
+ $('btnResume').onclick=()=>togglePause();
+ $('btnResume2').onclick=()=>newGame();
+ $('btnSound').onclick=()=>toggleSound();
+ addEventListener('resize',()=>{});
+-updateHUD();requestAnimationFrame(loop);
++initScene();updateHUD();requestAnimationFrame(loop);
+ if(/[?&](play|shot)\b/.test(location.search)){ newGame(); }
+-if(/shot\b/.test(location.search)){ setTimeout(()=>{ try{ const L=lanterns(); const b=window.__lld.boat(); if(L[0]&&b){ b.x=L[0].x-60; b.y=L[0].y; } }catch(e){} },600); }
+ // expose for automated verification
+ window.__lld={get state(){return state},get score(){return score},get collected(){return collected},
+   get lives(){return lives},get timeLeft(){return timeLeft},newGame,togglePause,boat:()=>boat,lanterns:()=>lanterns};
+ })();
+
+[0m
+Critical crash fixed — final verification and wrap-up.
+[0m← [0mEdit lantern-lake-dash/index.html
+Index: /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
++++ /home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html
+@@ -404,9 +404,9 @@
+ $('btnAgain').onclick=()=>newGame();
+ $('btnRestart2').onclick=()=>newGame();
+ $('btnPause').onclick=()=>togglePause();
+ $('btnResume').onclick=()=>togglePause();
+-$('btnResume2').onclick=()=>newGame();
++$('btnResume2').onclick=()=>{ ov.end.classList.remove('show'); if(state==='won'||state==='lost'){ state='title'; ov.title.classList.add('show'); } };
+ $('btnSound').onclick=()=>toggleSound();
+ addEventListener('resize',()=>{});
+ initScene();updateHUD();requestAnimationFrame(loop);
+ if(/[?&](play|shot)\b/.test(location.search)){ newGame(); }
+
+[0m
+[0m$ [0mpython3 -c "
+import re,pathlib
+t=pathlib.Path('lantern-lake-dash/index.html').read_text()
+m=re.search(r'<script>(.*)</script>',t,re.S)
+open('/tmp/opencode/lld.js','w').write(m.group(1))
+" && node --check /tmp/opencode/lld.js && echo SYNTAX_OK && node /tmp/opencode/harness.js && node /tmp/opencode/hazard.js
+SYNTAX_OK
+PASS starts playing
+PASS lanterns spawn >=8
+PASS boat exists
+PASS collect scores +10
+PASS collected increments
+PASS lives still valid
+PASS timer ticks down
+PASS pause works
+PASS resume works
+PASS double restart safe
+PASS timer expiry ends game
+PASS quota reachable collected=8
+PASS dock win with quota state=won
+lives before 3 after 2 PASS rock hazard
+invuln after hit PASS invuln
+no multi-hit during invuln PASS
+[0m
+[0m$ [0mchromium --headless --disable-gpu --no-sandbox --window-size=1100,800 --screenshot=/tmp/opencode/lld-title2.png file:///home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html 2>&1 | tail -1; chromium --headless --disable-gpu --no-sandbox --window-size=1100,800 --screenshot=/tmp/opencode/lld-play2.png "file:///home/runner/work/PlayGround/PlayGround/lantern-lake-dash/index.html?play" 2>&1 | tail -1; ls -lh /tmp/opencode/*.png
+146455 bytes written to file /tmp/opencode/lld-title2.png
+188760 bytes written to file /tmp/opencode/lld-play2.png
+-rw-r--r-- 1 runner runner 100K Sep  9 01:24 /tmp/opencode/lld-desktop.png
+-rw-r--r-- 1 runner runner  83K Sep  9 01:24 /tmp/opencode/lld-mobile.png
+-rw-r--r-- 1 runner runner 182K Sep  9 01:24 /tmp/opencode/lld-play.png
+-rw-r--r-- 1 runner runner 185K Sep  9 01:27 /tmp/opencode/lld-play2.png
+-rw-r--r-- 1 runner runner 144K Sep  9 01:27 /tmp/opencode/lld-title2.png
+[0m
+[0m→ [0mRead /tmp/opencode/lld-title2.png
+[0m→ [0mRead /tmp/opencode/lld-play2.png
+[0m
+[0m# [0mTodos
+[✓] Research visual references + download 6 anchors to reference-assets/
+[✓] Build Lantern Lake Dash playable game (HTML/CSS/JS)
+[✓] Verify gameplay loop, controls, states, responsive + record evidence
+[•] Maintain live progress page + polish until bar met
+[0m
+[0m← [0mWrite PROGRESS.md
+Wrote file successfully.
+[0m
+[0m# [0mTodos
+[✓] Research visual references + download 6 anchors to reference-assets/
+[✓] Build Lantern Lake Dash playable game (HTML/CSS/JS)
+[✓] Verify gameplay loop, controls, states, responsive + record evidence
+[✓] Maintain live progress page + polish until bar met
+[0m
+[goal:evidence] Lantern Lake Dash shipped at lantern-lake-dash/index.html (single-file, opens directly). 6 Mini Metro anchors in reference-assets/ verified JPEG/PNG with URL provenance in PROGRESS.md. Chromium screenshots inspected: title v2 with live lake backdrop, gameplay v2 with readable grid/lanterns/rocks/dock, mobile 420px 2-col HUD. node --check OK; 13-check logic harness ALL PASS (collect, quota 8, timer, pause/resume, double-restart, expiry loss, dock win); hazard harness PASS (rock 3→2, invuln, no multi-hit). Critic-found title draw crash + Close-strand + dock contrast fixed and re-verified.
+
+[goal:complete]

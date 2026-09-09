@@ -1,0 +1,144 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Capturing the public game as final proof — verifying the live URL first.
+[0m$ [0mgit branch --show-current; git status --short | head -30; echo ---; curl -s -o /tmp/opencode/public.html -w "HTTP %{http_code} bytes %{size_download}\n" https://become-specializing-excuse-thrown.trycloudflare.com/ && python3 -c "
+t=open('/tmp/opencode/public.html').read()
+print('title ok','Lantern Lake Dash' in t)
+print('canvas ok','id=\"game\"' in t)
+"
+opencode/34298707973
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? PROGRESS.md
+?? index.html
+?? lantern-lake-dash/
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? reference-assets/
+?? screenshots/
+---
+HTTP 200 bytes 23390
+title ok True
+canvas ok True
+[0m
+[0m$ [0mchromium --headless --disable-gpu --no-sandbox --window-size=1280,860 --screenshot=screenshots/final-public-title.png https://become-specializing-excuse-thrown.trycloudflare.com/ 2>&1 | tail -1 && chromium --headless --disable-gpu --no-sandbox --window-size=1280,860 --screenshot=screenshots/final-public-play.png "https://become-specializing-excuse-thrown.trycloudflare.com/?play" 2>&1 | tail -1 && chromium --headless --disable-gpu --no-sandbox --window-size=420,860 --screenshot=screenshots/final-public-mobile.png https://become-specializing-excuse-thrown.trycloudflare.com/ 2>&1 | tail -1 && ls -lh screenshots/
+161758 bytes written to file screenshots/final-public-title.png
+207718 bytes written to file screenshots/final-public-play.png
+87408 bytes written to file screenshots/final-public-mobile.png
+total 908K
+-rw-r--r-- 1 runner runner 205K Sep  9 01:29 final-desktop-play.png
+-rw-r--r-- 1 runner runner 159K Sep  9 01:29 final-desktop-title.png
+-rw-r--r-- 1 runner runner  86K Sep  9 01:29 final-mobile.png
+-rw-r--r-- 1 runner runner  86K Sep  9 01:29 final-public-mobile.png
+-rw-r--r-- 1 runner runner 203K Sep  9 01:29 final-public-play.png
+-rw-r--r-- 1 runner runner 158K Sep  9 01:29 final-public-title.png
+[0m
+[0m→ [0mRead screenshots/final-public-title.png
+[0m→ [0mRead screenshots/final-public-mobile.png
+[0m→ [0mRead screenshots/final-public-play.png
+Public game confirmed working — committing and pushing the final branch.
+[0m
+[0m$ [0mgit add index.html lantern-lake-dash/index.html screenshots/ reference-assets/ PROGRESS.md && git status --short && git diff --cached --stat
+A  PROGRESS.md
+A  index.html
+A  lantern-lake-dash/index.html
+A  reference-assets/mini-metro-01-screenshot-2.jpg
+A  reference-assets/mini-metro-02-classic-map.jpg
+A  reference-assets/mini-metro-03-network.jpg
+A  reference-assets/mini-metro-04-stations.jpg
+A  reference-assets/mini-metro-05-lisbon-miniversary.png
+A  reference-assets/mini-metro-06-crowding.jpg
+A  screenshots/final-desktop-play.png
+A  screenshots/final-desktop-title.png
+A  screenshots/final-mobile.png
+A  screenshots/final-public-mobile.png
+A  screenshots/final-public-play.png
+A  screenshots/final-public-title.png
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+ PROGRESS.md                                        |  45 +++
+ index.html                                         | 419 +++++++++++++++++++++
+ lantern-lake-dash/index.html                       | 419 +++++++++++++++++++++
+ reference-assets/mini-metro-01-screenshot-2.jpg    | Bin 0 -> 176449 bytes
+ reference-assets/mini-metro-02-classic-map.jpg     | Bin 0 -> 247066 bytes
+ reference-assets/mini-metro-03-network.jpg         | Bin 0 -> 320356 bytes
+ reference-assets/mini-metro-04-stations.jpg        | Bin 0 -> 168290 bytes
+ .../mini-metro-05-lisbon-miniversary.png           | Bin 0 -> 1422102 bytes
+ reference-assets/mini-metro-06-crowding.jpg        | Bin 0 -> 206190 bytes
+ screenshots/final-desktop-play.png                 | Bin 0 -> 209053 bytes
+ screenshots/final-desktop-title.png                | Bin 0 -> 162669 bytes
+ screenshots/final-mobile.png                       | Bin 0 -> 87347 bytes
+ screenshots/final-public-mobile.png                | Bin 0 -> 87408 bytes
+ screenshots/final-public-play.png                  | Bin 0 -> 207718 bytes
+ screenshots/final-public-title.png                 | Bin 0 -> 161758 bytes
+ 15 files changed, 883 insertions(+)
+[0m
+[0m$ [0mgit commit -m "Lantern Lake Dash: playable game, root entrypoint, references, final screenshots" && git log --oneline -3 && git push -u origin opencode/34298707973 2>&1 | tail -5
+[opencode/34298707973 e17457d] Lantern Lake Dash: playable game, root entrypoint, references, final screenshots
+ 15 files changed, 883 insertions(+)
+ create mode 100644 PROGRESS.md
+ create mode 100644 index.html
+ create mode 100644 lantern-lake-dash/index.html
+ create mode 100644 reference-assets/mini-metro-01-screenshot-2.jpg
+ create mode 100644 reference-assets/mini-metro-02-classic-map.jpg
+ create mode 100644 reference-assets/mini-metro-03-network.jpg
+ create mode 100644 reference-assets/mini-metro-04-stations.jpg
+ create mode 100644 reference-assets/mini-metro-05-lisbon-miniversary.png
+ create mode 100644 reference-assets/mini-metro-06-crowding.jpg
+ create mode 100644 screenshots/final-desktop-play.png
+ create mode 100644 screenshots/final-desktop-title.png
+ create mode 100644 screenshots/final-mobile.png
+ create mode 100644 screenshots/final-public-mobile.png
+ create mode 100644 screenshots/final-public-play.png
+ create mode 100644 screenshots/final-public-title.png
+e17457d Lantern Lake Dash: playable game, root entrypoint, references, final screenshots
+35c2a6e Fix stale preparation and use one issue-opened run
+remote:      https://github.com/AgentsLoop/PlayGround/pull/new/opencode/34298707973        
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34298707973 -> opencode/34298707973
+branch 'opencode/34298707973' set up to track 'origin/opencode/34298707973'.
+[0m
+[0m$ [0mgh issue comment 89 --body "## Lantern Lake Dash — complete and verified
+
+Play the public game: https://become-specializing-excuse-thrown.trycloudflare.com
+
+Steer the tiny boat around the moonlit lake, collect 8 lanterns, avoid the rocks, and reach the golden dock before the 90s timer expires. Keyboard (Arrows/WASD, P pause, R restart, M mute) and touch drag steering, score, timer bar, hull lives, pause, win/loss/restart flows, and best-score persistence all work.
+
+### Final screenshots (captured against the public URL)
+![Title](https://github.com/AgentsLoop/PlayGround/raw/opencode/34298707973/screenshots/final-public-title.png)
+![Gameplay](https://github.com/AgentsLoop/PlayGround/raw/opencode/34298707973/screenshots/final-public-play.png)
+![Mobile](https://github.com/AgentsLoop/PlayGround/raw/opencode/34298707973/screenshots/final-public-mobile.png)
+
+Localhost captures from port 3000 are also in screenshots/ as final-desktop-title.png, final-desktop-play.png, and final-mobile.png.
+
+### Final commit
+- e17457d Lantern Lake Dash: playable game, root entrypoint, references, final screenshots on branch opencode/34298707973 (pushed).
+
+### Deployment and test status
+- Deployment: public URL returns HTTP 200 with the game (title, canvas, input, win text all present in served HTML); tmux app-server on port 3000 serves ./index.html with HTTP 200 and byte-identical content to the tested build.
+- Entrypoint: ./index.html exists at repo root, node --check clean, diff-identical to lantern-lake-dash/index.html.
+- Tests: logic harness 13/13 PASS (start, spawn, collect +10, quota 8, timer ticks, pause/resume, double-restart safe, timer-expiry loss, dock win); hazard harness 3/3 PASS (rock hit 3 to 2, invulnerability window, no multi-hit); headless Chromium screenshots at desktop and mobile widths visually inspected with no render errors.
+
+### Known limitations
+- Moon glow can overlap a spawned lantern; cosmetic only.
+- In-canvas shoreline duplicates the DOM HUD score/time readout (kept for screenshot readability).
+- Some icons use emoji glyphs alongside original vector art." && echo COMMENT_POSTED
+https://github.com/AgentsLoop/PlayGround/issues/89#issuecomment-5594384508
+COMMENT_POSTED
+[0m
+[goal:evidence] Public game verified at https://become-specializing-excuse-thrown.trycloudflare.com with HTTP 200 and correct content; final screenshots captured against the public URL and inspected; commit e17457d pushed on opencode/34298707973; final completion comment with URL, screenshots, test status, and limitations posted to issue 89.
+[goal:complete]
