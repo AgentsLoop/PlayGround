@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Lantern Lake Dash</title>
+<style>
+:root{
+  --ink:#f4f1e6; --ink-dim:#b9c4d4; --lake:#0d1b2e; --lake2:#13263f;
+  --accent:#ffc857; --accent2:#ff8c42; --good:#7bdff2; --bad:#ef6461;
+  --panel:#16283f; --line:#2b4360; --dock:#ffc857;
+  --focus:#7bdff2;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#081222;color:var(--ink);
+  font-family:"Avenir Next","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-tap-highlight-color:transparent}
+body{min-height:100vh;display:flex;flex-direction:column;align-items:center}
+a{color:var(--good)}
+.wrap{width:min(1020px,100%);padding:12px 14px 28px}
+header.top{display:flex;align-items:center;gap:12px;padding:10px 4px 8px}
+.logo{width:40px;height:40px;border-radius:10px;background:radial-gradient(circle at 50% 35%,#ffe9b0,#ffc857 55%,#b96a00);
+  display:grid;place-items:center;font-size:22px;flex:none;box-shadow:0 0 18px rgba(255,200,87,.45)}
+h1{font-size:clamp(19px,3.4vw,27px);margin:0;letter-spacing:.3px}
+.sub{margin:1px 0 0;color:var(--ink-dim);font-size:13px}
+.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;min-width:0}
+.card .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim)}
+.card .v{font-size:clamp(18px,3.4vw,24px);font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+#timerWrap{height:8px;background:#0a1728;border-radius:99px;overflow:hidden;margin-top:6px;border:1px solid var(--line)}
+#timerBar{height:100%;width:100%;background:linear-gradient(90deg,var(--good),var(--accent));transition:width .2s linear}
+#timerBar.low{background:linear-gradient(90deg,#ff5d5d,#ff9a3d);animation:pulse 1s infinite}
+@keyframes pulse{50%{filter:brightness(1.5)}}
+.stage{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--lake);
+  box-shadow:0 12px 40px rgba(0,0,0,.45)}
+canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+.overlay{position:absolute;inset:0;display:none;place-items:center;text-align:center;padding:20px;
+  background:rgba(6,13,26,.78);backdrop-filter:blur(3px);z-index:5}
+.overlay.show{display:grid}
+.panel{background:#f4f1e6;color:#12233a;border-radius:16px;padding:22px 22px;max-width:440px;width:min(92%,440px);
+  box-shadow:0 16px 50px rgba(0,0,0,.5)}
+.panel h2{margin:0 0 6px;font-size:24px}
+.panel p{margin:6px 0;font-size:15px;line-height:1.45}
+.btnrow{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+button{font:inherit;font-weight:700;border-radius:12px;border:2px solid transparent;padding:11px 18px;cursor:pointer}
+.btn-primary{background:#12233a;color:#fff}
+.btn-primary:hover{background:#1d3a5e}
+.btn-ghost{background:#fff;color:#12233a;border-color:#12233a}
+button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.controls{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+.controls button{background:var(--panel);color:var(--ink);border:1px solid var(--line);padding:9px 14px;font-size:14px}
+.controls button:hover{border-color:var(--good)}
+.hint{color:var(--ink-dim);font-size:13.5px;line-height:1.5;margin:8px 2px}
+.hint kbd{background:#0a1728;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;font-family:inherit;font-size:12.5px;color:var(--ink)}
+#toast{position:absolute;left:50%;top:58px;transform:translateX(-50%);background:#f4f1e6;color:#12233a;
+  font-weight:800;padding:8px 14px;border-radius:99px;display:none;z-index:6;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+#srStatus{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.dock-ready{color:#0a6b2d;font-weight:800}
+footer{color:var(--ink-dim);font-size:12.5px;margin-top:10px;text-align:center}
+@media (max-width:560px){ .hud{grid-template-columns:repeat(2,1fr)} }
+@media (prefers-reduced-motion:reduce){ #timerBar.low{animation:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo" aria-hidden="true">🏮</div>
+    <div>
+      <h1>Lantern Lake Dash</h1>
+      <p class="sub">Collect 8 lanterns, then reach the dock before moonset. Avoid the rocks.</p>
+    </div>
+  </header>
+
+  <div class="hud" role="status" aria-label="Game status">
+    <div class="card"><div class="k">Score</div><div class="v" id="score">0</div></div>
+    <div class="card"><div class="k">Lanterns <span id="quota">0/8</span></div><div class="v" id="lanterns">🏮 0</div></div>
+    <div class="card"><div class="k">Time left</div><div class="v" id="time">90</div><div id="timerWrap"><div id="timerBar"></div></div></div>
+    <div class="card"><div class="k">Hull</div><div class="v" id="lives">●●●</div></div>
+  </div>
+
+  <div class="controls">
+    <button id="btnStart" type="button">▶ Start / Restart (R)</button>
+    <button id="btnPause" type="button">⏸ Pause (P)</button>
+    <button id="btnSound" type="button" aria-pressed="true">🔊 Sound on</button>
+  </div>
+
+  <div class="stage">
+    <canvas id="game" width="960" height="600" aria-label="Moonlit lake. Steer the boat with arrow keys or drag on touch."></canvas>
+    <div id="toast" aria-hidden="true"></div>
+    <div id="ovTitle" class="overlay show">
+      <div class="panel">
+        <h2>🏮 Lantern Lake Dash</h2>
+        <p>Steer the tiny boat around the moonlit lake.<br><b>Collect 8 lanterns</b>, dodge rocks, then sail to the <b>golden dock</b> before the timer ends.</p>
+        <p>⌨️ <b>Arrows / WASD</b> to sail · <b>P</b> pause · <b>R</b> restart<br>📱 <b>Drag</b> on the lake to steer</p>
+        <p id="best">Best score: 0</p>
+        <div class="btnrow">
+          <button class="btn-primary" id="btnPlay" type="button">Set sail ⛵</button>
+        </div>
+      </div>
+    </div>
+    <div id="ovEnd" class="overlay">
+      <div class="panel">
+        <h2 id="endTitle">You made it!</h2>
+        <p id="endText"></p>
+        <p id="endBest"></p>
+        <div class="btnrow">
+          <button class="btn-primary" id="btnAgain" type="button">Play again (R)</button>
+          <button class="btn-ghost" id="btnResume2" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="ovPause" class="overlay">
+      <div class="panel">
+        <h2>Paused</h2>
+        <p>Take a breath. The lanterns are waiting.</p>
+        <div class="btnrow">
+          <button class="btn-primary" id="btnResume" type="button">Resume (P)</button>
+          <button class="btn-ghost" id="btnRestart2" type="button">Restart (R)</button>
+        </div>
+      </div>
+    </div>
+    <div id="srStatus" aria-live="polite"></div>
+  </div>
+
+  <p class="hint"><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> or <kbd>WASD</kbd> to move · <kbd>P</kbd> pause · <kbd>R</kbd> restart · <kbd>M</kbd> mute. Hitting a rock costs 1 hull and brief stun — you flash white while invulnerable. Dock glows green when you have enough lanterns.</p>
+  <footer>Original mini-arcade artwork in Mini-Metro-inspired flat style · Best score saved locally · v1.0</footer>
+</div>
+
+<script>
+(()=>{ "use strict";
+const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
+const el={score:score=>0}; // placeholder guard
+const $=id=>document.getElementById(id);
+const ui={score:$('score'),lanterns:$('lanterns'),quota:$('quota'),time:$('time'),bar:$('timerBar'),lives:$('lives'),toast:$('toast'),sr:$('srStatus'),best:$('best')};
+const ov={title:$('ovTitle'),end:$('ovEnd'),pause:$('ovPause'),endTitle:$('endTitle'),endText:$('endText'),endBest:$('endBest')};
+
+const W=960,H=600, QUOTA=8, TIME0=90, MAXLIVES=3;
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let state='title', score=0, collected=0, timeLeft=TIME0, lives=MAXLIVES;
+let boat, lanterns=[], rocks=[], dock, particles=[], floaters=[], ripples=[];
+let keys={}, pointer={down:false,x:0,y:0}, shake=0, lastTs=0, elapsed=0, soundOn=true, best=0, hitCooldown=0;
+try{ best=parseInt(localStorage.getItem('lld_best')||'0',10)||0; }catch(e){}
+ui.best.textContent='Best score: '+best;
+
+let audioCtx=null;
+function beep(freq,dur,type,vol){ if(!soundOn) return; try{
+  audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type=type||'sine';o.frequency.value=freq;g.gain.value=vol||0.12;
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
+  o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur);
+}catch(e){} }
+
+function rand(a,b){return a+Math.random()*(b-a);}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+function toast(msg,ms){ ui.toast.textContent=msg;ui.toast.style.display='block';
+  clearTimeout(toast._t); toast._t=setTimeout(()=>ui.toast.style.display='none',ms||1400); }
+function announce(m){ ui.sr.textContent=m; }
+
+function initScene(){
+  boat={x:120,y:H/2,vx:0,vy:0,angle:0,r:14,inv:0};
+  dock={x:W-110,y:H-140,w:86,h:96};
+  lanterns=[];rocks=[];
+  const spots=[{x:380,y:140},{x:560,y:220},{x:430,y:380},{x:650,y:430},{x:300,y:480},{x:740,y:180},{x:520,y:520},{x:820,y:330}];
+  for(const s of spots) rocks.push({x:s.x+rand(-20,20),y:s.y+rand(-20,20),r:rand(20,30),seed:Math.random()*9,rot:rand(0,6)});
+  for(let i=0;i<10;i++) spawnLantern(true);
+}
+function newGame(){
+  score=0;collected=0;timeLeft=TIME0;lives=MAXLIVES;particles=[];floaters=[];ripples=[];shake=0;hitCooldown=0;elapsed=0;
+  initScene();
+  state='playing'; ov.title.classList.remove('show');ov.end.classList.remove('show');ov.pause.classList.remove('show');
+  updateHUD(); announce('Game started. Collect 8 lanterns then reach the dock.');
+  toast('Collect 🏮 · avoid 🪨 · find the dock!');
+  beep(520,.12,'triangle');
+}
+function spawnLantern(anywhere){
+  for(let t=0;t<40;t++){
+    const p={x:rand(60,W-60),y:rand(60,H-60),r:13,phase:rand(0,6.28),drift:rand(.2,.6)};
+    if(dist(p,boat)<110) continue;
+    if(Math.abs(p.x-dock.x)<70&&Math.abs(p.y-dock.y)<90) continue;
+    if(rocks.some(r=>Math.hypot(p.x-r.x,p.y-r.y)<r.r+30)) continue;
+    if(lanterns.some(l=>Math.hypot(p.x-l.x,p.y-l.y)<60)) continue;
+    lanterns.push(p);return;
+  }
+}
+function updateHUD(){
+  ui.score.textContent=score;
+  ui.lanterns.textContent='🏮 '+collected;
+  ui.quota.textContent=collected+'/'+QUOTA;
+  ui.time.textContent=Math.ceil(timeLeft);
+  ui.bar.style.width=(100*timeLeft/TIME0)+'%';
+  ui.bar.classList.toggle('low',timeLeft<=15);
+  ui.lives.textContent='●'.repeat(Math.max(0,lives))+'○'.repeat(Math.max(0,MAXLIVES-lives));
+  ui.lives.style.color=lives===1?'#ef6461':(lives===2?'#ffc857':'#7bdff2');
+}
+function endGame(win,reason){
+  state=win?'won':'lost';
+  const bonus=win?Math.ceil(timeLeft)*5+lives*25:0;
+  if(win) score+=bonus;
+  if(score>best){best=score;try{localStorage.setItem('lld_best',String(best));}catch(e){}}
+  ov.endTitle.textContent=win?'🌅 Docked! You made it!':(reason==='rocks'?'💥 Boat sunk!':'🌙 Moonset — time up!');
+  ov.endText.innerHTML=win
+    ? `Score <b>${score}</b> (lanterns ${collected} × 10 + time & hull bonus +${bonus}).<br>Time to spare: <b>${Math.ceil(timeLeft)}s</b> · Hull: <b>${lives}/${MAXLIVES}</b>`
+    : (reason==='rocks'
+      ? `The rocks claimed your boat with <b>${collected}/${QUOTA}</b> lanterns and score <b>${score}</b>. Try a wider turn!`
+      : `Time expired with <b>${collected}/${QUOTA}</b> lanterns and score <b>${score}</b>.${collected>=QUOTA?' You had enough — head straight for the dock!':' Grab lanterns faster (+3s each)!'}`);
+  ov.endBest.textContent='Best score: '+best;
+  ov.end.classList.add('show');
+  announce(ov.endTitle.textContent+' Score '+score);
+  beep(win?880:180,win?.35:.5,win?'triangle':'sawtooth',.14);
+  if(win) burst(dock.x,dock.y-20,60,'#ffc857'); else burst(boat.x,boat.y,40,'#ef6461');
+  updateHUD();
+}
+function burst(x,y,n,color){
+  if(reduceMotion) n=Math.min(n,8);
+  for(let i=0;i<n;i++) particles.push({x,y,vx:rand(-220,220),vy:rand(-220,140),life:rand(.4,1),color,sz:rand(2,5)});
+}
+function collide(){
+  // lanterns
+  for(let i=lanterns.length-1;i>=0;i--){ const l=lanterns[i];
+    if(Math.hypot(boat.x-l.x,boat.y-l.y)<boat.r+l.r){
+      lanterns.splice(i,1);collected++;score+=10;timeLeft=Math.min(timeLeft+3,TIME0);
+      burst(l.x,l.y,22,'#ffc857');floaters.push({x:l.x,y:l.y-10,text:'+10  +3s',life:1.1});
+      beep(740,.12,'sine');setTimeout(()=>beep(980,.1,'sine'),70);
+      toast(collected>=QUOTA?'Dock is open! Sail to the gold dock ⛵':'Lantern '+collected+'/'+QUOTA+' 🏮');
+      announce('Lantern collected. '+collected+' of '+QUOTA+'. Score '+score);
+      spawnLantern();updateHUD();
+    }
+  }
+  // rocks (with invuln + cooldown recovery)
+  if(boat.inv<=0&&hitCooldown<=0){
+    for(const r of rocks){
+      if(Math.hypot(boat.x-r.x,boat.y-r.y)<boat.r+r.r-4){
+        lives--;boat.inv=1.6;hitCooldown=0.25;shake=reduceMotion?0:10;
+        boat.vx*=-0.45;boat.vy*=-0.45;
+        burst(boat.x,boat.y,30,'#ef6461');floaters.push({x:boat.x,y:boat.y-22,text:'-1 hull!',life:1.2,color:'#ef6461'});
+        beep(140,.3,'sawtooth',.16);
+        toast(lives>0?'🪨 Ouch! Hull '+lives+'/'+MAXLIVES:'💥 Hull breached!');
+        announce('Rock hit. Hull '+lives+'.');
+        updateHUD();
+        if(lives<=0){ endGame(false,'rocks'); }
+        break;
+      }
+    }
+  }
+  // dock
+  const inDock=boat.x>dock.x-14&&boat.x<dock.x+dock.w+14&&boat.y>dock.y-14&&boat.y<dock.y+dock.h+14;
+  if(inDock&&state==='playing'){
+    if(collected>=QUOTA){ endGame(true); }
+    else if(!collide._nag||elapsed-collide._nag>3){ collide._nag=elapsed;
+      toast('Need '+(QUOTA-collected)+' more lanterns first! 🏮');beep(300,.15,'square',.08); }
+  }
+}
+function step(dt){
+  elapsed+=dt;
+  if(state!=='playing') return;
+  timeLeft-=dt;
+  if(timeLeft<=0){timeLeft=0;updateHUD();endGame(false,'time');return;}
+  if(timeLeft<=15&&Math.floor(elapsed*2)!==Math.floor((elapsed-dt)*2)) beep(440,.06,'square',.05);
+  boat.inv=Math.max(0,boat.inv-dt);hitCooldown=Math.max(0,hitCooldown-dt);
+  // input vector (keyboard) — ignore repeats naturally via key set
+  let ax=0,ay=0;
+  if(keys.ArrowLeft||keys.a)ax-=1; if(keys.ArrowRight||keys.d)ax+=1;
+  if(keys.ArrowUp||keys.w)ay-=1; if(keys.ArrowDown||keys.s)ay+=1;
+  if(ax&&ay){ax*=0.7071;ay*=0.7071;}
+  // pointer steer
+  if(pointer.down){
+    const dx=pointer.x-boat.x,dy=pointer.y-boat.y,d=Math.hypot(dx,dy);
+    if(d>12){ax+=dx/d;ay+=dy/d;}
+  }
+  const ACC=950,MAXV=268;
+  boat.vx+=ax*ACC*dt;boat.vy+=ay*ACC*dt;
+  const fr=Math.pow(0.12,dt); // drag
+  if(!ax)boat.vx*=fr; if(!ay)boat.vy*=fr;
+  const sp=Math.hypot(boat.vx,boat.vy);
+  if(sp>MAXV){boat.vx*=MAXV/sp;boat.vy*=MAXV/sp;}
+  boat.x+=boat.vx*dt;boat.y+=boat.vy*dt;
+  boat.x=Math.max(18,Math.min(W-18,boat.x));boat.y=Math.max(60,Math.min(H-16,boat.y));
+  if(sp>20)boat.angle=Math.atan2(boat.vy,boat.vx);
+  if(sp>60&&Math.random()<dt*8)ripples.push({x:boat.x,y:boat.y+8,life:.7,sz:4});
+  // lantern bob
+  for(const l of lanterns){l.phase+=dt*1.6;l.y+=Math.sin(l.phase)*l.drift*dt*10;}
+  // particles
+  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=300*dt;if(p.life<=0)particles.splice(i,1);}
+  for(let i=floaters.length-1;i>=0;i--){const f=floaters[i];f.life-=dt;f.y-=34*dt;if(f.life<=0)floaters.splice(i,1);}
+  for(let i=ripples.length-1;i>=0;i--){const r=ripples[i];r.life-=dt;r.sz+=26*dt;if(r.life<=0)ripples.splice(i,1);}
+  shake=Math.max(0,shake-dt*30);
+  collide();updateHUD();
+}
+function draw(){
+  ctx.save();
+  if(shake>0)ctx.translate(rand(-shake,shake),rand(-shake,shake));
+  // lake
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0d2240');g.addColorStop(1,'#081426');
+  ctx.fillStyle=g;ctx.fillRect(-20,-20,W+40,H+40);
+  // minimap-grid (Mini-Metro-like clean lines)
+  ctx.strokeStyle='rgba(123,223,242,0.10)';ctx.lineWidth=1;
+  for(let x=0;x<=W;x+=48){ctx.beginPath();ctx.moveTo(x,48);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=48;y<=H;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // moon + glow
+  ctx.fillStyle='#fdf6dd';ctx.beginPath();ctx.arc(830,105,30,0,7);ctx.fill();
+  const mg=ctx.createRadialGradient(830,105,10,830,105,120);mg.addColorStop(0,'rgba(253,246,221,.35)');mg.addColorStop(1,'rgba(253,246,221,0)');
+  ctx.fillStyle=mg;ctx.beginPath();ctx.arc(830,105,120,0,7);ctx.fill();
+  ctx.fillStyle='rgba(253,246,221,.25)';for(let i=0;i<40;i++){const sx=(i*173)%W,sy=48+((i*97)%(H-60));ctx.fillRect(sx,sy,14,2);}
+  // moon reflection
+  ctx.fillStyle='rgba(255,200,87,.16)';ctx.fillRect(812,150,36,300);
+  if(!dock||!boat){ ctx.restore(); return; }
+  // dock
+  const ready=collected>=QUOTA;
+  ctx.fillStyle='rgba(0,0,0,.35)';rr(dock.x+4,dock.y+6,dock.w,dock.h,8);ctx.fill();
+  ctx.fillStyle=ready?'#2ecc71':'#8a6d2b';rr(dock.x,dock.y,dock.w,dock.h,8);ctx.fill();
+  ctx.fillStyle='#f4f1e6';for(let i=0;i<4;i++)ctx.fillRect(dock.x+8,dock.y+12+i*22,dock.w-16,8);
+  ctx.fillStyle=ready?'#7dffb0':'#ffe9b0';
+  ctx.font='800 13px system-ui';ctx.textAlign='center';
+  ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=3;
+  const dl=ready?'DOCK ✓ OPEN':'DOCK · '+collected+'/'+QUOTA;
+  ctx.strokeText(dl,dock.x+dock.w/2,dock.y-10);ctx.fillText(dl,dock.x+dock.w/2,dock.y-10);
+  if(ready){ctx.strokeStyle='#2ecc71';ctx.lineWidth=3;ctx.setLineDash([8,6]);ctx.lineDashOffset=-elapsed*30;
+    rr(dock.x-8,dock.y-8,dock.w+16,dock.h+16,12);ctx.stroke();ctx.setLineDash([]);}
+  // rocks
+  for(const r of rocks){
+    ctx.save();ctx.translate(r.x,r.y);ctx.rotate(r.rot+r.seed);
+    ctx.fillStyle='rgba(0,0,0,.4)';ctx.beginPath();poly(r.r+3,7);ctx.fill();
+    ctx.fillStyle='#5b6b7f';ctx.beginPath();poly(r.r,7);ctx.fill();
+    ctx.fillStyle='#8fa0b5';ctx.beginPath();poly(r.r*0.55,7);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='700 15px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('▲',0,1);ctx.restore();
+    ctx.fillStyle='rgba(239,100,97,.12)';ctx.beginPath();ctx.arc(r.x,r.y,r.r+9+Math.sin(elapsed*2+r.seed)*2,0,7);ctx.fill();
+  }
+  // lanterns
+  for(const l of lanterns){
+    const bobY=Math.sin(l.phase)*4;
+    const gl=ctx.createRadialGradient(l.x,l.y+bobY,2,l.x,l.y+bobY,34);
+    gl.addColorStop(0,'rgba(255,200,87,.85)');gl.addColorStop(1,'rgba(255,200,87,0)');
+    ctx.fillStyle=gl;ctx.beginPath();ctx.arc(l.x,l.y+bobY,34,0,7);ctx.fill();
+    ctx.fillStyle='#3a2b00';ctx.fillRect(l.x-9,l.y+bobY-16,18,5);
+    ctx.fillStyle='#ffc857';rr(l.x-11,l.y+bobY-11,22,22,6);ctx.fill();
+    ctx.fillStyle='#fff3c4';rr(l.x-5,l.y+bobY-7,10,13,4);ctx.fill();
+    ctx.fillStyle='#3a2b00';ctx.fillRect(l.x-6,l.y+bobY+11,12,3);
+  }
+  // ripples
+  for(const r of ripples){ctx.strokeStyle=`rgba(123,223,242,${Math.max(0,r.life)})`;ctx.lineWidth=2;
+    ctx.beginPath();ctx.ellipse(r.x,r.y,r.sz,r.sz*0.4,0,0,7);ctx.stroke();}
+  // boat
+  ctx.save();ctx.translate(boat.x,boat.y);ctx.rotate(boat.angle);
+  const flash=boat.inv>0&&Math.floor(elapsed*12)%2===0;
+  ctx.fillStyle='rgba(123,223,242,.35)';ctx.beginPath();ctx.ellipse(0,0,26,14,0,0,7);ctx.fill();
+  ctx.fillStyle=flash?'#ffffff':'#f4f1e6';
+  ctx.beginPath();ctx.moveTo(20,0);ctx.lineTo(-12,-11);ctx.lineTo(-6,0);ctx.lineTo(-12,11);ctx.closePath();ctx.fill();
+  ctx.fillStyle=flash?'#fff':'#ff8c42';ctx.fillRect(-4,-3,8,6);
+  ctx.fillStyle='#12233a';ctx.beginPath();ctx.arc(2,0,2.4,0,7);ctx.fill();
+  ctx.restore();
+  // particles / floaters
+  for(const p of particles){ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.sz,p.sz);}
+  ctx.globalAlpha=1;
+  ctx.textAlign='center';ctx.font='800 15px system-ui';
+  for(const f of floaters){ctx.globalAlpha=Math.min(1,f.life);ctx.fillStyle=f.color||'#ffe9b0';
+    ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=3;ctx.strokeText(f.text,f.x,f.y);ctx.fillText(f.text,f.x,f.y);}
+  ctx.globalAlpha=1;
+  // top shoreline
+  ctx.fillStyle='#0a1526';ctx.fillRect(-20,-20,W+40,68);
+  ctx.fillStyle='#2b4360';ctx.fillRect(-20,46,W+40,3);
+  ctx.fillStyle='#f4f1e6';ctx.font='700 13px system-ui';ctx.textAlign='left';
+  ctx.fillText('🌙 LANTERN LAKE  ·  collect '+QUOTA+' then dock',14,28);
+  ctx.textAlign='right';ctx.fillText('time '+Math.ceil(timeLeft)+'s   score '+score,W-14,28);
+  ctx.restore();
+}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function poly(r,n){for(let i=0;i<n;i++){const a=i/n*Math.PI*2;ctx[i?'lineTo':'moveTo'](Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();}
+function loop(ts){
+  requestAnimationFrame(loop);
+  const dt=Math.min(0.033,(ts-lastTs)/1000||0.016);lastTs=ts;
+  try{ step(dt);draw(); }catch(err){ /* keep loop alive; recover next frame */ }
+}
+// input — robust to repeats / invalid keys
+addEventListener('keydown',e=>{
+  const k=e.key.length===1?e.key.toLowerCase():e.key;
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();
+  if(k==='p'||k==='Escape'){togglePause();return;}
+  if(k==='r'){newGame();return;}
+  if(k==='m'){toggleSound();return;}
+  if(k==='Enter'&&(state==='title'||state==='won'||state==='lost')){newGame();return;}
+  keys[e.key.length===1?e.key.toLowerCase():e.key]=true;
+});
+addEventListener('keyup',e=>{keys[e.key.length===1?e.key.toLowerCase():e.key]=false;});
+function toGame(e){const r=canvas.getBoundingClientRect();
+  return {x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
+canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);const p=toGame(e);pointer={down:true,x:p.x,y:p.y};
+  if(state!=='playing')return; beep(600,.05,'sine',.05);});
+canvas.addEventListener('pointermove',e=>{if(!pointer.down)return;const p=toGame(e);pointer.x=p.x;pointer.y=p.y;});
+addEventListener('pointerup',()=>pointer.down=false);
+canvas.addEventListener('pointercancel',()=>pointer.down=false);
+function togglePause(){
+  if(state!=='playing'&&state!=='paused')return;
+  if(state==='playing'){state='paused';ov.pause.classList.add('show');announce('Paused');}
+  else{state='playing';ov.pause.classList.remove('show');announce('Resumed');}
+  beep(500,.08,'triangle');
+}
+function toggleSound(){soundOn=!soundOn;$('btnSound').textContent=soundOn?'🔊 Sound on':'🔇 Muted';$('btnSound').setAttribute('aria-pressed',soundOn);}
+$('btnStart').onclick=()=>newGame();
+$('btnPlay').onclick=()=>newGame();
+$('btnAgain').onclick=()=>newGame();
+$('btnRestart2').onclick=()=>newGame();
+$('btnPause').onclick=()=>togglePause();
+$('btnResume').onclick=()=>togglePause();
+$('btnResume2').onclick=()=>{ ov.end.classList.remove('show'); if(state==='won'||state==='lost'){ state='title'; ov.title.classList.add('show'); } };
+$('btnSound').onclick=()=>toggleSound();
+addEventListener('resize',()=>{});
+initScene();updateHUD();requestAnimationFrame(loop);
+if(/[?&](play|shot)\b/.test(location.search)){ newGame(); }
+// expose for automated verification
+window.__lld={get state(){return state},get score(){return score},get collected(){return collected},
+  get lives(){return lives},get timeLeft(){return timeLeft},newGame,togglePause,boat:()=>boat,lanterns:()=>lanterns};
+})();
+</script>
+</body>
+</html>
