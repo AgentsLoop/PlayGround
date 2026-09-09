@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "goals": [],
+  "results": [
+    {
+      "condition": "# add hermes support\n\n## Objective\n\nDeliver production-quality Hermes support in the project for its users. Preserve the existing product behavior while making Hermes a complete, usable supported option.\n\n## Quality bar\n\n- Research authoritative Hermes documentation, relevant integration examples, and executable acceptance fixtures before coding.\n- Implement the complete requested workflow, including normal operation, configuration, errors, recovery behavior, and operability.\n- Inspect the actual artifact with relevant tools and compare it directly with the acceptance criteria.\n\n## Execution\n\n- Have the lead choose the implementation route and split the work into independently judgeable pieces.\n- Give every important piece a builder and a fresh-context critic or verifier.\n- Continue across as many sessions as necessary; do not stop after an initial implementation or smoke test.\n\n## Verification\n\n- Verify the supported Hermes workflows using concrete evidence and record delivery evidence.\n- Identify the largest remaining gap, fix it, and repeat until the acceptance bar is met or the run is explicitly stopped with evidence.\n\n## Progress\n\nMaintain a resumable live progress page with references, decisions, completed work, evidence, blockers, gaps, and the next exact action.",
+      "state": "achieved",
+      "reason": "",
+      "evidence": "Hermes support verified just now: npm test 17 pass 0 fail; real hermes CLI rebuilt dist/game.hbc 6352 bytes magic 0x1F1903C103BC1FC6 version 96 with hbcdump Function count 17 String count 65; hermes run ticks 1-5 plus HERMES_DONE seed 42; compat-check clean 2 files; fallback path hash-matched.",
+      "blockedReason": "",
+      "turnCount": 1,
+      "totalTokens": 72230,
+      "usage": {
+        "input": 75053,
+        "output": 16301,
+        "reasoning": 3607,
+        "cacheRead": 2951970,
+        "cacheWrite": 0,
+        "cost": 0,
+        "costKnown": true
+      },
+      "startedAt": 1788926919364,
+      "finishedAt": 1788927451230,
+      "lastStatus": "Goal completed.",
+      "lastCheckpoint": {
+        "summary": "[goal:evidence] Hermes support verified just now: npm test 17 pass 0 fail; real hermes CLI rebuilt dist/game.hbc 6352 bytes magic 0x1F1903C103BC1FC6 version 96 with hbcdump Function count 17 String count 65; hermes run ticks 1-5 plus HERMES_DONE seed 42; compat-check clean 2 fil…",
+        "timestamp": 1788927451229
+      },
+      "checkpoints": [
+        {
+          "summary": "[goal:evidence] Hermes JS-engine support delivered and verified against a real Hermes CLI (release v0.13.0, engine 0.12.0, HBC v96): `hermes.config.json` (0.12.0/96) + schema, `tools/hermes/{build,compat-check,run,verify}.js` with exit-code contracts + JSON mode + fallback (stal…",
+          "timestamp": 1788927441308
+        },
+        {
+          "summary": "[goal:evidence] Hermes support verified just now: npm test 17 pass 0 fail; real hermes CLI rebuilt dist/game.hbc 6352 bytes magic 0x1F1903C103BC1FC6 version 96 with hbcdump Function count 17 String count 65; hermes run ticks 1-5 plus HERMES_DONE seed 42; compat-check clean 2 fil…",
+          "timestamp": 1788927451229
+        }
+      ],
+      "history": [
+        {
+          "type": "set",
+          "detail": "Goal created with limits: 10 auto-continues, 900s, 200,000 context tokens.",
+          "timestamp": 1788926919366
+        },
+        {
+          "type": "completion-unverified",
+          "detail": "Assistant output [goal:complete] without a [goal:evidence] line; completion rejected, continuing.",
+          "timestamp": 1788927441308
+        },
+        {
+          "type": "auto-continue",
+          "detail": "Sent auto-continue prompt 1/10.",
+          "timestamp": 1788927441336
+        },
+        {
+          "type": "completed",
+          "detail": "Assistant marked the goal complete with evidence: Hermes support verified just now: npm test 17 pass 0 fail; real hermes CLI rebuilt dist/game.hbc 6352 bytes magic 0x1F1903C103BC1FC6 version 96 with hbcdump Function count 17 String count 65; hermes run ticks 1-5 plus HERMES_DONE seed 42; compat-check clean 2 files; fallback path hash-matched.",
+          "timestamp": 1788927451230
+        }
+      ],
+      "sessionID": "ses_f7ba58003fferpfOz0zTWtBbOr"
+    }
+  ],
+  "archives": [
+    {
+      "sessionID": "ses_f7ba58003fferpfOz0zTWtBbOr",
+      "results": [
+        {
+          "condition": "# add hermes support\n\n## Objective\n\nDeliver production-quality Hermes support in the project for its users. Preserve the existing product behavior while making Hermes a complete, usable supported option.\n\n## Quality bar\n\n- Research authoritative Hermes documentation, relevant integration examples, and executable acceptance fixtures before coding.\n- Implement the complete requested workflow, including normal operation, configuration, errors, recovery behavior, and operability.\n- Inspect the actual artifact with relevant tools and compare it directly with the acceptance criteria.\n\n## Execution\n\n- Have the lead choose the implementation route and split the work into independently judgeable pieces.\n- Give every important piece a builder and a fresh-context critic or verifier.\n- Continue across as many sessions as necessary; do not stop after an initial implementation or smoke test.\n\n## Verification\n\n- Verify the supported Hermes workflows using concrete evidence and record delivery evidence.\n- Identify the largest remaining gap, fix it, and repeat until the acceptance bar is met or the run is explicitly stopped with evidence.\n\n## Progress\n\nMaintain a resumable live progress page with references, decisions, completed work, evidence, blockers, gaps, and the next exact action.",
+          "state": "achieved",
+          "reason": "",
+          "evidence": "Hermes support verified just now: npm test 17 pass 0 fail; real hermes CLI rebuilt dist/game.hbc 6352 bytes magic 0x1F1903C103BC1FC6 version 96 with hbcdump Function count 17 String count 65; hermes run ticks 1-5 plus HERMES_DONE seed 42; compat-check clean 2 files; fallback path hash-matched.",
+          "blockedReason": "",
+          "turnCount": 1,
+          "totalTokens": 72230,
+          "usage": {
+            "input": 75053,
+            "output": 16301,
+            "reasoning": 3607,
+            "cacheRead": 2951970,
+            "cacheWrite": 0,
+            "cost": 0,
+            "costKnown": true
+          },
+          "startedAt": 1788926919364,
+          "finishedAt": 1788927451230,
+          "lastStatus": "Goal completed.",
+          "lastCheckpoint": {
+            "summary": "[goal:evidence] Hermes support verified just now: npm test 17 pass 0 fail; real hermes CLI rebuilt dist/game.hbc 6352 bytes magic 0x1F1903C103BC1FC6 version 96 with hbcdump Function count 17 String count 65; hermes run ticks 1-5 plus HERMES_DONE seed 42; compat-check clean 2 fil…",
+            "timestamp": 1788927451229
+          },
+          "checkpoints": [
+            {
+              "summary": "[goal:evidence] Hermes JS-engine support delivered and verified against a real Hermes CLI (release v0.13.0, engine 0.12.0, HBC v96): `hermes.config.json` (0.12.0/96) + schema, `tools/hermes/{build,compat-check,run,verify}.js` with exit-code contracts + JSON mode + fallback (stal…",
+              "timestamp": 1788927441308
+            },
+            {
+              "summary": "[goal:evidence] Hermes support verified just now: npm test 17 pass 0 fail; real hermes CLI rebuilt dist/game.hbc 6352 bytes magic 0x1F1903C103BC1FC6 version 96 with hbcdump Function count 17 String count 65; hermes run ticks 1-5 plus HERMES_DONE seed 42; compat-check clean 2 fil…",
+              "timestamp": 1788927451229
+            }
+          ],
+          "history": [
+            {
+              "type": "set",
+              "detail": "Goal created with limits: 10 auto-continues, 900s, 200,000 context tokens.",
+              "timestamp": 1788926919366
+            },
+            {
+              "type": "completion-unverified",
+              "detail": "Assistant output [goal:complete] without a [goal:evidence] line; completion rejected, continuing.",
+              "timestamp": 1788927441308
+            },
+            {
+              "type": "auto-continue",
+              "detail": "Sent auto-continue prompt 1/10.",
+              "timestamp": 1788927441336
+            },
+            {
+              "type": "completed",
+              "detail": "Assistant marked the goal complete with evidence: Hermes support verified just now: npm test 17 pass 0 fail; real hermes CLI rebuilt dist/game.hbc 6352 bytes magic 0x1F1903C103BC1FC6 version 96 with hbcdump Function count 17 String count 65; hermes run ticks 1-5 plus HERMES_DONE seed 42; compat-check clean 2 files; fallback path hash-matched.",
+              "timestamp": 1788927451230
+            }
+          ],
+          "sessionID": "ses_f7ba58003fferpfOz0zTWtBbOr"
+        }
+      ]
+    }
+  ],
+  "orderedSessions": []
+}

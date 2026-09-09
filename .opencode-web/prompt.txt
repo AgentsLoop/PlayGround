@@ -1,0 +1,26 @@
+# add hermes support
+
+## Objective
+
+Deliver production-quality Hermes support in the project for its users. Preserve the existing product behavior while making Hermes a complete, usable supported option.
+
+## Quality bar
+
+- Research authoritative Hermes documentation, relevant integration examples, and executable acceptance fixtures before coding.
+- Implement the complete requested workflow, including normal operation, configuration, errors, recovery behavior, and operability.
+- Inspect the actual artifact with relevant tools and compare it directly with the acceptance criteria.
+
+## Execution
+
+- Have the lead choose the implementation route and split the work into independently judgeable pieces.
+- Give every important piece a builder and a fresh-context critic or verifier.
+- Continue across as many sessions as necessary; do not stop after an initial implementation or smoke test.
+
+## Verification
+
+- Verify the supported Hermes workflows using concrete evidence and record delivery evidence.
+- Identify the largest remaining gap, fix it, and repeat until the acceptance bar is met or the run is explicitly stopped with evidence.
+
+## Progress
+
+Maintain a resumable live progress page with references, decisions, completed work, evidence, blockers, gaps, and the next exact action.

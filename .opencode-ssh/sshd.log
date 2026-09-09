@@ -1,0 +1,4 @@
+Server listening on 0.0.0.0 port 2222.
+Server listening on :: port 2222.
+Accepted publickey for runner from 127.0.0.1 port 44592 ssh2: ED25519 SHA256:6NQmVCO0IcBA7ElpHmzBExToKn8rwYhpXWyE1Z/tvz4
+Accepted publickey for runner from 127.0.0.1 port 51458 ssh2: ED25519 SHA256:6NQmVCO0IcBA7ElpHmzBExToKn8rwYhpXWyE1Z/tvz4

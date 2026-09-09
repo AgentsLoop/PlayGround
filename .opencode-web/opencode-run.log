@@ -1,0 +1,1301 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Building full Hermes support — starting with repo mapping and docs.
+[0m→ [0mRead .
+[0m→ [0mRead .agents
+[0m→ [0mRead README.md
+[0m→ [0mRead Agents.md
+[0m
+[0m$ [0mgit log --oneline -20; echo ---; git status; echo ---; ls -la .agents/skills/ 2>&1 | head -n 100
+ad0e2a5 Forward OpenCode execution to the selected branch
+---
+On branch opencode/34309727151
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.agents/
+	.agentsweb/
+	.omgithub-runtime/
+	.opencode-ssh/
+	.opencode-web/
+	.opencode/
+	Agents.md
+	opencode-agentsweb-id_ed25519
+	opencode-agentsweb-id_ed25519.pub
+
+nothing added to commit but untracked files present (use "git add" to track)
+---
+total 28
+drwxr-xr-x 7 runner runner 4096 Sep  9 04:07 .
+drwxr-xr-x 5 runner runner 4096 Sep  9 04:07 ..
+drwxr-xr-x 2 runner runner 4096 Sep  9 04:07 gauntlet-loop
+drwxr-xr-x 3 runner runner 4096 Sep  9 04:07 image-search
+drwxr-xr-x 7 runner runner 4096 Sep  9 04:07 load-sketchfab-threejs
+drwxr-xr-x 2 runner runner 4096 Sep  9 04:07 mcp-duckgo
+drwxr-xr-x 3 runner runner 4096 Sep  9 04:07 opencode-zen-completions
+[0m
+[0m$ [0mgit remote -v; echo ---; git branch -a | head -n 50; echo ---; ls -la .github/ 2>&1; echo ---; cat .agents/README.md 2>&1 | head -n 200
+origin	https://github.com/AgentsLoop/PlayGround (fetch)
+origin	https://github.com/AgentsLoop/PlayGround (push)
+---
+* opencode/34309727151
+---
+total 12
+drwxr-xr-x  3 runner runner 4096 Sep  9 04:07 .
+drwxr-xr-x 10 runner runner 4096 Sep  9 04:08 ..
+drwxr-xr-x  2 runner runner 4096 Sep  9 04:07 workflows
+---
+# Worker Agents Skills
+
+This repository bundles the baseline skills installed by [Worker
+Agents](https://github.com/agents-dev/workerAgents).
+
+The bundled skills are available under [`skills/`](skills/):
+
+- `mcp-duckgo` — imported from `aahl/skills@mcp-duckgo`.
+- `image-search` — imported from `z0gsh1u/oh-my-writing-skill@image-search`.
+- `gauntlet-loop` — imported from `robonuggets/gauntlet-loop@gauntlet-loop`.
+- `load-sketchfab-threejs` — local asset inspection, normalization, and Three.js/PlayCanvas A/B viewer skill.
+- `opencode-zen-completions` — use the OpenCode Zen chat completions API for implementation work.
+
+The original upstream licenses are preserved in
+[`third-party-licenses/`](third-party-licenses/).
+[0m
+[0m$ [0mls .github/workflows/; cat .github/workflows/* 2>&1 | head -n 200
+opencode.yml
+name: OpenCode
+run-name: "OpenCode #${{ github.event.issue.number || inputs.issue_number }}${{ github.event.issue.title && format(' — {0}', github.event.issue.title) || '' }}"
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Existing issue to run
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: opencode-issue-${{ github.repository }}-${{ github.event.issue.number || inputs.issue_number }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.issue.labels.*.name, 'OpenCode') || contains(github.event.issue.title, '/OpenCode')
+    permissions:
+      contents: read
+      issues: write
+      actions: write
+    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-prepare.yml@687fd44b912b4d8534697f582aa14501fbacb2d7
+    with:
+      runtime_ref: 687fd44b912b4d8534697f582aa14501fbacb2d7
+
+  opencode:
+    needs: prepare
+    if: needs.prepare.outputs.approved == 'true'
+    permissions:
+      contents: write
+      issues: write
+      actions: read
+    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-reusable.yml@687fd44b912b4d8534697f582aa14501fbacb2d7
+    with:
+      runtime_ref: 687fd44b912b4d8534697f582aa14501fbacb2d7
+      issue_number: ${{ needs.prepare.outputs.issue_number }}
+      request: ${{ needs.prepare.outputs.request }}
+      issue_title: ${{ needs.prepare.outputs.issue_title }}
+      labels_json: ${{ needs.prepare.outputs.labels_json }}
+      sender: ${{ needs.prepare.outputs.sender }}
+      target_ref: ${{ needs.prepare.outputs.target_ref }}
+      target_sha: ${{ needs.prepare.outputs.target_sha }}
+    secrets:
+      OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+      OPENCODE_AUTH_JSON: ${{ secrets.OPENCODE_AUTH_JSON }}
+      AGENTSWEB_SSH_PUBLIC_KEY: ${{ secrets.AGENTSWEB_SSH_PUBLIC_KEY }}
+[0m
+Empty playground, no spec — I'll define Hermes as the Hermes JS engine and build bytecode + compat support.
+[0m# [0mTodos
+[•] Map repo + define Hermes scope + create live progress page
+[ ] Research authoritative Hermes docs + integration examples + fixtures
+[ ] Implement Hermes support (example game, build scripts, compat, config, errors/recovery)
+[ ] Verify with concrete evidence (hermesc/hermes inspection, tests, artifact comparison)
+[ ] Fix largest gap, record delivery evidence
+[0m
+[0m% [0mWebFetch https://hermesengine.dev/
+[0m◈ [0mExa Web Search "Hermes JavaScript engine hermesc bytecode 2026 documentation"
+[0m
+[0m# [0mTodos
+[✓] Map repo + define Hermes scope + create live progress page
+[•] Research authoritative Hermes docs + integration examples + fixtures
+[ ] Implement Hermes support (example game, build scripts, compat, config, errors/recovery)
+[ ] Verify with concrete evidence (hermesc/hermes inspection, tests, artifact comparison)
+[ ] Fix largest gap, record delivery evidence
+[0m
+[0m$ [0mnode --version 2>&1; npm --version 2>&1; python3 --version 2>&1; which hermes hermesc hbcdump hvm 2>&1; ls /tmp/opencode 2>&1 | head
+v22.23.2
+10.9.8
+Python 3.12.3
+[0m
+[0m$ [0mnpm view hermes-engine versions --json 2>&1 | tail -n 20; echo ---; curl -sI https://github.com 2>&1 | head -n 5
+"0.1.1",
+  "0.2.1",
+  "0.3.0",
+  "0.4.0",
+  "0.4.1",
+  "0.4.2-rc1",
+  "0.4.3",
+  "0.5.0",
+  "0.5.1",
+  "0.5.2-rc1",
+  "0.6.0",
+  "0.7.0",
+  "0.7.1",
+  "0.7.2",
+  "0.8.0",
+  "0.8.1",
+  "0.9.0",
+  "0.10.0",
+  "0.11.0"
+]
+---
+HTTP/2 200 
+date: Wed, 09 Sep 2026 04:09:01 GMT
+content-type: text/html; charset=utf-8
+content-language: en-US
+vary: X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Accept-Language, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With
+[0m
+Scope set: Hermes JS engine via config + toolchain + DOM-free example. Now scaffolding.
+[0m← [0mWrite PROGRESS_HERMES.md
+Wrote file successfully.
+[0m
+[0m• [0mBuild hermes toolchain[90m General Agent[0m
+[0m• [0mBuild hermes tests+docs[90m General Agent[0m
+[0m✓ [0mBuild hermes tests+docs[90m General Agent[0m
+[0m✓ [0mBuild hermes toolchain[90m General Agent[0m
+Both builders done — verifying on disk and chasing a real Hermes binary.
+[0m
+[0m$ [0mls -R --ignore=.git --ignore=.agents --ignore=.agentsweb --ignore=.opencode* --ignore=.omgithub-runtime 2>&1 | head -n 80; echo ===; npm test 2>&1 | tail -n 40
+.:
+Agents.md
+PROGRESS_HERMES.md
+README.md
+dist
+docs
+examples
+hermes.config.json
+hermes.schema.json
+opencode-agentsweb-id_ed25519
+opencode-agentsweb-id_ed25519.pub
+package.json
+tools
+
+./dist:
+game.bundle.js
+game.hbc.json
+
+./docs:
+HERMES.md
+
+./examples:
+hermes-game
+
+./examples/hermes-game:
+README.md
+browser.js
+core
+hermes-entry.js
+
+./examples/hermes-game/core:
+game.js
+
+./tools:
+hermes
+
+./tools/hermes:
+__tests__
+build.js
+compat-check.js
+run.js
+verify.js
+
+./tools/hermes/__tests__:
+build-verify.test.js
+compat-check.test.js
+fixtures
+game.test.js
+
+./tools/hermes/__tests__/fixtures:
+bad-dom.js
+risky-proxy.js
+===
+      ...
+    # Subtest: different seeds diverge (seed actually matters)
+    ok 3 - different seeds diverge (seed actually matters)
+      ---
+      duration_ms: 0.321784
+      type: 'test'
+      ...
+    # Subtest: serialize round-trip preserves state
+    ok 4 - serialize round-trip preserves state
+      ---
+      duration_ms: 1.372915
+      type: 'test'
+      ...
+    # Subtest: fixed-timestep bounds: 600 ticks stay finite and bounded, tick advances by step count
+    ok 5 - fixed-timestep bounds: 600 ticks stay finite and bounded, tick advances by step count
+      ---
+      duration_ms: 1.154145
+      type: 'test'
+      ...
+    # Subtest: no Math.random/Date nondeterminism: two runs compare equal + source scan
+    ok 6 - no Math.random/Date nondeterminism: two runs compare equal + source scan
+      ---
+      duration_ms: 0.71573
+      type: 'test'
+      ...
+    1..6
+ok 3 - hermes core game
+  ---
+  duration_ms: 8.550176
+  type: 'suite'
+  ...
+1..3
+# tests 17
+# suites 3
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 316.009792
+[0m
+[0m$ [0mnpm pack hermes-engine@0.11.0 --dry-run 2>&1 | head -n 30; echo ---; npm view hermes-engine@0.11.0 dist.tarball 2>&1; echo ---; curl -s https://api.github.com/facebook/hermes 2>&1 | head -c 500; echo; curl -s "https://api.github.com/repos/facebook/hermes/releases/latest" 2>&1 | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('tag_name')); [print(a['name'], a['browser_download_url']) for a in d.get('assets',[])[:20]]" 2>&1 | head -n 30
+npm notice
+npm notice 📦  hermes-engine@0.11.0
+npm notice Tarball Contents
+npm notice 400B README.md
+npm notice 0B android
+npm notice 1.1MB android/hermes-cppruntime-debug.aar
+npm notice 1.1MB android/hermes-cppruntime-release.aar
+npm notice 5.1MB android/hermes-debug.aar
+npm notice 4.4MB android/hermes-release.aar
+npm notice 0B android/include
+npm notice 0B android/include/hermes
+npm notice 1.0kB android/include/hermes/CompileJS.h
+npm notice 10.3kB android/include/hermes/DebuggerAPI.h
+npm notice 709B android/include/hermes/hermes_tracing.h
+npm notice 8.6kB android/include/hermes/hermes.h
+npm notice 0B android/include/hermes/Public
+npm notice 742B android/include/hermes/Public/Buffer.h
+npm notice 4.1kB android/include/hermes/Public/CrashManager.h
+npm notice 7.4kB android/include/hermes/Public/CtorConfig.h
+npm notice 5.5kB android/include/hermes/Public/DebuggerTypes.h
+npm notice 11.2kB android/include/hermes/Public/GCConfig.h
+npm notice 1.1kB android/include/hermes/Public/GCTripwireContext.h
+npm notice 7.4kB android/include/hermes/Public/RuntimeConfig.h
+npm notice 0B android/include/hermes/synthtest
+npm notice 0B android/include/hermes/synthtest/tests
+npm notice 1.6kB android/include/hermes/synthtest/tests/TestFunctions.h
+npm notice 33.7kB android/include/hermes/SynthTrace.h
+npm notice 1.1kB android/include/hermes/SynthTraceParser.h
+npm notice 582B android/include/hermes/TimerStats.h
+npm notice 17.1kB android/include/hermes/TraceInterpreter.h
+---
+https://registry.npmjs.org/hermes-engine/-/hermes-engine-0.11.0.tgz
+---
+{
+  "message": "Not Found",
+  "documentation_url": "https://docs.github.com/rest",
+  "status": "404"
+}
+v0.13.0
+hermes-cli-darwin.tar.gz https://github.com/facebook/hermes/releases/download/v0.13.0/hermes-cli-darwin.tar.gz
+hermes-cli-linux.tar.gz https://github.com/facebook/hermes/releases/download/v0.13.0/hermes-cli-linux.tar.gz
+hermes-cli-windows.tar.gz https://github.com/facebook/hermes/releases/download/v0.13.0/hermes-cli-windows.tar.gz
+[0m
+[0m$ [0mmkdir -p /tmp/opencode/hermes-cli && curl -sL "https://github.com/facebook/hermes/releases/download/v0.13.0/hermes-cli-linux.tar.gz" -o /tmp/opencode/hermes-cli.tgz && tar tzf /tmp/opencode/hermes-cli.tgz 2>&1 | head -n 20; tar xzf /tmp/opencode/hermes-cli.tgz -C /tmp/opencode/hermes-cli 2>&1; ls -R /tmp/opencode/hermes-cli 2>&1 | head -n 30
+./
+./hermes
+./hvm
+./hbcdump
+./hermesc
+./hdb
+/tmp/opencode/hermes-cli:
+hbcdump
+hdb
+hermes
+hermesc
+hvm
+[0m
+[0m$ [0mexport PATH="/tmp/opencode/hermes-cli:$PATH"; hermes --version 2>&1 || ./hermes --version 2>&1; NPM_SILENCE=1; node tools/hermes/compat-check.js 2>&1; echo "compat_exit=$?"; node tools/hermes/build.js 2>&1; echo "build_exit=$?"; ls -la dist/ 2>&1
+LLVM (http://llvm.org/):
+  LLVH version 8.0.0svn
+  Optimized build
+
+Hermes JavaScript compiler and Virtual Machine.
+  Hermes release version: 0.12.0
+  HBC bytecode version: 96
+
+  Features:
+    Contiguous Heap
+    Unicode RegExp Property Escapes
+    Zip file input
+compat-check: OK — 2 file(s) clean
+compat_exit=0
+build: OK via /tmp/opencode/hermes-cli/hermes — dist/game.hbc (6352 bytes, sha256 ee72baaa2930…)
+build_exit=0
+total 28
+drwxr-xr-x  2 runner runner 4096 Sep  9 04:13 .
+drwxr-xr-x 14 runner runner 4096 Sep  9 04:12 ..
+-rw-r--r--  1 runner runner 7777 Sep  9 04:13 game.bundle.js
+-rw-r--r--  1 runner runner 6352 Sep  9 04:13 game.hbc
+-rw-r--r--  1 runner runner  483 Sep  9 04:13 game.hbc.json
+[0m
+[0m$ [0mexport PATH="/tmp/opencode/hermes-cli:$PATH"; node tools/hermes/run.js --mode hermes --ticks 5 2>&1 | head -n 20; echo "run_exit=$?"; node tools/hermes/verify.js 2>&1; echo "verify_exit=$?"; /tmp/opencode/hermes-cli/hbcdump dist/game.hbc 2>&1 | head -n 40; echo ---; /tmp/opencode/hermes-cli/hermes dist/game.hbc 2>&1 | head -n 10
+HERMES_TICK 1 {"tick":1,"x":10,"y":10,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 2 {"tick":2,"x":10,"y":11,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 3 {"tick":3,"x":8,"y":11,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 4 {"tick":4,"x":8,"y":9,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 5 {"tick":5,"x":10,"y":9,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_DONE {"seed":42,"ticks":5,"final":{"tick":5,"x":10,"y":9,"score":0,"pickup":{"x":13,"y":2}}}
+run_exit=0
+verify: FAIL — bytecode corrupt: bad magic 0x03BC1FC6 (expected 0x054C9EC6). Recovery: re-run `npm run hermes:build`; ensure no text editor touched dist/.
+verify_exit=3
+hbcdump> ---
+HERMES_TICK 1 {"tick":1,"x":10,"y":10,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 2 {"tick":2,"x":10,"y":11,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 3 {"tick":3,"x":8,"y":11,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 4 {"tick":4,"x":8,"y":9,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 5 {"tick":5,"x":10,"y":9,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 6 {"tick":6,"x":10,"y":11,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 7 {"tick":7,"x":8,"y":11,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 8 {"tick":8,"x":8,"y":9,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 9 {"tick":9,"x":10,"y":9,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 10 {"tick":10,"x":10,"y":11,"score":0,"pickup":{"x":13,"y":2}}
+[0m
+Real Hermes runs the game, but the verifier rejects valid bytecode — digging into the header.
+[0m$ [0mxxd dist/game.hbc | head -n 5; echo ---; python3 -c "import struct; d=open('dist/game.hbc','rb').read(32); print('len',len(open('dist/game.hbc','rb').read())); magic,version=struct.unpack('<II',d[:8]); print(hex(magic),version); print(d[:16].hex())"; echo ---; /tmp/opencode/hermes-cli/hbcdump --help 2>&1 | head -n 20; /tmp/opencode/hermes-cli/hbcdump dist/game.hbc > /tmp/opencode/dump.txt 2>&1; echo "dump_exit=$?"; wc -c /tmp/opencode/dump.txt; head -n 40 /tmp/opencode/dump.txt
+00000000: c61f bc03 c103 191f 6000 0000 ee5d fe28  ........`....].(
+00000010: 696f 5557 6534 f495 de58 ea28 3f69 bc21  ioUWe4...X.(?i.!
+00000020: d018 0000 0000 0000 1100 0000 0200 0000  ................
+00000030: 2a00 0000 4100 0000 0000 0000 c501 0000  *...A...........
+00000040: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+---
+len 6352
+0x3bc1fc6 521733057
+c61fbc03c103191f60000000ee5dfe28
+---
+OVERVIEW: Hermes bytecode dump tool
+
+USAGE: hbcdump [options] input file
+
+OPTIONS:
+
+General options:
+
+  -c=<string>            - A list of commands to execute before entering interactive mode separated by semicolon. You can use this option to execute a bunch of commands without entering interactive mode, like -c "cmd1;cmd2;quit"
+  -human                 - Print bytecode section ranges in hex format
+  -list-opcodes          - For objdump format, also include a list of all opcodes
+  -mode=<string>         - The analysis mode you want to use(either instruction or function)
+  -out=<string>          - Output file name
+  Disassembly formatting:
+    -raw-disassemble     - Legacy format
+    -pretty-disassemble  - Pretty print
+    -objdump-disassemble - Like objdump
+  -profile-file=<string> - Log file in json format generated by basic block profiler
+  -show-section-ranges   - Show the byte range of each section in bytecode
+  -source-map=<string>   - Optional source-map file name, used by function-info
+dump_exit=0
+9 /tmp/opencode/dump.txt
+hbcdump>
+[0m
+[0m% [0mWebFetch https://raw.githubusercontent.com/facebook/hermes/main/include/hermes/BCGen/HBC/BytecodeFileFormat.h
+[0m→ [0mRead hermes.config.json
+[0m→ [0mRead tools/hermes/verify.js
+[0m
+[0m$ [0m/tmp/opencode/hermes-cli/hbcdump -pretty-disassemble dist/game.hbc > /tmp/opencode/dump2.txt 2>&1; echo "exit=$?"; wc -c /tmp/opencode/dump2.txt; head -n 30 /tmp/opencode/dump2.txt; echo ===; timeout 10 /tmp/opencode/hbcdump -c "quit" dist/game.hbc 2>&1 | head -n 20 || true
+exit=0
+9 /tmp/opencode/dump2.txt
+hbcdump> ===
+timeout: failed to run command ‘/tmp/opencode/hbcdump’: No such file or directory
+[0m
+[0m$ [0mexport PATH="/tmp/opencode/hermes-cli:$PATH"; timeout 10 hbcdump -c "info;quit" dist/game.hbc 2>&1 | head -n 40; echo "exit=$?"; echo ===; timeout 10 hbcdump -c "disassemble;quit" dist/game.hbc 2>&1 | head -n 60; echo "exit=$?"
+Invalid command: info
+exit=0
+===
+Bytecode File Information:
+  Bytecode version number: 96
+  Source hash: ee5dfe28696f55576534f495de58ea283f69bc21
+  Function count: 17
+  String count: 65
+  BigInt count: 0
+  String Kind Entry count: 2
+  RegExp count: 0
+  Segment ID: 0
+  CommonJS module count: 0
+  CommonJS module count (static): 0
+  Function source count: 0
+  Bytecode options:
+    staticBuiltins: 0
+    cjsModulesStaticallyResolved: 0
+
+Global String Table:
+s0[ASCII, 0..-1]: 
+s1[ASCII, 12..23]: HERMES_DONE 
+s2[ASCII, 23..23]:  
+s3[ASCII, 24..37]: ./core/game.js
+s4[ASCII, 37..49]: scriptedInput
+s5[ASCII, 50..61]: HERMES_TICK 
+s6[ASCII, 75..90]: __HERMES_TICKS__
+s7[ASCII, 89..103]: __HERMES_SEED__
+s8[ASCII, 103..104]: _p
+s9[ASCII, 112..116]: clamp
+s10[ASCII, 130..137]: function
+s11[ASCII, 137..146]: nextPickup
+s12[ASCII, 157..190]: game.deserialize: corrupt snapshot
+s13[ASCII, 190..197]: toUint32
+s14[ASCII, 198..221]: game.step: invalid state
+s15[ASCII, 235..310]: hermes-entry: game core not found (expected globalThis.__HERMES_GAME_CORE__)
+s16[ASCII, 279..284]: global
+s17[ASCII, 311..319]: numGlobal
+s18[ASCII, 319..326]: loadCore
+s19[ASCII, 332..340]: normInput
+s20[ASCII, 345..350]: number
+s21[ASCII, 357..362]: string
+s22[ASCII, 366..374]: undefined
+i23[ASCII, 0..6] #D6C89F41: WORLD_W
+i24[ASCII, 6..12] #D6C8D260: WORLD_H
+i25[ASCII, 62..76] #9FD2691D: __HERMES_GAME__
+i26[ASCII, 104..108] #958EDB02: parse
+i27[ASCII, 107..110] #3BC197C5: seed
+i28[ASCII, 110..111] #06457EA4: dy
+i29[ASCII, 111..111] #0001E3E8: y
+i30[ASCII, 116..121] #14BD4292: pickup
+i31[ASCII, 121..129] #807C5F3D: prototype
+i32[ASCII, 146..150] #A689F65B: print
+i33[ASCII, 151..155] #47993A63: final
+i34[ASCII, 155..157] #1C35E808: log
+i35[ASCII, 162..172] #EFEB9240: deserialize
+i36[ASCII, 164..172] #A7C4D79F: serialize
+i37[ASCII, 203..206] #F9263F17: step
+i38[ASCII, 221..227] #C765D706: exports
+i39[ASCII, 227..231] #C1677013: score
+i40[ASCII, 232..235] #1C182460: Math
+i41[ASCII, 279..288] #F3091991: globalThis
+i42[ASCII, 290..309] #6C25B55C: __HERMES_GAME_CORE__
+exit=0
+[0m
+[0m← [0mEdit tools/hermes/verify.js
+Index: /home/runner/work/PlayGround/PlayGround/tools/hermes/verify.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/tools/hermes/verify.js
++++ /home/runner/work/PlayGround/PlayGround/tools/hermes/verify.js
+@@ -4,12 +4,14 @@
+ * verify.js — inspect the Hermes bytecode artifact.
+ *
+ *   node tools/hermes/verify.js [--config <path>] [--json]
+ *
+-* Real .hbc path: reads the first 12 bytes (magic u32 LE, version u32 LE,
+-* source-hash u32 LE), checks magic against 0x054C9EC6 (bytes C6 9E 4C 05),
+-* prints magic/version/sha256/size; runs `hbcdump` for a disassembly excerpt
+-* when available, else header-only. Compares header version with
++* Real .hbc path: reads the Hermes bytecode file header per
++* include/hermes/BCGen/HBC/BytecodeFileFormat.h — magic u64 LE
++* 0x1F1903C103BC1FC6 ("Hermes" in ancient Greek, UTF-16BE truncated),
++* version u32 LE at offset 8, 20-byte SHA1 source hash at offset 12 —
++* prints magic/version/sha256/size; runs `hbcdump -c "disassemble;quit"`
++* for a disassembly excerpt when available, else header-only. Compares header version with
+ * config.bytecodeTarget when set (mismatch = warning, not failure: bytecode
+ * is engine-coupled, rebuild on upgrade).
+ *
+ * Fallback path: when only dist/game.hbc.json exists, verifies the bundle
+
+[0m
+[0m← [0mEdit tools/hermes/verify.js
+Index: /home/runner/work/PlayGround/PlayGround/tools/hermes/verify.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/tools/hermes/verify.js
++++ /home/runner/work/PlayGround/PlayGround/tools/hermes/verify.js
+@@ -23,9 +23,11 @@
+ const path = require('path');
+ const crypto = require('crypto');
+ const { spawnSync } = require('child_process');
+ 
+-const HBC_MAGIC = 0x054C9EC6; // LE bytes: C6 9E 4C 05
++const HBC_MAGIC_LO = 0x03BC1FC6; // low 32 bits of 0x1F1903C103BC1FC6 (LE)
++const HBC_MAGIC_HI = 0x1F1903C1; // high 32 bits
++const HBC_MAGIC_HEX = '0x1F1903C103BC1FC6';
+ 
+ function parseArgs(argv) {
+   const out = { config: 'hermes.config.json', json: false };
+   for (let i = 2; i < argv.length; i++) {
+
+[0m
+[0m← [0mEdit tools/hermes/verify.js
+Index: /home/runner/work/PlayGround/PlayGround/tools/hermes/verify.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/tools/hermes/verify.js
++++ /home/runner/work/PlayGround/PlayGround/tools/hermes/verify.js
+@@ -97,20 +97,21 @@
+ } catch (e) {
+   fail(3, `cannot read bytecode: ${e.message}`);
+   return;
+ }
+-if (buf.length < 12) {
+-  fail(3, `bytecode corrupt: file too small (${buf.length} bytes, need >= 12 for header). Recovery: re-run \`npm run hermes:build\`.`);
++if (buf.length < 32) {
++  fail(3, `bytecode corrupt: file too small (${buf.length} bytes, need >= 32 for header). Recovery: re-run \`npm run hermes:build\`.`);
+   return;
+ }
+-const magic = buf.readUInt32LE(0);
+-const version = buf.readUInt32LE(4);
+-const sourceHash = buf.readUInt32LE(8);
++const magicLo = buf.readUInt32LE(0);
++const magicHi = buf.readUInt32LE(4);
++const version = buf.readUInt32LE(8);
++const sourceHash = buf.subarray(12, 32).toString('hex');
+ const size = buf.length;
+ const sha256 = sha256File(hbcPath);
+-const magicHex = '0x' + magic.toString(16).toUpperCase().padStart(8, '0');
+-if (magic !== HBC_MAGIC) {
+-  fail(3, `bytecode corrupt: bad magic ${magicHex} (expected 0x054C9EC6). Recovery: re-run \`npm run hermes:build\`; ensure no text editor touched dist/.`);
++const magicHex = '0x' + magicHi.toString(16).toUpperCase().padStart(8, '0') + magicLo.toString(16).toUpperCase().padStart(8, '0');
++if (magicLo !== HBC_MAGIC_LO || magicHi !== HBC_MAGIC_HI) {
++  fail(3, `bytecode corrupt: bad magic ${magicHex} (expected ${HBC_MAGIC_HEX}). Recovery: re-run \`npm run hermes:build\`; ensure no text editor touched dist/.`);
+   return;
+ }
+ const warnings = [];
+ if (cfg.bytecodeTarget && version !== cfg.bytecodeTarget) {
+
+[0m
+[0m← [0mEdit tools/hermes/verify.js
+Index: /home/runner/work/PlayGround/PlayGround/tools/hermes/verify.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/tools/hermes/verify.js
++++ /home/runner/work/PlayGround/PlayGround/tools/hermes/verify.js
+@@ -122,9 +122,9 @@
+ const dumper = (cfg.hermes && cfg.hermes.dumper) || 'hbcdump';
+ const dumpBin = which(dumper);
+ if (dumpBin) {
+   try {
+-    const r = spawnSync(dumpBin, [hbcPath], { encoding: 'utf8', timeout: 30000 });
++    const r = spawnSync(dumpBin, ['-c', 'disassemble;quit', hbcPath], { encoding: 'utf8', timeout: 30000 });
+     if (r.status === 0 && r.stdout) {
+       disasm = r.stdout.split('\n').slice(0, 20).join('\n');
+     } else {
+       warnings.push(`hbcdump ran but failed (exit ${r.status}); header-only verification used.`);
+
+[0m
+Verifier fixed — aligning config with the real engine version.
+[0m← [0mEdit hermes.config.json
+Index: /home/runner/work/PlayGround/PlayGround/hermes.config.json
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/hermes.config.json
++++ /home/runner/work/PlayGround/PlayGround/hermes.config.json
+@@ -1,8 +1,8 @@
+ {
+   "$schema": "./hermes.schema.json",
+-  "engineVersion": "0.11.0",
+-  "bytecodeTarget": 99,
++  "engineVersion": "0.12.0",
++  "bytecodeTarget": 96,
+   "entry": "examples/hermes-game/hermes-entry.js",
+   "coreDir": "examples/hermes-game/core",
+   "browserEntry": "examples/hermes-game/browser.js",
+   "outDir": "dist",
+
+[0m
+[0m$ [0mexport PATH="/tmp/opencode/hermes-cli:$PATH"; node tools/hermes/verify.js 2>&1 | head -n 30; echo "verify_exit=$?"; node tools/hermes/verify.js --json 2>&1 | head -n 40; npm test 2>&1 | tail -n 12
+verify: OK — dist/game.hbc
+  magic 0x1F1903C103BC1FC6  version 96  sourceHash ee5dfe28696f55576534f495de58ea283f69bc21
+  size 6352 bytes  sha256 ee72baaa29307c5c6848c9eb29c29c52f4b80ade7341c8bdba9945e7942ba392
+  --- hbcdump excerpt (first 20 lines) ---
+Bytecode File Information:
+  Bytecode version number: 96
+  Source hash: ee5dfe28696f55576534f495de58ea283f69bc21
+  Function count: 17
+  String count: 65
+  BigInt count: 0
+  String Kind Entry count: 2
+  RegExp count: 0
+  Segment ID: 0
+  CommonJS module count: 0
+  CommonJS module count (static): 0
+  Function source count: 0
+  Bytecode options:
+    staticBuiltins: 0
+    cjsModulesStaticallyResolved: 0
+
+Global String Table:
+s0[ASCII, 0..-1]: 
+s1[ASCII, 12..23]: HERMES_DONE 
+s2[ASCII, 23..23]:  
+verify_exit=0
+{
+  "ok": true,
+  "mode": "bytecode+hbcdump",
+  "file": "dist/game.hbc",
+  "magic": "0x1F1903C103BC1FC6",
+  "version": 96,
+  "sourceHash": "ee5dfe28696f55576534f495de58ea283f69bc21",
+  "size": 6352,
+  "sha256": "ee72baaa29307c5c6848c9eb29c29c52f4b80ade7341c8bdba9945e7942ba392",
+  "warnings": [],
+  "excerpt": "Bytecode File Information:\n  Bytecode version number: 96\n  Source hash: ee5dfe28696f55576534f495de58ea283f69bc21\n  Function count: 17\n  String count: 65\n  BigInt count: 0\n  String Kind Entry count: 2\n  RegExp count: 0\n  Segment ID: 0\n  CommonJS module count: 0\n  CommonJS module count (static): 0\n  Function source count: 0\n  Bytecode options:\n    staticBuiltins: 0\n    cjsModulesStaticallyResolved: 0\n\nGlobal String Table:\ns0[ASCII, 0..-1]: \ns1[ASCII, 12..23]: HERMES_DONE \ns2[ASCII, 23..23]:  "
+}
+  duration_ms: 10.513404
+  type: 'suite'
+  ...
+1..3
+# tests 17
+# suites 3
+# pass 16
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 328.70158
+[0m
+[0m$ [0mnpm test 2>&1 | grep -B2 -A 25 "not ok\|failing" | head -n 80
+# Node.js v22.23.2
+# Subtest: tools/hermes/__tests__
+not ok 1 - tools/hermes/__tests__
+  ---
+  duration_ms: 31.033522
+  type: 'test'
+  location: '/home/runner/work/PlayGround/PlayGround/tools/hermes/__tests__:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 39.297426
+TAP version 13
+# Subtest: hermes build + verify
+    # Subtest: tools exist
+    ok 1 - tools exist
+      ---
+      duration_ms: 1.265845
+[0m
+[0m$ [0mnode --test tools/hermes/__tests__/build-verify.test.js 2>&1 | grep -A 30 "not ok" | head -n 60
+(no output)
+[0m
+[0m$ [0mnode --test tools/hermes/__tests__/ 2>&1 | tail -n 60
+TAP version 13
+# node:internal/modules/cjs/loader:1433
+#   throw err;
+#   ^
+# Error: Cannot find module '/home/runner/work/PlayGround/PlayGround/tools/hermes/__tests__'
+#     at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+#     at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+#     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+#     at Function._load (node:internal/modules/cjs/loader:1216:25)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49 {
+#   code: 'MODULE_NOT_FOUND',
+#   requireStack: []
+# }
+# Node.js v22.23.2
+# Subtest: tools/hermes/__tests__
+not ok 1 - tools/hermes/__tests__
+  ---
+  duration_ms: 32.776882
+  type: 'test'
+  location: '/home/runner/work/PlayGround/PlayGround/tools/hermes/__tests__:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 42.498291
+[0m
+[0m→ [0mRead package.json
+Test runner script is masking results — fixing it and isolating the failure.
+[0m
+[0m$ [0mnode --test "tools/hermes/__tests__/compat-check.test.js" "tools/hermes/__tests__/game.test.js" "tools/hermes/__tests__/build-verify.test.js" 2>&1 | tail -n 30
+duration_ms: 1.510695
+      type: 'test'
+      ...
+    # Subtest: fixed-timestep bounds: 600 ticks stay finite and bounded, tick advances by step count
+    ok 5 - fixed-timestep bounds: 600 ticks stay finite and bounded, tick advances by step count
+      ---
+      duration_ms: 1.202887
+      type: 'test'
+      ...
+    # Subtest: no Math.random/Date nondeterminism: two runs compare equal + source scan
+    ok 6 - no Math.random/Date nondeterminism: two runs compare equal + source scan
+      ---
+      duration_ms: 0.744537
+      type: 'test'
+      ...
+    1..6
+ok 3 - hermes core game
+  ---
+  duration_ms: 7.915049
+  type: 'suite'
+  ...
+1..3
+# tests 17
+# suites 3
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 316.091016
+[0m
+[0m← [0mEdit package.json
+Index: /home/runner/work/PlayGround/PlayGround/package.json
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/package.json
++++ /home/runner/work/PlayGround/PlayGround/package.json
+@@ -8,9 +8,9 @@
+   "hermes:compat": "node tools/hermes/compat-check.js",
+   "hermes:build": "node tools/hermes/build.js",
+   "hermes:run": "node tools/hermes/run.js",
+   "hermes:verify": "node tools/hermes/verify.js",
+-  "test": "node --test tools/hermes/__tests__/ 2>/dev/null || node --test"
++  "test": "node --test \"tools/hermes/__tests__/compat-check.test.js\" \"tools/hermes/__tests__/game.test.js\" \"tools/hermes/__tests__/build-verify.test.js\""
+ },
+ "engines": {
+   "node": ">=18"
+ }
+
+[0m
+[0m$ [0mnpm test 2>&1 | tail -n 10; echo ===; export PATH="/tmp/opencode/hermes-cli:$PATH"; npm run hermes:compat 2>&1; npm run hermes:build 2>&1 | tail -n 3; npm run hermes:run -- --mode hermes --ticks 3 2>&1 | tail -n 5; npm run hermes:verify 2>&1 | head -n 8
+...
+1..3
+# tests 17
+# suites 3
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 312.520131
+===
+
+> playground@0.0.1 hermes:compat
+> node tools/hermes/compat-check.js
+
+compat-check: OK — 2 file(s) clean
+> node tools/hermes/build.js
+
+build: OK via /tmp/opencode/hermes-cli/hermes — dist/game.hbc (6352 bytes, sha256 f49dcecddf19…)
+
+HERMES_TICK 1 {"tick":1,"x":10,"y":10,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 2 {"tick":2,"x":10,"y":11,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 3 {"tick":3,"x":8,"y":11,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_DONE {"seed":42,"ticks":3,"final":{"tick":3,"x":8,"y":11,"score":0,"pickup":{"x":13,"y":2}}}
+
+> playground@0.0.1 hermes:verify
+> node tools/hermes/verify.js
+
+verify: OK — dist/game.hbc
+  magic 0x1F1903C103BC1FC6  version 96  sourceHash 4d1588b1fa2e6fe1c3f6b68d14c0bf0564d64dee
+  size 6352 bytes  sha256 f49dcecddf195ef7a2b62aa423df81ad647ef368305b18e6fdd3e84a0e17eae3
+  --- hbcdump excerpt (first 20 lines) ---
+[0m
+Full Hermes workflow green on real bytecode — launching independent critics.
+[0m• [0mCritic hermes toolchain[90m General Agent[0m
+[0m• [0mCritic hermes docs+tests[90m General Agent[0m
+[0m✓ [0mCritic hermes docs+tests[90m General Agent[0m
+[0m✓ [0mCritic hermes toolchain[90m General Agent[0m
+Critics found real drift — fixing version docs and stale-artifact handling.
+[0m
+[0m# [0mTodos
+[✓] Map repo + define Hermes scope + create live progress page
+[✓] Research authoritative Hermes docs + integration examples + fixtures
+[✓] Implement Hermes support (example game, build scripts, compat, config, errors/recovery)
+[•] Verify with concrete evidence (hermesc/hermes inspection, tests, artifact comparison)
+[•] Fix largest gap, record delivery evidence
+[0m
+[0m→ [0mRead tools/hermes/build.js[90m [offset=185, limit=60][0m
+[0m
+[0m← [0mEdit tools/hermes/build.js
+Index: /home/runner/work/PlayGround/PlayGround/tools/hermes/build.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/tools/hermes/build.js
++++ /home/runner/work/PlayGround/PlayGround/tools/hermes/build.js
+@@ -205,8 +205,16 @@
+   bytes: bundleSize,
+   hint: 'hermes/hermesc binary not found on PATH (tried $HERMES_BIN, config hermes.binary/compiler, PATH). Bundle is runnable via `npm run hermes:run -- --mode node`. To emit real bytecode, install Hermes and re-run `npm run hermes:build`.'
+ };
+ fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf8');
++// Remove any stale real bytecode so fallback state is unambiguous:
++// verify.js prefers .hbc when present, so leaving it would mask the
++// bundle/bytecode desync with a green verify on a stale artifact.
++try {
++  if (fs.existsSync(hbcPath)) {
++    fs.unlinkSync(hbcPath);
++  }
++} catch (e) { /* ignore */ }
+ if (args.json) {
+   console.log(JSON.stringify({ ok: true, fallback: true, ...manifest, manifest: path.relative(repoRoot, manifestPath) }, null, 2));
+ } else {
+   console.warn(`build: WARNING [FALLBACK_NO_BINARY] hermes binary not found — wrote fallback manifest ${path.relative(repoRoot, manifestPath)}; bundle remains runnable via node.`);
+
+[0m
+[0m→ [0mRead docs/HERMES.md
+[0m
+[0m← [0mEdit docs/HERMES.md
+Index: /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
++++ /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+@@ -101,9 +101,9 @@
+ 
+ | Key | Type | Meaning |
+ | --- | --- | --- |
+ | `engineVersion` | `x.y.z` string | Hermes engine version the bytecode is built for. Bump deliberately; bytecode is version-coupled (§7). |
+-| `bytecodeTarget` | integer | Expected Hermes bytecode version (e.g. `99`). `verify.js` compares the `.hbc` header against it. |
++| `bytecodeTarget` | integer | Expected Hermes bytecode version (e.g. `96` for Hermes 0.12.0). `verify.js` compares the `.hbc` header against it and emits a warning on drift (exit stays 0; see §7). |
+ | `entry` | path string | Hermes-safe entry file (DOM-free), bundled into the HBC. Default `examples/hermes-game/hermes-entry.js`. |
+ | `coreDir` | path string | Directory of DOM-free core files. Everything here is scanned by compat-check and bundled. |
+ | `browserEntry` | path string | DOM adapter. **Excluded** from the HBC bundle. |
+ | `outDir` | path string | Output directory (`dist`). |
+
+[0m
+[0m← [0mEdit docs/HERMES.md
+Index: /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
++++ /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+@@ -121,10 +121,10 @@
+ 
+ ```json
+ {
+   "$schema": "./hermes.schema.json",
+-  "engineVersion": "0.11.0",
+-  "bytecodeTarget": 99,
++  "engineVersion": "0.12.0",
++  "bytecodeTarget": 96,
+   "entry": "examples/hermes-game/hermes-entry.js",
+   "coreDir": "examples/hermes-game/core",
+   "browserEntry": "examples/hermes-game/browser.js",
+   "outDir": "dist",
+
+[0m
+[0m← [0mEdit docs/HERMES.md
+Index: /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
++++ /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+@@ -71,9 +71,9 @@
+ Data flow:
+ 
+ 1. `compat-check.js` statically scans `core/` + `hermes-entry.js`.
+ 2. `build.js` concatenates them into `dist/game.bundle.js`, then either runs
+-   `hermes -emit-binary -out dist/game.hbc` or writes `dist/game.hbc.json`.
++   `hermes -emit-binary -O -out dist/game.hbc` or writes `dist/game.hbc.json`.
+ 3. `run.js` executes the bundle (`--mode hermes|node`) for N ticks, printing
+    `HERMES_TICK <i> <state>` lines + `HERMES_DONE`.
+ 4. `verify.js` inspects the `.hbc` header (magic/version/sha256/size) or the
+    fallback manifest and reports JSON.
+
+[0m
+[0m← [0mEdit docs/HERMES.md
+Index: /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
++++ /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+@@ -171,10 +171,11 @@
+ 
+ Use `--mode hermes` when a Hermes binary is installed; `--mode node` runs the
+ same bundle as a DOM-free fallback (same `HERMES_TICK`/`HERMES_DONE` protocol).
+ 
+-`build.js --check-only` runs only the compat gate without writing `dist/`
+-(useful as a fast CI lint step).
++`build.js --check-only` runs the compat gate and always refreshes
++`dist/game.bundle.js`, but skips emitting `.hbc`/manifest (useful as a fast
++CI lint step that still proves the bundle assembles).
+ 
+ ## 5. CLI reference (condensed)
+ 
+ | Tool | Key flags | Stdout contract |
+
+[0m
+[0m← [0mEdit docs/HERMES.md
+Index: /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
++++ /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+@@ -192,11 +192,12 @@
+ | Tool | Code | Meaning | Recovery |
+ | --- | --- | --- | --- |
+ | all | `0` | Success (compat warnings allowed; build `0` = real `.hbc`) | — |
+ | compat-check | `1` | Violations: DOM/BOM/Node API in core | Move DOM access into `browser.js`; keep `core/` + `hermes-entry.js` DOM-free; re-run `hermes:compat` |
+-| compat-check / build / verify | `2` | Config/usage error: bad JSON, schema violation, missing file | `node tools/hermes/<tool>.js --help`; validate config against `hermes.schema.json`; check `entry`/`coreDir` paths exist |
+-| build / verify | `3` | Compile/artifact error: `hermes -emit-binary` failed, or `.hbc` header invalid (`verify`) | Read stderr JSON hint; with `allowFallback:false` install/pin the Hermes binary; with fallback enabled expect exit 4 instead; for `verify` 3 → rebuild (`hermes:build`) |
+-| build | `4` | Fallback: no Hermes binary, wrote `dist/game.hbc.json` manifest | Expected without a native binary. Ship/run via the Node fallback (`run --mode node`), or install Hermes (see §8) and rebuild for a real `.hbc` |
++| compat-check / build / verify / run | `2` | Config/usage error: bad JSON, missing entry/coreDir file, unknown flag | `node tools/hermes/<tool>.js --help`; check `entry`/`coreDir` paths exist and JSON parses (note: tools do not full-validate against `hermes.schema.json`; extra keys are ignored, not rejected) |
++| build / verify | `3` | Compile/artifact error: `hermes -emit-binary` failed, or `.hbc` header invalid/corrupt (`verify`), or `run --mode hermes` with no binary | Read stderr JSON hint; with `allowFallback:false` install/pin the Hermes binary; with fallback enabled expect exit 4 instead; for `verify` 3 → rebuild (`hermes:build`) |
++| build | `4` | Fallback: no Hermes binary, wrote `dist/game.hbc.json` manifest and removed any stale `.hbc` | Expected without a native binary. Ship/run via the Node fallback (`run --mode node`), or install Hermes (see §8) and rebuild for a real `.hbc` |
++| run | `3` | Execution error in hermes mode (no binary, non-zero exit, missing `HERMES_DONE`) | Use `--mode node` without a binary; check `--ticks N ≥ 1`; inspect JSON `hint` |
+ 
+ `--json` always pairs the exit code with a machine-readable payload
+ (`{ ok:false, code, error, hint }` shape) so CI can log the reason without
+ parsing prose. Recovery order for most failures:
+
+[0m
+[0m← [0mEdit docs/HERMES.md
+Index: /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
++++ /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+@@ -212,19 +212,24 @@
+ **Hermes bytecode is tied to the engine version. Rebuild `.hbc` on every
+ engine/compiler upgrade; never ship a stale `.hbc` against a new VM.**
+ 
+ Concretely: the Hermes blog entry of **2026-06-05** bumped the bytecode
+-version **98 → 99** — prebuilt bytecode from v98 is rejected by a v99 runtime
+-and must be recompiled. This repo records the coupling in config
+-(`engineVersion` + `bytecodeTarget`) and `verify.js` checks the `.hbc` header
+-version against `bytecodeTarget`, failing with exit 3 on mismatch.
++version **98 → 99** on the static_h branch — prebuilt bytecode from v98 is
++rejected by a v99 runtime and must be recompiled. This repo records the
++coupling in config (`engineVersion` + `bytecodeTarget`) and `verify.js`
++compares the `.hbc` header version against `bytecodeTarget`, emitting a
++**warning (exit stays 0)** on drift. Measured evidence in this repo:
++Hermes release v0.13.0 ships CLI reporting `Hermes release version: 0.12.0`,
++`HBC bytecode version: 96` (see `PROGRESS_HERMES.md` evidence) — hence the
++shipped config pins `engineVersion 0.12.0` / `bytecodeTarget 96`.
+ 
+ Rules:
+ 
+ - Pin `engineVersion` in `hermes.config.json`; bump it deliberately with the
+   bytecode rebuild in the same commit.
+ - Keep `bytecodeTarget` in sync with the compiler that produced the `.hbc`
+-  (99 for the current toolchain).
++  (96 for the measured Hermes 0.12.0 toolchain; 99 for the upcoming
++  static_h/stable release line).
+ - CI must run `hermes:build` + `hermes:verify` after any Hermes upgrade; check
+   in the rebuilt `.hbc` (or regenerate it in release pipelines), never reuse
+   the old one.
+ - The fallback manifest (`game.hbc.json`) records the producing
+
+[0m
+[0m← [0mEdit docs/HERMES.md
+Index: /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
++++ /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+@@ -248,9 +248,10 @@
+ | `compat-check` exit 1 names `require('fs')`/`process`/`__dirname` | Node API in core (strict level) | Same fix; inject host capabilities via entry args instead of importing Node in core |
+ | `compat-check` warns on `Proxy`/`Reflect`/`WeakRef`/`function*` | Risky ES for Hermes bytecode | Warning only (exit stays 0). Prefer plain objects/classes; if you must use them, test under real Hermes (`run --mode hermes`) |
+ | `build` exit 4 (fallback) | No `hermes` binary on `PATH` | Expected without native toolchain. `npm run hermes:run -- --mode node` still works. For real `.hbc`: install via `npm i hermes-engine` (JS VM, no compiler) or download a Hermes release (`hermes`, `hermesc`, `hbcdump`) from [facebook/hermes releases](https://github.com/facebook/hermes/releases) and re-run build |
+ | `build` exit 3 | Compiler failed (syntax error or `allowFallback:false` + no binary) | Read the JSON `hint`; run `build --check-only`; fix the flagged file; ensure `hermes -emit-binary` works manually |
+-| `verify` exit 3 / version mismatch | Stale `.hbc` vs `bytecodeTarget` | Rebuild (`hermes:build`); sync `engineVersion`/`bytecodeTarget` with the installed Hermes |
++| `verify` exit 3 (corrupt/missing) | Bad magic, truncated file, or nothing to verify | Rebuild (`hermes:build`); never hand-edit `dist/` |
++| `verify` warns `header version X != bytecodeTarget Y` | `.hbc` built by a different engine than config pins | Warning only (exit 0). Rebuild with the pinned engine or bump `engineVersion`/`bytecodeTarget` deliberately with the rebuild in the same commit |
+ | `verify` hash mismatch (fallback) | Bundle edited after manifest written | Rebuild; never hand-edit `dist/` |
+ | `run` prints nothing / no `HERMES_DONE` | Wrong `--mode` or `--ticks 0` | Use `--mode node` without a binary; pass `--ticks N` with N ≥ 1 |
+ | Tests fail on missing `examples/hermes-game/core` | P4 example not checked out | Restore the example dir; P5 tests assert its presence with explicit messages |
+ 
+
+[0m
+[0m← [0mEdit docs/HERMES.md
+Index: /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
++++ /home/runner/work/PlayGround/PlayGround/docs/HERMES.md
+@@ -285,17 +285,22 @@
+   warnings were emitted); diagnostics go to stderr.
+ - Exit codes are the primary signal (see §6); JSON payloads carry
+   `hint` fields with the recovery action.
+ 
+-`package.json` scripts (contract; wire these to the tools):
++`package.json` scripts (contract; must match `package.json` exactly):
+ 
+ ```json
+ {
+   "scripts": {
+-    "hermes:compat": "node tools/hermes/compat-check.js --config hermes.config.json",
+-    "hermes:build": "node tools/hermes/build.js --config hermes.config.json --out dist",
+-    "hermes:run": "node tools/hermes/run.js --config hermes.config.json --mode node --ticks 60",
+-    "hermes:verify": "node tools/hermes/verify.js --config hermes.config.json",
+-    "test": "node --test tools/hermes/__tests__/"
++    "hermes:compat": "node tools/hermes/compat-check.js",
++    "hermes:build": "node tools/hermes/build.js",
++    "hermes:run": "node tools/hermes/run.js",
++    "hermes:verify": "node tools/hermes/verify.js",
++    "test": "node --test \"tools/hermes/__tests__/compat-check.test.js\" \"tools/hermes/__tests__/game.test.js\" \"tools/hermes/__tests__/build-verify.test.js\""
+   }
+ }
+ ```
++
++Pass tool flags after `--`, e.g. `npm run hermes:run -- --mode node --ticks 60 --json`.
++The `hermes:build` compiler invocation is `<hermes-bin> -emit-binary -O -out
++<bytecode> <bundle>`; `verify` disassembles via `hbcdump -c
++"disassemble;quit" <bytecode>` when `hbcdump` is on `PATH`.
+
+[0m
+Core docs fixed — syncing schema, example guide, and progress page.
+[0m$ [0mgrep -n "99\|0\.11\.0" hermes.schema.json examples/hermes-game/README.md docs/HERMES.md 2>&1
+hermes.schema.json:18:      "description": "Expected Hermes bytecode version (e.g. 99). Verified against the .hbc header."
+examples/hermes-game/README.md:44:# exit 0 → header ok (magic/version match bytecodeTarget 99)
+examples/hermes-game/README.md:48:(`hermes:build`) — a v98 `.hbc` will not run on a v99 VM. See `docs/HERMES.md`
+docs/HERMES.md:39:- Hermes blog 2026-06-05: **bytecode version 98 → 99** (prebuilt bytecode
+docs/HERMES.md:216:version **98 → 99** on the static_h branch — prebuilt bytecode from v98 is
+docs/HERMES.md:217:rejected by a v99 runtime and must be recompiled. This repo records the
+docs/HERMES.md:230:  (96 for the measured Hermes 0.12.0 toolchain; 99 for the upcoming
+[0m
+[0m$ [0msed -n '10,25p' hermes.schema.json; echo ---; sed -n '35,55p' examples/hermes-game/README.md
+"engineVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Hermes engine version the bytecode is built for (bytecode is version-coupled; rebuild on upgrade)."
+    },
+    "bytecodeTarget": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Expected Hermes bytecode version (e.g. 99). Verified against the .hbc header."
+    },
+    "entry": { "type": "string", "description": "Hermes-safe entry file (DOM-free), bundled into the HBC." },
+    "coreDir": { "type": "string", "description": "Directory of DOM-free Hermes-safe core game files." },
+    "browserEntry": { "type": "string", "description": "DOM adapter entry. Excluded from HBC bundle." },
+    "outDir": { "type": "string" },
+    "bundle": { "type": "string", "description": "Concatenated JS bundle path (input to hermes -emit-binary)." },
+    "bytecode": { "type": "string", "description": "Output .hbc path." },
+---
+npm run hermes:build
+# exit 0 → dist/game.hbc is real bytecode; exit 4 → fallback (no binary, see §3)
+
+# execute the bytecode on the Hermes VM:
+hermes dist/game.hbc
+# or via the repo runner (hermes mode):
+node tools/hermes/run.js --config hermes.config.json --mode hermes --ticks 60
+
+node tools/hermes/verify.js --config hermes.config.json --json
+# exit 0 → header ok (magic/version match bytecodeTarget 99)
+```
+
+Bytecode is **version-coupled**: after any Hermes upgrade, rebuild
+(`hermes:build`) — a v98 `.hbc` will not run on a v99 VM. See `docs/HERMES.md`
+§7.
+
+## 3. Run under Node (fallback, no Hermes binary)
+
+Same bundle, same tick protocol, plain Node — for development and CI without
+the native toolchain:
+[0m
+[0m← [0mEdit hermes.schema.json
+Index: /home/runner/work/PlayGround/PlayGround/hermes.schema.json
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/hermes.schema.json
++++ /home/runner/work/PlayGround/PlayGround/hermes.schema.json
+@@ -14,9 +14,9 @@
+ },
+ "bytecodeTarget": {
+   "type": "integer",
+   "minimum": 1,
+-  "description": "Expected Hermes bytecode version (e.g. 99). Verified against the .hbc header."
++  "description": "Expected Hermes bytecode version (e.g. 96 for Hermes 0.12.0). Verified against the .hbc header."
+ },
+ "entry": { "type": "string", "description": "Hermes-safe entry file (DOM-free), bundled into the HBC." },
+ "coreDir": { "type": "string", "description": "Directory of DOM-free Hermes-safe core game files." },
+ "browserEntry": { "type": "string", "description": "DOM adapter entry. Excluded from HBC bundle." },
+
+[0m
+[0m→ [0mRead examples/hermes-game/README.md
+[0m
+[0m← [0mEdit examples/hermes-game/README.md
+Index: /home/runner/work/PlayGround/PlayGround/examples/hermes-game/README.md
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/examples/hermes-game/README.md
++++ /home/runner/work/PlayGround/PlayGround/examples/hermes-game/README.md
+@@ -40,13 +40,13 @@
+ # or via the repo runner (hermes mode):
+ node tools/hermes/run.js --config hermes.config.json --mode hermes --ticks 60
+ 
+ node tools/hermes/verify.js --config hermes.config.json --json
+-# exit 0 → header ok (magic/version match bytecodeTarget 99)
++# exit 0 → header ok (magic 0x1F1903C103BC1FC6, version matches bytecodeTarget 96 for Hermes 0.12.0)
+ ```
+ 
+ Bytecode is **version-coupled**: after any Hermes upgrade, rebuild
+-(`hermes:build`) — a v98 `.hbc` will not run on a v99 VM. See `docs/HERMES.md`
++(`hermes:build`) — e.g. a v98 `.hbc` will not run on a v99 VM. See `docs/HERMES.md`
+ §7.
+ 
+ ## 3. Run under Node (fallback, no Hermes binary)
+ 
+
+[0m
+[0m→ [0mRead tools/hermes/__tests__/build-verify.test.js[90m [offset=100, limit=130][0m
+[0m
+[0m← [0mEdit tools/hermes/__tests__/build-verify.test.js
+Index: /home/runner/work/PlayGround/PlayGround/tools/hermes/__tests__/build-verify.test.js
+===================================================================
+--- /home/runner/work/PlayGround/PlayGround/tools/hermes/__tests__/build-verify.test.js
++++ /home/runner/work/PlayGround/PlayGround/tools/hermes/__tests__/build-verify.test.js
+@@ -140,8 +140,12 @@
+     assert.ok(
+       fs.existsSync(manifestPath),
+       `exit 4 must write fallback manifest at ${manifestPath}. output:\n${combinedText(res)}`,
+     );
++    assert.ok(
++      !fs.existsSync(hbcPath),
++      `exit 4 (fallback) must remove any stale real bytecode at ${hbcPath} so verify cannot pass on a desynced artifact`,
++    );
+   }
+ });
+ 
+ it('fallback manifest hash matches the bundle (when fallback)', () => {
+
+[0m
+Fixes in — running full verification in both real-binary and fallback modes.
+[0m$ [0mexport PATH="/tmp/opencode/hermes-cli:$PATH"; echo "=== WITH binary ==="; node tools/hermes/compat-check.js 2>&1; node tools/hermes/build.js 2>&1; node tools/hermes/run.js --mode hermes --ticks 3 2>&1 | tail -n 4; node tools/hermes/verify.js 2>&1 | head -n 6; echo "=== tests ==="; npm test 2>&1 | tail -n 9
+=== WITH binary ===
+compat-check: OK — 2 file(s) clean
+build: OK via /tmp/opencode/hermes-cli/hermes — dist/game.hbc (6352 bytes, sha256 f49dcecddf19…)
+HERMES_TICK 1 {"tick":1,"x":10,"y":10,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 2 {"tick":2,"x":10,"y":11,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_TICK 3 {"tick":3,"x":8,"y":11,"score":0,"pickup":{"x":13,"y":2}}
+HERMES_DONE {"seed":42,"ticks":3,"final":{"tick":3,"x":8,"y":11,"score":0,"pickup":{"x":13,"y":2}}}
+verify: OK — dist/game.hbc
+  magic 0x1F1903C103BC1FC6  version 96  sourceHash 4d1588b1fa2e6fe1c3f6b68d14c0bf0564d64dee
+  size 6352 bytes  sha256 f49dcecddf195ef7a2b62aa423df81ad647ef368305b18e6fdd3e84a0e17eae3
+  --- hbcdump excerpt (first 20 lines) ---
+Bytecode File Information:
+  Bytecode version number: 96
+=== tests ===
+1..3
+# tests 17
+# suites 3
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 325.603121
+[0m
+[0m$ [0mmkdir -p /tmp/opencode/nobin && echo "=== WITHOUT binary (empty PATH) ==="; env -i PATH=/usr/bin:/bin HOME="$HOME" node tools/hermes/build.js --json 2>&1 | head -n 20; echo "build_exit=$?"; env -i PATH=/usr/bin:/bin HOME="$HOME" node tools/hermes/verify.js 2>&1 | head -n 5; echo "verify_exit=$?"; ls -la dist/ 2>&1; npm test 2>&1 | tail -n 8; export PATH="/tmp/opencode/hermes-cli:$PATH"; node tools/hermes/build.js 2>&1 | tail -n 1; node tools/hermes/verify.js 2>&1 | head -n 2
+=== WITHOUT binary (empty PATH) ===
+env: ‘node’: No such file or directory
+build_exit=0
+env: ‘node’: No such file or directory
+verify_exit=0
+total 28
+drwxr-xr-x  2 runner runner 4096 Sep  9 04:16 .
+drwxr-xr-x 14 runner runner 4096 Sep  9 04:12 ..
+-rw-r--r--  1 runner runner 7777 Sep  9 04:16 game.bundle.js
+-rw-r--r--  1 runner runner 6352 Sep  9 04:16 game.hbc
+-rw-r--r--  1 runner runner  483 Sep  9 04:14 game.hbc.json
+# tests 17
+# suites 3
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 314.814217
+build: OK via /tmp/opencode/hermes-cli/hermes — dist/game.hbc (6352 bytes, sha256 f49dcecddf19…)
+verify: OK — dist/game.hbc
+  magic 0x1F1903C103BC1FC6  version 96  sourceHash 4d1588b1fa2e6fe1c3f6b68d14c0bf0564d64dee
+[0m
+[0m$ [0mwhich hermes hermesc hbcdump 2>&1; node tools/hermes/build.js --json 2>&1 | head -n 25; echo "build_exit=$?"; ls -la dist/ 2>&1; node tools/hermes/verify.js 2>&1 | head -n 5; echo "verify_exit=$?"; npm test 2>&1 | tail -n 8
+{
+  "ok": true,
+  "fallback": true,
+  "code": "FALLBACK_NO_BINARY",
+  "engineVersion": "0.12.0",
+  "bytecodeTarget": 96,
+  "bundle": "dist/game.bundle.js",
+  "sha256": "b96465ee865ea883d8735434c63598b2d2397505782bb69b55b3ed99fe491567",
+  "bytes": 7777,
+  "hint": "hermes/hermesc binary not found on PATH (tried $HERMES_BIN, config hermes.binary/compiler, PATH). Bundle is runnable via `npm run hermes:run -- --mode node`. To emit real bytecode, install Hermes and re-run `npm run hermes:build`.",
+  "manifest": "dist/game.hbc.json"
+}
+build_exit=0
+total 20
+drwxr-xr-x  2 runner runner 4096 Sep  9 04:17 .
+drwxr-xr-x 14 runner runner 4096 Sep  9 04:12 ..
+-rw-r--r--  1 runner runner 7777 Sep  9 04:17 game.bundle.js
+-rw-r--r--  1 runner runner  483 Sep  9 04:17 game.hbc.json
+verify: FALLBACK — no real .hbc (hermes binary was absent at build time).
+  bundle dist/game.bundle.js sha256 b96465ee865ea883d8735434c63598b2d2397505782bb69b55b3ed99fe491567 (matches manifest)
+  recovery: hermes/hermesc binary not found on PATH (tried $HERMES_BIN, config hermes.binary/compiler, PATH). Bundle is runnable via `npm run hermes:run -- --mode node`. To emit real bytecode, install Hermes and re-run `npm run hermes:build`.
+verify_exit=0
+# tests 17
+# suites 3
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 315.260639
+[0m
+Both modes verified — restoring real bytecode and closing out the progress record.
+[0m$ [0mexport PATH="/tmp/opencode/hermes-cli:$PATH"; node tools/hermes/build.js 2>&1 | tail -n 1; node tools/hermes/verify.js --json 2>&1 | python3 -c "import json,sys; d=json.load(sys.stdin); print('magic',d['magic'],'version',d['version'],'size',d['size'],'sha256',d['sha256'][:16]+'…','mode',d['mode'])"; node tools/hermes/run.js --mode hermes --ticks 10 2>&1 | tail -n 1; timeout 10 hbcdump -c "disassemble;quit" dist/game.hbc 2>&1 | head -n 8; npm test 2>&1 | tail -n 8; git status --short 2>&1 | head -n 30
+build: OK via /tmp/opencode/hermes-cli/hermes — dist/game.hbc (6352 bytes, sha256 f49dcecddf19…)
+magic 0x1F1903C103BC1FC6 version 96 size 6352 sha256 f49dcecddf195ef7… mode bytecode+hbcdump
+HERMES_DONE {"seed":42,"ticks":10,"final":{"tick":10,"x":10,"y":11,"score":0,"pickup":{"x":13,"y":2}}}
+Bytecode File Information:
+  Bytecode version number: 96
+  Source hash: 4d1588b1fa2e6fe1c3f6b68d14c0bf0564d64dee
+  Function count: 17
+  String count: 65
+  BigInt count: 0
+  String Kind Entry count: 2
+  RegExp count: 0
+# tests 17
+# suites 3
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 334.561609
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? PROGRESS_HERMES.md
+?? dist/
+?? docs/
+?? examples/
+?? hermes.config.json
+?? hermes.schema.json
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? package.json
+?? tools/
+[0m
+[0m← [0mWrite PROGRESS_HERMES.md
+Wrote file successfully.
+[0m
+[0m# [0mTodos
+[✓] Map repo + define Hermes scope + create live progress page
+[✓] Research authoritative Hermes docs + integration examples + fixtures
+[✓] Implement Hermes support (example game, build scripts, compat, config, errors/recovery)
+[✓] Verify with concrete evidence (hermesc/hermes inspection, tests, artifact comparison)
+[✓] Fix largest gap, record delivery evidence
+[0m
+[goal:evidence] Hermes JS-engine support delivered and verified against a real Hermes CLI (release v0.13.0, engine 0.12.0, HBC v96): `hermes.config.json` (0.12.0/96) + schema, `tools/hermes/{build,compat-check,run,verify}.js` with exit-code contracts + JSON mode + fallback (stale-.hbc deletion), DOM-free `examples/hermes-game` (core/browser/hermes-entry), 17/17 `npm test` green in both modes, real `dist/game.hbc` (6352 B, magic 0x1F1903C103BC1FC6 per BytecodeFileFormat.h, version 96, 17 functions/65 strings via `hbcdump -c "disassemble;quit"`) executed by real `hermes` (`HERMES_TICK`+`HERMES_DONE`, deterministic, matches Node fallback), docs `docs/HERMES.md` + progress `PROGRESS_HERMES.md`, 2 builders + 2 fresh critics with all findings fixed.
+
+[goal:complete]
