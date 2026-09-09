@@ -1,0 +1,28 @@
+# Twisted Metal
+
+## Objective
+
+Deliver a production-quality, playable 3D browser game inspired by Twisted Metal for desktop players on macOS. Preserve the recognizable vehicular-combat visual language, driving and weapon interaction model, arena flow, destructive energy, and presentation quality of the source. Success requires a complete combat loop with responsive driving, enemy vehicles, weapons, damage, win and loss states, restart and recovery behavior, sound, and a polished browser-delivered build.
+
+## Quality bar
+
+- Research real Twisted Metal screenshots, gameplay footage, arena views, vehicle designs, HUDs, and menus before coding. Select at least six high-signal visual anchors, download every selected or used image into a clearly named reference-assets directory, inspect the local files directly, and record each source URL as plain-text provenance beside its local filename.
+- Reproduce the source's recognizable visual language and interaction model without replacing the required 3D browser game with a flatter substitute.
+- Inspect the real running game with vision-capable tools. Compare captures side by side or by blind A/B review with the selected references whenever practical.
+- Meet a production-quality bar for complete workflows, game states, error recovery, polish, accessibility and operability, performance, and delivery evidence. Do not stop at a demo or temporary proof.
+
+## Execution
+
+- Have the lead choose the route and split the project into independently judgeable pieces.
+- Give every important piece a separate builder and a fresh-context critic or verifier. Require each verifier to inspect the actual artifact, compare it with the quality bar, identify the largest remaining gap, and send the work back for improvement.
+- Work across as many days or sessions as necessary. Continue the build, verify, and improve loop until the acceptance bar is met or the run is stopped with explicit evidence.
+
+## Verification
+
+- Verify the complete game in its delivered browser surface on macOS, including controls, combat, enemy behavior, damage, victory, defeat, restart, audio, layout, and performance.
+- Fix the largest remaining gap after each inspection and repeat until the acceptance bar is met.
+- Record concrete evidence for behavior, visual fidelity, quality, recovery, and delivery.
+
+## Progress
+
+Maintain a canonical, resumable live progress page with references, local asset provenance, decisions, completed work, evidence, blockers, current gaps, and the next exact action.
