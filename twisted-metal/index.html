@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TWISTED STEEL — Arena Vehicular Combat</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23120a18'/%3E%3Ctext x='16' y='23' font-size='18' text-anchor='middle'%3E%F0%9F%9A%9A%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="./styles.css" />
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+<script>
+window.__threeFallbackTimer = setTimeout(() => {
+  if (!window.__gameBooted) {
+    const m = document.getElementById('errorMsg');
+    if (m) m.textContent = 'Could not load three.js CDN (network offline?). Check connection and reload. Tried jsdelivr; alternate: https://unpkg.com/three@0.160.0/build/three.module.js';
+    document.getElementById('errorOverlay')?.classList.remove('hidden');
+  }
+}, 9000);
+</script>
+</head>
+<body>
+<div id="app">
+  <canvas id="game-canvas" aria-label="3D arena combat viewport"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden" aria-hidden="true">
+    <div id="hud-topleft">
+      <canvas id="minimap" width="180" height="180" aria-label="Minimap"></canvas>
+      <div id="killCounter">Killed 0 of 5</div>
+      <div id="matchTimer">00:00</div>
+    </div>
+    <div id="weapon-slots" aria-label="Weapons">
+      <div class="wslot" id="slot-mg" title="Machine gun (LMB / J)">
+        <span class="wicon">🔫</span><span class="wname">MG</span><span class="wammo" id="weaponMgAmmo">∞</span>
+      </div>
+      <div class="wslot" id="slot-missile" title="Homing missiles (RMB / K)">
+        <span class="wicon">🚀</span><span class="wname">MSL</span><span class="wammo" id="weaponMissiles">6</span>
+      </div>
+      <div class="wslot" id="slot-special" title="Nova blast (E)">
+        <span class="wicon">💥</span><span class="wname">NOVA</span><span class="wammo" id="weaponSpecial">0%</span>
+      </div>
+    </div>
+    <div id="hud-bottomright">
+      <div class="bar-row"><span class="bar-label">HULL</span><div class="bar"><div id="healthBar"></div></div><span id="healthText">100</span></div>
+      <div class="bar-row"><span class="bar-label">TURBO</span><div class="bar turbo"><div id="turboBar"></div></div><span id="turboText">100</span></div>
+      <div class="bar-row"><span class="bar-label">NOVA</span><div class="bar nova"><div id="specialBar"></div></div></div>
+    </div>
+    <div id="reticle"><div class="ret-dot"></div></div>
+    <div id="enemy-markers"></div>
+    <div id="offscreen-arrows"></div>
+    <div id="killfeed" aria-live="polite"></div>
+    <div id="hitmarker" class="hidden">✕</div>
+  </div>
+  <div id="vignette"></div>
+  <div id="lowhp" class="hidden">⚠ HULL CRITICAL ⚠</div>
+  <div id="nova-flash" class="hidden"></div>
+  <div id="countdown" class="hidden"><span id="countdownNumber">3</span></div>
+  <div id="centerMsg" class="hidden"></div>
+  <div id="fpsCounter" class="hidden">60 fps</div>
+
+  <!-- Top bar -->
+  <div id="topbar">
+    <button id="muteBtn" title="Mute (M)" aria-label="Mute audio">🔊</button>
+    <button id="flashToggle" title="Toggle reduced flash" aria-label="Reduced flash" aria-pressed="false">✨ Flash: ON</button>
+    <button id="fpsBtn" title="FPS counter (F)" aria-label="FPS counter">FPS</button>
+    <button id="pauseBtn" title="Pause (P)" aria-label="Pause">⏸</button>
+  </div>
+
+  <!-- Title / menu -->
+  <div id="menu" class="overlay" role="dialog" aria-modal="true" aria-label="Main menu">
+    <div class="panel">
+      <h1 class="title">TWISTED <span>STEEL</span></h1>
+      <p class="subtitle">Night Stadium Deathmatch — destroy all 5 rivals</p>
+      <div id="bestStats">Best: —</div>
+      <h2>Choose your vehicle <span class="hint">(←/→ + Enter, or click)</span></h2>
+      <div id="vehicleCards" role="radiogroup" aria-label="Vehicle select">
+        <button class="vcard selected" id="veh-0" data-veh="0" role="radio" aria-checked="true">
+          <div class="vname">🍦 SWEET FANG</div><div class="vdesc">Ice-cream van of doom. Balanced.</div>
+          <div class="vstats">HULL ████████░░ 100<br>SPEED ██████░░░░<br>HANDLING ███████░░░</div>
+        </button>
+        <button class="vcard" id="veh-1" data-veh="1" role="radio" aria-checked="false">
+          <div class="vname">🔥 ROAD RIPPER</div><div class="vdesc">Muscle car. Fast &amp; fragile.</div>
+          <div class="vstats">HULL ██████░░░░ 80<br>SPEED ██████████<br>HANDLING ██████░░░░</div>
+        </button>
+        <button class="vcard" id="veh-2" data-veh="2" role="radio" aria-checked="false">
+          <div class="vname">🛡 IRON BULWARK</div><div class="vdesc">Armored truck. Slow tank.</div>
+          <div class="vstats">HULL ██████████ 140<br>SPEED ████░░░░░░<br>HANDLING █████░░░░░</div>
+        </button>
+      </div>
+      <h2>Difficulty</h2>
+      <div id="difficultyRow" role="radiogroup" aria-label="Difficulty">
+        <button class="diff" id="diff-rookie" data-diff="rookie" role="radio" aria-checked="false">ROOKIE</button>
+        <button class="diff selected" id="diff-pro" data-diff="pro" role="radio" aria-checked="true">PRO</button>
+        <button class="diff" id="diff-insane" data-diff="insane" role="radio" aria-checked="false">INSANE</button>
+      </div>
+      <button id="startBtn" class="big-btn">START ENGINES</button>
+      <div class="controls-help">
+        <b>Drive:</b> WASD / Arrows &nbsp; <b>Handbrake:</b> Space &nbsp; <b>Turbo:</b> Shift &nbsp;
+        <b>MG:</b> LMB / J &nbsp; <b>Missile:</b> RMB / K &nbsp; <b>Nova:</b> E &nbsp;
+        <b>Reset:</b> T &nbsp; <b>Pause:</b> P/Esc &nbsp; <b>Mute:</b> M &nbsp; <b>FPS:</b> F
+      </div>
+      <label class="check"><input type="checkbox" id="reducedFlashMenu" /> Reduced flash / screen shake</label>
+    </div>
+  </div>
+
+  <!-- Pause -->
+  <div id="pauseMenu" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Paused">
+    <div class="panel">
+      <h1>PAUSED</h1>
+      <p id="pauseStats"></p>
+      <button id="resumeBtn" class="big-btn">RESUME (P)</button>
+      <div class="btn-row">
+        <button id="restartBtnPause">RESTART (R)</button>
+        <button id="quitBtnPause">QUIT TO MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- End screen -->
+  <div id="endScreen" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Match result">
+    <div class="panel">
+      <h1 id="endTitle">VICTORY</h1>
+      <p id="endStats"></p>
+      <p id="endBest"></p>
+      <button id="endRestartBtn" class="big-btn">PLAY AGAIN (R)</button>
+      <div class="btn-row"><button id="menuBtn">BACK TO MENU</button></div>
+    </div>
+  </div>
+
+  <!-- Error overlay -->
+  <div id="errorOverlay" class="hidden" role="alert">
+    <b>⚠ Something hiccuped:</b> <span id="errorMsg"></span>
+    <button id="errorClose">Dismiss</button>
+  </div>
+
+  <footer id="footerHelp">WASD drive · Space drift · Shift turbo · LMB/J MG · RMB/K missile · E nova · T reset · P pause · M mute · F fps</footer>
+  <div id="touchControls" class="hidden" aria-label="Touch controls">
+    <div class="tcluster">
+      <button data-k="ArrowLeft">◀</button><button data-k="ArrowUp">▲</button><button data-k="ArrowDown">▼</button><button data-k="ArrowRight">▶</button>
+    </div>
+    <div class="tcluster">
+      <button data-k="KeyJ">🔫</button><button data-k="KeyK">🚀</button><button data-k="KeyE">💥</button>
+    </div>
+  </div>
+</div>
+<script type="module" src="./game.js"></script>
+</body>
+</html>
