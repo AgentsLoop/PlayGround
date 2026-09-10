@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tideglass Drift — Gauntlet Progress</title>
+<style>
+  :root { --bg:#0b1622; --card:#132433; --accent:#5eead4; --muted:#94a3b8; --text:#e2e8f0; --warn:#fbbf24; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
+  header { padding:32px 24px; text-align:center; border-bottom:1px solid #1e3a4d; background:linear-gradient(180deg,#10263a,#0b1622); }
+  header h1 { margin:0 0 8px; font-size:28px; letter-spacing:.3px; }
+  header p { margin:0; color:var(--muted); }
+  .badge { display:inline-block; margin-top:12px; padding:4px 12px; border-radius:999px; background:#1e3a4d; color:var(--accent); font-size:13px; font-weight:600; }
+  main { max-width:880px; margin:0 auto; padding:24px 20px 48px; }
+  section { background:var(--card); border:1px solid #1e3a4d; border-radius:12px; padding:20px 20px; margin:16px 0; }
+  h2 { margin:0 0 12px; font-size:18px; color:var(--accent); }
+  ul { margin:8px 0; padding-left:20px; }
+  li { margin:6px 0; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:10px 8px; border-bottom:1px solid #1e3a4d; }
+  th { color:var(--muted); font-weight:600; text-transform:uppercase; font-size:12px; letter-spacing:.05em; }
+  .pill { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:700; }
+  .in-progress { background:#3b2f0b; color:var(--warn); border:1px solid #71530f; }
+  .pending { background:#1e293b; color:#94a3b8; border:1px solid #334155; }
+  a { color:var(--accent); }
+  code { background:#0b1622; padding:2px 6px; border-radius:6px; border:1px solid #1e3a4d; }
+  footer { text-align:center; color:var(--muted); font-size:13px; padding:20px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Tideglass Drift — Gauntlet Progress</h1>
+  <p>Live build log: bar, pieces, rounds, and evidence.</p>
+  <span class="badge">● LIVE — Round 1 in-progress</span>
+</header>
+
+<main>
+  <section id="bar">
+    <h2>Bar</h2>
+    <p>Beat <strong>Crossy Road</strong> on:</p>
+    <ul>
+      <li><strong>Readability</strong> — obstacles / lanes / player instantly legible at a glance.</li>
+      <li><strong>One-control steering</strong> — single-input, tight and forgiving movement.</li>
+      <li><strong>Short-run replay</strong> — runs under ~2 min, instant restart, score-chasing hook.</li>
+    </ul>
+  </section>
+
+  <section id="pieces">
+    <h2>Pieces</h2>
+    <ul>
+      <li><strong>P1 — Core game:</strong> grid / drift loop, spawn, collision, score, game-over.</li>
+      <li><strong>P2 — Readability:</strong> contrast, sizing, motion cues, lane telegraphing.</li>
+      <li><strong>P3 — Controls:</strong> one-control steering tuning, input latency, forgiveness.</li>
+      <li><strong>P4 — Replay:</strong> short-run pacing, instant restart, best-score persistence.</li>
+    </ul>
+  </section>
+
+  <section id="rounds">
+    <h2>Rounds</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Round #</th>
+          <th>Piece</th>
+          <th>Builder result</th>
+          <th>Critic verdict</th>
+          <th>Gap fixed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>P1 — Core game (521 lines, canvas, lanes, lanterns, rocks)</td>
+          <td>Built index.html: title/playing/over, arrows+drag, score/best</td>
+          <td>LOSE/LOSE — hue-shift lanes camouflage player; lerp lag + start-tap snap; hollow best chase</td>
+          <td>Froze lanes #0A2342/#0E3A4A, red-coded rocks r22-36, 1:1 drag for pointer, start-tap kept, spawn gap-guarantee, NEW BEST + 400ms hit-stop, trickle 0.045→0.015</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>P2/P3/P4 re-check after fix (node --check pass, 563 lines)</td>
+          <td>All 19 spec checks pass; verified bytes=19161</td>
+          <td>Replay WIN; readability LOSE (faint fills/noise); steering LOSE (absolute teleport unfair)</td>
+          <td>Capped drag follow-speed W*2.2/s, dividers 2px 0.6 alpha no glow, dashes 0.15 alpha, trickle →0.008 (562 lines, verified)</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="evidence">
+    <h2>Evidence</h2>
+    <ul>
+      <li>Playable build: <a href="./index.html"><code>index.html</code></a></li>
+      <li>Screenshots: <code>screenshots/round-*.png</code> — full-viewport capture per round showing gameplay, score HUD, and game-over / restart state (to be added as rounds complete).</li>
+      <li>This log: <code>progress.html</code> — updated after each builder/critic round.</li>
+    </ul>
+  </section>
+</main>
+
+<footer>Last updated: Round 2 fixed + final polish verified • Tideglass Drift Gauntlet</footer>
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tideglass Drift</title>
+<style>
+  /* Fullscreen dark sea page, canvas does all rendering. No deps. */
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #04121f; }
+  #game { display: block; width: 100vw; height: 100vh; touch-action: none; cursor: crosshair; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<script>
+'use strict';
+/* ============================================================
+   TIDEGLOSS DRIFT — single-file 2D arcade game
+   Steer a skiff through glowing tide lanes. Collect lanterns,
+   dodge rocks. One-control steering: arrows / A-D / drag.
+   ============================================================ */
+
+// ---------- Canvas setup + resize handling ----------
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+let W = 0, H = 0, DPR = 1;
+
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2); // cap DPR for perf
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = Math.floor(W * DPR);
+  canvas.height = Math.floor(H * DPR);
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  player.y = H * 0.82; // keep skiff pinned near bottom on resize
+}
+window.addEventListener('resize', resize);
+
+// ---------- Audio: tiny WebAudio chime, no assets ----------
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { audioCtx = null; }
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+// Two-note lantern chime (sine + quick decay).
+function chime() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  [[880, 0], [1318.5, 0.09]].forEach(([freq, dt]) => {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t + dt);
+    g.gain.exponentialRampToValueAtTime(0.25, t + dt + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dt + 0.35);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t + dt);
+    o.stop(t + dt + 0.4);
+  });
+}
+// Low thud on crash (sawtooth drop).
+function thud() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(160, t);
+  o.frequency.exponentialRampToValueAtTime(40, t + 0.4);
+  g.gain.setValueAtTime(0.25, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(t);
+  o.stop(t + 0.5);
+}
+
+// ---------- Game state ----------
+const LANES = 5;               // shifting glowing tide lanes
+let state = 'title';           // 'title' | 'playing' | 'over'
+let paused = false;            // pause-on-blur flag
+let time = 0;                  // run time (s), drives hue shift + speed
+let lastTs = 0;
+let score = 0;
+let lanterns = 0;
+let best = parseInt(localStorage.getItem('tideglass_best') || '0', 10) || 0;
+let newBest = false;   // set on game over when score beats best
+let overDelay = 0;     // hit-stop delay before game-over overlay shows (s)
+let speed = 240;               // obstacle flow px/s, ramps up
+let rocks = [];                // {x,y,r,verts,rot,spin}
+let orbs = [];                 // lanterns {x,y,r,phase,taken}
+let particles = [];            // {x,y,vx,vy,life,maxLife,color,size}
+let rockTimer = 0, orbTimer = 0;
+
+const player = {
+  x: 0, targetX: 0, y: 0, r: 18,
+  tilt: 0 // visual bank angle from lateral velocity
+};
+
+// ---------- Input: keyboard + pointer drag (tilt-free) ----------
+const keys = { left: false, right: false };
+let dragging = false;
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { keys.left = true; e.preventDefault(); }
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { keys.right = true; e.preventDefault(); }
+  if (e.key === ' ' || e.key === 'Enter' || e.key === 'r' || e.key === 'R') {
+    e.preventDefault();
+    ensureAudio();
+    pressAction(); // start / instant restart
+  }
+});
+window.addEventListener('keyup', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+});
+
+// Pointer drag: targetX follows finger/mouse instantly (<50ms feel).
+function pointerX(e) {
+  return (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+}
+canvas.addEventListener('pointerdown', (e) => {
+  ensureAudio();
+  dragging = true;
+  // Capture tap position first, then start — set target AFTER startGame
+  // so the first tap position is kept, not snapped to center.
+  const tx = clamp(e.clientX, player.r, W - player.r);
+  pressAction();
+  player.targetX = tx;
+  // No instant teleport: update() moves x toward targetX at capped speed.
+});
+window.addEventListener('pointermove', (e) => {
+  if (dragging && state === 'playing') {
+    player.targetX = clamp(e.clientX, player.r, W - player.r);
+  }
+});
+window.addEventListener('pointerup', () => { dragging = false; });
+window.addEventListener('pointercancel', () => { dragging = false; });
+// Prevent touch scrolling / double-tap zoom on mobile.
+canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  if (state === 'playing') {
+    player.targetX = clamp(pointerX(e), player.r, W - player.r);
+  }
+}, { passive: false });
+
+// Title / game-over tap or Space/R restarts instantly.
+function pressAction() {
+  if (paused) { paused = false; lastTs = performance.now(); return; }
+  if (state === 'title' || state === 'over') startGame();
+}
+
+// ---------- Pause on blur / tab hide ----------
+function autoPause() { if (state === 'playing') paused = true; }
+document.addEventListener('visibilitychange', () => { if (document.hidden) autoPause(); });
+window.addEventListener('blur', autoPause);
+canvas.addEventListener('click', () => { if (paused) { paused = false; lastTs = performance.now(); } });
+
+// ---------- Helpers ----------
+function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+function rand(a, b) { return a + Math.random() * (b - a); }
+function dist2(ax, ay, bx, by) { const dx = ax - bx, dy = ay - by; return dx * dx + dy * dy; }
+
+// ---------- Flow control ----------
+function startGame() {
+  state = 'playing';
+  paused = false;
+  time = 0;
+  score = 0;
+  lanterns = 0;
+  newBest = false;
+  overDelay = 0;
+  speed = 240;
+  rocks = [];
+  orbs = [];
+  particles = [];
+  rockTimer = 0.6;
+  orbTimer = 0.4;
+  player.x = player.targetX = W / 2;
+  player.y = H * 0.82;
+  lastTs = performance.now();
+}
+
+function gameOver() {
+  state = 'over';
+  overDelay = 0; // start 400ms hit-stop delay before overlay shows
+  thud();
+  // Burst of pale spray on crash.
+  for (let i = 0; i < 26; i++) spawnParticle(player.x, player.y, '#9fd8ff', 220);
+  if (Math.floor(score) > best) {
+    best = Math.floor(score);
+    newBest = true;
+    try { localStorage.setItem('tideglass_best', String(best)); } catch (e) {}
+  } else {
+    newBest = false;
+  }
+}
+
+// ---------- Spawning ----------
+// Rocks: dark slate polygons with red danger outline. Spawn fairness:
+// limit max rocks in the top band and reject overlapping spawns so at
+// least one gap (one free lane) always remains — no full-wall blocks.
+function spawnRock() {
+  const r = rand(22, 36);
+  const n = 7 + Math.floor(Math.random() * 3);
+  const verts = [];
+  for (let i = 0; i < n; i++) verts.push(rand(0.7, 1.15)); // radial jitter
+  // Fairness: never fill every lane in the entry band.
+  const bandCount = rocks.filter((rk) => rk.y < 160).length;
+  if (bandCount >= LANES - 1) return;
+  let x = rand(r, W - r);
+  let ok = false;
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const overlap = rocks.some(
+      (rk) => rk.y < 160 && Math.abs(rk.x - x) < rk.r + r + 24
+    );
+    if (!overlap) { ok = true; break; }
+    x = rand(r, W - r);
+  }
+  if (!ok) return; // keep a gap rather than stacking a wall
+  rocks.push({
+    x,
+    y: -r - 10,
+    r, verts, rot: rand(0, Math.PI * 2), spin: rand(-1.5, 1.5)
+  });
+}
+// Lanterns: glowing lantern orbs worth +10 (main score source).
+function spawnOrb() {
+  orbs.push({ x: rand(18, W - 18), y: -20, r: 8, phase: rand(0, Math.PI * 2) });
+}
+function spawnParticle(x, y, color, power) {
+  particles.push({
+    x, y,
+    vx: rand(-power, power), vy: rand(-power, power * 0.6) - 60,
+    life: 0, maxLife: rand(0.4, 0.9),
+    color, size: rand(2, 5)
+  });
+}
+
+// ---------- Update ----------
+function update(dt) {
+  time += dt;
+  speed = Math.min(240 + time * 14, 640); // difficulty ramp
+  score += dt * (speed * 0.008);          // low idle trickle: lanterns dominate scoring
+
+  // --- Steering: keys move target; drag follows at capped speed (no teleport) ---
+  const keySpeed = Math.max(W * 1.1, 520);
+  if (keys.left) player.targetX -= keySpeed * dt;
+  if (keys.right) player.targetX += keySpeed * dt;
+  player.targetX = clamp(player.targetX, player.r + 4, W - player.r - 4);
+  const prevX = player.x;
+  if (dragging) {
+    const maxSpeed = W * 2.2; // capped follow-speed, frame-rate independent
+    player.x += clamp(player.targetX - player.x, -maxSpeed * dt, maxSpeed * dt);
+  } else {
+    player.x += (player.targetX - player.x) * Math.min(1, dt * 22); // snappy key follow
+  }
+  player.tilt = clamp((player.x - prevX) / Math.max(dt, 0.001) / 900, -1, 1);
+
+  // --- Spawn pacing tightens as speed rises; harder after 30s ---
+  rockTimer -= dt;
+  orbTimer -= dt;
+  const late = time > 30 ? 0.65 : 1; // post-30s difficulty ramp
+  if (rockTimer <= 0) { spawnRock(); rockTimer = rand(0.35, 0.9) * (300 / speed) * late; }
+  if (orbTimer <= 0) { spawnOrb(); orbTimer = time > 30 ? rand(0.7, 1.4) : rand(0.5, 1.1); }
+
+  // --- Move rocks down, cull offscreen ---
+  for (let i = rocks.length - 1; i >= 0; i--) {
+    const rk = rocks[i];
+    rk.y += speed * dt;
+    rk.rot += rk.spin * dt;
+    if (rk.y > H + rk.r + 20) rocks.splice(i, 1);
+  }
+  // --- Move orbs down with gentle bob ---
+  for (let i = orbs.length - 1; i >= 0; i--) {
+    const o = orbs[i];
+    o.y += (speed * 0.9) * dt;
+    o.phase += dt * 4;
+    if (o.y > H + 30) orbs.splice(i, 1);
+  }
+
+  // --- Collisions ---
+  // Rocks: forgiving hitbox (0.78x) so near-misses feel fair.
+  for (const rk of rocks) {
+    const rr = rk.r * 0.78 + player.r * 0.8;
+    if (dist2(player.x, player.y, rk.x, rk.y) < rr * rr) { gameOver(); return; }
+  }
+  // Lanterns: collect -> +10, burst, chime.
+  for (let i = orbs.length - 1; i >= 0; i--) {
+    const o = orbs[i];
+    const cr = o.r + player.r + 4;
+    if (dist2(player.x, player.y, o.x, o.y) < cr * cr) {
+      orbs.splice(i, 1);
+      score += 10;
+      lanterns++;
+      for (let k = 0; k < 18; k++) spawnParticle(o.x, o.y, k % 2 ? '#ffd94d' : '#fff3b0', 200);
+      chime();
+    }
+  }
+
+  // --- Particles ---
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.life += dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vy += 300 * dt; // slight gravity
+    if (p.life >= p.maxLife) particles.splice(i, 1);
+  }
+}
+
+// ---------- Render ----------
+function draw() {
+  // Dark sea background with subtle vertical gradient.
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#020a14');
+  bg.addColorStop(0.6, '#04121f');
+  bg.addColorStop(1, '#062033');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  drawTideLanes();  // animated glowing lanes under everything
+  drawOrbs();
+  drawRocks();
+  drawParticles();
+  if (state !== 'over') drawPlayer(); // hide wreck after crash, show spray
+  drawHUD();
+
+  if (state === 'title') drawTitle();
+  if (state === 'over' && overDelay > 0.4) drawGameOver(); // 400ms hit-stop delay
+  if (paused && state === 'playing') drawPaused();
+}
+
+// Frozen high-contrast tide lanes: fixed alternating navy / teal-dark
+// fills, fixed cyan dividers. No hue drift, no glow — stays readable.
+function drawTideLanes() {
+  const laneW = W / LANES;
+  for (let i = 0; i < LANES; i++) {
+    // Fixed alternating fills at 0.35 alpha.
+    ctx.fillStyle = i % 2 === 0 ? 'rgba(10, 35, 66, 0.35)' : 'rgba(14, 58, 74, 0.35)'; // #0A2342 / #0E3A4A
+    ctx.fillRect(i * laneW, 0, laneW, H);
+    // Fixed dim divider lines between lanes, no glow.
+    if (i > 0) {
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(125, 240, 255, 0.6)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(i * laneW, 0);
+      ctx.lineTo(i * laneW, H);
+      ctx.stroke();
+    }
+    // Very faint drifting "current" dashes inside each lane.
+    ctx.strokeStyle = 'rgba(125, 240, 255, 0.15)';
+    ctx.lineWidth = 2;
+    const dashOff = (time * speed * 0.6 + i * 90) % 120;
+    for (let y = -120 + dashOff; y < H + 120; y += 120) {
+      ctx.beginPath();
+      ctx.moveTo(i * laneW + laneW / 2, y);
+      ctx.lineTo(i * laneW + laneW / 2, y + 34);
+      ctx.stroke();
+    }
+  }
+}
+
+// Player skiff: white hull with 3px black outline + wake. Larger r=18.
+function drawPlayer() {
+  ctx.save();
+  ctx.translate(player.x, player.y);
+  ctx.rotate(player.tilt * 0.35);
+  // Wake ellipse.
+  ctx.fillStyle = 'rgba(120, 220, 255, 0.25)';
+  ctx.beginPath();
+  ctx.ellipse(0, 14, 16, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Hull (triangle boat): white fill, 3px black outline for readability.
+  ctx.fillStyle = '#FFFFFF';
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 3;
+  ctx.shadowBlur = 0;
+  ctx.beginPath();
+  ctx.moveTo(0, -18); ctx.lineTo(13, 12); ctx.lineTo(-13, 12);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  // Sail stripe.
+  ctx.fillStyle = '#38e1ff';
+  ctx.beginPath();
+  ctx.moveTo(0, -10); ctx.lineTo(6, 8); ctx.lineTo(-6, 8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+// Rocks: dark slate polygons with red danger outline + glow (distinct from orbs).
+function drawRocks() {
+  for (const rk of rocks) {
+    ctx.save();
+    ctx.translate(rk.x, rk.y);
+    ctx.rotate(rk.rot);
+    ctx.beginPath();
+    const n = rk.verts.length;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      const rr = rk.r * rk.verts[i];
+      const px = Math.cos(a) * rr, py = Math.sin(a) * rr;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = '#2B3542';
+    ctx.fill();
+    ctx.strokeStyle = '#FF4D4D';
+    ctx.lineWidth = 4;
+    ctx.shadowColor = '#FF4D4D';
+    ctx.shadowBlur = 12;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    // Dark core crack for texture.
+    ctx.fillStyle = '#39414b';
+    ctx.beginPath();
+    ctx.arc(0, 0, rk.r * 0.35, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// Lanterns: distinct circular lanterns — #FFD400 outer ring + white core.
+function drawOrbs() {
+  for (const o of orbs) {
+    const bob = Math.sin(o.phase) * 3;
+    const y = o.y + bob;
+    // Halo.
+    const g = ctx.createRadialGradient(o.x, y, 1, o.x, y, o.r * 2.6);
+    g.addColorStop(0, 'rgba(255, 212, 0, 0.9)');
+    g.addColorStop(0.4, 'rgba(255, 212, 0, 0.35)');
+    g.addColorStop(1, 'rgba(255, 212, 0, 0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(o.x, y, o.r * 2.6, 0, Math.PI * 2);
+    ctx.fill();
+    // Outer lantern disc.
+    ctx.fillStyle = '#FFD400';
+    ctx.shadowColor = '#FFD400';
+    ctx.shadowBlur = 16;
+    ctx.beginPath();
+    ctx.arc(o.x, y, o.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    // White core — clearly circular, distinct from rocks.
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(o.x, y, o.r * 0.55, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawParticles() {
+  for (const p of particles) {
+    const a = 1 - p.life / p.maxLife;
+    ctx.globalAlpha = a;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * a + 0.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+// HUD: score / lanterns / best / speed, high-contrast top bar.
+function drawHUD() {
+  ctx.fillStyle = 'rgba(2, 10, 20, 0.55)';
+  ctx.fillRect(0, 0, W, 44);
+  ctx.font = 'bold 16px system-ui, sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'left';
+  ctx.fillText('Score ' + Math.floor(score), 12, 22);
+  ctx.fillStyle = '#ffe66d';
+  ctx.fillText('🏮 ' + lanterns, 120, 22);
+  ctx.fillStyle = '#9fd8ff';
+  ctx.textAlign = 'center';
+  ctx.fillText('Speed x' + (speed / 240).toFixed(1), W / 2, 22);
+  ctx.fillStyle = '#8fa3b8';
+  ctx.textAlign = 'right';
+  ctx.fillText('Best ' + best, W - 12, 22);
+}
+
+function centerText(text, y, size, color) {
+  ctx.font = `bold ${size}px system-ui, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = color;
+  ctx.fillText(text, W / 2, y);
+}
+
+function drawTitle() {
+  ctx.fillStyle = 'rgba(2, 8, 16, 0.72)';
+  ctx.fillRect(0, 0, W, H);
+  centerText('TIDEGLASS DRIFT', H * 0.32, Math.min(44, W / 10), '#7df0ff');
+  centerText('Ride the glowing tides. Grab lanterns. Dodge rocks.', H * 0.32 + 44, 15, '#cfe8ff');
+  centerText('◀ A / D ▶  or  drag to steer', H * 0.5, 17, '#ffffff');
+  centerText('🏮 Lantern +10', H * 0.5 + 30, 15, '#ffe66d');
+  centerText('— press Space / click to set sail —', H * 0.62, 16, '#7df0ff');
+  centerText('Best: ' + best, H * 0.62 + 32, 14, '#8fa3b8');
+}
+
+function drawGameOver() {
+  ctx.fillStyle = 'rgba(20, 4, 4, 0.68)';
+  ctx.fillRect(0, 0, W, H);
+  centerText('WRECKED', H * 0.36, Math.min(52, W / 8), '#ff6b6b');
+  if (newBest && Math.floor(time * 4) % 2 === 0) {
+    centerText('NEW BEST!', H * 0.36 - 52, 22, '#FFD400');
+  }
+  centerText('Score ' + Math.floor(score) + '   •   🏮 ' + lanterns + '   •   Best ' + best, H * 0.36 + 48, 16, '#ffffff');
+  centerText('press Space / R / click for instant restart', H * 0.52, 15, '#ffd9d9');
+}
+
+function drawPaused() {
+  ctx.fillStyle = 'rgba(2, 8, 16, 0.6)';
+  ctx.fillRect(0, 0, W, H);
+  centerText('PAUSED', H * 0.45, 36, '#ffffff');
+  centerText('click to resume', H * 0.45 + 40, 15, '#9fd8ff');
+}
+
+// ---------- Main loop: fixed-dt clamp keeps 60fps stable ----------
+function frame(ts) {
+  requestAnimationFrame(frame);
+  if (!lastTs) lastTs = ts;
+  let dt = (ts - lastTs) / 1000;
+  lastTs = ts;
+  if (dt > 0.05) dt = 0.05; // clamp tab-jank spikes
+  if (paused) { draw(); return; }
+  if (state === 'playing') update(dt);
+  else {
+    time += dt * 0.5; // keep lanes shimmering on menus
+    if (state === 'over' && overDelay <= 0.4) overDelay += dt; // 400ms hit-stop
+  }
+  // Idle particles still fade on menus.
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.life += dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    if (p.life >= p.maxLife) particles.splice(i, 1);
+  }
+  draw();
+}
+
+// ---------- Boot ----------
+resize();
+player.x = player.targetX = window.innerWidth / 2;
+player.y = window.innerHeight * 0.82;
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
