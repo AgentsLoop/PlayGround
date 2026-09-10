@@ -1,0 +1,7 @@
+# Build Tideglass Drift, a playable browser game
+
+Build Tideglass Drift: a polished, single-screen 2D browser arcade game where the player steers a small skiff through shifting glowing tide lanes, collects lanterns, and avoids rocks. Set the quality bar at the immediate readability, responsive one-control steering, and satisfying short-run replay loop of *Crossy Road*; make the running game directly inspectable against that bar.
+
+Act as the lead. Choose the approach and split the work into the smallest independently judgeable pieces. For each important piece, use a builder and a separate fresh-context critic that inspects the real artifact. When our output loses, fix the largest meaningful gap and repeat until it meets the bar or the user stops the run.
+
+Maintain a simple live progress page with concrete evidence of each round. Load and use these available skills where relevant: gauntlet-loop.

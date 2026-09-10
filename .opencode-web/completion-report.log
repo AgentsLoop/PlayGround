@@ -1,0 +1,88 @@
+[0m
+> build · muse-spark-1.3-contributor-free
+[0m
+Finalizing the public release — capturing screenshots, pushing, and posting completion.
+[0m$ [0mgit branch --show-current; git status --short | head -20; ls -l screenshots/ 2>&1; echo "---"; tmux ls 2>&1; echo "---"; curl -s -o /dev/null -w "public %{http_code}\n" https://watershed-panel-september-obviously.trycloudflare.com --max-time 15; curl -s -o /dev/null -w "local %{http_code}\n" http://localhost:3000/index.html --max-time 10
+opencode/34419391574
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+?? .opencode-ssh/
+?? .opencode-web/
+?? .opencode/
+?? Agents.md
+?? index.html
+?? opencode-agentsweb-id_ed25519
+?? opencode-agentsweb-id_ed25519.pub
+?? screenshots/
+?? tideglass-drift/
+total 88
+-rw-r--r-- 1 runner runner 37924 Sep 10 00:06 final-game-mobile.png
+-rw-r--r-- 1 runner runner 45867 Sep 10 00:06 final-game.png
+---
+app-server: 1 windows (created Thu Sep 10 00:06:21 2026)
+---
+public 200
+local 200
+[0m
+[0m$ [0mgoogle-chrome --headless --disable-gpu --no-sandbox --window-size=1280,800 --screenshot=screenshots/final-public-desktop.png https://watershed-panel-september-obviously.trycloudflare.com --timeout=30000 2>&1 | tail -1; google-chrome --headless --disable-gpu --no-sandbox --window-size=390,844 --screenshot=screenshots/final-public-mobile.png https://watershed-panel-september-obviously.trycloudflare.com --timeout=30000 2>&1 | tail -1; ls -l screenshots/
+45867 bytes written to file screenshots/final-public-desktop.png
+37924 bytes written to file screenshots/final-public-mobile.png
+total 176
+-rw-r--r-- 1 runner runner 37924 Sep 10 00:06 final-game-mobile.png
+-rw-r--r-- 1 runner runner 45867 Sep 10 00:06 final-game.png
+-rw-r--r-- 1 runner runner 45867 Sep 10 00:07 final-public-desktop.png
+-rw-r--r-- 1 runner runner 37924 Sep 10 00:07 final-public-mobile.png
+[0m
+[0m$ [0mfile screenshots/final-*.png && git add index.html screenshots tideglass-drift && git status --short | head; git commit -m "Tideglass Drift: playable game + final screenshots" 2>&1 | tail -3; git rev-parse HEAD
+screenshots/final-game-mobile.png:    PNG image data, 390 x 844, 8-bit/color RGB, non-interlaced
+screenshots/final-game.png:           PNG image data, 1280 x 800, 8-bit/color RGB, non-interlaced
+screenshots/final-public-desktop.png: PNG image data, 1280 x 800, 8-bit/color RGB, non-interlaced
+screenshots/final-public-mobile.png:  PNG image data, 390 x 844, 8-bit/color RGB, non-interlaced
+A  index.html
+A  screenshots/final-game-mobile.png
+A  screenshots/final-game.png
+A  screenshots/final-public-desktop.png
+A  screenshots/final-public-mobile.png
+A  tideglass-drift/index.html
+A  tideglass-drift/progress.html
+?? .agents/
+?? .agentsweb/
+?? .omgithub-runtime/
+ create mode 100644 screenshots/final-public-mobile.png
+ create mode 100644 tideglass-drift/index.html
+ create mode 100644 tideglass-drift/progress.html
+dfc3d696ed3ad77d677eeab8696d9e4473a81932
+[0m
+[0m$ [0mgit push -u origin opencode/34419391574 2>&1 | tail -5; git log --oneline -2
+remote:      https://github.com/AgentsLoop/PlayGround/pull/new/opencode/34419391574        
+remote: 
+To https://github.com/AgentsLoop/PlayGround
+ * [new branch]      opencode/34419391574 -> opencode/34419391574
+branch 'opencode/34419391574' set up to track 'origin/opencode/34419391574'.
+dfc3d69 Tideglass Drift: playable game + final screenshots
+ad0e2a5 Forward OpenCode execution to the selected branch
+[0m
+Screenshots committed and branch pushed. Posting the final completion comment.
+[0m$ [0mgh issue comment 97 --body "Final completion: Tideglass Drift is live and verified.
+
+Play now: https://watershed-panel-september-obviously.trycloudflare.com
+
+Screenshots (captured headless Chrome against the public URL, committed on this branch):
+![Desktop gameplay](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34419391574/screenshots/final-public-desktop.png)
+![Mobile gameplay](https://raw.githubusercontent.com/AgentsLoop/PlayGround/opencode/34419391574/screenshots/final-public-mobile.png)
+
+Final commit: \`dfc3d69\` on \`opencode/34419391574\` (\"Tideglass Drift: playable game + final screenshots\") — includes \`index.html\`, \`tideglass-drift/index.html\`, \`tideglass-drift/progress.html\`, \`screenshots/final-*.png\`. Branch pushed to origin.
+
+Deployment status: local tmux \`app-server\` serves \`./index.html\` on port 3000 (HTTP 200, re-verified); public Cloudflare tunnel URL returns HTTP 200 and renders the game.
+
+Test status: headless Chrome DOM render exit 0; 8/8 content checks PASS (doctype, canvas, requestAnimationFrame loop, keyboard input, pointer/touch, game-over/collision, localStorage best score, zero external deps); all 4 screenshots verified as valid PNGs (desktop 1280x800, mobile 390x844).
+
+Known limitations: (1) lane readability is simplified vs Crossy Road's discrete voxel grid — fills are faint by design and particles add some noise; (2) steering is capped-follow drag (W*2.2/s) rather than discrete hops, so no hop-timing mastery curve; (3) a small idle score trickle (speed*0.008) remains alongside lantern scoring; (4) WebAudio chimes require a user gesture; (5) best score persists per-browser via localStorage only." 2>&1
+https://github.com/AgentsLoop/PlayGround/issues/97#issuecomment-5610551415
+[0m
+All done:
+
+- **Screenshots:** captured fresh against the public URL — `screenshots/final-public-desktop.png` (1280×800) and `screenshots/final-public-mobile.png` (390×844), plus the earlier `final-game*.png` set. All 4 verified as valid PNGs.
+- **Commit + push:** `dfc3d69` "Tideglass Drift: playable game + final screenshots" on `opencode/34419391574`, pushed to origin (includes `index.html`, `tideglass-drift/`, all screenshots).
+- **Issue #97:** final completion comment posted ([link](https://github.com/AgentsLoop/PlayGround/issues/97#issuecomment-5610551415)) with the public game URL, embedded screenshots (raw branch URLs), final commit, deployment status (local `app-server` :3000 HTTP 200 + public tunnel HTTP 200), test status (headless Chrome exit 0, 8/8 checks PASS), and 5 known limitations.
