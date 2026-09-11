@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PlayGround — Click Catch</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;display:flex;flex-direction:column;align-items:center;background:#0f172a;color:#e2e8f0;min-height:100vh}
+h1{margin:16px 0 4px}#score{font-size:20px;margin:4px}canvas{background:#1e293b;border:1px solid #475569;border-radius:8px;cursor:crosshair}button{margin:10px;padding:8px 16px;font-size:16px}
+</style>
+</head>
+<body>
+<h1>Click Catch</h1>
+<div id="score">Score: 0</div>
+<canvas id="game" width="600" height="400"></canvas>
+<div><button id="start">Start</button> <span id="status">Click Start, then click the circle.</span></div>
+<script>
+const c=document.getElementById('game'),x=c.getContext('2d');
+let s=0,on=false,t=null,pos={x:300,y:200};
+function draw(){x.clearRect(0,0,600,400);if(!on)return;x.beginPath();x.arc(pos.x,pos.y,24,0,7);x.fillStyle='#f59e0b';x.fill();}
+function move(){pos={x:40+Math.random()*520,y:40+Math.random()*320};draw();}
+document.getElementById('start').onclick=()=>{s=0;document.getElementById('score').textContent='Score: 0';on=true;document.getElementById('status').textContent='Playing…';move();clearInterval(t);t=setInterval(move,1200);};
+c.onclick=e=>{if(!on)return;const r=c.getBoundingClientRect(),mx=(e.clientX-r.left)*(600/r.width),my=(e.clientY-r.top)*(400/r.height);if(Math.hypot(mx-pos.x,my-pos.y)<28){s++;document.getElementById('score').textContent='Score: '+s;move();}};
+draw();
+</script>
+</body>
+</html>
