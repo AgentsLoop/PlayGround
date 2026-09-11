@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Twisted Metal — delivery fix verification</title>
+<style>
+  :root{--bg:#0d0d12;--panel:#17141f;--panel2:#1f1826;--red:#e5383b;--orange:#ff7b1c;--gold:#f5c518;--purple:#7b2ff7;--text:#f2e9e4;--muted:#b8a9a3;--green:#2ec4b6;--line:#3a2b3f}
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#2b1230 0%,var(--bg) 60%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.5}
+  header{background:linear-gradient(180deg,#1a0e18,#0d0d12);border-bottom:3px solid var(--red);padding:28px 20px;text-align:center;position:relative;overflow:hidden}
+  header::before{content:"🎪 🎡 🤡 🏟️";position:absolute;top:6px;left:0;right:0;opacity:.25;letter-spacing:12px;font-size:18px}
+  h1{margin:10px 0 6px;font-size:clamp(22px,4vw,38px);letter-spacing:.5px;text-transform:uppercase}
+  h1 .accent{color:var(--orange)}
+  .subtitle{color:var(--muted);max-width:900px;margin:0 auto}
+  .goalbox{max-width:1000px;margin:18px auto 0;background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--gold);border-radius:10px;padding:14px 18px;text-align:left}
+  main{max-width:1100px;margin:0 auto;padding:20px}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin:18px 0}
+  section h2{margin:0 0 10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-size:18px;border-bottom:1px dashed var(--line);padding-bottom:8px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{border:1px solid var(--line);padding:10px;vertical-align:top;text-align:left}
+  th{background:var(--panel2);color:var(--gold)}
+  tr:nth-child(even) td{background:#14101b}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700}
+  .done{background:#0f5132;color:#7ef0c1;border:1px solid #2ec4b6}
+  .pending{background:#5c3d00;color:#ffd166;border:1px solid var(--gold)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+  .card{background:#100d16;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .card img{width:100%;height:130px;object-fit:cover;display:block;background:#000}
+  .card .body{padding:10px;font-size:13px}
+  .card a{color:var(--gold);word-break:break-word}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;background:#0a090e;border:1px solid var(--line);border-radius:8px;padding:12px;white-space:pre-wrap;word-break:break-word}
+  ul.traits{columns:2;column-gap:28px;margin:10px 0}
+  ul.traits li{margin:6px 0}
+  a{color:#ff9e5e}
+  .btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+  .btn{display:inline-block;padding:10px 18px;border-radius:8px;font-weight:800;text-decoration:none}
+  .btn-play{background:var(--red);color:#fff;border:2px solid #ff7b7b}
+  .btn-ghost{background:transparent;color:var(--gold);border:2px solid var(--gold)}
+  footer{color:var(--muted);text-align:center;padding:20px;font-size:13px}
+  .stripes{height:10px;background:repeating-linear-gradient(45deg,var(--red) 0 16px,#fff 16px 32px,var(--gold) 32px 48px,#222 48px 64px);border-radius:0 0 12px 12px;opacity:.9}
+</style>
+</head>
+<body>
+<header>
+  <div>🎪 TWISTED CARNIVAL OF COMBAT 🎪</div>
+  <h1>Twisted Metal — <span class="accent">delivery fix verification</span></h1>
+  <p class="subtitle">Live progress page — concrete evidence of each gauntlet-loop round, updated as work evolves.</p>
+  <div class="goalbox">
+    <strong>Goal summary:</strong>
+    <ul style="margin:8px 0 0">
+      <li>Build a <strong>playable 3D vehicle combat</strong> browser game (Twisted Metal project).</li>
+      <li>Compare every round vs the <strong>Twisted Metal Black bar</strong> (PS2 quality bar below).</li>
+      <li>Keep <strong>worker files out of commit</strong> (.agents/, .agentsweb/, .omgithub-runtime/, .opencode-*, node_modules/, screenshots/ via .gitignore).</li>
+      <li>Leave changes <strong>uncommitted</strong> — verification only, <code>Do NOT commit</code>.</li>
+    </ul>
+  </div>
+</header>
+
+<main>
+<!-- GAUNTLET-LOOP-EDIT-HINT: update Rounds table + Delivery verification + footer timestamp as work evolves. Keep single file, inline CSS only. -->
+
+<section id="quality-bar">
+  <h2>1. Quality bar — Twisted Metal Black (PS2)</h2>
+  <p>Every builder/critic round is judged against this bar. Blind compare: does the current <code>index.html</code> beat it?</p>
+  <ul class="traits">
+    <li><strong>Dark industrial arena:</strong> grimy asylum / factory / rooftop, fog, flickering lights, destructibles.</li>
+    <li><strong>Chase cam:</strong> tight third-person follow, shake on hits, FOV kick on boost.</li>
+    <li><strong>Armed cars:</strong> machine guns + missiles / specials per vehicle, lock-on or aimed fire.</li>
+    <li><strong>Pickups:</strong> health, weapons, turbo scattered in arena, respawn timers.</li>
+    <li><strong>HUD:</strong> health, weapon/ammo, radar/minimap, timer, kill feed.</li>
+    <li><strong>AI aggression:</strong> 3+ bots that hunt, flee when weak, grab pickups, ram.</li>
+  </ul>
+
+  <h3 style="color:#ff9e5e">Image-search evidence — 8 results from /tmp/tm-search.json</h3>
+  <p style="color:#b8a9a3;font-size:13px">Query: “Twisted Metal Black gameplay” — 2026-09-11T02:16:38 — 8 results. Titles / URLs / thumbnails embedded.</p>
+  <div class="grid">
+    <div class="card"><img src="https://ts2.mm.bing.net/th?id=OIP.caLuUggWpJI22ih1VxVemgHaEK&amp;pid=15.1" alt="Twisted Metal: Black ... (PS2) Gameplay thumbnail"><div class="body"><strong>1. Twisted Metal: Black ... (PS2) Gameplay - YouTube</strong><br>Source: YouTube &gt; 10min Gameplay<br><a href="https://www.youtube.com/watch?v=9MVXqguFC_M">https://www.youtube.com/watch?v=9MVXqguFC_M</a><br><span style="color:#b8a9a3">Full: https://i.ytimg.com/vi/9MVXqguFC_M/maxresdefault.jpg</span></div></div>
+    <div class="card"><img src="https://ts2.mm.bing.net/th?id=OIP.2icw364CCfCTaZcOfUex3AHaEK&amp;pid=15.1" alt="Twisted Metal: Black on PS4 thumbnail"><div class="body"><strong>2. Twisted Metal: Black on PS4 — price history, screenshots, discounts • USA</strong><br>Source: psprices.com — 1920×1080<br><a href="https://psprices.com/region-us/game/125505/twisted-metal-black">psprices.com/region-us/…</a><br><span style="color:#b8a9a3">Full: image.api.playstation.com … PREVIEW_SCREENSHOT8</span></div></div>
+    <div class="card"><img src="https://ts4.mm.bing.net/th?id=OIP.gj7UdBLRRuoABrjCiJtnMwHaEK&amp;pid=15.1" alt="Twisted Metal Black thumbnail"><div class="body"><strong>3. Twisted Metal Black</strong><br>Source: fity.club — 1280×720<br><a href="https://fity.club/lists/suggestions/Twisted-Metal-Black/">fity.club/…/Twisted-Metal-Black/</a><br><span style="color:#b8a9a3">Full: https://i.ytimg.com/vi/s8E811N97mw/maxresdefault.jpg</span></div></div>
+    <div class="card"><img src="https://ts1.mm.bing.net/th?id=OIP.yfEHho-nuZ4eix2IYDsYJwHaEK&amp;pid=15.1" alt="Twisted Metal: Black - PS2 Gameplay 1080p thumbnail"><div class="body"><strong>4. Twisted Metal: Black - PS2 Gameplay 1080p (PCSX2) - YouTube</strong><br>Source: YouTube &gt; John GodGames<br><a href="https://www.youtube.com/watch?v=L9F1jv1qJNQ">https://www.youtube.com/watch?v=L9F1jv1qJNQ</a><br><span style="color:#b8a9a3">Full: https://i.ytimg.com/vi/L9F1jv1qJNQ/maxresdefault.jpg</span></div></div>
+    <div class="card"><img src="https://ts3.mm.bing.net/th?id=OIP.U7zuO0iqLpXJlf2TxjUqNgHaEK&amp;pid=15.1" alt="Twisted Metal: Black PS store thumbnail"><div class="body"><strong>5. Twisted Metal: Black™</strong><br>Source: store.playstation.com — 1920×1080<br><a href="https://store.playstation.com/pt-br/product/UP9000-CUSA02036_00-SCUS971010000001/">store.playstation.com/…</a><br><span style="color:#b8a9a3">Full: …/PREVIEW_SCREENSHOT1_104582.jpg</span></div></div>
+    <div class="card"><img src="https://ts2.mm.bing.net/th?id=OIP.a7EGIYlViuP3lxkPg0BiagHaEK&amp;pid=15.1" alt="Twisted Metal: Black gameplay thumbnail"><div class="body"><strong>6. Twisted Metal: Black gameplay - YouTube</strong><br>Source: www.youtube.com — 1280×720<br><a href="https://www.youtube.com/watch?v=zwNOddkPwWA">https://www.youtube.com/watch?v=zwNOddkPwWA</a><br><span style="color:#b8a9a3">Full: https://i.ytimg.com/vi/zwNOddkPwWA/maxresdefault.jpg</span></div></div>
+    <div class="card"><img src="https://ts4.mm.bing.net/th?id=OIP.mmjUgflNFa_pSR7hE_rgEQHaEK&amp;pid=15.1" alt="Twisted Metal: Black gameplay thumbnail 2"><div class="body"><strong>7. Twisted Metal: Black gameplay - YouTube</strong><br>Source: www.youtube.com — 1280×720<br><a href="https://www.youtube.com/watch?v=aXOt2-zGI-o">https://www.youtube.com/watch?v=aXOt2-zGI-o</a><br><span style="color:#b8a9a3">Full: https://i.ytimg.com/vi/aXOt2-zGI-o/maxresdefault.jpg</span></div></div>
+    <div class="card"><img src="https://ts2.mm.bing.net/th?id=OIP.X74i21M_os5U_FqB1cFHzQHaEK&amp;pid=15.1" alt="Twisted Metal: Black PS store thumbnail 2"><div class="body"><strong>8. Twisted Metal: Black™</strong><br>Source: store.playstation.com — 1920×1080<br><a href="https://store.playstation.com/pt-br/product/UP9000-CUSA02036_00-SCUS971010000001/">store.playstation.com/…</a><br><span style="color:#b8a9a3">Full: …/PREVIEW_SCREENSHOT3_104582.jpg</span></div></div>
+  </div>
+
+  <h3 style="color:#ff9e5e">Sketchfab model used (grounded)</h3>
+  <div class="mono">Model: Classic Muscle car
+UID: 641efc889e5f4543bae51d0922e6f4b3
+Author: Lexyc16 — https://sketchfab.com/Lexyc16
+Model URL: https://sketchfab.com/3d-models/none-641efc889e5f4543bae51d0922e6f4b3
+License: CC Attribution (credit required, see attribution link below)
+File: models/classic-muscle.glb — 258208 bytes (~252KB)
+Faces: 5594 / Verts: 5361 (from attribution JSON)
+Inspected evidence via inspect_glb.mjs output: 20 meshes, 9 materials, KHR_materials_clearcoat, 0 textures
+Attribution JSON: <a href="./models/classic-muscle.glb.attribution.json">models/classic-muscle.glb.attribution.json</a></div>
+</section>
+
+<section id="rounds">
+  <h2>2. Gauntlet-loop rounds — evidence</h2>
+  <table>
+    <thead><tr><th>Round</th><th>Builder output</th><th>Critic verdict</th><th>Biggest gap vs Black bar</th><th>Fix applied / next</th><th>Timestamp (UTC)</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Round 1</strong></td>
+        <td>Builder landed <code>index.html</code> — 47,936 bytes (~47KB), 848 lines, single file inline CSS, Three.js r160 importmap — plus <code>models/classic-muscle.glb</code> 258,208 bytes (~252KB) on 2026-09-11 02:19 UTC. Player Classic Muscle GLB upgrade wired via GLTFLoader (procedural fallback kept); 3 procedural box-body foes; MG + homing missiles; pickups (msl/hp/ar); HUD (hull/armor/weapons/kills/timer/minimap/killfeed); chase cam + shake + FOV kick.<br><span style="color:#b8a9a3">Evidence: <code>ls -l</code> + <code>wc</code> verified sizes above.</span></td>
+        <td><strong>FAIL</strong> vs Twisted Metal Black bar. Blind winner: <strong>Bar</strong>. Per-trait: Arena 4/10, Cars 5/10, HUD 7/10, Pickups 6/10, AI 4/10, Carnival 6/10.</td>
+        <td>Biggest gap: “only player gets real GLB, enemies are boxes + AI never fires missiles” (AI calls <code>fireGun</code> only; foe <code>missiles:0</code>, <code>fireMissile</code> never invoked for AI).</td>
+        <td>Ordered defects for Round 2: (1) arena emptiness, (2) CDN single-point (unpkg importmap, no fallback), (3) combat feel placeholder, (4) rules contradiction (start says 8 kills vs timer text “4 kills” / deaths≥8).</td>
+        <td>2026-09-11 02:19 UTC (builder landed; critic verdict FAIL recorded)</td>
+        <td><span class="badge done">ROUND 1 DONE</span></td>
+      </tr>
+      <tr>
+        <td><strong>Round 2</strong></td>
+        <td>Builder landed fix: <code>index.html</code> 914 lines / 52,290 bytes (was 848/47,936). AI GLB clones tinted teal/purple/yellow share geometries; AI start 3 missiles + seek msl pickups + fire homing 15-60m cd 6-9s; rules unified First-to-8 (barrels +1 missile, no kill inflation, no deaths&gt;=8 loss); enemy HP bar sprites + pooled muzzle light + camera clamp; CDN watchdog overlay with jsDelivr fallback. Evidence: <code>node --check PASS</code>, GLB glTF2 header valid 258,208B.</td>
+        <td><strong>IMPROVED — narrow FAIL/near-pass</strong> vs Black bar (self-check; blind winner still Bar on arena density/verticality, but car/AI/rules gaps closed). Per-trait now: Arena 4/10, Cars 8/10, HUD 7/10, Pickups 7/10, AI 7/10, Carnival 6/10.</td>
+        <td>Remaining biggest gap: arena density/verticality (flat 120m lot vs Black gothic city) + no shadowmaps; next would be ramps/interiors + denser props.</td>
+        <td>Landed 2026-09-11 02:26 UTC, uncommitted. Loopback http.server blocked in sandbox (curl 000) so verified via file+header+node checks; re-run <code>python3 -m http.server</code> + open index.html in browser before ship.</td>
+        <td>2026-09-11 02:26 UTC (fix landed + verified)</td>
+        <td><span class="badge done">ROUND 2 DONE</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="color:#b8a9a3;font-size:13px">How to update: edit this file’s Rounds table rows in place (keep history, append Round 3+ rows). Do not delete critic verdicts.</p>
+</section>
+
+<section id="delivery">
+  <h2>3. Delivery verification — uncommitted only, worker files excluded</h2>
+  <p>Requirement: worker/runtime files must stay out of the commit; all work stays uncommitted.</p>
+  <h3 style="color:#ff9e5e">git status (2026-09-11 02:28 UTC, branch opencode/34553863986)</h3>
+  <div class="mono">## opencode/34553863986
+?? .gitignore
+?? Agents.md
+?? index.html       &lt;-- 52290 bytes (~51KB), 914 lines, uncommitted
+?? models/          &lt;-- classic-muscle.glb (252KB) + attribution JSON, uncommitted
+?? progress.html    &lt;-- this file (untracked, NOT committed)
+
+# Verified 02:28 UTC: node --check PASS, GLB glTF2 valid, git check-ignore confirms .agents/.agentsweb/.omgithub-runtime/.opencode-*/node_modules/screenshots excluded, no staged changes, no commits.</div>
+  <h3 style="color:#ff9e5e">.gitignore — excludes worker files</h3>
+  <div class="mono">screenshots/
+*.log
+*.pid
+.agents/
+.agentsweb/
+.omgithub-runtime/
+.opencode-ssh/
+.opencode-web/
+node_modules/
+# Covers required: .agents/, .agentsweb/, .omgithub-runtime/, .opencode-* (.opencode-ssh/, .opencode-web/), node_modules/, screenshots/</div>
+  <p style="font-size:13px;color:#b8a9a3">Note: <code>.gitignore</code> itself is currently untracked (uncommitted), so exclusions apply once staged — until then, do not <code>git add -A</code>. Add only <code>index.html</code> / <code>progress.html</code> / <code>models/</code> intentionally. Never commit <code>.agents*/</code>, runtime dirs, or screenshots.</p>
+</section>
+
+<section id="links">
+  <h2>4. Links</h2>
+  <div class="btns">
+    <a class="btn btn-play" href="./index.html">▶ Play index.html</a>
+    <a class="btn btn-ghost" href="./models/classic-muscle.glb">⬇ models/classic-muscle.glb</a>
+    <a class="btn btn-ghost" href="https://sketchfab.com/3d-models/none-641efc889e5f4543bae51d0922e6f4b3">© Attribution: Lexyc16 / Sketchfab (CC Attribution)</a>
+    <a class="btn btn-ghost" href="./models/classic-muscle.glb.attribution.json">📄 GLB attribution JSON</a>
+  </div>
+  <p style="font-size:13px;color:#b8a9a3">index.html status: <strong>PRESENT</strong> — 52,290 bytes (~51KB), 914 lines, Round 2 fix landed 2026-09-11 02:26 UTC next to this file. GLB present: models/classic-muscle.glb (258,208 bytes / 252KB).</p>
+</section>
+<div class="stripes"></div>
+</main>
+<footer>Last updated: 2026-09-11 02:28 UTC · Single file, inline CSS, no external CSS/JS deps (remote thumbnail images only as evidence) · Do NOT commit — verification page.</footer>
+</body>
+</html>
