@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Neon Orchard Courier</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍃</text></svg>" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="wrap">
+  <header id="topbar">
+    <div class="logo">🍃 NEON ORCHARD <span>COURIER</span></div>
+    <div id="hud">
+      <div class="pill" id="hud-time" title="Time left">⏱ 90.0</div>
+      <div class="pill" id="hud-parcels" title="Delivered / Collected">📦 0/3 ✓</div>
+      <div class="pill" id="hud-carry" title="Currently carrying">🤖 empty</div>
+      <div class="pill hearts" id="hud-hearts" title="Hull">♥♥♥</div>
+      <div class="pill" id="hud-score" title="Score">★ 0</div>
+      <button class="pill btn" id="btn-mute" title="Mute (M)">🔊</button>
+      <button class="pill btn" id="btn-pause" title="Pause (P)">⏸</button>
+      <button class="pill btn" id="btn-restart" title="Restart (R)">↻</button>
+    </div>
+  </header>
+
+  <main id="stage">
+    <canvas id="game" aria-label="Neon Orchard Courier game canvas"></canvas>
+
+    <div id="overlay" class="show">
+      <div class="card">
+        <h1 id="ov-title">NEON ORCHARD COURIER</h1>
+        <p id="ov-sub">Guide the courier drone through the glowing orchard.</p>
+        <div id="ov-body"></div>
+        <div class="keys">
+          <span><b>WASD / ←↑↓→</b> fly</span>
+          <span><b>P</b> pause</span>
+          <span><b>R</b> restart</span>
+          <span><b>M</b> mute</span>
+          <span><b>Enter</b> start</span>
+        </div>
+        <button id="ov-btn">▶ Start delivery run</button>
+        <p class="hint">Collect 3 parcels → carry each to the glowing <b>drop pad</b> before the 90s timer ends. Avoid fireflies — 3 hits ends the run. Touch: drag anywhere to steer.</p>
+      </div>
+    </div>
+
+    <div id="toast" aria-live="polite"></div>
+  </main>
+
+  <footer id="foot">
+    <span>Canvas 2D · keyboard + touch · no build step — open <b>index.html</b></span>
+    <span id="fps"></span>
+  </footer>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
