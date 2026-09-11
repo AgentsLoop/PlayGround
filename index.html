@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PlayGround — Bounce</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; background: #101418; color: #e8edf2;
+         display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+  h1 { font-size: 1.4rem; margin: 1rem 0 0.25rem; }
+  p { margin: 0.25rem 0 1rem; color: #9fb0c0; }
+  #score { font-variant-numeric: tabular-nums; }
+  canvas { background: #1a222b; border: 1px solid #33404d; border-radius: 8px;
+           cursor: crosshair; touch-action: none; }
+</style>
+</head>
+<body>
+<h1>PlayGround — Bounce</h1>
+<p>Click the ball to score. <span id="score">Score: 0</span></p>
+<canvas id="game" width="480" height="320"></canvas>
+<script>
+(function () {
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+  var scoreEl = document.getElementById('score');
+  var score = 0;
+  var ball = { x: 240, y: 160, vx: 2.4, vy: 1.8, r: 18 };
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#4fc3f7';
+    ctx.fill();
+  }
+  function step() {
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    if (ball.x - ball.r < 0 || ball.x + ball.r > canvas.width) ball.vx *= -1;
+    if (ball.y - ball.r < 0 || ball.y + ball.r > canvas.height) ball.vy *= -1;
+    draw();
+    requestAnimationFrame(step);
+  }
+  canvas.addEventListener('pointerdown', function (e) {
+    var rect = canvas.getBoundingClientRect();
+    var x = (e.clientX - rect.left) * (canvas.width / rect.width);
+    var y = (e.clientY - rect.top) * (canvas.height / rect.height);
+    if (Math.hypot(x - ball.x, y - ball.y) <= ball.r) {
+      score += 1;
+      scoreEl.textContent = 'Score: ' + score;
+      ball.vx *= 1.05;
+      ball.vy *= 1.05;
+    }
+  });
+  document.title = 'PlayGround — Bounce';
+  window.__gameReady = true;
+  step();
+})();
+</script>
+</body>
+</html>
