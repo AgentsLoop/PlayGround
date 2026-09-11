@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:," />
+<title>PlayGround — Dodge Blocks</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    background: #0b1020; color: #e8ecf8;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  header { text-align: center; padding: 16px 12px 4px; }
+  header h1 { margin: 0 0 4px; font-size: 28px; letter-spacing: .5px; }
+  header p { margin: 0; opacity: .75; font-size: 14px; }
+  #hud {
+    display: flex; gap: 16px; align-items: center; justify-content: center;
+    margin: 12px 0; font-size: 16px;
+  }
+  #hud strong { font-variant-numeric: tabular-nums; }
+  #wrap { position: relative; }
+  canvas {
+    background: #111832; border: 2px solid #2e3a67; border-radius: 12px;
+    max-width: min(92vw, 480px); width: 480px; height: 640px;
+    touch-action: none; display: block;
+  }
+  #overlay {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    background: rgba(5,8,20,.72); border-radius: 12px; padding: 20px;
+  }
+  #overlay[hidden] { display: none; }
+  #overlay h2 { margin: 0 0 8px; }
+  #overlay p { margin: 6px 0; opacity: .85; font-size: 14px; max-width: 34ch; }
+  button {
+    margin-top: 12px; padding: 10px 22px; font-size: 16px; font-weight: 700;
+    border: 0; border-radius: 999px; cursor: pointer;
+    background: #4f7cff; color: white;
+  }
+  button:hover { background: #3b63d8; }
+  footer { margin: 12px 0 24px; font-size: 12px; opacity: .55; }
+</style>
+</head>
+<body>
+<header>
+  <h1>PlayGround — Dodge Blocks</h1>
+  <p>Move with ← → ↑ ↓ / WASD or drag. Survive as long as you can.</p>
+</header>
+<div id="hud">
+  <span>Score: <strong id="score">0</strong></span>
+  <span>Best: <strong id="best">0</strong></span>
+  <span>Status: <strong id="status">ready</strong></span>
+</div>
+<div id="wrap">
+  <canvas id="game" width="480" height="640" aria-label="Dodge Blocks game canvas"></canvas>
+  <div id="overlay">
+    <h2 id="overlay-title">Dodge Blocks</h2>
+    <p id="overlay-text">Press Start or hit Space. Dodge the falling blocks and grab stars for bonus points.</p>
+    <button id="startBtn" type="button">Start</button>
+  </div>
+</div>
+<footer>PlayGround browser game experiment · single-file build · no dependencies</footer>
+<script>
+(function () {
+  "use strict";
+  var canvas = document.getElementById("game");
+  var ctx = canvas.getContext("2d");
+  var scoreEl = document.getElementById("score");
+  var bestEl = document.getElementById("best");
+  var statusEl = document.getElementById("status");
+  var overlay = document.getElementById("overlay");
+  var overlayTitle = document.getElementById("overlay-title");
+  var overlayText = document.getElementById("overlay-text");
+  var startBtn = document.getElementById("startBtn");
+
+  var W = canvas.width, H = canvas.height;
+  var keys = {};
+  var player, blocks, stars, score, best, running, lastTime, spawnTimer, starTimer, rafId;
+
+  try { best = parseInt(localStorage.getItem("playground-best") || "0", 10) || 0; }
+  catch (e) { best = 0; }
+  bestEl.textContent = String(best);
+
+  function reset() {
+    player = { x: W / 2, y: H - 80, r: 14, speed: 300, vx: 0, vy: 0 };
+    blocks = [];
+    stars = [];
+    score = 0;
+    spawnTimer = 0;
+    starTimer = 1.2;
+    scoreEl.textContent = "0";
+    statusEl.textContent = "ready";
+  }
+
+  function start() {
+    reset();
+    running = true;
+    overlay.hidden = true;
+    statusEl.textContent = "playing";
+    lastTime = performance.now();
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function gameOver() {
+    running = false;
+    statusEl.textContent = "game-over";
+    if (score > best) {
+      best = Math.floor(score);
+      bestEl.textContent = String(best);
+      try { localStorage.setItem("playground-best", String(best)); } catch (e) {}
+    }
+    overlay.hidden = false;
+    overlayTitle.textContent = "Game Over — Score " + Math.floor(score);
+    overlayText.textContent = "Press Start or hit Space to play again. Best: " + best + ".";
+    startBtn.textContent = "Restart";
+  }
+
+  function spawnBlock() {
+    var w = 22 + Math.random() * 46;
+    blocks.push({
+      x: Math.random() * (W - w),
+      y: -30,
+      w: w,
+      h: 18 + Math.random() * 22,
+      vy: 140 + Math.random() * 160 + score * 0.35,
+      vx: (Math.random() - 0.5) * 60
+    });
+  }
+
+  function spawnStar() {
+    stars.push({
+      x: 20 + Math.random() * (W - 40),
+      y: -20,
+      r: 9,
+      vy: 120 + Math.random() * 80,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+
+  function update(dt) {
+    var ax = 0, ay = 0;
+    if (keys.ArrowLeft || keys.a || keys.A) ax -= 1;
+    if (keys.ArrowRight || keys.d || keys.D) ax += 1;
+    if (keys.ArrowUp || keys.w || keys.W) ay -= 1;
+    if (keys.ArrowDown || keys.s || keys.S) ay += 1;
+    var len = Math.hypot(ax, ay) || 1;
+    player.x += (ax / len) * player.speed * dt + player.vx * dt;
+    player.y += (ay / len) * player.speed * dt + player.vy * dt;
+    player.vx *= 0.9; player.vy *= 0.9;
+    player.x = Math.max(player.r, Math.min(W - player.r, player.x));
+    player.y = Math.max(player.r, Math.min(H - player.r, player.y));
+
+    score += dt * 10;
+    scoreEl.textContent = String(Math.floor(score));
+
+    spawnTimer -= dt;
+    if (spawnTimer <= 0) {
+      spawnBlock();
+      var interval = Math.max(0.18, 0.7 - score * 0.002);
+      spawnTimer = interval;
+    }
+    starTimer -= dt;
+    if (starTimer <= 0) { spawnStar(); starTimer = 2.2 + Math.random() * 2; }
+
+    var i, b, s;
+    for (i = 0; i < blocks.length; i++) {
+      b = blocks[i];
+      b.y += b.vy * dt;
+      b.x += b.vx * dt;
+      if (b.x < 0 || b.x + b.w > W) b.vx *= -1;
+      // circle-vs-rect collision
+      var cx = Math.max(b.x, Math.min(player.x, b.x + b.w));
+      var cy = Math.max(b.y, Math.min(player.y, b.y + b.h));
+      var dx = player.x - cx, dy = player.y - cy;
+      if (dx * dx + dy * dy < player.r * player.r) { gameOver(); return; }
+    }
+    blocks = blocks.filter(function (b) { return b.y < H + 40; });
+
+    for (i = 0; i < stars.length; i++) {
+      s = stars[i];
+      s.y += s.vy * dt;
+      s.phase += dt * 4;
+      var sdx = player.x - s.x, sdy = player.y - s.y;
+      if (sdx * sdx + sdy * sdy < Math.pow(player.r + s.r, 2)) {
+        score += 25;
+        s.taken = true;
+      }
+    }
+    stars = stars.filter(function (s) { return !s.taken && s.y < H + 30; });
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+    // grid backdrop
+    ctx.strokeStyle = "rgba(120,140,255,0.08)";
+    ctx.lineWidth = 1;
+    var g;
+    for (g = 0; g < W; g += 40) { ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, H); ctx.stroke(); }
+    for (g = 0; g < H; g += 40) { ctx.beginPath(); ctx.moveTo(0, g); ctx.lineTo(W, g); ctx.stroke(); }
+
+    // stars
+    var i, s;
+    for (i = 0; i < stars.length; i++) {
+      s = stars[i];
+      ctx.save();
+      ctx.translate(s.x, s.y + Math.sin(s.phase) * 2);
+      ctx.fillStyle = "#ffd84f";
+      ctx.beginPath();
+      for (var k = 0; k < 5; k++) {
+        var a = -Math.PI / 2 + k * (Math.PI * 2 / 5);
+        var a2 = a + Math.PI / 5;
+        ctx.lineTo(Math.cos(a) * s.r, Math.sin(a) * s.r);
+        ctx.lineTo(Math.cos(a2) * (s.r * 0.45), Math.sin(a2) * (s.r * 0.45));
+      }
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+    // blocks
+    ctx.fillStyle = "#ff5470";
+    for (i = 0; i < blocks.length; i++) {
+      var b = blocks[i];
+      ctx.beginPath();
+      var r = 6;
+      if (ctx.roundRect) ctx.roundRect(b.x, b.y, b.w, b.h, r); else ctx.rect(b.x, b.y, b.w, b.h);
+      ctx.fill();
+    }
+
+    // player
+    var pulse = running ? 1 + Math.sin(t / 180) * 0.06 : 1;
+    ctx.save();
+    ctx.translate(player.x, player.y);
+    ctx.scale(pulse, pulse);
+    ctx.fillStyle = "#4f7cff";
+    ctx.strokeStyle = "#bcd0ff";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, 0, player.r, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#fff";
+    ctx.beginPath(); ctx.arc(-4.5, -2, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(4.5, -2, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#0b1020";
+    ctx.beginPath(); ctx.arc(-4.5, -2, 1.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(4.5, -2, 1.2, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function loop(t) {
+    if (!running) return;
+    var now = t;
+    var dt = Math.min(0.05, (now - lastTime) / 1000);
+    lastTime = now;
+    update(dt);
+    if (running) draw(now);
+    if (running) rafId = requestAnimationFrame(loop);
+  }
+
+  window.addEventListener("keydown", function (e) {
+    keys[e.key] = true;
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      if (!running) start();
+    }
+    if (["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"," "].indexOf(e.key) >= 0) e.preventDefault();
+  });
+  window.addEventListener("keyup", function (e) { keys[e.key] = false; });
+
+  // pointer drag: velocity toward pointer
+  var dragging = false, lastPX = 0, lastPY = 0;
+  function toCanvas(e) {
+    var rect = canvas.getBoundingClientRect();
+    var cx = (e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX);
+    var cy = (e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY);
+    return {
+      x: (cx - rect.left) * (W / rect.width),
+      y: (cy - rect.top) * (H / rect.height)
+    };
+  }
+  canvas.addEventListener("pointerdown", function (e) {
+    dragging = true;
+    var p = toCanvas(e);
+    lastPX = p.x; lastPY = p.y;
+    canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId);
+    if (!running) start();
+  });
+  canvas.addEventListener("pointermove", function (e) {
+    if (!dragging || !running) return;
+    var p = toCanvas(e);
+    player.vx = (p.x - lastPX) * 12;
+    player.vy = (p.y - lastPY) * 12;
+    lastPX = p.x; lastPY = p.y;
+  });
+  ["pointerup","pointercancel","pointerleave"].forEach(function (ev) {
+    canvas.addEventListener(ev, function () { dragging = false; });
+  });
+
+  startBtn.addEventListener("click", start);
+
+  reset();
+  draw(0);
+
+  // Test hooks (used by automated browser checks)
+  window.__game = {
+    start: start,
+    get score() { return score; },
+    get running() { return running; },
+    get player() { return player; },
+    press: function (key, down) { keys[key] = !!down; }
+  };
+  window.__gameReady = true;
+})();
+</script>
+</body>
+</html>
