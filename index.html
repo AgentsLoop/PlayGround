@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PlayGround — Hermes Agent Support</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.5; }
+  header { padding: 24px 16px; text-align: center; }
+  main { max-width: 900px; margin: 0 auto; padding: 0 16px 48px; }
+  .card { border: 1px solid #8884; border-radius: 12px; padding: 16px; margin: 16px 0; }
+  code { background: #8882; padding: 1px 6px; border-radius: 6px; }
+  #hud { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin: 8px 0 12px; font-variant-numeric: tabular-nums; }
+  #hud strong { font-size: 1.1em; }
+  #game { width: 100%; max-width: 640px; aspect-ratio: 4 / 3; border: 1px solid #8886; border-radius: 12px; display: block; margin: 0 auto; touch-action: none; background: #0b1020; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+  button { padding: 10px 16px; border-radius: 10px; border: 1px solid #8886; cursor: pointer; font-size: 1em; }
+  button:hover { filter: brightness(1.1); }
+  #status { min-height: 1.6em; font-weight: 600; }
+  ul { margin: 8px 0; }
+  footer { text-align: center; opacity: .7; padding: 24px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>PlayGround</h1>
+  <p>Playground for browser game experiments — now with Hermes agent support.</p>
+</header>
+<main>
+  <section class="card" aria-label="Hermes support">
+    <h2>Hermes agent support</h2>
+    <ul>
+      <li>Project context: <code>HERMES.md</code> (highest priority) + <code>Agents.md</code></li>
+      <li>Native skills: <code>.hermes/skills/playground-guide</code> — try <code>/playground-guide</code></li>
+      <li>Shared skills: <code>.agents/skills/</code> (<code>gauntlet-loop</code>, <code>image-search</code>, <code>load-sketchfab-threejs</code>, <code>mcp-duckgo</code>, <code>opencode-zen-completions</code>)</li>
+      <li>Trust once: <code>hermes skills trust</code>, then <code>hermes skills list</code></li>
+    </ul>
+  </section>
+
+  <section class="card" aria-label="Mini game">
+    <h2>Catch the orb</h2>
+    <p>Click / tap the moving orb before time runs out. Score <strong>15</strong> to win. Keyboard: move the paddle with <code>←</code> <code>→</code> / <code>A</code> <code>D</code>; the orb can also be caught when it touches the paddle.</p>
+    <div id="hud">
+      <span>Score: <strong id="score">0</strong>/15</span>
+      <span>Time: <strong id="time">30</strong>s</span>
+      <span id="status" role="status">Press Start.</span>
+    </div>
+    <canvas id="game" width="640" height="480"></canvas>
+    <div class="row">
+      <button id="startBtn" type="button">Start</button>
+      <button id="restartBtn" type="button">Restart</button>
+    </div>
+  </section>
+</main>
+<footer>Serve over HTTP (never <code>file://</code>). Verify with a real browser.</footer>
+
+<script>
+(function () {
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+  var scoreEl = document.getElementById('score');
+  var timeEl = document.getElementById('time');
+  var statusEl = document.getElementById('status');
+  var startBtn = document.getElementById('startBtn');
+  var restartBtn = document.getElementById('restartBtn');
+
+  var WIN_SCORE = 15;
+  var ROUND_TIME = 30;
+  var orb = { x: 320, y: 200, r: 22, vx: 2.6, vy: 2.1 };
+  var paddle = { w: 110, h: 14, x: 265, y: 446, speed: 7 };
+  var keys = {};
+  var score = 0;
+  var timeLeft = ROUND_TIME;
+  var state = 'idle'; // idle | playing | won | lost
+  var lastTick = 0;
+  var raf = 0;
+
+  window.__game = { get score() { return score; }, get timeLeft() { return timeLeft; }, get state() { return state; } };
+  window.PLAYGROUND_READY = true;
+
+  function setStatus(msg) { statusEl.textContent = msg; }
+  function syncHud() { scoreEl.textContent = String(score); timeEl.textContent = String(Math.ceil(timeLeft)); }
+
+  function reset() {
+    score = 0; timeLeft = ROUND_TIME; state = 'idle';
+    orb.x = 320; orb.y = 200; orb.vx = 2.6; orb.vy = 2.1;
+    paddle.x = 265;
+    syncHud(); setStatus('Press Start.');
+    draw();
+  }
+
+  function start() {
+    if (state === 'playing') return;
+    score = 0; timeLeft = ROUND_TIME; state = 'playing';
+    lastTick = performance.now();
+    syncHud(); setStatus('Playing — catch the orb!');
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(loop);
+  }
+
+  function endGame(won) {
+    state = won ? 'won' : 'lost';
+    cancelAnimationFrame(raf);
+    syncHud();
+    setStatus(won ? 'You win! Score 15/15. Press Restart.' : 'Time up — you lose. Press Restart.');
+  }
+
+  function loop(now) {
+    if (state !== 'playing') return;
+    var dt = Math.min(0.05, (now - lastTick) / 1000);
+    lastTick = now;
+    timeLeft -= dt;
+    if (timeLeft <= 0) { timeLeft = 0; draw(); endGame(false); return; }
+
+    // move orb
+    orb.x += orb.vx * 60 * dt;
+    orb.y += orb.vy * 60 * dt;
+    if (orb.x < orb.r || orb.x > canvas.width - orb.r) orb.vx *= -1;
+    if (orb.y < orb.r + 40 || orb.y > canvas.height - orb.r - 30) orb.vy *= -1;
+
+    // move paddle
+    if (keys.left) paddle.x -= paddle.speed;
+    if (keys.right) paddle.x += paddle.speed;
+    paddle.x = Math.max(0, Math.min(canvas.width - paddle.w, paddle.x));
+
+    // paddle catch
+    if (orb.y + orb.r >= paddle.y && orb.x >= paddle.x && orb.x <= paddle.x + paddle.w && orb.vy > 0) {
+      orb.vy *= -1;
+      registerHit();
+    }
+
+    syncHud();
+    draw();
+    raf = requestAnimationFrame(loop);
+  }
+
+  function registerHit() {
+    score += 1;
+    // speed up slightly each hit
+    orb.vx *= 1.04; orb.vy *= 1.04;
+    // relocate orb away from paddle
+    orb.y = 80 + Math.random() * 200;
+    orb.x = 40 + Math.random() * (canvas.width - 80);
+    syncHud();
+    if (score >= WIN_SCORE) { draw(); endGame(true); }
+  }
+
+  function canvasPos(evt) {
+    var rect = canvas.getBoundingClientRect();
+    var cx = (evt.clientX - rect.left) * (canvas.width / rect.width);
+    var cy = (evt.clientY - rect.top) * (canvas.height / rect.height);
+    return { x: cx, y: cy };
+  }
+
+  canvas.addEventListener('pointerdown', function (evt) {
+    if (state !== 'playing') return;
+    var p = canvasPos(evt);
+    var dx = p.x - orb.x, dy = p.y - orb.y;
+    if (Math.sqrt(dx * dx + dy * dy) <= orb.r + 6) registerHit();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
+    if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
+  });
+  document.addEventListener('keyup', function (e) {
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
+    if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+  });
+
+  startBtn.addEventListener('click', start);
+  restartBtn.addEventListener('click', function () { reset(); start(); });
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#0b1020';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // orb glow
+    var g = ctx.createRadialGradient(orb.x, orb.y, 4, orb.x, orb.y, orb.r * 2.2);
+    g.addColorStop(0, '#7dd3fc');
+    g.addColorStop(1, 'rgba(125,211,252,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(orb.x, orb.y, orb.r * 2.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath(); ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2); ctx.fill();
+    // paddle
+    ctx.fillStyle = '#f472b6';
+    ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+  }
+
+  reset();
+})();
+</script>
+</body>
+</html>
