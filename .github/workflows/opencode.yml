@@ -3,7 +3,7 @@ run-name: "OpenCode #${{ github.event.issue.number || inputs.issue_number }}${{ 
 
 on:
   issues:
-    types: [opened, labeled]
+    types: [opened]
   workflow_dispatch:
     inputs:
       issue_number:
@@ -19,14 +19,14 @@ concurrency:
 
 jobs:
   prepare:
-    if: github.event_name == 'workflow_dispatch' || (github.event.action == 'opened' && (contains(github.event.issue.labels.*.name, 'OpenCode') || contains(github.event.issue.title, '/OpenCode'))) || (github.event.action == 'labeled' && github.event.label.name == 'OpenCode')
+    if: github.event_name == 'workflow_dispatch' || (github.event.action == 'opened' && (contains(github.event.issue.labels.*.name, 'OpenCode') || contains(github.event.issue.title, '/OpenCode')))
     permissions:
       contents: read
       issues: write
       actions: write
-    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-prepare.yml@a0f0af1a0cd434490587a12a9302104e03d5eb15
+    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-prepare.yml@74af8959815a483e1e19b829a317277e5204f6d6
     with:
-      runtime_ref: a0f0af1a0cd434490587a12a9302104e03d5eb15
+      runtime_ref: 74af8959815a483e1e19b829a317277e5204f6d6
 
   opencode:
     needs: prepare
@@ -35,9 +35,9 @@ jobs:
       contents: write
       issues: write
       actions: read
-    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-reusable.yml@a0f0af1a0cd434490587a12a9302104e03d5eb15
+    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-reusable.yml@74af8959815a483e1e19b829a317277e5204f6d6
     with:
-      runtime_ref: a0f0af1a0cd434490587a12a9302104e03d5eb15
+      runtime_ref: 74af8959815a483e1e19b829a317277e5204f6d6
       issue_number: ${{ needs.prepare.outputs.issue_number }}
       request: ${{ needs.prepare.outputs.request }}
       issue_title: ${{ needs.prepare.outputs.issue_title }}
