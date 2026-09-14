@@ -1,0 +1,24 @@
+const { chromium } = require('playwright-core');
+(async () => {
+  const exe = '/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing';
+  const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox', '--disable-gpu'] });
+  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  const logs = [];
+  page.on('console', (m) => logs.push(`[${m.type()}] ${m.text().slice(0, 500)}`));
+  page.on('pageerror', (e) => logs.push(`[pageerror] ${String(e).slice(0, 800)}`));
+  page.on('requestfailed', (r) => logs.push(`[reqfail] ${r.url().slice(0, 300)} :: ${r.failure()?.errorText}`));
+  page.on('response', (r) => { if (r.status() >= 400) logs.push(`[http${r.status()}] ${r.url().slice(0, 300)}`); });
+  await page.goto('http://localhost:3000/', { waitUntil: 'networkidle', timeout: 60000 });
+  await page.waitForTimeout(9000);
+  const html = await page.content();
+  console.log('HTML_LEN', html.length);
+  console.log('HAS_HOUSE', html.includes('PlayGround House'));
+  console.log('HAS_LOADING', html.includes('Loading house'));
+  console.log('HAS_FAILED', html.includes('Failed to load'));
+  console.log('HAS_CANVAS', html.includes('<canvas'));
+  console.log('---LOGS---');
+  logs.slice(0, 40).forEach((l) => console.log(l));
+  await page.screenshot({ path: 'screenshots/final-house.png' });
+  console.log('SHOT_OK');
+  await browser.close();
+})().catch((e) => { console.error('FATAL', e); process.exit(1); });

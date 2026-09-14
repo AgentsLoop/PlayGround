@@ -1,0 +1,30 @@
+{
+  "house": "PlayGround House",
+  "source": "https://github.com/pascalorg/editor",
+  "cli": "@pascal-app/cli 1.0.0",
+  "localProjectId": "4a23eb99f0de",
+  "savedSceneId": "39c5c315acfd",
+  "graphHash": "d13f237605183c4d28f9311b230599f3b6fc558f0ee55f01eb76db2ca039c933",
+  "nodeCount": 37,
+  "validation": { "valid": true, "errors": [] },
+  "verify": {
+    "ok": true,
+    "hasIssues": false,
+    "levels": [
+      { "level": "Level 0", "walls": 7, "zones": 4, "doors": 5, "windows": 5, "items": 8 },
+      { "level": "Roof", "roofs": 1 }
+    ]
+  },
+  "layout": {
+    "footprint": "10 x 7 m single storey",
+    "rooms": [
+      "Living Kitchen 42 m2",
+      "Bedroom 1 14 m2",
+      "Bathroom 7 m2",
+      "Bedroom 2 7 m2"
+    ],
+    "roof": "gable, pitch 30",
+    "openings": "1 front door, 4 interior doors, 5 windows"
+  },
+  "sceneFile": "public/house.scene.json"
+}
