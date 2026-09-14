@@ -1,0 +1,135 @@
+{
+  "config": {
+    "name": "D-vulkan-channel-headless",
+    "channel": "chromium",
+    "headless": true,
+    "args": [
+      "--enable-unsafe-webgpu",
+      "--ignore-gpu-blocklist",
+      "--enable-features=Vulkan",
+      "--use-angle=vulkan",
+      "--disable-vulkan-surface"
+    ],
+    "note": "SEPARATE Vulkan variant; NOT assumed suitable on macOS"
+  },
+  "startedAt": "2026-09-14T03:14:56.194Z",
+  "ok": true,
+  "browserVersion": "153.0.8010.12",
+  "sceneDone": true,
+  "probe": {
+    "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+    "hasGpu": true,
+    "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+    "adapter": {
+      "vendor": "google",
+      "device": "",
+      "description": "",
+      "architecture": "swiftshader",
+      "features": [
+        "depth32float-stencil8",
+        "rg11b10ufloat-renderable",
+        "bgra8unorm-storage",
+        "texture-compression-bc",
+        "chromium-experimental-sampling-resource-table",
+        "core-features-and-limits",
+        "chromium-experimental-timestamp-query-inside-passes",
+        "float32-filterable",
+        "indirect-first-instance",
+        "texture-compression-astc-sliced-3d",
+        "float32-blendable",
+        "subgroup-size-control",
+        "texture-compression-unaligned",
+        "texture-compression-astc",
+        "texture-compression-etc2",
+        "depth-clip-control",
+        "texture-compression-bc-sliced-3d",
+        "timestamp-query",
+        "clip-distances",
+        "texture-component-swizzle",
+        "subgroups"
+      ]
+    },
+    "scene": {
+      "gl": {
+        "ok": false,
+        "error": "webglcontextlost (compositor/context failure)"
+      },
+      "webgpu": {
+        "supported": true,
+        "gotAdapter": false,
+        "reason": "null adapter — blocked or unsupported, NOT skipped"
+      }
+    }
+  },
+  "sceneState": {
+    "done": true,
+    "scene": {
+      "gl": {
+        "ok": false,
+        "error": "webglcontextlost (compositor/context failure)"
+      },
+      "webgpu": {
+        "supported": true,
+        "gotAdapter": false,
+        "reason": "null adapter — blocked or unsupported, NOT skipped"
+      }
+    },
+    "errors": [],
+    "title": "DONE gl=true wgpu=undefined"
+  },
+  "screenshots": [
+    "page.png",
+    "canvas-gl.png",
+    "canvas-wgpu.png"
+  ],
+  "nonblank": [
+    {
+      "id": "gl",
+      "present": true,
+      "method": "n/a-webgl-context-owned-by-scene",
+      "note": "see centerPixel in scene state + file sizes"
+    },
+    {
+      "id": "wgpu",
+      "present": true,
+      "method": "drawImage-sample",
+      "distinctColors": 1,
+      "mean": 0
+    }
+  ],
+  "size_page.png": 36208,
+  "png_page.png": {
+    "width": 900,
+    "height": 700,
+    "distinctColors": 223,
+    "mean": 191.69,
+    "nonblank": true
+  },
+  "size_canvas-gl.png": 1435,
+  "png_canvas-gl.png": {
+    "width": 404,
+    "height": 304,
+    "distinctColors": 53,
+    "mean": 753.13,
+    "nonblank": true
+  },
+  "size_canvas-wgpu.png": 1104,
+  "png_canvas-wgpu.png": {
+    "width": 404,
+    "height": 304,
+    "distinctColors": 2,
+    "mean": 5.85,
+    "nonblank": false
+  },
+  "finishedAt": "2026-09-14T03:14:58.460Z",
+  "console": [
+    "[log] [scene] GL OK renderer=ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver) centerPixel=136,63,136,255",
+    "[warning] [.WebGL-0x114000c9000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x114000c9000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] WebGL: CONTEXT_LOST_WEBGL: loseContext: context lost",
+    "[warning] A valid external Instance reference no longer exists.",
+    "[log] [scene] WebGPU: adapter NULL (blocked/unsupported)",
+    "[log] [scene] SCENE DONE"
+  ],
+  "pageErrors": []
+}

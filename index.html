@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PlayGround 3D — WebGL cube + WebGPU triangle</title>
+<style>
+  html,body{margin:0;background:#111;color:#eee;font-family:monospace}
+  #wrap{display:flex;gap:12px;padding:12px;flex-wrap:wrap}
+  canvas{width:400px;height:300px;border:2px solid #555;background:#000;touch-action:none}
+  #status{padding:12px;white-space:pre-wrap;font-size:12px}
+  .badge{display:inline-block;padding:2px 8px;margin:2px;background:#222;border:1px solid #666}
+  #hint{margin:0 12px;color:#9cf;font-size:13px}
+</style>
+</head>
+<body>
+<h2 style="margin:12px">PlayGround 3D — WebGL cube + WebGPU triangle (no network)</h2>
+<p id="hint">Drag the left canvas to rotate the cube. The first frame is deterministic for screenshot tests.</p>
+<div id="wrap">
+  <div><div>WebGL canvas (drag to play)</div><canvas id="gl" width="400" height="300"></canvas><div id="gl-status" class="badge">gl: pending</div></div>
+  <div><div>WebGPU canvas</div><canvas id="wgpu" width="400" height="300"></canvas><div id="wgpu-status" class="badge">webgpu: pending</div></div>
+</div>
+<div id="status">booting…</div>
+<script>
+"use strict";
+window.__errors = [];
+window.__done = false;
+window.__scene = { gl: null, webgpu: null };
+window.__play = { ax: 0.4, ay: 0.6, dragging: false };
+function log(s){ const el=document.getElementById('status'); el.textContent += "\n"+s; console.log("[scene] "+s); }
+
+// ---------- Playable WebGL cube (deterministic first frame + drag + auto-rotate) ----------
+let GL = null;
+function persp(fov,aspect,near,far){
+  const f=1/Math.tan(fov/2), o=new Float32Array(16);
+  o[0]=f/aspect;o[5]=f;o[10]=(far+near)/(near-far);o[11]=-1;o[14]=2*far*near/(near-far);
+  return o;
+}
+function matMul(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];}return o;}
+function rotX(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([1,0,0,0, 0,c,s,0, 0,-s,c,0, 0,0,0,1]);}
+function rotY(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,-s,0, 0,1,0,0, s,0,c,0, 0,0,0,1]);}
+function translate(x,y,z){return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1]);}
+function drawCube(){
+  const gl=GL.gl; if(!gl) return;
+  const P=persp(Math.PI/4,400/300,0.1,100);
+  const M=matMul(P,matMul(translate(0,0,-6),matMul(rotY(window.__play.ay),rotX(window.__play.ax))));
+  gl.viewport(0,0,400,300);gl.clearColor(0.05,0.07,0.12,1.0);gl.enable(gl.DEPTH_TEST);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BIT);
+  gl.uniformMatrix4fv(GL.lm,false,M);gl.drawElements(gl.TRIANGLES,36,gl.UNSIGNED_SHORT,0);
+}
+function initGL(){
+  const canvas = document.getElementById('gl');
+  canvas.addEventListener('webglcontextlost',(e)=>{e.preventDefault();window.__scene.gl={ok:false,error:'webglcontextlost (compositor/context failure)'};document.getElementById('gl-status').textContent='gl: CONTEXT LOST';},false);
+  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+  if(!gl){ document.getElementById('gl-status').textContent='gl: NO CONTEXT'; window.__scene.gl={ok:false,error:'no context'}; return; }
+  let renderer='unknown';
+  try{
+    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+    if(dbg) renderer = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || renderer;
+    else renderer = gl.getParameter(gl.RENDERER) || renderer;
+  }catch(e){ renderer='query-failed: '+e.message; }
+  const vs='attribute vec3 p;attribute vec3 c;uniform mat4 m;varying vec3 v;void main(){gl_Position=m*vec4(p,1.0);v=c;}';
+  const fs='precision mediump float;varying vec3 v;void main(){gl_FragColor=vec4(v,1.0);}';
+  function sh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o;}
+  const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);gl.useProgram(pr);
+  // cube: 8 verts, 12 tris with per-vertex colors
+  const V=new Float32Array([-1,-1,-1, 1,-1,-1, 1,1,-1, -1,1,-1, -1,-1,1, 1,-1,1, 1,1,1, -1,1,1]);
+  const C=new Float32Array([1,0,0, 0,1,0, 0,0,1, 1,1,0, 1,0,1, 0,1,1, 1,1,1, 0.2,0.2,0.2]);
+  const I=new Uint16Array([0,1,2,0,2,3, 4,6,5,4,7,6, 0,4,5,0,5,1, 2,6,7,2,7,3, 0,3,7,0,7,4, 1,5,6,1,6,2]);
+  function buf(data,type){const b=gl.createBuffer();gl.bindBuffer(type,b);gl.bufferData(type,data,gl.STATIC_DRAW);return b;}
+  const vb=buf(V,gl.ARRAY_BUFFER); const cb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,cb);gl.bufferData(gl.ARRAY_BUFFER,C,gl.STATIC_DRAW);
+  buf(I,gl.ELEMENT_ARRAY_BUFFER);
+  const lp=gl.getAttribLocation(pr,'p'), lc=gl.getAttribLocation(pr,'c'), lm=gl.getUniformLocation(pr,'m');
+  gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,3,gl.FLOAT,false,0,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,cb);gl.enableVertexAttribArray(lc);gl.vertexAttribPointer(lc,3,gl.FLOAT,false,0,0);
+  GL={gl,lm};
+  drawCube(); // deterministic first frame: rotY(0.6) x rotX(0.4)
+  const px=new Uint8Array(4);gl.readPixels(200,150,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);
+  const ok = pr && gl.getProgramParameter(pr,gl.LINK_STATUS);
+  document.getElementById('gl-status').textContent='gl: OK renderer='+renderer;
+  window.__scene.gl={ok:!!ok,renderer:String(renderer).slice(0,300),centerPixel:Array.from(px)};
+  log('GL OK renderer='+renderer+' centerPixel='+Array.from(px));
+  // playability: drag to rotate + gentle auto-rotate
+  let px0=0,py0=0;
+  canvas.addEventListener('pointerdown',(e)=>{window.__play.dragging=true;px0=e.clientX;py0=e.clientY;canvas.setPointerCapture(e.pointerId);});
+  canvas.addEventListener('pointermove',(e)=>{if(!window.__play.dragging)return;window.__play.ay+=(e.clientX-px0)*0.01;window.__play.ax+=(e.clientY-py0)*0.01;px0=e.clientX;py0=e.clientY;drawCube();});
+  canvas.addEventListener('pointerup',()=>{window.__play.dragging=false;});
+  (function spin(){ if(!window.__play.dragging && !(window.__scene.gl&&window.__scene.gl.ok===false)){ window.__play.ay+=0.01; drawCube(); } requestAnimationFrame(spin); })();
+}
+
+// ---------- WebGPU triangle (bounded inside page) ----------
+async function initWebGPU(){
+  const el=document.getElementById('wgpu-status');
+  if(!('gpu' in navigator)){ el.textContent='webgpu: navigator.gpu ABSENT'; window.__scene.webgpu={supported:false,reason:'navigator.gpu absent'}; log('WebGPU: navigator.gpu absent'); return; }
+  let adapter=null;
+  try{
+    adapter = await Promise.race([
+      navigator.gpu.requestAdapter(),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('requestAdapter page-timeout 8000ms')),8000))
+    ]);
+  }catch(e){ el.textContent='webgpu: requestAdapter THREW '+e.message; window.__scene.webgpu={supported:true,gotAdapter:false,error:String(e&&e.message||e)}; log('WebGPU requestAdapter threw: '+e.message); return; }
+  if(!adapter){ el.textContent='webgpu: requestAdapter returned NULL (blocked/unsupported)'; window.__scene.webgpu={supported:true,gotAdapter:false,reason:'null adapter — blocked or unsupported, NOT skipped'}; log('WebGPU: adapter NULL (blocked/unsupported)'); return; }
+  let info={};
+  try{
+    if(adapter.requestAdapterInfo) info = await adapter.requestAdapterInfo();
+    else if(adapter.info) info = {vendor:adapter.info.vendor,architecture:adapter.info.architecture,device:adapter.info.device,description:adapter.info.description};
+    info.isFallbackAdapter = adapter.isFallbackAdapter;
+    try{ info.features = Array.from(adapter.features||[]).slice(0,50); }catch(_){}
+  }catch(e){ info.infoError=String(e&&e.message||e); }
+  try{
+    const device = await Promise.race([
+      adapter.requestDevice(),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('requestDevice page-timeout 8000ms')),8000))
+    ]);
+    const canvas=document.getElementById('wgpu');
+    const ctx=canvas.getContext('webgpu');
+    const fmt=navigator.gpu.getPreferredCanvasFormat();
+    ctx.configure({device,format:fmt,alphaMode:'opaque'});
+    const code=`
+      @vertex fn vs(@builtin(vertex_index) i:u32)->@builtin(position) vec4<f32>{
+        var p=array<vec2<f32>,3>(vec2<f32>(0.0,0.8),vec2<f32>(-0.8,-0.8),vec2<f32>(0.8,-0.8));
+        return vec4<f32>(p[i],0.0,1.0);
+      }
+      @fragment fn fs()->@location(0) vec4<f32>{ return vec4<f32>(0.1,0.9,0.35,1.0); }`;
+    const mod=device.createShaderModule({code});
+    const pipe=device.createRenderPipeline({layout:'auto',vertex:{module:mod,entryPoint:'vs'},fragment:{module:mod,entryPoint:'fs',targets:[{format:fmt}]},primitive:{topology:'triangle-list'}});
+    const enc=device.createCommandEncoder();
+    const tex=ctx.getCurrentTexture();
+    const pass=enc.beginRenderPass({colorAttachments:[{view:tex.createView(),loadOp:'clear',clearValue:{r:0.08,g:0.1,b:0.35,a:1},storeOp:'store'}]});
+    pass.setPipeline(pipe);pass.draw(3);pass.end();
+    device.queue.submit([enc.finish()]);
+    await device.queue.onSubmittedWorkDone().catch(()=>{});
+    el.textContent='webgpu: RENDERED adapter='+(info.device||info.description||'unknown');
+    window.__scene.webgpu={supported:true,gotAdapter:true,adapterInfo:info,rendered:true};
+    log('WebGPU rendered adapterInfo='+JSON.stringify(info).slice(0,600));
+  }catch(e){ el.textContent='webgpu: adapter present but render FAILED: '+e.message; window.__scene.webgpu={supported:true,gotAdapter:true,adapterInfo:info,rendered:false,error:String(e&&e.message||e)}; log('WebGPU render failed: '+(e&&e.stack||e)); }
+}
+
+(async function(){
+  try{ initGL(); }catch(e){ window.__errors.push('gl-init: '+e.message); log('GL init failed: '+(e&&e.stack||e)); window.__scene.gl={ok:false,error:String(e&&e.message||e)}; }
+  try{ await initWebGPU(); }catch(e){ window.__errors.push('webgpu-init: '+e.message); log('WebGPU init failed: '+(e&&e.stack||e)); }
+  window.__done=true;
+  document.title='DONE gl='+(window.__scene.gl&&window.__scene.gl.ok)+' wgpu='+(window.__scene.webgpu&&window.__scene.webgpu.rendered);
+  log('SCENE DONE');
+})();
+</script>
+</body>
+</html>

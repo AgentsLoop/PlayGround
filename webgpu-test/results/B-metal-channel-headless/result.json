@@ -1,0 +1,202 @@
+{
+  "config": {
+    "name": "B-metal-channel-headless",
+    "channel": "chromium",
+    "headless": true,
+    "args": [
+      "--enable-unsafe-webgpu",
+      "--ignore-gpu-blocklist",
+      "--use-angle=metal"
+    ],
+    "note": "proposed macOS path: full chromium + Metal ANGLE + unsafe-webgpu + ignore-blocklist"
+  },
+  "startedAt": "2026-09-14T03:14:51.526Z",
+  "ok": true,
+  "browserVersion": "153.0.8010.12",
+  "sceneDone": true,
+  "probe": {
+    "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+    "hasGpu": true,
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)",
+    "adapter": {
+      "vendor": "apple",
+      "device": "",
+      "description": "",
+      "architecture": "",
+      "features": [
+        "depth32float-stencil8",
+        "rg11b10ufloat-renderable",
+        "texture-formats-tier1",
+        "bgra8unorm-storage",
+        "texture-compression-bc",
+        "dual-source-blending",
+        "core-features-and-limits",
+        "float32-filterable",
+        "indirect-first-instance",
+        "texture-compression-astc-sliced-3d",
+        "float32-blendable",
+        "subgroup-size-control",
+        "texture-compression-unaligned",
+        "texture-compression-astc",
+        "texture-compression-etc2",
+        "depth-clip-control",
+        "texture-compression-bc-sliced-3d",
+        "clip-distances",
+        "shader-f16",
+        "texture-formats-tier2",
+        "texture-component-swizzle",
+        "subgroups"
+      ]
+    },
+    "scene": {
+      "gl": {
+        "ok": true,
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)",
+        "centerPixel": [
+          136,
+          63,
+          136,
+          255
+        ]
+      },
+      "webgpu": {
+        "supported": true,
+        "gotAdapter": true,
+        "adapterInfo": {
+          "vendor": "apple",
+          "architecture": "",
+          "device": "",
+          "description": "",
+          "features": [
+            "depth32float-stencil8",
+            "rg11b10ufloat-renderable",
+            "texture-formats-tier1",
+            "bgra8unorm-storage",
+            "texture-compression-bc",
+            "dual-source-blending",
+            "core-features-and-limits",
+            "float32-filterable",
+            "indirect-first-instance",
+            "texture-compression-astc-sliced-3d",
+            "float32-blendable",
+            "subgroup-size-control",
+            "texture-compression-unaligned",
+            "texture-compression-astc",
+            "texture-compression-etc2",
+            "depth-clip-control",
+            "texture-compression-bc-sliced-3d",
+            "shader-f16",
+            "texture-formats-tier2",
+            "clip-distances",
+            "texture-component-swizzle",
+            "subgroups"
+          ]
+        },
+        "rendered": true
+      }
+    }
+  },
+  "sceneState": {
+    "done": true,
+    "scene": {
+      "gl": {
+        "ok": true,
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)",
+        "centerPixel": [
+          136,
+          63,
+          136,
+          255
+        ]
+      },
+      "webgpu": {
+        "supported": true,
+        "gotAdapter": true,
+        "adapterInfo": {
+          "vendor": "apple",
+          "architecture": "",
+          "device": "",
+          "description": "",
+          "features": [
+            "depth32float-stencil8",
+            "rg11b10ufloat-renderable",
+            "texture-formats-tier1",
+            "bgra8unorm-storage",
+            "texture-compression-bc",
+            "dual-source-blending",
+            "core-features-and-limits",
+            "float32-filterable",
+            "indirect-first-instance",
+            "texture-compression-astc-sliced-3d",
+            "float32-blendable",
+            "subgroup-size-control",
+            "texture-compression-unaligned",
+            "texture-compression-astc",
+            "texture-compression-etc2",
+            "depth-clip-control",
+            "texture-compression-bc-sliced-3d",
+            "shader-f16",
+            "texture-formats-tier2",
+            "clip-distances",
+            "texture-component-swizzle",
+            "subgroups"
+          ]
+        },
+        "rendered": true
+      }
+    },
+    "errors": [],
+    "title": "DONE gl=true wgpu=true"
+  },
+  "screenshots": [
+    "page.png",
+    "canvas-gl.png",
+    "canvas-wgpu.png"
+  ],
+  "nonblank": [
+    {
+      "id": "gl",
+      "present": true,
+      "method": "n/a-webgl-context-owned-by-scene",
+      "note": "see centerPixel in scene state + file sizes"
+    },
+    {
+      "id": "wgpu",
+      "present": true,
+      "method": "drawImage-sample",
+      "distinctColors": 1,
+      "mean": 0
+    }
+  ],
+  "size_page.png": 81207,
+  "png_page.png": {
+    "width": 900,
+    "height": 700,
+    "distinctColors": 5056,
+    "mean": 110.23,
+    "nonblank": true
+  },
+  "size_canvas-gl.png": 15443,
+  "png_canvas-gl.png": {
+    "width": 404,
+    "height": 304,
+    "distinctColors": 5075,
+    "mean": 96.31,
+    "nonblank": true
+  },
+  "size_canvas-wgpu.png": 2063,
+  "png_canvas-wgpu.png": {
+    "width": 404,
+    "height": 304,
+    "distinctColors": 3,
+    "mean": 203.1,
+    "nonblank": true
+  },
+  "finishedAt": "2026-09-14T03:14:54.324Z",
+  "console": [
+    "[log] [scene] GL OK renderer=ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version) centerPixel=136,63,136,255",
+    "[log] [scene] WebGPU rendered adapterInfo={\"vendor\":\"apple\",\"architecture\":\"\",\"device\":\"\",\"description\":\"\",\"features\":[\"depth32float-stencil8\",\"rg11b10ufloat-renderable\",\"texture-formats-tier1\",\"bgra8unorm-storage\",\"texture-compression-bc\",\"dual-source-blending\",\"core-features-and-limits\",\"float32-filterable\",\"indirect-first-instance\",\"texture-compression-astc-sliced-3d\",\"float32-blendable\",\"subgroup-size-control\",\"texture-compression-unaligned\",\"texture-compression-astc\",\"texture-compression-etc2\",\"depth-clip-control\",\"texture-compression-bc-sliced-3d\",\"shader-f16\",\"texture-formats-tier2\",\"clip-distances\",\"texture-component-swizzle\",",
+    "[log] [scene] SCENE DONE"
+  ],
+  "pageErrors": []
+}
