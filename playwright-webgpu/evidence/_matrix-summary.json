@@ -1,0 +1,78 @@
+{
+  "startedAt": "2026-09-14T08:24:21.722Z",
+  "endedAt": "2026-09-14T08:24:55.679Z",
+  "gotoUrl": "file:///Users/runner/work/PlayGround/PlayGround/playwright-webgpu/scene.html",
+  "systemChromePresent": true,
+  "configs": [
+    {
+      "name": "baseline-bundled-headless",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "null",
+      "durationMs": 1579,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/baseline-bundled-headless.json",
+      "notes": "Bundled Playwright Chromium, default launch, headless.",
+      "adapterDetail": "requestAdapter returned null (no suitable adapter)"
+    },
+    {
+      "name": "baseline-bundled-headed",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "success",
+      "durationMs": 10837,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/baseline-bundled-headed.json",
+      "notes": "Bundled Chromium headed; may fail on CI (no display) — recorded honestly, not skipped.",
+      "adapterDetail": "requestAdapter returned an adapter"
+    },
+    {
+      "name": "channel-chromium-webgpu-headless",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "success",
+      "durationMs": 2804,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/channel-chromium-webgpu-headless.json",
+      "notes": "Playwright channel=chromium with WebGPU flags, headless.",
+      "adapterDetail": "requestAdapter returned an adapter"
+    },
+    {
+      "name": "channel-chromium-webgpu-headed",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "success",
+      "durationMs": 2660,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/channel-chromium-webgpu-headed.json",
+      "notes": "Playwright channel=chromium with WebGPU flags, headed.",
+      "adapterDetail": "requestAdapter returned an adapter"
+    },
+    {
+      "name": "vulkan-variant-headless",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "success",
+      "durationMs": 2810,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/vulkan-variant-headless.json",
+      "notes": "SEPARATE macOS-unsuitable candidate: Vulkan feature flag, headless. Not assumed suitable.",
+      "adapterDetail": "requestAdapter returned an adapter"
+    },
+    {
+      "name": "vulkan-variant-headed",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "success",
+      "durationMs": 4363,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/vulkan-variant-headed.json",
+      "notes": "SEPARATE macOS-unsuitable candidate: Vulkan feature flag, headed. Not assumed suitable.",
+      "adapterDetail": "requestAdapter returned an adapter"
+    },
+    {
+      "name": "system-chrome",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "success",
+      "durationMs": 8859,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/system-chrome.json",
+      "notes": "Optional: real system Google Chrome via executablePath override (distinct from Playwright Chromium).",
+      "adapterDetail": "requestAdapter returned an adapter"
+    }
+  ]
+}
