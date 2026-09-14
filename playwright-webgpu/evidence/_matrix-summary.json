@@ -1,0 +1,89 @@
+{
+  "startedAt": "2026-09-14T08:27:27.154Z",
+  "endedAt": "2026-09-14T08:27:45.542Z",
+  "gotoUrl": "file:///Users/runner/work/PlayGround/PlayGround/playwright-webgpu/scene.html",
+  "systemChromePresent": true,
+  "configs": [
+    {
+      "name": "baseline-bundled-headless",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "null",
+      "durationMs": 1426,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/baseline-bundled-headless.json",
+      "notes": "Bundled Playwright Chromium, default launch, headless.",
+      "adapterDetail": "requestAdapter returned null (no suitable adapter)"
+    },
+    {
+      "name": "baseline-bundled-headed",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "success",
+      "durationMs": 4721,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/baseline-bundled-headed.json",
+      "notes": "Bundled Chromium headed; may fail on CI (no display) — recorded honestly, not skipped.",
+      "adapterDetail": "requestAdapter returned an adapter"
+    },
+    {
+      "name": "channel-chromium-webgpu-headless",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "success",
+      "durationMs": 2084,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/channel-chromium-webgpu-headless.json",
+      "notes": "Playwright channel=chromium with WebGPU flags, headless.",
+      "adapterDetail": "requestAdapter returned an adapter"
+    },
+    {
+      "name": "channel-chromium-webgpu-headed",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "success",
+      "durationMs": 2182,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/channel-chromium-webgpu-headed.json",
+      "notes": "Playwright channel=chromium with WebGPU flags, headed.",
+      "adapterDetail": "requestAdapter returned an adapter"
+    },
+    {
+      "name": "vulkan-variant-headless",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "success",
+      "durationMs": 2011,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/vulkan-variant-headless.json",
+      "notes": "SEPARATE macOS-unsuitable candidate: Vulkan feature flag, headless. Not assumed suitable.",
+      "adapterDetail": "requestAdapter returned an adapter"
+    },
+    {
+      "name": "vulkan-variant-headed",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "success",
+      "durationMs": 2362,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/vulkan-variant-headed.json",
+      "notes": "SEPARATE macOS-unsuitable candidate: Vulkan feature flag, headed. Not assumed suitable.",
+      "adapterDetail": "requestAdapter returned an adapter"
+    },
+    {
+      "name": "system-chrome",
+      "ok": true,
+      "sceneReady": true,
+      "adapter": "success",
+      "durationMs": 3582,
+      "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/system-chrome.json",
+      "notes": "Optional: real system Google Chrome via executablePath override (distinct from Playwright Chromium).",
+      "adapterDetail": "requestAdapter returned an adapter"
+    }
+  ],
+  "docs": [
+    "https://playwright.dev/docs/browsers#chromium-headless-shell",
+    "https://playwright.dev/docs/browsers#chromium-new-headless-mode",
+    "https://playwright.dev/docs/api/class-browsertype#browser-type-launch-option-channel"
+  ],
+  "disclaimers": {
+    "paravirtualIsNotPhysicalGpuProof": "WebGL renderer \"ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device ...)\" proves a virtualized Metal path on this VirtualMac2,1 (Apple M1 Virtual) runner — it is NOT proof of physical-GPU access and MUST NOT be read as hardware-performance evidence.",
+    "swiftShaderIsSoftware": "WebGL renderer containing \"SwiftShader\" is a software rasterizer fallback (no GPU).",
+    "vulkanOnMacOS": "The --enable-features=Vulkan variant is tested SEPARATELY and is NOT assumed suitable on macOS; on this runner it still reports the Apple Paravirtual Metal renderer (Vulkan flag has no Metal-replacing effect here).",
+    "noPerfClaim": "No frames-per-second or hardware-performance claim is made from any renderer string in this report."
+  }
+}

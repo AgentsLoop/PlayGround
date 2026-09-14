@@ -1,0 +1,66 @@
+{
+  "ok": true,
+  "configName": "system-chrome",
+  "startedAt": "2026-09-14T08:27:41.960Z",
+  "endedAt": "2026-09-14T08:27:45.542Z",
+  "durationMs": 3582,
+  "playwrightVersion": "1.63.0",
+  "chromiumExecutablePath": "/Users/runner/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+  "browserVersion": "152.0.7977.83",
+  "launch": {
+    "channel": "bundled-default",
+    "headless": true,
+    "args": [],
+    "rawLaunchOptions": {
+      "headless": true,
+      "executablePath": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    }
+  },
+  "gotoUrl": "file:///Users/runner/work/PlayGround/PlayGround/playwright-webgpu/scene.html",
+  "gotoOk": true,
+  "gotoError": null,
+  "sceneReady": true,
+  "sceneReadyError": null,
+  "sceneDiag": {
+    "webglSupported": true,
+    "webglVersion": 2,
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)",
+    "webgpuSupported": true,
+    "adapterInfo": {
+      "vendor": "apple",
+      "architecture": null,
+      "device": null,
+      "description": null
+    },
+    "webgpuStatus": "probing",
+    "webgpuError": null,
+    "frameCount": 5,
+    "timestamps": {
+      "pageLoadIso": "2026-09-14T08:27:44.151Z",
+      "pageLoadMs": 1789374464153,
+      "firstFrameIso": "2026-09-14T08:27:44.564Z",
+      "lastFrameIso": "2026-09-14T08:27:44.754Z"
+    }
+  },
+  "gpu": {
+    "hasNavigatorGpu": true,
+    "adapterResult": {
+      "status": "success",
+      "detail": "requestAdapter returned an adapter"
+    },
+    "adapterInfo": {
+      "vendor": "apple",
+      "architecture": null,
+      "device": null,
+      "description": null
+    },
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)",
+    "webgl2Supported": true,
+    "errors": []
+  },
+  "consoleMessages": [],
+  "pageErrors": [],
+  "screenshotPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/system-chrome.png",
+  "screenshotError": null,
+  "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/system-chrome.json"
+}
