@@ -1,0 +1,75 @@
+{
+  "ok": true,
+  "configName": "channel-chromium-webgpu-headless",
+  "startedAt": "2026-09-14T08:27:33.304Z",
+  "endedAt": "2026-09-14T08:27:35.388Z",
+  "durationMs": 2084,
+  "playwrightVersion": "1.63.0",
+  "chromiumExecutablePath": "/Users/runner/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+  "browserVersion": "153.0.8010.12",
+  "launch": {
+    "channel": "chromium",
+    "headless": true,
+    "args": [
+      "--enable-unsafe-webgpu",
+      "--ignore-gpu-blocklist",
+      "--use-angle=metal"
+    ],
+    "rawLaunchOptions": {
+      "channel": "chromium",
+      "headless": true,
+      "args": [
+        "--enable-unsafe-webgpu",
+        "--ignore-gpu-blocklist",
+        "--use-angle=metal"
+      ]
+    }
+  },
+  "gotoUrl": "file:///Users/runner/work/PlayGround/PlayGround/playwright-webgpu/scene.html",
+  "gotoOk": true,
+  "gotoError": null,
+  "sceneReady": true,
+  "sceneReadyError": null,
+  "sceneDiag": {
+    "webglSupported": true,
+    "webglVersion": 2,
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)",
+    "webgpuSupported": true,
+    "adapterInfo": {
+      "vendor": "apple",
+      "architecture": null,
+      "device": null,
+      "description": null
+    },
+    "webgpuStatus": "probing",
+    "webgpuError": null,
+    "frameCount": 5,
+    "timestamps": {
+      "pageLoadIso": "2026-09-14T08:27:34.268Z",
+      "pageLoadMs": 1789374454268,
+      "firstFrameIso": "2026-09-14T08:27:34.634Z",
+      "lastFrameIso": "2026-09-14T08:27:34.888Z"
+    }
+  },
+  "gpu": {
+    "hasNavigatorGpu": true,
+    "adapterResult": {
+      "status": "success",
+      "detail": "requestAdapter returned an adapter"
+    },
+    "adapterInfo": {
+      "vendor": "apple",
+      "architecture": null,
+      "device": null,
+      "description": null
+    },
+    "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)",
+    "webgl2Supported": true,
+    "errors": []
+  },
+  "consoleMessages": [],
+  "pageErrors": [],
+  "screenshotPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/channel-chromium-webgpu-headless.png",
+  "screenshotError": null,
+  "jsonPath": "/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/channel-chromium-webgpu-headless.json"
+}

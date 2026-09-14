@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D Scene loading...</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #0a0a14; color: #f2f2f2; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  header { padding: 16px 20px 4px 20px; }
+  h1 { margin: 0 0 4px 0; font-size: 24px; color: #ffd54a; }
+  p.subtitle { margin: 0 0 12px 0; color: #9fd8ff; }
+  main { display: flex; flex-wrap: wrap; gap: 16px; padding: 12px 20px 20px 20px; }
+  section.panel { background: #141422; border: 1px solid #33335a; border-radius: 8px; padding: 12px; }
+  section.panel h2 { margin: 0 0 8px 0; font-size: 16px; color: #7dffb2; }
+  canvas { display: block; background: #000; border: 2px solid #ffd54a; border-radius: 4px; }
+  #diag { white-space: pre-wrap; word-break: break-word; background: #000; color: #8affff; border: 1px solid #2de2ff; border-radius: 4px; padding: 10px; min-width: 300px; max-width: 560px; font-family: ui-monospace, monospace; font-size: 12px; }
+  #webgpu-status { margin-top: 8px; padding: 8px; background: #000; border: 1px solid #ff7ad9; border-radius: 4px; color: #ffc6ec; font-size: 13px; max-width: 620px; word-break: break-word; }
+  .badge { display: inline-block; background: #ff2e88; color: #fff; font-weight: 700; padding: 2px 8px; border-radius: 999px; font-size: 12px; margin-left: 8px; vertical-align: middle; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Reproducible 3D Scene: Rotating Cube<span class="badge">LIVE</span></h1>
+  <p class="subtitle">Raw WebGL cube (per-face colors) + WebGPU probe + diagnostic overlay. No network dependencies.</p>
+</header>
+<main>
+  <section class="panel">
+    <h2>WebGL Canvas (640x480) — rotating cube</h2>
+    <canvas id="glcanvas" width="640" height="480"></canvas>
+    <div id="gl-status">WebGL: initializing...</div>
+  </section>
+  <section class="panel">
+    <h2>WebGPU Probe Canvas (320x240) — clear color</h2>
+    <canvas id="webgpu-canvas" width="320" height="240"></canvas>
+    <div id="webgpu-status">WebGPU: probing...</div>
+  </section>
+  <section class="panel">
+    <h2>Diagnostic Overlay (#diag)</h2>
+    <div id="diag">{}</div>
+  </section>
+</main>
+<script>
+(function () {
+  'use strict';
+  var pageLoadIso = new Date().toISOString();
+  var pageLoadMs = Date.now();
+  var perfStart = (typeof performance !== 'undefined' && performance.now) ? performance.now() : 0;
+  var frameCount = 0;
+  var firstFrameIso = null;
+  var lastFrameIso = null;
+
+  // ---- deterministic globals (created synchronously so they always exist) ----
+  window.__sceneReady = false;
+  window.__diag = {
+    webglSupported: false,
+    webglVersion: null,
+    webglRenderer: 'unknown',
+    webgpuSupported: false,
+    adapterInfo: null,
+    webgpuStatus: 'probing',
+    webgpuError: null,
+    frameCount: 0,
+    timestamps: {
+      pageLoadIso: pageLoadIso,
+      pageLoadMs: pageLoadMs,
+      firstFrameIso: null,
+      lastFrameIso: null
+    }
+  };
+  document.title = '3D Scene loading...';
+
+  var diagEl = document.getElementById('diag');
+  var glStatusEl = document.getElementById('gl-status');
+
+  function refreshDiagOverlay() {
+    window.__diag.frameCount = frameCount;
+    window.__diag.timestamps.firstFrameIso = firstFrameIso;
+    window.__diag.timestamps.lastFrameIso = lastFrameIso;
+    try {
+      diagEl.textContent = JSON.stringify(window.__diag, null, 2);
+    } catch (e) {
+      diagEl.textContent = 'diag stringify error: ' + String(e);
+    }
+  }
+
+  // ================= WebGL: rotating cube =================
+  var canvas = document.getElementById('glcanvas');
+  var gl = null;
+  var glVersion = null;
+  try {
+    // Prefer WebGL2 if available, fall back to WebGL1. Both use GLSL ES 1.00 shaders.
+    gl = canvas.getContext('webgl2', { antialias: true, depth: true });
+    if (gl) { glVersion = 2; }
+    else {
+      gl = canvas.getContext('webgl', { antialias: true, depth: true }) ||
+           canvas.getContext('experimental-webgl', { antialias: true, depth: true });
+      if (gl) { glVersion = 1; }
+    }
+  } catch (e) {
+    gl = null;
+  }
+
+  var VERT_SRC = [
+    'attribute vec3 aPosition;',
+    'attribute vec3 aColor;',
+    'attribute vec3 aNormal;',
+    'varying vec3 vColor;',
+    'varying float vLight;',
+    'uniform mat4 uModel;',
+    'uniform mat4 uView;',
+    'uniform mat4 uProj;',
+    'uniform mat3 uNormalMat;',
+    'uniform vec3 uLightDir;',
+    'void main(void) {',
+    '  gl_Position = uProj * uView * uModel * vec4(aPosition, 1.0);',
+    '  vColor = aColor;',
+    '  vec3 n = normalize(uNormalMat * aNormal);',
+    '  vLight = max(dot(n, normalize(uLightDir)), 0.0) * 0.7 + 0.3;',
+    '}'
+  ].join('\n');
+
+  var FRAG_SRC = [
+    'precision mediump float;',
+    'varying vec3 vColor;',
+    'varying float vLight;',
+    'void main(void) {',
+    '  gl_FragColor = vec4(vColor * vLight, 1.0);',
+    '}'
+  ].join('\n');
+
+  function compileShader(glCtx, type, src) {
+    var s = glCtx.createShader(type);
+    glCtx.shaderSource(s, src);
+    glCtx.compileShader(s);
+    if (!glCtx.getShaderParameter(s, glCtx.COMPILE_STATUS)) {
+      throw new Error('shader compile failed: ' + glCtx.getShaderInfoLog(s));
+    }
+    return s;
+  }
+
+  // Minimal mat4 helpers (column-major, like gl-matrix).
+  function mat4Perspective(out, fovy, aspect, near, far) {
+    var f = 1.0 / Math.tan(fovy / 2);
+    out[0] = f / aspect; out[1] = 0; out[2] = 0; out[3] = 0;
+    out[4] = 0; out[5] = f; out[6] = 0; out[7] = 0;
+    out[8] = 0; out[9] = 0; out[10] = (far + near) / (near - far); out[11] = -1;
+    out[12] = 0; out[13] = 0; out[14] = (2 * far * near) / (near - far); out[15] = 0;
+    return out;
+  }
+  function mat4FromRotationY(out, rad) {
+    var c = Math.cos(rad), s = Math.sin(rad);
+    out[0] = c;  out[1] = 0; out[2] = -s; out[3] = 0;
+    out[4] = 0;  out[5] = 1; out[6] = 0;  out[7] = 0;
+    out[8] = s;  out[9] = 0; out[10] = c; out[11] = 0;
+    out[12] = 0; out[13] = 0; out[14] = 0; out[15] = 1;
+    return out;
+  }
+  function mat4FromRotationX(out, rad) {
+    var c = Math.cos(rad), s = Math.sin(rad);
+    out[0] = 1; out[1] = 0; out[2] = 0; out[3] = 0;
+    out[4] = 0; out[5] = c; out[6] = s; out[7] = 0;
+    out[8] = 0; out[9] = -s; out[10] = c; out[11] = 0;
+    out[12] = 0; out[13] = 0; out[14] = 0; out[15] = 1;
+    return out;
+  }
+  function mat4Multiply(out, a, b) {
+    // out = a * b (column-major)
+    var tmp = new Float32Array(16);
+    for (var c = 0; c < 4; c++) {
+      for (var r = 0; r < 4; r++) {
+        tmp[c * 4 + r] =
+          a[0 * 4 + r] * b[c * 4 + 0] +
+          a[1 * 4 + r] * b[c * 4 + 1] +
+          a[2 * 4 + r] * b[c * 4 + 2] +
+          a[3 * 4 + r] * b[c * 4 + 3];
+      }
+    }
+    for (var i = 0; i < 16; i++) { out[i] = tmp[i]; }
+    return out;
+  }
+
+  var glProgram = null;
+  var glAttribs = null;
+  var glUniforms = null;
+  var cubeIndexCount = 36;
+
+  if (gl) {
+    try {
+      // Renderer string for diagnostics.
+      var renderer = 'unknown';
+      try {
+        var dbg = gl.getExtension('WEBGL_debug_renderer_info');
+        if (dbg) {
+          renderer = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || renderer;
+        } else {
+          renderer = gl.getParameter(gl.RENDERER) || renderer;
+        }
+      } catch (e2) {
+        try { renderer = gl.getParameter(gl.RENDERER) || renderer; } catch (e3) { /* keep unknown */ }
+      }
+      window.__diag.webglRenderer = String(renderer);
+      window.__diag.webglSupported = true;
+      window.__diag.webglVersion = glVersion;
+
+      var vs = compileShader(gl, gl.VERTEX_SHADER, VERT_SRC);
+      var fs = compileShader(gl, gl.FRAGMENT_SHADER, FRAG_SRC);
+      glProgram = gl.createProgram();
+      gl.attachShader(glProgram, vs);
+      gl.attachShader(glProgram, fs);
+      gl.linkProgram(glProgram);
+      if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS)) {
+        throw new Error('program link failed: ' + gl.getProgramInfoLog(glProgram));
+      }
+      gl.useProgram(glProgram);
+
+      glAttribs = {
+        pos: gl.getAttribLocation(glProgram, 'aPosition'),
+        col: gl.getAttribLocation(glProgram, 'aColor'),
+        nor: gl.getAttribLocation(glProgram, 'aNormal')
+      };
+      glUniforms = {
+        model: gl.getUniformLocation(glProgram, 'uModel'),
+        view: gl.getUniformLocation(glProgram, 'uView'),
+        proj: gl.getUniformLocation(glProgram, 'uProj'),
+        normalMat: gl.getUniformLocation(glProgram, 'uNormalMat'),
+        lightDir: gl.getUniformLocation(glProgram, 'uLightDir')
+      };
+
+      // Cube: 24 verts (4 per face), per-face bright colors + per-face normals.
+      var RED = [1, 0.15, 0.15], GREEN = [0.15, 1, 0.3], BLUE = [0.25, 0.5, 1],
+          YELLOW = [1, 0.9, 0.1], MAGENTA = [1, 0.2, 0.9], CYAN = [0.1, 1, 1];
+      function faceVerts(corners, color, normal) {
+        var p = [], c = [], n = [];
+        for (var i = 0; i < 4; i++) { p.push(corners[i][0], corners[i][1], corners[i][2]); c.push(color[0], color[1], color[2]); n.push(normal[0], normal[1], normal[2]); }
+        return { p: p, c: c, n: n };
+      }
+      var F = [
+        faceVerts([[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]], RED, [0,0,1]),       // front
+        faceVerts([[-1,-1,-1],[-1,1,-1],[1,1,-1],[1,-1,-1]], CYAN, [0,0,-1]),   // back
+        faceVerts([[-1,1,-1],[-1,1,1],[1,1,1],[1,1,-1]], GREEN, [0,1,0]),      // top
+        faceVerts([[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1]], BLUE, [0,-1,0]),   // bottom
+        faceVerts([[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]], YELLOW, [1,0,0]),     // right
+        faceVerts([[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1]], MAGENTA, [-1,0,0]) // left
+      ];
+      var posArr = [], colArr = [], norArr = [];
+      F.forEach(function (f) { posArr = posArr.concat(f.p); colArr = colArr.concat(f.c); norArr = norArr.concat(f.n); });
+      var idxArr = [];
+      for (var f2 = 0; f2 < 6; f2++) {
+        var o = f2 * 4;
+        idxArr.push(o, o + 1, o + 2, o, o + 2, o + 3);
+      }
+
+      var posBuf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(posArr), gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(glAttribs.pos);
+      gl.vertexAttribPointer(glAttribs.pos, 3, gl.FLOAT, false, 0, 0);
+
+      var colBuf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, colBuf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colArr), gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(glAttribs.col);
+      gl.vertexAttribPointer(glAttribs.col, 3, gl.FLOAT, false, 0, 0);
+
+      var norBuf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, norBuf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(norArr), gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(glAttribs.nor);
+      gl.vertexAttribPointer(glAttribs.nor, 3, gl.FLOAT, false, 0, 0);
+
+      var idxBuf = gl.createBuffer();
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idxBuf);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idxArr), gl.STATIC_DRAW);
+
+      // Depth testing ON (required). Culling with correct enum (gl.BACK, not BACK_FACE).
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LEQUAL);
+      gl.enable(gl.CULL_FACE);
+      gl.cullFace(gl.BACK);
+      gl.frontFace(gl.CCW);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.clearColor(0.04, 0.05, 0.10, 1.0);
+
+      glStatusEl.textContent = 'WebGL' + glVersion + ' ready — renderer: ' + window.__diag.webglRenderer;
+    } catch (e) {
+      window.__diag.webglSupported = false;
+      window.__diag.webglVersion = null;
+      glStatusEl.textContent = 'WebGL init failed: ' + (e && e.message ? e.message : String(e));
+      gl = null;
+    }
+  } else {
+    window.__diag.webglSupported = false;
+    glStatusEl.textContent = 'WebGL not supported: getContext returned null';
+  }
+
+  var projMat = new Float32Array(16);
+  mat4Perspective(projMat, Math.PI / 4, canvas.width / canvas.height, 0.1, 100.0);
+  // View: camera at (0,0,6) looking at origin => translate -6 on z.
+  var viewMat = new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,-6,1]);
+
+  var angle = 0;
+  var rotX = new Float32Array(16);
+  var rotY = new Float32Array(16);
+  var modelMat = new Float32Array(16);
+
+  function drawGL() {
+    // Rotation: constant per-frame increment (proves animation via frameCount + pixels).
+    angle += 0.03;
+    mat4FromRotationY(rotY, angle);
+    mat4FromRotationX(rotX, angle * 0.7);
+    mat4Multiply(modelMat, rotY, rotX);
+    // Normal matrix: upper 3x3 of model (rotation only, uniform scale => transpose == inverse).
+    // Column-major mat3 from modelMat rotation part.
+    var normalMat = [modelMat[0], modelMat[1], modelMat[2], modelMat[4], modelMat[5], modelMat[6], modelMat[8], modelMat[9], modelMat[10]];
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.useProgram(glProgram);
+    gl.uniformMatrix4fv(glUniforms.model, false, modelMat);
+    gl.uniformMatrix4fv(glUniforms.view, false, viewMat);
+    gl.uniformMatrix4fv(glUniforms.proj, false, projMat);
+    gl.uniformMatrix3fv(glUniforms.normalMat, false, normalMat);
+    gl.uniform3f(glUniforms.lightDir, 0.5, 0.8, 0.75);
+    gl.drawElements(gl.TRIANGLES, cubeIndexCount, gl.UNSIGNED_SHORT, 0);
+  }
+
+  function drawFallback2D(n) {
+    // Only used if WebGL unavailable — keeps animation + readiness deterministic.
+    var ctx2d = canvas.getContext('2d');
+    if (!ctx2d) { return; }
+    ctx2d.fillStyle = '#0a0a14';
+    ctx2d.fillRect(0, 0, canvas.width, canvas.height);
+    var cx = canvas.width / 2, cy = canvas.height / 2;
+    var s = 120 + 40 * Math.sin(n * 0.1);
+    ctx2d.save();
+    ctx2d.translate(cx, cy);
+    ctx2d.rotate(n * 0.03);
+    ctx2d.fillStyle = '#ff2e88';
+    ctx2d.fillRect(-s / 2, -s / 2, s, s);
+    ctx2d.fillStyle = '#ffd54a';
+    ctx2d.fillRect(-s / 4, -s / 4, s / 2, s / 2);
+    ctx2d.restore();
+    ctx2d.fillStyle = '#fff';
+    ctx2d.font = '20px sans-serif';
+    ctx2d.fillText('2D fallback frame ' + n, 20, 40);
+  }
+
+  function tick() {
+    frameCount++;
+    var nowIso = new Date().toISOString();
+    if (firstFrameIso === null) { firstFrameIso = nowIso; }
+    lastFrameIso = nowIso;
+    try {
+      if (gl) { drawGL(); }
+      else { drawFallback2D(frameCount); }
+    } catch (e) {
+      glStatusEl.textContent = 'WebGL frame error: ' + (e && e.message ? e.message : String(e));
+    }
+    refreshDiagOverlay();
+    if (frameCount >= 5 && !window.__sceneReady) {
+      window.__sceneReady = true;
+      document.title = '3D Scene Ready — ' + frameCount + ' frames';
+    } else if (window.__sceneReady) {
+      document.title = '3D Scene Ready — ' + frameCount + ' frames';
+    }
+    requestAnimationFrame(tick);
+  }
+  refreshDiagOverlay();
+  requestAnimationFrame(tick);
+
+  // ================= WebGPU probe (bounded, never hangs) =================
+  var webgpuStatusEl = document.getElementById('webgpu-status');
+  var wcanvas = document.getElementById('webgpu-canvas');
+
+  function withTimeout(promise, ms, label) {
+    var timer = null;
+    var timeout = new Promise(function (_, reject) {
+      timer = setTimeout(function () {
+        reject(new Error(label + ' timed out after ' + ms + 'ms'));
+      }, ms);
+    });
+    return Promise.race([promise, timeout]).then(
+      function (v) { clearTimeout(timer); return v; },
+      function (e) { clearTimeout(timer); throw e; }
+    );
+  }
+
+  function setWebgpuStatus(text, ok) {
+    webgpuStatusEl.textContent = text;
+    webgpuStatusEl.style.borderColor = ok ? '#35ff8b' : '#ff7ad9';
+  }
+
+  (async function probeWebGPU() {
+    // Global bound: entire probe must settle within 8s.
+    var finished = false;
+    var globalTimer = setTimeout(function () {
+      if (!finished) {
+        window.__diag.webgpuSupported = false;
+        window.__diag.webgpuStatus = 'global-timeout';
+        window.__diag.webgpuError = 'WebGPU probe global timeout after 8000ms';
+        setWebgpuStatus('WebGPU probe failed: ' + window.__diag.webgpuError, false);
+        refreshDiagOverlay();
+      }
+    }, 8000);
+    try {
+      if (!('gpu' in navigator) || !navigator.gpu) {
+        window.__diag.webgpuSupported = false;
+        window.__diag.webgpuStatus = 'unsupported';
+        window.__diag.webgpuError = 'navigator.gpu is undefined (WebGPU not supported)';
+        setWebgpuStatus('WebGPU not supported: ' + window.__diag.webgpuError, false);
+        refreshDiagOverlay();
+        finished = true;
+        clearTimeout(globalTimer);
+        return;
+      }
+      window.__diag.webgpuSupported = true;
+      // Bounded requestAdapter with 3s timeout via Promise.race.
+      var adapter = await withTimeout(
+        navigator.gpu.requestAdapter(),
+        3000,
+        'requestAdapter'
+      );
+      if (!adapter) {
+        throw new Error('requestAdapter returned null (no suitable adapter)');
+      }
+      // adapterInfo (new spec: adapter.info; legacy: adapter.requestAdapterInfo()).
+      var info = null;
+      try {
+        if (adapter.info) {
+          info = {
+            vendor: adapter.info.vendor || null,
+            architecture: adapter.info.architecture || null,
+            device: adapter.info.device || null,
+            description: adapter.info.description || null
+          };
+        } else if (typeof adapter.requestAdapterInfo === 'function') {
+          var raw = await withTimeout(adapter.requestAdapterInfo(), 3000, 'requestAdapterInfo');
+          info = { vendor: raw.vendor || null, architecture: raw.architecture || null, device: raw.device || null, description: raw.description || null };
+        }
+      } catch (ie) {
+        info = { error: String((ie && ie.message) || ie) };
+      }
+      window.__diag.adapterInfo = info;
+      // Bounded requestDevice with 3s timeout via Promise.race.
+      var device = await withTimeout(adapter.requestDevice(), 3000, 'requestDevice');
+      // Render a clear-color WebGPU canvas (separate canvas element).
+      var ctx = wcanvas.getContext('webgpu');
+      if (!ctx) { throw new Error('getContext("webgpu") returned null'); }
+      var format = navigator.gpu.getPreferredCanvasFormat();
+      ctx.configure({ device: device, format: format, alphaMode: 'opaque' });
+      var encoder = device.createCommandEncoder();
+      var view = ctx.getCurrentTexture().createView();
+      var pass = encoder.beginRenderPass({
+        colorAttachments: [{
+          view: view,
+          clearValue: { r: 0.05, g: 0.55, b: 0.85, a: 1.0 },
+          loadOp: 'clear',
+          storeOp: 'store'
+        }]
+      });
+      pass.end();
+      device.queue.submit([encoder.finish()]);
+      window.__diag.webgpuStatus = 'ready';
+      window.__diag.webgpuError = null;
+      setWebgpuStatus('WebGPU ready — clear-color frame rendered (format ' + format + ', adapter ' + JSON.stringify(info) + ')', true);
+      refreshDiagOverlay();
+      finished = true;
+      clearTimeout(globalTimer);
+    } catch (e) {
+      var msg = (e && e.message) ? e.message : String(e);
+      // If gpu existed but something failed, keep webgpuSupported=true but record error.
+      if (!window.__diag.webgpuSupported && ('gpu' in navigator) && navigator.gpu) {
+        window.__diag.webgpuSupported = true;
+      }
+      window.__diag.webgpuStatus = 'failed';
+      window.__diag.webgpuError = msg;
+      setWebgpuStatus('WebGPU probe failed: ' + msg, false);
+      refreshDiagOverlay();
+      finished = true;
+      clearTimeout(globalTimer);
+    }
+  })();
+})();
+</script>
+</body>
+</html>

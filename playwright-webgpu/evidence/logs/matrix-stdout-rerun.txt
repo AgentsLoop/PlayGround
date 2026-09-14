@@ -1,0 +1,25 @@
+{"matrix":"start","gotoUrl":"file:///Users/runner/work/PlayGround/PlayGround/playwright-webgpu/scene.html","startedAt":"2026-09-14T08:27:27.154Z"}
+{"matrix":"run-start","config":"baseline-bundled-headless"}
+{"probe":"baseline-bundled-headless","ok":true,"sceneReady":true,"gpu":{"hasNavigatorGpu":true,"adapterResult":{"status":"null","detail":"requestAdapter returned null (no suitable adapter)"},"adapterInfo":null,"webglRenderer":"ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)","webgl2Supported":true,"errors":[]},"durationMs":1426}
+{"matrix":"run-start","config":"baseline-bundled-headed"}
+{"probe":"baseline-bundled-headed","ok":true,"sceneReady":true,"gpu":{"hasNavigatorGpu":true,"adapterResult":{"status":"success","detail":"requestAdapter returned an adapter"},"adapterInfo":{"vendor":"apple","architecture":null,"device":null,"description":null},"webglRenderer":"ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)","webgl2Supported":true,"errors":[]},"durationMs":4721}
+{"matrix":"run-start","config":"channel-chromium-webgpu-headless"}
+{"probe":"channel-chromium-webgpu-headless","ok":true,"sceneReady":true,"gpu":{"hasNavigatorGpu":true,"adapterResult":{"status":"success","detail":"requestAdapter returned an adapter"},"adapterInfo":{"vendor":"apple","architecture":null,"device":null,"description":null},"webglRenderer":"ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)","webgl2Supported":true,"errors":[]},"durationMs":2084}
+{"matrix":"run-start","config":"channel-chromium-webgpu-headed"}
+{"probe":"channel-chromium-webgpu-headed","ok":true,"sceneReady":true,"gpu":{"hasNavigatorGpu":true,"adapterResult":{"status":"success","detail":"requestAdapter returned an adapter"},"adapterInfo":{"vendor":"apple","architecture":null,"device":null,"description":null},"webglRenderer":"ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)","webgl2Supported":true,"errors":[]},"durationMs":2182}
+{"matrix":"run-start","config":"vulkan-variant-headless"}
+{"probe":"vulkan-variant-headless","ok":true,"sceneReady":true,"gpu":{"hasNavigatorGpu":true,"adapterResult":{"status":"success","detail":"requestAdapter returned an adapter"},"adapterInfo":{"vendor":"apple","architecture":null,"device":null,"description":null},"webglRenderer":"ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)","webgl2Supported":true,"errors":[]},"durationMs":2011}
+{"matrix":"run-start","config":"vulkan-variant-headed"}
+{"probe":"vulkan-variant-headed","ok":true,"sceneReady":true,"gpu":{"hasNavigatorGpu":true,"adapterResult":{"status":"success","detail":"requestAdapter returned an adapter"},"adapterInfo":{"vendor":"apple","architecture":null,"device":null,"description":null},"webglRenderer":"ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)","webgl2Supported":true,"errors":[]},"durationMs":2362}
+{"matrix":"run-start","config":"system-chrome"}
+{"probe":"system-chrome","ok":true,"sceneReady":true,"gpu":{"hasNavigatorGpu":true,"adapterResult":{"status":"success","detail":"requestAdapter returned an adapter"},"adapterInfo":{"vendor":"apple","architecture":null,"device":null,"description":null},"webglRenderer":"ANGLE (Apple, ANGLE Metal Renderer: Apple Paravirtual device, Unspecified Version)","webgl2Supported":true,"errors":[]},"durationMs":3582}
+config | ok | sceneReady | adapter | ms
+--- | --- | --- | --- | ---
+baseline-bundled-headless | true | true | null | 1426
+baseline-bundled-headed | true | true | success | 4721
+channel-chromium-webgpu-headless | true | true | success | 2084
+channel-chromium-webgpu-headed | true | true | success | 2182
+vulkan-variant-headless | true | true | success | 2011
+vulkan-variant-headed | true | true | success | 2362
+system-chrome | true | true | success | 3582
+{"matrix":"done","summaryPath":"/Users/runner/work/PlayGround/PlayGround/playwright-webgpu/evidence/_matrix-summary.json","count":7}
