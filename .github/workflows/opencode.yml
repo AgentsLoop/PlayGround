@@ -11,7 +11,11 @@ on:
         required: true
         type: string
 
-permissions: {}
+permissions:
+  id-token: write
+  contents: write
+  issues: write
+  actions: write
 
 concurrency:
   group: opencode-issue-${{ github.repository }}-${{ github.event.issue.number || inputs.issue_number }}
@@ -19,26 +23,21 @@ concurrency:
 
 jobs:
   prepare:
-    if: github.event_name == 'workflow_dispatch' || (github.event.action == 'opened' && (contains(github.event.issue.labels.*.name, 'OpenCode') || contains(github.event.issue.title, '/OpenCode')))
-    permissions:
-      contents: read
-      issues: write
-      actions: write
-    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-prepare.yml@0604fdc9bb6590d1e03b0fe0c0d578e831733100
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.issue.labels.*.name, 'OpenCode')
+    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-prepare.yml@a0f59ed4819fa338740ae5bc81519c3e22c0cf50
     with:
-      runtime_ref: 0604fdc9bb6590d1e03b0fe0c0d578e831733100
-
+      runtime_ref: a0f59ed4819fa338740ae5bc81519c3e22c0cf50
   opencode:
     needs: prepare
     if: needs.prepare.outputs.approved == 'true'
+    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-reusable.yml@a0f59ed4819fa338740ae5bc81519c3e22c0cf50
     permissions:
+      id-token: write
       contents: write
       issues: write
       actions: read
-      pull-requests: write
-    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-reusable.yml@0604fdc9bb6590d1e03b0fe0c0d578e831733100
     with:
-      runtime_ref: 0604fdc9bb6590d1e03b0fe0c0d578e831733100
+      runtime_ref: a0f59ed4819fa338740ae5bc81519c3e22c0cf50
       issue_number: ${{ needs.prepare.outputs.issue_number }}
       request: ${{ needs.prepare.outputs.request }}
       issue_title: ${{ needs.prepare.outputs.issue_title }}
@@ -46,7 +45,4 @@ jobs:
       sender: ${{ needs.prepare.outputs.sender }}
       target_ref: ${{ needs.prepare.outputs.target_ref }}
       target_sha: ${{ needs.prepare.outputs.target_sha }}
-    secrets:
-      OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
-      OPENCODE_AUTH_JSON: ${{ secrets.OPENCODE_AUTH_JSON }}
-      AGENTSWEB_SSH_PUBLIC_KEY: ${{ secrets.AGENTSWEB_SSH_PUBLIC_KEY }}
+    secrets: inherit
