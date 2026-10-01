@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>STARFALL COMMAND — Live Progress</title>
+<style>
+body{background:#04090c;color:#dff7f4;font-family:"Rajdhani","Segoe UI",sans-serif;margin:0;padding:28px;max-width:1060px;}
+h1{color:#35e0d2;letter-spacing:5px;margin:0} h2{color:#8fb3ae;font-weight:400;font-size:15px;letter-spacing:2px}
+a{color:#35e0d2} table{border-collapse:collapse;width:100%;margin:14px 0}
+td,th{border:1px solid rgba(53,224,210,.3);padding:6px 10px;font-size:14px;text-align:left}
+th{color:#35e0d2;letter-spacing:1px} .pass{color:#4ade80;font-weight:700} .fail{color:#ff5a4e;font-weight:700}
+img{max-width:100%;border:1px solid rgba(53,224,210,.4);margin:8px 0}
+.card{background:rgba(8,18,24,.9);border:1px solid rgba(53,224,210,.35);padding:16px 20px;margin:16px 0;border-radius:4px}
+code{background:#0b1c22;padding:1px 6px;border-radius:3px}
+.bar{color:#8fb3ae;font-size:13px}
+</style>
+</head>
+<body>
+<h1>STARFALL COMMAND</h1>
+<h2>LIVE PROGRESS — ORIGINAL 3D BROWSER RTS SKIRMISH (VANGUARD vs CRIMSON SWARM) • <a href="/">▶ play the game</a></h2>
+
+<div class="card">
+<b>Quality bar (observable):</b> StarCraft II gameplay footage/screenshots — battlefield readability (distinct silhouettes, team colors, on-damage health bars, selection rings, muzzle/death feedback), responsive control (box select, right-click smart orders, attack-move, shift-queue, rally, control groups), command interface (resource strip, minimap + camera rect, command card with hotkeys, selection portraits), full loop (harvest → build → train → attack → win/loss/restart). All factions, names, art, audio original and procedural.
+<span class="bar">Lead method: smallest judgeable pieces, builder + fresh-context critic per piece, blind A/B vs references, fix largest gap, repeat. Source playable via live Vite at <code>/</code>; <code>dist/</code> reserved for final preview.</span>
+</div>
+
+<div class="card">
+<h3>Automated browser playtest evidence (headed Chromium, SwiftShader WebGL)</h3>
+<p class="bar">Scripted run <code>?test=1</code> drives every system in a real browser; <code>?test=2</code> verifies the loss path. Latest console log:</p>
+<pre id="log" style="white-space:pre-wrap;font-size:13px;background:#02070a;padding:10px;border:1px solid #123038">final run 12/12 PASS, 0 console errors — <a href="/screenshots/testlog.txt">full log</a></pre>
+<table>
+<tr><th>Check</th><th>Status</th><th>Evidence</th></tr>
+<tr><td>boot: 5 workers + core</td><td class="pass">PASS</td><td>state {"units":5,"buildings":1,"sup":"5/10"}</td></tr>
+<tr><td>harvest: flux increased</td><td class="pass">PASS</td><td>250 → 505 in ~36 game-sec</td></tr>
+<tr><td>build: pylon placed + completed, supply grew</td><td class="pass">PASS</td><td>progress=1.0, cap 10 → 18</td></tr>
+<tr><td>build: foundry completed</td><td class="pass">PASS</td><td>progress=1.0</td></tr>
+<tr><td>train: core → drudge, foundry → lancer</td><td class="pass">PASS</td><td>5 → 6 workers, 0 → 1 lancer</td></tr>
+<tr><td>orders: attack / attack-move issued</td><td class="pass">PASS</td><td>order.t === 'attack'/'amove'</td></tr>
+<tr><td>combat: real damage to enemy unit</td><td class="pass">PASS</td><td>enemy 60hp → dead; kills=9–14 per run</td></tr>
+<tr><td>win: victory screen on enemy Core kill</td><td class="pass">PASS</td><td>#end visible, game.over === 'win'</td></tr>
+<tr><td>loss: defeat screen on Core loss + restart</td><td class="pass">PASS</td><td>?test=2, PLAY AGAIN reloads</td></tr>
+</table>
+<p class="bar">All screenshots below are captured from the running game, not mockups. Critic rounds documented above.</p>
+</div>
+
+<div class="card"><h3>Round 1 — builder vs critic</h3>
+<p><b>Critic verdict (fresh context, blind vs SC2 bar):</b> playable and readable, but 3 gaps: (1) full-HP health bars always on — clutter, unlike SC2 on-damage bars; <b>fixed</b> (bars now show only when damaged/under construction). (2) scene too dark, units don't pop; <b>fixed</b> (hemi 0.85→1.1, sun 1.6→1.9). (3) automated combat path untested (cascade FAILs masked real damage code); <b>fixed</b> with independent lancer probe + longer build timers.</p>
+<p class="bar">Remaining known gaps vs SC2: no fog-of-war, no control-group UI strip persistence beyond keys, no pathfinding around buildings (steering only), no multiplayer. None block the skirmish loop.</p>
+</div>
+
+<div class="card"><h3>Round 2 — controls critic + balance</h3>
+<p><b>Critic verdict (fresh context, SC2 macro loop):</b> biggest gap was rally/production visibility (text-only queue, invisible rally). <b>Fixed:</b> in-world spinning rally flags per building + explicit rally state in command card. Minor gaps noted (emoji portraits, no income-rate, basic minimap) accepted as scope trade-offs — portraits match SC2's always-on panel HP bars; minimap has dots + camera rect + click-jump.</p>
+<p><b>Balance (from organic play):</b> AI razed a passive player at 3:39 — correct punishment, but first contact was too early for learners. <b>Fixed:</b> first wave 90s → 210s, threshold 4 → 7+2/wave, AI trickle 14/6 → 8/3, Command Core has a light defense cannon (menu + manual updated). AI still razes passive players — verified in screenshot session.</p>
+<p class="bar">Final suite re-run on finished code below. <code>dist/</code> built for final preview (<code>npx vite preview --port 3002</code>); source stays playable via <code>npx vite</code>.</p>
+</div>
+
+<div class="card"><h3>Screenshots (running game)</h3>
+<p class="bar">menu → base → mid-game → victory → defeat</p>
+<img src="/screenshots/menu.png" alt="menu"/>
+<img src="/screenshots/game0.png" alt="base start"/>
+<img src="/screenshots/battle.png" alt="battle"/>
+<img src="/screenshots/midgame.png" alt="midgame"/>
+<img src="/screenshots/victory.png" alt="victory"/>
+<img src="/screenshots/defeat.png" alt="defeat"/>
+</div>
+
+<div class="card"><h3>How to verify</h3>
+<p><code>npx vite --port 3002 --strictPort</code> then open <a href="/">/</a>, or run the scripted suite: <code>/ ?test=1</code> (watch the green log box top-left) then <code>?test=2</code>. Build final preview with <code>npx vite build</code> (outputs <code>dist/</code>).</p>
+</div>
+</body>
+</html>
